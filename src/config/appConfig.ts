@@ -18,9 +18,15 @@ function readViteEnv(key: string): string {
  * Chaves fixas embutidas no app (preenchidas via .env no build ou direto aqui).
  * Caso o usuário informe chaves próprias no Modo Professor, elas funcionam como fallback/override.
  */
+export const DEFAULT_BACKEND_API_URL: string =
+  readViteEnv('VITE_BACKEND_API_URL') ||
+  'https://fluentbridge-api.silaswf.workers.dev';
+
+/** Token simbólico quando a IA usa o proxy seguro no Cloudflare Worker */
+export const CLOUD_GEMINI_PROXY_TOKEN = '__CLOUD_PROXY__';
+
 export const DEFAULT_GEMINI_API_KEY: string =
-  readViteEnv('VITE_DEFAULT_GEMINI_API_KEY') ||
-  'AQ.Ab8RN6JyYi46qHxxkTLWu8RFjNTBhomZ_Pgg6QcAWpBUKdVUYw';
+  readViteEnv('VITE_DEFAULT_GEMINI_API_KEY') || '';
 
 export const DEFAULT_SUPABASE_URL: string =
   readViteEnv('VITE_DEFAULT_SUPABASE_URL') ||
@@ -37,11 +43,13 @@ export function isMasterAdminEmail(email?: string): boolean {
 export function getEffectiveGeminiKey(customKey?: string): string {
   const custom = (customKey ?? '').trim();
   if (custom.length > 0) return custom;
-  return DEFAULT_GEMINI_API_KEY.trim();
+  const localEnv = DEFAULT_GEMINI_API_KEY.trim();
+  if (localEnv.length > 0) return localEnv;
+  return CLOUD_GEMINI_PROXY_TOKEN;
 }
 
 export function hasEmbeddedGeminiKey(): boolean {
-  return DEFAULT_GEMINI_API_KEY.trim().length > 0;
+  return DEFAULT_BACKEND_API_URL.trim().length > 0 || DEFAULT_GEMINI_API_KEY.trim().length > 0;
 }
 
 export function getEffectiveSupabaseConfig(cloudConfig?: CloudConfig): {

@@ -14,6 +14,7 @@ import {
   isMasterAdminEmail,
   MASTER_ADMIN_EMAIL,
 } from '../config/appConfig';
+import { verifyPassword } from '../utils/storage';
 import type { ClassGroup, UserProfile, UserRole } from '../types/learning';
 
 interface AuthScreenProps {
@@ -71,8 +72,7 @@ export function AuthScreen({
       const localMatch = users.find(
         (u) =>
           u.email.toLowerCase() === email.trim().toLowerCase() &&
-          u.password.length > 0 &&
-          u.password === password,
+          verifyPassword(password, u.password),
       );
       if (localMatch) {
         onLogin(localMatch.id);
@@ -88,8 +88,7 @@ export function AuthScreen({
     const found = users.find(
       (u) =>
         u.email.toLowerCase() === email.trim().toLowerCase() &&
-        u.password.length > 0 &&
-        u.password === password,
+        verifyPassword(password, u.password),
     );
     if (found) {
       onLogin(found.id);

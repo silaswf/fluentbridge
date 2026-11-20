@@ -1,3 +1,7 @@
+import {
+  CLOUD_GEMINI_PROXY_TOKEN,
+  DEFAULT_BACKEND_API_URL,
+} from '../config/appConfig';
 import type { AITutorScenario, TutorMessage } from '../types/learning';
 
 export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
@@ -517,11 +521,13 @@ Respond ONLY with valid JSON (no markdown fences) matching this exact schema:
       }>;
     } | null = null;
 
-    for (const model of models) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(
-        apiKey.trim(),
-      )}`;
-      const response = await fetch(endpoint, {
+    const cleanKey = (apiKey ?? '').trim();
+    const useCloudProxy =
+      cleanKey === CLOUD_GEMINI_PROXY_TOKEN || cleanKey.length === 0;
+    const proxyEndpoint = `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/gemini-tutor`;
+
+    if (useCloudProxy && DEFAULT_BACKEND_API_URL.trim().length > 0) {
+      const response = await fetch(proxyEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -538,7 +544,53 @@ Respond ONLY with valid JSON (no markdown fences) matching this exact schema:
             content?: { parts?: Array<{ text?: string }> };
           }>;
         };
-        break;
+      }
+    } else if (cleanKey.length > 10) {
+      for (const model of models) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(
+          cleanKey,
+        )}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              responseMimeType: 'application/json',
+            },
+          }),
+        });
+        if (response.ok) {
+          data = (await response.json()) as {
+            candidates?: Array<{
+              content?: { parts?: Array<{ text?: string }> };
+            }>;
+          };
+          break;
+        }
+      }
+
+      // Fallback to secure Cloudflare proxy if a custom key expired or failed
+      if (!data && DEFAULT_BACKEND_API_URL.trim().length > 0) {
+        const fallbackRes = await fetch(proxyEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              responseMimeType: 'application/json',
+            },
+          }),
+        });
+        if (fallbackRes.ok) {
+          data = (await fallbackRes.json()) as {
+            candidates?: Array<{
+              content?: { parts?: Array<{ text?: string }> };
+            }>;
+          };
+        }
       }
     }
 
@@ -579,7 +631,11 @@ export async function generateTutorReply(params: {
 }): Promise<TutorReplyResult> {
   const { scenario, history, userText, geminiApiKey } = params;
 
-  if (geminiApiKey && geminiApiKey.trim().length > 10) {
+  if (
+    geminiApiKey &&
+    (geminiApiKey.trim() === CLOUD_GEMINI_PROXY_TOKEN ||
+      geminiApiKey.trim().length > 10)
+  ) {
     const aiResult = await generateGeminiReply(
       geminiApiKey,
       scenario,

@@ -58,12 +58,18 @@ export async function startAudioRecording(callbacks: {
   let recorder: MediaRecorder;
   try {
     recorder = mimeType
-      ? new MediaRecorder(stream, { mimeType })
-      : new MediaRecorder(stream);
+      ? new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 32000 })
+      : new MediaRecorder(stream, { audioBitsPerSecond: 32000 });
   } catch {
-    stream.getTracks().forEach((t) => t.stop());
-    callbacks.onError('Erro ao inicializar gravador de áudio neste dispositivo.');
-    return null;
+    try {
+      recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+    } catch {
+      stream.getTracks().forEach((t) => t.stop());
+      callbacks.onError('Erro ao inicializar gravador de áudio neste dispositivo.');
+      return null;
+    }
   }
 
   const chunks: BlobPart[] = [];

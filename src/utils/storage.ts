@@ -3,6 +3,35 @@ import type { PlatformState, UserProfile, VocabCard } from '../types/learning';
 
 export const PLATFORM_STORAGE_KEY = 'fluentbridge_platform_v3';
 
+export function hashPassword(raw: string): string {
+  const value = (raw ?? '').trim();
+  if (!value) return '';
+  if (value.startsWith('fbh1:')) return value;
+
+  let h1 = 0x811c9dc5;
+  let h2 = 0x9e3779b9;
+  const salted = `fb-salt-2026::${value}`;
+  for (let i = 0; i < salted.length; i++) {
+    const ch = salted.charCodeAt(i);
+    h1 ^= ch;
+    h1 = Math.imul(h1, 0x01000193);
+    h2 ^= ch ^ (i * 31);
+    h2 = Math.imul(h2, 0x85ebca6b);
+  }
+  const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
+  const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
+  return `fbh1:${p1}${p2}`;
+}
+
+export function verifyPassword(input: string, stored: string): boolean {
+  const cleanStored = (stored ?? '').trim();
+  if (!cleanStored || !input) return false;
+  if (cleanStored.startsWith('fbh1:')) {
+    return hashPassword(input) === cleanStored;
+  }
+  return input === cleanStored;
+}
+
 const LEGACY_DEMO_USER_IDS = new Set([
   'user-teacher-1',
   'user-student-mariana',
@@ -57,6 +86,7 @@ export function normalizePlatformState(
             (u.name === 'Silas (Admin Mestre)' || !u.name.trim())
               ? 'Prof. Silas'
               : u.name,
+          password: hashPassword(u.password),
           isMasterAdmin: u.isMasterAdmin || isMasterAdminEmail(u.email),
           role: isMasterAdminEmail(u.email) ? 'teacher' : u.role,
           activeLanguage: u.activeLanguage ?? 'en',
@@ -90,6 +120,7 @@ export function normalizePlatformState(
         }))
       : defaults.users.map((u) => ({
           ...u,
+          password: hashPassword(u.password),
           vocab: syncUserVocab(u.vocab, masterVocab),
         }));
 
@@ -101,6 +132,7 @@ export function normalizePlatformState(
       ? [
           {
             ...masterTemplate,
+            password: hashPassword(masterTemplate.password),
             vocab: syncUserVocab(masterTemplate.vocab, masterVocab),
           },
           ...rawMergedUsers,
@@ -130,6 +162,15 @@ export function normalizePlatformState(
       ? raw.customTopics
       : defaults.customTopics,
     submissions: cleanedSubmissions,
+    deletedUserIds: Array.isArray(raw.deletedUserIds)
+      ? raw.deletedUserIds
+      : defaults.deletedUserIds ?? [],
+    deletedClassIds: Array.isArray(raw.deletedClassIds)
+      ? raw.deletedClassIds
+      : defaults.deletedClassIds ?? [],
+    deletedTopicIds: Array.isArray(raw.deletedTopicIds)
+      ? raw.deletedTopicIds
+      : defaults.deletedTopicIds ?? [],
     cloudConfig: {
       ...defaults.cloudConfig,
       ...(raw.cloudConfig ?? {}),

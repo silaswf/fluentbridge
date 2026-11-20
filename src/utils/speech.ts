@@ -1,4 +1,6 @@
+import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { Accent } from '../types/learning';
+import { getAudioClip, saveAudioClip } from './audioDb';
 
 interface SpeakOptions {
   accent?: Accent | string;
@@ -141,7 +143,93 @@ export function pickBestNaturalVoice(
   return bestScore > -500 ? best : null;
 }
 
+let activePlayToken = 0;
+let activeHtmlAudio: HTMLAudioElement | null = null;
+let activeObjectUrl: string | null = null;
+let activeFinishCallback: (() => void) | null = null;
+const ttsInFlightRequests = new Map<string, Promise<Blob | null>>();
+
+function hashTtsKey(text: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
+}
+
+function normalizeTtsLocale(locale: string): string {
+  const lower = locale.trim().toLowerCase();
+  if (lower === 'en-gb' || lower.startsWith('en-gb') || lower === 'uk') return 'en-GB';
+  if (lower === 'es-es') return 'es-ES';
+  if (lower.startsWith('es')) return 'es-MX';
+  if (lower.startsWith('fr')) return 'fr-FR';
+  if (lower.startsWith('pt')) return 'pt-BR';
+  return 'en-US';
+}
+
+async function fetchNeuralTtsBlob(text: string, targetLocale: string): Promise<Blob | null> {
+  const apiBase = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
+  if (!apiBase || typeof fetch === 'undefined') return null;
+
+  const cleanText = text.trim().slice(0, 750);
+  if (!cleanText) return null;
+
+  const normLocale = normalizeTtsLocale(targetLocale);
+  const cacheId = `tts-v2:${normLocale}:${cleanText.length}:${hashTtsKey(cleanText)}`;
+
+  const cachedBlob = await getAudioClip(cacheId);
+  if (cachedBlob && cachedBlob.size > 200) {
+    return cachedBlob;
+  }
+
+  const pending = ttsInFlightRequests.get(cacheId);
+  if (pending) return pending;
+
+  const requestPromise = (async () => {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId =
+      controller !== null
+        ? globalThis.setTimeout(() => controller.abort(), 7500)
+        : undefined;
+
+    try {
+      const endpoint = `${apiBase}/api/tts?lang=${encodeURIComponent(normLocale)}&text=${encodeURIComponent(
+        cleanText,
+      )}`;
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        signal: controller?.signal,
+      });
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      if (!blob || blob.size <= 200) return null;
+
+      void saveAudioClip(cacheId, blob);
+      return blob;
+    } catch {
+      return null;
+    } finally {
+      if (timeoutId !== undefined) {
+        globalThis.clearTimeout(timeoutId);
+      }
+      ttsInFlightRequests.delete(cacheId);
+    }
+  })();
+
+  ttsInFlightRequests.set(cacheId, requestPromise);
+  return requestPromise;
+}
+
 export function getSelectedVoiceLabels(): { us: string; uk: string } {
+  const apiBase = DEFAULT_BACKEND_API_URL.trim();
+  if (apiBase) {
+    return {
+      us: 'Deepgram Aura-2 · Thalia (Neural US)',
+      uk: 'Deepgram Aura-2 · Pandora (Neural UK)',
+    };
+  }
   const voices = refreshVoices();
   const us = pickBestNaturalVoice(voices, 'en-US');
   const uk = pickBestNaturalVoice(voices, 'en-GB');
@@ -152,21 +240,49 @@ export function getSelectedVoiceLabels(): { us: string; uk: string } {
 }
 
 export function stopSpeaking(): void {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  try {
-    window.speechSynthesis.cancel();
-  } catch {
-    // Ignore speech synthesis cancellation errors in restricted browsers
+  activePlayToken += 1;
+  if (activeFinishCallback) {
+    const cb = activeFinishCallback;
+    activeFinishCallback = null;
+    cb();
+  }
+  if (activeHtmlAudio) {
+    try {
+      activeHtmlAudio.onended = null;
+      activeHtmlAudio.onerror = null;
+      activeHtmlAudio.pause();
+      activeHtmlAudio.currentTime = 0;
+    } catch {
+      // Ignore cleanup errors
+    }
+    activeHtmlAudio = null;
+  }
+  if (activeObjectUrl && typeof URL !== 'undefined') {
+    URL.revokeObjectURL(activeObjectUrl);
+    activeObjectUrl = null;
+  }
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+    } catch {
+      // Ignore speech synthesis cancellation errors in restricted browsers
+    }
   }
 }
 
-export function speakText(text: string, options: SpeakOptions = {}): void {
-  const { accent = 'en-US', langCode, rate = 1, onStart, onEnd } = options;
-  const targetLocale = langCode ?? accent;
-
+function speakWithBrowserSynthesis(
+  text: string,
+  targetLocale: string,
+  rate: number,
+  playToken: number,
+  finish: () => void,
+): void {
   if (typeof window === 'undefined' || typeof window.speechSynthesis === 'undefined') {
-    onStart?.();
-    globalThis.setTimeout(() => onEnd?.(), 600);
+    globalThis.setTimeout(finish, 600);
+    return;
+  }
+  if (playToken !== activePlayToken) {
+    finish();
     return;
   }
 
@@ -192,27 +308,101 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
       utterance.pitch = 1.02;
     }
 
-    let ended = false;
-    const finish = () => {
-      if (!ended) {
-        ended = true;
-        onEnd?.();
-      }
-    };
-
-    utterance.onstart = () => onStart?.();
     utterance.onend = finish;
     utterance.onerror = finish;
-
-    onStart?.();
     window.speechSynthesis.speak(utterance);
 
     // Safety timeout in case a headless browser does not emit onend
     const estimatedMs = Math.max(1200, Math.min(9000, text.length * 75));
     window.setTimeout(finish, estimatedMs);
   } catch {
-    onEnd?.();
+    finish();
   }
+}
+
+export function speakText(text: string, options: SpeakOptions = {}): void {
+  const { accent = 'en-US', langCode, rate = 1, onStart, onEnd } = options;
+  const targetLocale = langCode ?? accent;
+  const cleanText = text.trim();
+
+  if (!cleanText) {
+    onEnd?.();
+    return;
+  }
+
+  stopSpeaking();
+  const myToken = activePlayToken;
+
+  let ended = false;
+  const finish = () => {
+    if (ended) return;
+    ended = true;
+    if (activeFinishCallback === finish) {
+      activeFinishCallback = null;
+    }
+    onEnd?.();
+  };
+  activeFinishCallback = finish;
+
+  if (typeof window === 'undefined') {
+    onStart?.();
+    globalThis.setTimeout(finish, 600);
+    return;
+  }
+
+  onStart?.();
+
+  void (async () => {
+    const neuralBlob = await fetchNeuralTtsBlob(cleanText, targetLocale);
+    if (myToken !== activePlayToken) return;
+
+    if (neuralBlob && typeof Audio !== 'undefined' && typeof URL !== 'undefined') {
+      try {
+        const objectUrl = URL.createObjectURL(neuralBlob);
+        if (myToken !== activePlayToken) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        const audio = new Audio(objectUrl);
+        audio.playbackRate = Math.max(0.65, Math.min(1.5, rate));
+        if ('preservesPitch' in audio) {
+          audio.preservesPitch = true;
+        }
+
+        activeObjectUrl = objectUrl;
+        activeHtmlAudio = audio;
+
+        audio.onended = () => {
+          if (activeHtmlAudio === audio) {
+            activeHtmlAudio = null;
+          }
+          if (activeObjectUrl === objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+            activeObjectUrl = null;
+          }
+          finish();
+        };
+
+        audio.onerror = () => {
+          if (activeHtmlAudio === audio) {
+            activeHtmlAudio = null;
+          }
+          if (activeObjectUrl === objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+            activeObjectUrl = null;
+          }
+          speakWithBrowserSynthesis(cleanText, targetLocale, rate, myToken, finish);
+        };
+
+        await audio.play();
+        return;
+      } catch {
+        // Fallback to Web Speech API if HTMLAudio autoplay or decode fails
+      }
+    }
+
+    speakWithBrowserSynthesis(cleanText, targetLocale, rate, myToken, finish);
+  })();
 }
 
 export function speakEnglish(text: string, options: SpeakOptions = {}): void {

@@ -85,3 +85,18 @@ export async function deleteAudioClip(id: string): Promise<void> {
     // Ignore errors
   }
 }
+
+export async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject(new Error('Falha ao converter áudio para Data URL'));
+      }
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('Erro de leitura do áudio'));
+    reader.readAsDataURL(blob);
+  });
+}

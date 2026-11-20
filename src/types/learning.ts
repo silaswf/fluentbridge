@@ -212,6 +212,8 @@ export interface StudentSubmission {
   promptPt: string;
   responseText: string;
   audioId?: string;
+  audioDataUrl?: string;
+  audioPath?: string;
   audioDurationSec?: number;
   targetSentence?: string;
   autoPronunciationScore?: number;
@@ -296,6 +298,9 @@ export interface PlatformState {
   customTopics: Topic[];
   submissions: StudentSubmission[];
   cloudConfig: CloudConfig;
+  deletedUserIds?: string[];
+  deletedClassIds?: string[];
+  deletedTopicIds?: string[];
 }
 
 export interface AITutorScenario {

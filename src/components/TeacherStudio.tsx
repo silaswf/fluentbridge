@@ -37,8 +37,10 @@ import type {
 import { getAudioClip } from '../utils/audioDb';
 import {
   SUPABASE_SQL_SCHEMA,
+  mergePlatformStates,
   pullStateFromCloud,
   pushStateToCloud,
+  resolveSubmissionAudioUrl,
   testSupabaseConnection,
 } from '../utils/cloudSync';
 import { getSelectedVoiceLabels } from '../utils/speech';
@@ -189,19 +191,40 @@ export function TeacherStudio({
     let createdUrl: string | null = null;
     setLoadedAudioUrl(null);
 
-    if (selectedSub?.type === 'speaking' && selectedSub.audioId) {
-      void getAudioClip(selectedSub.audioId).then((blob) => {
-        if (!active || !blob) return;
-        createdUrl = URL.createObjectURL(blob);
-        setLoadedAudioUrl(createdUrl);
-      });
+    if (selectedSub?.type === 'speaking') {
+      const loadAudio = async () => {
+        if (selectedSub.audioId) {
+          const blob = await getAudioClip(selectedSub.audioId);
+          if (!active) return;
+          if (blob) {
+            createdUrl = URL.createObjectURL(blob);
+            setLoadedAudioUrl(createdUrl);
+            return;
+          }
+        }
+        const remoteUrl = resolveSubmissionAudioUrl(
+          selectedSub,
+          state.cloudConfig,
+        );
+        if (active && remoteUrl) {
+          setLoadedAudioUrl(remoteUrl);
+        }
+      };
+      void loadAudio();
     }
 
     return () => {
       active = false;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [selectedSub?.id, selectedSub?.audioId, selectedSub?.type]);
+  }, [
+    selectedSub?.id,
+    selectedSub?.audioId,
+    selectedSub?.audioPath,
+    selectedSub?.audioDataUrl,
+    selectedSub?.type,
+    state.cloudConfig,
+  ]);
 
   const handleSelectSubmission = (sub: StudentSubmission) => {
     setSelectedSubId(sub.id);
@@ -483,8 +506,9 @@ export function TeacherStudio({
     setIsSyncing(true);
     const res = await pullStateFromCloud(supaUrl, supaKey);
     if (res.ok && res.state) {
+      const merged = mergePlatformStates(state, res.state, 'remote');
       onApplyCloudSnapshot({
-        ...res.state,
+        ...merged,
         cloudConfig: {
           supabaseUrl: supaUrl.trim(),
           supabaseAnonKey: supaKey.trim(),
@@ -1651,17 +1675,17 @@ export function TeacherStudio({
                 >
                   <p className="font-extrabold">
                     {embeddedGeminiActive
-                      ? 'Gemini Chave Fixa Ativa'
+                      ? 'Gemini Proxy Seguro Ativo'
                       : effectiveGemini
                         ? 'Gemini Fallback/Própria Ativa'
                         : 'Tutor Local Ativo (Fallback Pendente)'}
                   </p>
                   <p className="mt-1 text-[11px] opacity-85">
                     {embeddedGeminiActive
-                      ? 'IA generativa pronta para todos os alunos sem digitar chave.'
+                      ? 'IA generativa via Cloudflare Worker (chave protegida no servidor).'
                       : effectiveGemini
                         ? 'Usando chave salva manualmente abaixo.'
-                        : 'Adicione uma chave fixa no código ou informe abaixo como fallback.'}
+                        : 'Configure uma chave de fallback abaixo se desejar sobrescrever.'}
                   </p>
                 </div>
               </div>
@@ -1783,7 +1807,7 @@ export function TeacherStudio({
                   />
                 </div>
                 <p className="text-xs text-slate-600">
-                  O motor neural seleciona automaticamente vozes <span className="font-semibold">Natural / Neural / Google</span> neste dispositivo:
+                  Vozes neurais <span className="font-semibold">Deepgram Aura-2</span> via Cloudflare Workers AI em todos os dispositivos (PC, Android e Web):
                 </p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-xs">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">

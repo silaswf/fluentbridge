@@ -5,8 +5,10 @@ import {
   getEffectiveSupabaseConfig,
   isMasterAdminEmail,
 } from './config/appConfig';
+import { getAudioClip } from './utils/audioDb';
 import {
   fetchCurrentSupabaseUser,
+  mergePlatformStates,
   pullStateFromCloud,
   pushStateToCloud,
   registerNativeOAuthListener,
@@ -15,6 +17,7 @@ import {
   signOutSupabase,
   signUpWithSupabaseEmail,
   subscribeSupabaseAuthChanges,
+  uploadSpeakingAudioToCloud,
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
 import { AITutor } from './components/AITutor';
@@ -55,9 +58,11 @@ import type {
 import { playSound } from './utils/soundFx';
 import {
   clearPlatformState,
+  hashPassword,
   loadPlatformState,
   normalizePlatformState,
   savePlatformState,
+  verifyPassword,
 } from './utils/storage';
 
 const AVATAR_COLORS = ['#116DFF', '#0D9488', '#D97706', '#7C3AED', '#E11D48'];
@@ -139,34 +144,9 @@ export function App() {
       if (!cancelled && pullRes.ok && pullRes.state) {
         skipNextCloudPushRef.current = true;
         setState((prev) => {
-          const remoteUsers = Array.isArray(pullRes.state?.users)
-            ? pullRes.state.users
-            : [];
-          const mergedUsers = [...remoteUsers];
-          for (const localUser of prev.users) {
-            if (
-              !mergedUsers.some(
-                (ru) =>
-                  ru.email.toLowerCase() === localUser.email.toLowerCase() ||
-                  ru.id === localUser.id,
-              )
-            ) {
-              mergedUsers.push(localUser);
-            }
-          }
+          const merged = mergePlatformStates(prev, pullRes.state, 'remote');
           return normalizePlatformState(
-            {
-              ...pullRes.state,
-              users: mergedUsers,
-              currentUserId: prev.currentUserId,
-              cloudConfig: {
-                ...prev.cloudConfig,
-                ...(pullRes.state?.cloudConfig ?? {}),
-                supabaseUrl: prev.cloudConfig.supabaseUrl,
-                supabaseAnonKey: prev.cloudConfig.supabaseAnonKey,
-                geminiApiKey: prev.cloudConfig.geminiApiKey,
-              },
-            },
+            merged,
             DEFAULT_PLATFORM_STATE,
             ALL_INITIAL_VOCABULARY,
           );
@@ -384,7 +364,7 @@ export function App() {
       id: `user-${Date.now()}`,
       name: payload.name,
       email: payload.email,
-      password: payload.password,
+      password: hashPassword(payload.password),
       role: master ? 'teacher' : payload.role,
       isMasterAdmin: master,
       classId: master ? undefined : payload.classId,
@@ -422,7 +402,7 @@ export function App() {
       (u) => u.email.toLowerCase() === payload.email.toLowerCase(),
     );
 
-    if (existing && !(master && existing.password === 'admin123')) {
+    if (existing && !(master && verifyPassword('admin123', existing.password))) {
       return { ok: false, error: 'Este e-mail já está cadastrado.' };
     }
 
@@ -453,7 +433,7 @@ export function App() {
             ? {
                 ...u,
                 name: payload.name,
-                password: payload.password,
+                password: hashPassword(payload.password),
                 role: 'teacher',
                 isMasterAdmin: true,
               }
@@ -501,7 +481,12 @@ export function App() {
         ...prev,
         users: prev.users.map((u) =>
           u.id === existing.id
-            ? { ...u, password, role: targetRole, isMasterAdmin: u.isMasterAdmin || master }
+            ? {
+                ...u,
+                password: hashPassword(password),
+                role: targetRole,
+                isMasterAdmin: u.isMasterAdmin || master,
+              }
             : u,
         ),
         currentUserId: existing.id,
@@ -690,11 +675,14 @@ export function App() {
     autoPronunciationScore?: number;
   }) => {
     if (!currentUser) return;
+    const submissionId = `sub-s-${Date.now()}`;
+    const cloudConfigSnapshot = state.cloudConfig;
+
     setState((prev) => ({
       ...prev,
       submissions: [
         {
-          id: `sub-s-${Date.now()}`,
+          id: submissionId,
           languageCode: activeLanguage,
           type: 'speaking',
           studentId: currentUser.id,
@@ -715,6 +703,30 @@ export function App() {
       ],
     }));
     showToast('Áudio enviado para o Professor avaliar sua pronúncia!');
+
+    void (async () => {
+      const blob = await getAudioClip(payload.audioId);
+      if (!blob) return;
+      const uploaded = await uploadSpeakingAudioToCloud(
+        blob,
+        submissionId,
+        cloudConfigSnapshot,
+      );
+      if (!uploaded.audioPath && !uploaded.audioDataUrl) return;
+
+      setState((prev) => ({
+        ...prev,
+        submissions: prev.submissions.map((sub) =>
+          sub.id === submissionId
+            ? {
+                ...sub,
+                audioPath: uploaded.audioPath ?? sub.audioPath,
+                audioDataUrl: uploaded.audioDataUrl ?? sub.audioDataUrl,
+              }
+            : sub,
+        ),
+      }));
+    })();
   };
 
   const handleRateVocab = (cardId: string, nextStrength: VocabCard['strength']) => {
@@ -853,6 +865,9 @@ export function App() {
       users: prev.users.map((u) =>
         u.classId === classId ? { ...u, classId: undefined } : u,
       ),
+      deletedClassIds: Array.from(
+        new Set([...(prev.deletedClassIds ?? []), classId]),
+      ),
     }));
     showToast('Turma removida.');
   };
@@ -888,6 +903,9 @@ export function App() {
     setState((prev) => ({
       ...prev,
       customTopics: prev.customTopics.filter((t) => t.id !== topicId),
+      deletedTopicIds: Array.from(
+        new Set([...(prev.deletedTopicIds ?? []), topicId]),
+      ),
     }));
     showToast('Tópico removido.');
   };
@@ -913,13 +931,22 @@ export function App() {
   };
 
   const handleDeleteUser = (userId: string) => {
-    setState((prev) => ({
-      ...prev,
-      users: prev.users.filter(
-        (u) =>
-          u.id !== userId || Boolean(u.isMasterAdmin || isMasterAdminEmail(u.email)),
-      ),
-    }));
+    setState((prev) => {
+      const target = prev.users.find((u) => u.id === userId);
+      const canDelete =
+        target && !target.isMasterAdmin && !isMasterAdminEmail(target.email);
+      return {
+        ...prev,
+        users: prev.users.filter(
+          (u) =>
+            u.id !== userId ||
+            Boolean(u.isMasterAdmin || isMasterAdminEmail(u.email)),
+        ),
+        deletedUserIds: canDelete
+          ? Array.from(new Set([...(prev.deletedUserIds ?? []), userId]))
+          : prev.deletedUserIds,
+      };
+    });
     showToast('Usuário removido.');
   };
 
@@ -1089,10 +1116,16 @@ export function App() {
             }}
             onResetDemo={() => {
               clearPlatformState();
-              setState({
-                ...DEFAULT_PLATFORM_STATE,
-                currentUserId: state.currentUserId,
-              });
+              setState(
+                normalizePlatformState(
+                  {
+                    ...DEFAULT_PLATFORM_STATE,
+                    currentUserId: state.currentUserId,
+                  },
+                  DEFAULT_PLATFORM_STATE,
+                  ALL_INITIAL_VOCABULARY,
+                ),
+              );
               showToast('Dados de demonstração restaurados.');
             }}
             onPlayTopic={(topic) => setActiveTopic(topic)}

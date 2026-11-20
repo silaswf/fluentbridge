@@ -3,7 +3,17 @@ import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getEffectiveSupabaseConfig } from '../config/appConfig';
-import type { CloudConfig, PlatformState, UserRole } from '../types/learning';
+import type {
+  ClassGroup,
+  CloudConfig,
+  PlatformState,
+  StudentSubmission,
+  Topic,
+  UserProfile,
+  UserRole,
+  VocabCard,
+} from '../types/learning';
+import { blobToDataUrl } from './audioDb';
 
 export const NATIVE_OAUTH_REDIRECT_URL = 'com.fluentbridge.app://auth-callback';
 
@@ -324,6 +334,329 @@ export async function testSupabaseConnection(
   }
 }
 
+const STRENGTH_RANK: Record<VocabCard['strength'], number> = {
+  weak: 0,
+  medium: 1,
+  mastered: 2,
+};
+
+function mergeVocabCards(
+  primary: VocabCard[] | undefined,
+  secondary: VocabCard[] | undefined,
+): VocabCard[] {
+  const map = new Map<string, VocabCard>();
+  for (const card of secondary ?? []) {
+    map.set(card.id, card);
+  }
+  for (const card of primary ?? []) {
+    const other = map.get(card.id);
+    if (!other) {
+      map.set(card.id, card);
+      continue;
+    }
+    const usePrimaryStrength =
+      STRENGTH_RANK[card.strength] >= STRENGTH_RANK[other.strength];
+    map.set(card.id, {
+      ...card,
+      strength: usePrimaryStrength ? card.strength : other.strength,
+      reviewCount: Math.max(card.reviewCount ?? 0, other.reviewCount ?? 0),
+    });
+  }
+  return Array.from(map.values());
+}
+
+function mergeUserProfiles(
+  localUser: UserProfile,
+  remoteUser: UserProfile,
+  preferSide: 'local' | 'remote',
+): UserProfile {
+  const primary = preferSide === 'local' ? localUser : remoteUser;
+  const secondary = preferSide === 'local' ? remoteUser : localUser;
+
+  const completedTopicIds = Array.from(
+    new Set([
+      ...(localUser.completedTopicIds ?? []),
+      ...(remoteUser.completedTopicIds ?? []),
+    ]),
+  );
+
+  const certMap = new Map<string, (typeof localUser.issuedCertificates)[number]>();
+  for (const cert of [...(secondary.issuedCertificates ?? []), ...(primary.issuedCertificates ?? [])]) {
+    const key = `${cert.languageCode ?? 'en'}:${cert.level}`;
+    if (!certMap.has(key)) certMap.set(key, cert);
+  }
+
+  const claimedQuestIds = Array.from(
+    new Set([
+      ...(localUser.dailyQuests?.claimedQuestIds ?? []),
+      ...(remoteUser.dailyQuests?.claimedQuestIds ?? []),
+    ]),
+  );
+
+  return {
+    ...secondary,
+    ...primary,
+    password: primary.password || secondary.password,
+    completedTopicIds,
+    xp: Math.max(localUser.xp ?? 0, remoteUser.xp ?? 0),
+    streakDays: Math.max(localUser.streakDays ?? 1, remoteUser.streakDays ?? 1),
+    todayMinutes: Math.max(localUser.todayMinutes ?? 0, remoteUser.todayMinutes ?? 0),
+    skillScores: {
+      listening: Math.max(
+        localUser.skillScores?.listening ?? 45,
+        remoteUser.skillScores?.listening ?? 45,
+      ),
+      reading: Math.max(
+        localUser.skillScores?.reading ?? 45,
+        remoteUser.skillScores?.reading ?? 45,
+      ),
+      speaking: Math.max(
+        localUser.skillScores?.speaking ?? 40,
+        remoteUser.skillScores?.speaking ?? 40,
+      ),
+      writing: Math.max(
+        localUser.skillScores?.writing ?? 45,
+        remoteUser.skillScores?.writing ?? 45,
+      ),
+    },
+    vocab: mergeVocabCards(primary.vocab, secondary.vocab),
+    issuedCertificates: Array.from(certMap.values()),
+    dailyQuests: {
+      lessonsCompletedToday: Math.max(
+        localUser.dailyQuests?.lessonsCompletedToday ?? 0,
+        remoteUser.dailyQuests?.lessonsCompletedToday ?? 0,
+      ),
+      vocabReviewedToday: Math.max(
+        localUser.dailyQuests?.vocabReviewedToday ?? 0,
+        remoteUser.dailyQuests?.vocabReviewedToday ?? 0,
+      ),
+      tutorSessionsToday: Math.max(
+        localUser.dailyQuests?.tutorSessionsToday ?? 0,
+        remoteUser.dailyQuests?.tutorSessionsToday ?? 0,
+      ),
+      claimedQuestIds,
+    },
+  };
+}
+
+function mergeSubmissions(
+  localSubs: StudentSubmission[],
+  remoteSubs: StudentSubmission[],
+  preferSide: 'local' | 'remote',
+): StudentSubmission[] {
+  const ordered =
+    preferSide === 'local'
+      ? [...remoteSubs, ...localSubs]
+      : [...localSubs, ...remoteSubs];
+  const map = new Map<string, StudentSubmission>();
+
+  for (const sub of ordered) {
+    const existing = map.get(sub.id);
+    if (!existing) {
+      map.set(sub.id, sub);
+      continue;
+    }
+    const existingReviewed = existing.status === 'reviewed';
+    const nextReviewed = sub.status === 'reviewed';
+    const winningReview =
+      existingReviewed && !nextReviewed ? existing : sub;
+
+    map.set(sub.id, {
+      ...existing,
+      ...sub,
+      status: existingReviewed || nextReviewed ? 'reviewed' : 'pending',
+      teacherFeedback: winningReview.teacherFeedback ?? existing.teacherFeedback ?? sub.teacherFeedback,
+      correctedText: winningReview.correctedText ?? existing.correctedText ?? sub.correctedText,
+      teacherBadge: winningReview.teacherBadge ?? existing.teacherBadge ?? sub.teacherBadge,
+      pronunciationRubric:
+        winningReview.pronunciationRubric ??
+        existing.pronunciationRubric ??
+        sub.pronunciationRubric,
+      audioId: sub.audioId ?? existing.audioId,
+      audioPath: sub.audioPath ?? existing.audioPath,
+      audioDataUrl: sub.audioDataUrl ?? existing.audioDataUrl,
+      audioDurationSec: sub.audioDurationSec ?? existing.audioDurationSec,
+    });
+  }
+
+  return Array.from(map.values());
+}
+
+/**
+ * Mescla granularmente dois snapshots (local vs nuvem) sem sobrescrever alunos,
+ * progresso, envios de áudio/escrita ou correções feitas em outros dispositivos.
+ */
+export function mergePlatformStates(
+  local: PlatformState,
+  remote: Partial<PlatformState> | undefined,
+  preferSide: 'local' | 'remote' = 'local',
+): PlatformState {
+  if (!remote) return local;
+
+  const deletedUserIds = new Set<string>([
+    ...(local.deletedUserIds ?? []),
+    ...(Array.isArray(remote.deletedUserIds) ? remote.deletedUserIds : []),
+  ]);
+  const deletedClassIds = new Set<string>([
+    ...(local.deletedClassIds ?? []),
+    ...(Array.isArray(remote.deletedClassIds) ? remote.deletedClassIds : []),
+  ]);
+  const deletedTopicIds = new Set<string>([
+    ...(local.deletedTopicIds ?? []),
+    ...(Array.isArray(remote.deletedTopicIds) ? remote.deletedTopicIds : []),
+  ]);
+
+  // Users by email (preserve master admin even if somehow listed)
+  const localUsers = local.users ?? [];
+  const remoteUsers = Array.isArray(remote.users) ? remote.users : [];
+  const userByEmail = new Map<string, UserProfile>();
+
+  const seedFirst = preferSide === 'local' ? remoteUsers : localUsers;
+  const seedSecond = preferSide === 'local' ? localUsers : remoteUsers;
+
+  for (const u of seedFirst) {
+    if (!u?.email) continue;
+    if (deletedUserIds.has(u.id) && !u.isMasterAdmin) continue;
+    userByEmail.set(u.email.toLowerCase(), u);
+  }
+  for (const u of seedSecond) {
+    if (!u?.email) continue;
+    if (deletedUserIds.has(u.id) && !u.isMasterAdmin) continue;
+    const key = u.email.toLowerCase();
+    const other = userByEmail.get(key);
+    if (!other) {
+      userByEmail.set(key, u);
+    } else {
+      const merged =
+        preferSide === 'local'
+          ? mergeUserProfiles(u, other, 'local')
+          : mergeUserProfiles(other, u, 'remote');
+      userByEmail.set(key, merged);
+    }
+  }
+
+  // Classes by id
+  const classMap = new Map<string, ClassGroup>();
+  const remoteClasses = Array.isArray(remote.classes) ? remote.classes : [];
+  const orderedClasses =
+    preferSide === 'local'
+      ? [...remoteClasses, ...(local.classes ?? [])]
+      : [...(local.classes ?? []), ...remoteClasses];
+  for (const c of orderedClasses) {
+    if (!c?.id || deletedClassIds.has(c.id)) continue;
+    classMap.set(c.id, c);
+  }
+
+  // Custom topics by id
+  const topicMap = new Map<string, Topic>();
+  const remoteTopics = Array.isArray(remote.customTopics) ? remote.customTopics : [];
+  const orderedTopics =
+    preferSide === 'local'
+      ? [...remoteTopics, ...(local.customTopics ?? [])]
+      : [...(local.customTopics ?? []), ...remoteTopics];
+  for (const t of orderedTopics) {
+    if (!t?.id || deletedTopicIds.has(t.id)) continue;
+    topicMap.set(t.id, t);
+  }
+
+  // Submissions by id
+  const remoteSubs = Array.isArray(remote.submissions) ? remote.submissions : [];
+  const mergedSubs = mergeSubmissions(local.submissions ?? [], remoteSubs, preferSide);
+
+  return {
+    schoolName:
+      preferSide === 'remote' && remote.schoolName
+        ? remote.schoolName
+        : local.schoolName,
+    teacherName:
+      preferSide === 'remote' && remote.teacherName
+        ? remote.teacherName
+        : local.teacherName,
+    currentUserId: local.currentUserId,
+    classes: Array.from(classMap.values()),
+    users: Array.from(userByEmail.values()),
+    customTopics: Array.from(topicMap.values()),
+    submissions: mergedSubs,
+    deletedUserIds: Array.from(deletedUserIds),
+    deletedClassIds: Array.from(deletedClassIds),
+    deletedTopicIds: Array.from(deletedTopicIds),
+    cloudConfig: {
+      ...(remote.cloudConfig ?? {}),
+      ...local.cloudConfig,
+      supabaseUrl: local.cloudConfig.supabaseUrl,
+      supabaseAnonKey: local.cloudConfig.supabaseAnonKey,
+      geminiApiKey: local.cloudConfig.geminiApiKey,
+    },
+  };
+}
+
+export async function uploadSpeakingAudioToCloud(
+  blob: Blob,
+  submissionId: string,
+  cloudConfig?: CloudConfig,
+): Promise<{ audioPath?: string; audioDataUrl?: string }> {
+  const cfg = getEffectiveSupabaseConfig(cloudConfig);
+  const ext = blob.type.includes('mp4')
+    ? 'm4a'
+    : blob.type.includes('ogg')
+      ? 'ogg'
+      : 'webm';
+  const objectPath = `speaking/${submissionId}.${ext}`;
+
+  if (cfg.url && cfg.anonKey) {
+    try {
+      const client = getSupabaseClient(cfg.url, cfg.anonKey);
+      const { error } = await client.storage
+        .from('fb-audio')
+        .upload(objectPath, blob, {
+          upsert: true,
+          contentType: blob.type || 'audio/webm',
+        });
+      if (!error) {
+        return { audioPath: objectPath };
+      }
+    } catch {
+      // Fallback below to compact Data URL
+    }
+  }
+
+  // Fallback sem configuração adicional: embute áudio compacto (< 450 KB) para tocar no PC do professor
+  if (blob.size <= 450_000) {
+    try {
+      const dataUrl = await blobToDataUrl(blob);
+      return { audioDataUrl: dataUrl };
+    } catch {
+      // Ignore conversion error
+    }
+  }
+
+  return {};
+}
+
+export function resolveSubmissionAudioUrl(
+  submission: StudentSubmission,
+  cloudConfig?: CloudConfig,
+): string | null {
+  if (submission.audioPath) {
+    const cfg = getEffectiveSupabaseConfig(cloudConfig);
+    if (cfg.url && cfg.anonKey) {
+      try {
+        const client = getSupabaseClient(cfg.url, cfg.anonKey);
+        const { data } = client.storage
+          .from('fb-audio')
+          .getPublicUrl(submission.audioPath);
+        if (data?.publicUrl) return data.publicUrl;
+      } catch {
+        // Fallback to inline Data URL
+      }
+    }
+  }
+  if (submission.audioDataUrl) {
+    return submission.audioDataUrl;
+  }
+  return null;
+}
+
 export async function pushStateToCloud(
   state: PlatformState,
 ): Promise<{ ok: boolean; message: string; syncedAt?: string }> {
@@ -338,11 +671,32 @@ export async function pushStateToCloud(
   try {
     const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const nowIso = new Date().toISOString();
-    // Avoid storing sensitive local API keys inside shared cloud JSON snapshot
+
+    // Mescla estado remoto antes de gravar para preservar envios/alunos de outros dispositivos
+    let stateToSave: PlatformState = state;
+    try {
+      const { data: existingRow } = await client
+        .from('fb_school_state')
+        .select('state')
+        .eq('school_slug', DEFAULT_SLUG)
+        .maybeSingle();
+      if (existingRow?.state) {
+        stateToSave = mergePlatformStates(
+          state,
+          existingRow.state as Partial<PlatformState>,
+          'local',
+        );
+      }
+    } catch {
+      // Proceed with local snapshot if pre-fetch fails
+    }
+
+    // Never persist client Gemini keys inside shared cloud JSON snapshot
     const sanitizedState: PlatformState = {
-      ...state,
+      ...stateToSave,
+      currentUserId: null,
       cloudConfig: {
-        ...state.cloudConfig,
+        ...stateToSave.cloudConfig,
         geminiApiKey: '',
         lastSyncedAt: nowIso,
       },
