@@ -162,6 +162,48 @@ create policy "speaking_audio_upload_own" on storage.objects for insert to authe
 drop policy if exists "speaking_audio_read_own_or_teacher" on storage.objects;
 create policy "speaking_audio_read_own_or_teacher" on storage.objects for select to authenticated using (bucket_id = 'speaking-audios' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_teacher()));
 
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  assigned_role text;
+begin
+  assigned_role := case
+    when lower(coalesce(new.email, '')) = 'silaswf@gmail.com' then 'teacher'
+    when coalesce(new.raw_user_meta_data->>'role', '') = 'teacher' then 'teacher'
+    else 'student'
+  end;
+
+  insert into public.profiles (id, full_name, email, role)
+  values (
+    new.id,
+    coalesce(
+      nullif(new.raw_user_meta_data->>'full_name', ''),
+      nullif(new.raw_user_meta_data->>'name', ''),
+      split_part(coalesce(new.email, 'aluno'), '@', 1)
+    ),
+    coalesce(new.email, ''),
+    assigned_role
+  )
+  on conflict (id) do update
+    set full_name = excluded.full_name,
+        email = excluded.email,
+        role = case
+          when lower(excluded.email) = 'silaswf@gmail.com' then 'teacher'
+          else public.profiles.role
+        end;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
 grant usage on schema public to anon, authenticated;
 grant all on all tables in schema public to anon, authenticated;
 grant all on all sequences in schema public to anon, authenticated;

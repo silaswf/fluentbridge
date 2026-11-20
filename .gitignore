@@ -15,3 +15,8 @@ android/.gradle/
 android/app/build/
 android/build/
 android/local.properties
+
+# Android Release Signing Keystores (keep private, stored in GitHub Secrets)
+keystore/
+*.jks
+*.keystore

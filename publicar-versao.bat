@@ -42,9 +42,9 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [4/4] Disparo concluido! Acompanhe o build do APK em:
+echo [4/4] Disparo concluido! Acompanhe o build do APK e do AAB (Play Store) em:
 gh run list --limit 3
 echo.
-echo Quando finalizar, baixe o APK da Release mais recente com:
-echo   gh release download --pattern "*.apk" -D release --clobber
+echo Quando finalizar, baixe o APK assinado e o AAB da Play Store com:
+echo   gh release download --pattern "*.apk" --pattern "*.aab" -D release --clobber
 pause

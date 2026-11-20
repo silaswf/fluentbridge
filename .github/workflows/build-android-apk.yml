@@ -44,6 +44,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
+      - name: Decode Android Release Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "${{ github.workspace }}/android/app/fluentbridge-release.jks"
+
       - name: Compute version metadata
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
@@ -57,21 +61,32 @@ jobs:
           echo "VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
           echo "VERSION_CODE=${VERSION_CODE}" >> "$GITHUB_ENV"
 
-      - name: Build Debug APK
+      - name: Build Signed Release APK & Play Store AAB
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/fluentbridge-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           cd android
-          ./gradlew assembleDebug -PversionCode="$VERSION_CODE" -PversionName="$VERSION_NAME"
+          ./gradlew assembleRelease bundleRelease -PversionCode="$VERSION_CODE" -PversionName="$VERSION_NAME"
 
-      - name: Package APK files
+      - name: Package signed APK and AAB files
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk "FluentBridge-${VERSION_LABEL}.apk"
-          cp android/app/build/outputs/apk/debug/app-debug.apk "FluentBridge.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "FluentBridge-${VERSION_LABEL}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "FluentBridge.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "FluentBridge-${VERSION_LABEL}-playstore.aab"
+          cp android/app/build/outputs/bundle/release/app-release.aab "FluentBridge-playstore.aab"
 
-      - name: Upload FluentBridge APK artifact
+      - name: Upload FluentBridge APK & Play Store AAB artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: FluentBridge-Android-APK
-          path: FluentBridge-${{ env.VERSION_LABEL }}.apk
+          name: FluentBridge-Android-Release
+          path: |
+            FluentBridge-${{ env.VERSION_LABEL }}.apk
+            FluentBridge.apk
+            FluentBridge-${{ env.VERSION_LABEL }}-playstore.aab
+            FluentBridge-playstore.aab
 
       - name: Create or update GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -79,9 +94,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" --clobber
+            gh release upload "$GITHUB_REF_NAME" \
+              "FluentBridge-${VERSION_LABEL}.apk" \
+              "FluentBridge.apk" \
+              "FluentBridge-${VERSION_LABEL}-playstore.aab" \
+              "FluentBridge-playstore.aab" \
+              --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" \
+            gh release create "$GITHUB_REF_NAME" \
+              "FluentBridge-${VERSION_LABEL}.apk" \
+              "FluentBridge.apk" \
+              "FluentBridge-${VERSION_LABEL}-playstore.aab" \
+              "FluentBridge-playstore.aab" \
               --title "FluentBridge $GITHUB_REF_NAME" \
               --generate-notes
           fi
