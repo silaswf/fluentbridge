@@ -37,7 +37,6 @@ interface SidebarProps {
   dueVocabCount: number;
   pendingSubmissionsCount: number;
   onLogout: () => void;
-  onQuickSwitchToTeacher?: () => void;
 }
 
 export function Sidebar({
@@ -56,7 +55,6 @@ export function Sidebar({
   dueVocabCount,
   pendingSubmissionsCount,
   onLogout,
-  onQuickSwitchToTeacher,
 }: SidebarProps) {
   const navItems: {
     id: NavView;
@@ -265,17 +263,6 @@ export function Sidebar({
             );
           })}
         </nav>
-
-        {user.role === 'student' && onQuickSwitchToTeacher && (
-          <button
-            type="button"
-            onClick={onQuickSwitchToTeacher}
-            className="mb-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50/70 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 cursor-pointer"
-          >
-            <GraduationCap className="h-3.5 w-3.5" />
-            <span>Acessar Modo Professor (Demo)</span>
-          </button>
-        )}
 
         {/* Dynamic Dialect Selector */}
         <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">

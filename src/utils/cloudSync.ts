@@ -217,33 +217,45 @@ alter default privileges in schema public grant all on tables to anon, authentic
 
 const DEFAULT_SLUG = 'fluentbridge-main';
 
-let cachedAuthClientKey = '';
-let cachedAuthClient: SupabaseClient | null = null;
+let cachedClientKey = '';
+let cachedClient: SupabaseClient | null = null;
 
-function buildClient(
-  url: string,
-  anonKey: string,
-  persistSession = false,
-): SupabaseClient {
-  if (persistSession) {
-    const cacheKey = `${url.trim()}::${anonKey.trim()}`;
-    if (cachedAuthClient && cachedAuthClientKey === cacheKey) {
-      return cachedAuthClient;
-    }
-    cachedAuthClient = createClient(url.trim(), anonKey.trim(), {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-    });
-    cachedAuthClientKey = cacheKey;
-    return cachedAuthClient;
+function getSupabaseClient(url: string, anonKey: string): SupabaseClient {
+  const cleanUrl = url.trim();
+  const cleanKey = anonKey.trim();
+  const cacheKey = `${cleanUrl}::${cleanKey}`;
+  if (cachedClient && cachedClientKey === cacheKey) {
+    return cachedClient;
   }
-
-  return createClient(url.trim(), anonKey.trim(), {
-    auth: { persistSession: false },
+  cachedClient = createClient(cleanUrl, cleanKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
   });
+  cachedClientKey = cacheKey;
+  return cachedClient;
+}
+
+function mapSupabaseUserToInfo(user: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+}): SupabaseAuthUserInfo | null {
+  if (!user.email) return null;
+  const meta = user.user_metadata ?? {};
+  return {
+    id: user.id,
+    email: user.email,
+    name:
+      typeof meta.full_name === 'string' && meta.full_name.trim()
+        ? meta.full_name
+        : typeof meta.name === 'string' && meta.name.trim()
+          ? meta.name
+          : user.email.split('@')[0],
+    role: meta.role === 'teacher' ? 'teacher' : 'student',
+  };
 }
 
 function resolveSupabaseCredentials(
@@ -279,7 +291,7 @@ export async function testSupabaseConnection(
     };
   }
   try {
-    const client = buildClient(cfg.url, cfg.anonKey);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const { error } = await client
       .from('fb_school_state')
       .select('school_slug, updated_at')
@@ -324,7 +336,7 @@ export async function pushStateToCloud(
   }
 
   try {
-    const client = buildClient(cfg.url, cfg.anonKey);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const nowIso = new Date().toISOString();
     // Avoid storing sensitive local API keys inside shared cloud JSON snapshot
     const sanitizedState: PlatformState = {
@@ -372,7 +384,7 @@ export async function pullStateFromCloud(
   }
 
   try {
-    const client = buildClient(cfg.url, cfg.anonKey);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const { data, error } = await client
       .from('fb_school_state')
       .select('state, updated_at')
@@ -420,7 +432,7 @@ export async function signInWithSupabaseEmail(
     return { ok: false, error: 'Supabase não configurado.' };
   }
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const { data, error } = await client.auth.signInWithPassword({
       email: email.trim(),
       password,
@@ -431,19 +443,8 @@ export async function signInWithSupabaseEmail(
         error: error?.message ?? 'Falha ao autenticar no Supabase.',
       };
     }
-    const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
-    return {
-      ok: true,
-      user: {
-        id: data.user.id,
-        email: data.user.email,
-        name:
-          typeof meta.full_name === 'string' && meta.full_name.trim()
-            ? meta.full_name
-            : data.user.email.split('@')[0],
-        role: meta.role === 'teacher' ? 'teacher' : 'student',
-      },
-    };
+    const info = mapSupabaseUserToInfo(data.user);
+    return info ? { ok: true, user: info } : { ok: false, error: 'Usuário sem e-mail.' };
   } catch (err) {
     return {
       ok: false,
@@ -466,7 +467,7 @@ export async function signUpWithSupabaseEmail(
     return { ok: false, error: 'Supabase não configurado.' };
   }
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const { data, error } = await client.auth.signUp({
       email: payload.email.trim(),
       password: payload.password,
@@ -508,7 +509,7 @@ export async function signInWithSupabaseGoogle(
     return { ok: false, error: 'Supabase não configurado.' };
   }
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
 
     if (Capacitor.isNativePlatform()) {
       const { data, error } = await client.auth.signInWithOAuth({
@@ -566,7 +567,7 @@ export async function handleNativeOAuthCallbackUrl(
   if (!cfg.url || !cfg.anonKey) return null;
 
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     const parsed = new URL(callbackUrl);
     const hashParams = new URLSearchParams(
       parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash,
@@ -641,31 +642,68 @@ export async function fetchCurrentSupabaseUser(
   const cfg = getEffectiveSupabaseConfig(cloudConfig);
   if (!cfg.url || !cfg.anonKey) return null;
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data: sessionData } = await client.auth.getSession();
+    if (sessionData.session?.user) {
+      return mapSupabaseUserToInfo(sessionData.session.user);
+    }
     const { data, error } = await client.auth.getUser();
-    if (error || !data.user?.email) return null;
-    const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
-    return {
-      id: data.user.id,
-      email: data.user.email,
-      name:
-        typeof meta.full_name === 'string' && meta.full_name.trim()
-          ? meta.full_name
-          : typeof meta.name === 'string' && meta.name.trim()
-            ? meta.name
-            : data.user.email.split('@')[0],
-      role: meta.role === 'teacher' ? 'teacher' : 'student',
-    };
+    if (error || !data.user) return null;
+    return mapSupabaseUserToInfo(data.user);
   } catch {
     return null;
   }
+}
+
+export function subscribeSupabaseAuthChanges(
+  cloudConfig: CloudConfig | undefined,
+  onAuthenticated: (user: SupabaseAuthUserInfo, isSignInEvent: boolean) => void,
+): () => void {
+  const cfg = getEffectiveSupabaseConfig(cloudConfig);
+  if (!cfg.url || !cfg.anonKey) return () => {};
+
+  const client = getSupabaseClient(cfg.url, cfg.anonKey);
+  let disposed = false;
+
+  const {
+    data: { subscription },
+  } = client.auth.onAuthStateChange((event, session) => {
+    if (disposed || !session?.user) return;
+    if (
+      event === 'INITIAL_SESSION' ||
+      event === 'SIGNED_IN' ||
+      event === 'TOKEN_REFRESHED' ||
+      event === 'USER_UPDATED'
+    ) {
+      const info = mapSupabaseUserToInfo(session.user);
+      if (info) {
+        onAuthenticated(info, event === 'SIGNED_IN');
+      }
+    }
+  });
+
+  void client.auth
+    .getSession()
+    .then(({ data }) => {
+      if (disposed || !data.session?.user) return;
+      const info = mapSupabaseUserToInfo(data.session.user);
+      if (info) {
+        onAuthenticated(info, false);
+      }
+    })
+    .catch(() => {});
+
+  return () => {
+    disposed = true;
+    subscription.unsubscribe();
+  };
 }
 
 export async function signOutSupabase(cloudConfig?: CloudConfig): Promise<void> {
   const cfg = getEffectiveSupabaseConfig(cloudConfig);
   if (!cfg.url || !cfg.anonKey) return;
   try {
-    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
     await client.auth.signOut();
   } catch {
     // Ignore sign-out errors offline

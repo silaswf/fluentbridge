@@ -44,6 +44,7 @@ import {
 import { getSelectedVoiceLabels } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
 import {
+  DEFAULT_TEACHER_ACCESS_CODE,
   getEffectiveGeminiKey,
   getEffectiveSupabaseConfig,
   hasEmbeddedGeminiKey,
@@ -1162,7 +1163,7 @@ export function TeacherStudio({
                   </h2>
                 </div>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Admin Mestre autorizado: <span className="font-mono font-bold text-slate-700">{MASTER_ADMIN_EMAIL}</span> · Promova professores, mova alunos de turma ou remova contas de teste.
+                  Admin Mestre autorizado: <span className="font-mono font-bold text-slate-700">{MASTER_ADMIN_EMAIL}</span> · Código de convite docente: <span className="rounded bg-purple-100 px-1.5 py-0.5 font-mono font-bold text-purple-900">{DEFAULT_TEACHER_ACCESS_CODE}</span>
                 </p>
               </div>
               <span

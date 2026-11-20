@@ -14,6 +14,7 @@ import {
   signInWithSupabaseGoogle,
   signOutSupabase,
   signUpWithSupabaseEmail,
+  subscribeSupabaseAuthChanges,
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
 import { AITutor } from './components/AITutor';
@@ -108,6 +109,7 @@ export function App() {
   }>({ state: 'idle' });
   const hasBootstrappedCloudRef = useRef(false);
   const skipNextCloudPushRef = useRef(false);
+  const lastSupabaseAuthEmailRef = useRef<string | null>(null);
 
   const effectiveSupabase = useMemo(
     () => getEffectiveSupabaseConfig(state.cloudConfig),
@@ -136,10 +138,26 @@ export function App() {
       );
       if (!cancelled && pullRes.ok && pullRes.state) {
         skipNextCloudPushRef.current = true;
-        setState((prev) =>
-          normalizePlatformState(
+        setState((prev) => {
+          const remoteUsers = Array.isArray(pullRes.state?.users)
+            ? pullRes.state.users
+            : [];
+          const mergedUsers = [...remoteUsers];
+          for (const localUser of prev.users) {
+            if (
+              !mergedUsers.some(
+                (ru) =>
+                  ru.email.toLowerCase() === localUser.email.toLowerCase() ||
+                  ru.id === localUser.id,
+              )
+            ) {
+              mergedUsers.push(localUser);
+            }
+          }
+          return normalizePlatformState(
             {
               ...pullRes.state,
+              users: mergedUsers,
               currentUserId: prev.currentUserId,
               cloudConfig: {
                 ...prev.cloudConfig,
@@ -151,8 +169,8 @@ export function App() {
             },
             DEFAULT_PLATFORM_STATE,
             ALL_INITIAL_VOCABULARY,
-          ),
-        );
+          );
+        });
         setAutoSyncStatus({
           state: 'synced',
           message: 'Dados sincronizados ao iniciar.',
@@ -181,10 +199,14 @@ export function App() {
     notifyUser: boolean,
   ) => {
     if (!authUser.email) return;
-    const master = isMasterAdminEmail(authUser.email);
+    const normalizedEmail = authUser.email.toLowerCase();
+    const master = isMasterAdminEmail(normalizedEmail);
+    const computedTargetView: NavView =
+      master || authUser.role === 'teacher' ? 'teacher' : 'learn';
+
     setState((prev) => {
       const existing = prev.users.find(
-        (u) => u.email.toLowerCase() === authUser.email.toLowerCase(),
+        (u) => u.email.toLowerCase() === normalizedEmail,
       );
       if (existing) {
         return {
@@ -230,19 +252,41 @@ export function App() {
         currentUserId: created.id,
       };
     });
-    setActiveView(master || authUser.role === 'teacher' ? 'teacher' : 'learn');
-    if (notifyUser) {
-      showToast(`Conectado via Google como ${authUser.name}!`);
+
+    if (lastSupabaseAuthEmailRef.current !== normalizedEmail) {
+      lastSupabaseAuthEmailRef.current = normalizedEmail;
+      setActiveView(computedTargetView);
+      if (notifyUser) {
+        showToast(`Conectado via Google como ${authUser.name}!`);
+      }
     }
   };
+
+  // Subscribe to Supabase Web/Desktop auth state (captures OAuth #access_token / ?code redirects)
+  useEffect(() => {
+    if (!isCloudConfigured) return;
+    const cfg: CloudConfig = {
+      supabaseUrl: effectiveSupabase.url,
+      supabaseAnonKey: effectiveSupabase.anonKey,
+      geminiApiKey: '',
+    };
+    return subscribeSupabaseAuthChanges(cfg, (authUser, isSignInEvent) => {
+      applySupabaseAuthUser(authUser, isSignInEvent);
+    });
+  }, [isCloudConfigured, effectiveSupabase.url, effectiveSupabase.anonKey]);
 
   // Native Android Chrome Custom Tabs OAuth callback listener
   useEffect(() => {
     if (!isCloudConfigured) return;
-    return registerNativeOAuthListener(state.cloudConfig, (authUser) => {
+    const cfg: CloudConfig = {
+      supabaseUrl: effectiveSupabase.url,
+      supabaseAnonKey: effectiveSupabase.anonKey,
+      geminiApiKey: '',
+    };
+    return registerNativeOAuthListener(cfg, (authUser) => {
       applySupabaseAuthUser(authUser, true);
     });
-  }, [isCloudConfigured, state.cloudConfig]);
+  }, [isCloudConfigured, effectiveSupabase.url, effectiveSupabase.anonKey]);
 
   // Background debounced sync to Supabase when state changes
   useEffect(() => {
@@ -482,69 +526,27 @@ export function App() {
     return { ok: true };
   };
 
-  const handleGoogleLogin = async (fallbackProfile?: {
-    name: string;
-    email: string;
-  }): Promise<{ ok: boolean; error?: string }> => {
-    if (!fallbackProfile && isCloudConfigured) {
-      const res = await signInWithSupabaseGoogle(state.cloudConfig);
-      if (!res.ok) return { ok: false, error: res.error };
-      return { ok: true };
+  const handleGoogleLogin = async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!isCloudConfigured) {
+      return { ok: false, error: 'Supabase não configurado.' };
     }
-
-    if (!fallbackProfile?.email) {
-      return { ok: false, error: 'Informe um e-mail Google válido.' };
-    }
-
-    const master = isMasterAdminEmail(fallbackProfile.email);
-    const existing = state.users.find(
-      (u) => u.email.toLowerCase() === fallbackProfile.email.trim().toLowerCase(),
-    );
-    if (existing) {
-      const nextRole = master ? 'teacher' : existing.role;
-      setState((prev) => ({
-        ...prev,
-        users: prev.users.map((u) =>
-          u.id === existing.id
-            ? { ...u, role: nextRole, isMasterAdmin: u.isMasterAdmin || master }
-            : u,
-        ),
-        currentUserId: existing.id,
-      }));
-      setActiveView(nextRole === 'teacher' ? 'teacher' : 'learn');
-      showToast(`Conectado via Google como ${existing.name}!`);
-      return { ok: true };
-    }
-
-    const newUser = buildFreshUserProfile({
-      name: fallbackProfile.name.trim() || fallbackProfile.email.split('@')[0],
-      email: fallbackProfile.email.trim(),
-      password: '',
-      role: master ? 'teacher' : 'student',
-    });
-    setState((prev) => ({
-      ...prev,
-      users: [...prev.users, newUser],
-      currentUserId: newUser.id,
-    }));
-    setActiveView(newUser.role === 'teacher' ? 'teacher' : 'learn');
-    showToast(`Conta Google conectada: ${newUser.name}!`);
+    const res = await signInWithSupabaseGoogle(state.cloudConfig);
+    if (!res.ok) return { ok: false, error: res.error };
     return { ok: true };
   };
 
   const handleLogout = () => {
+    lastSupabaseAuthEmailRef.current = null;
     setActiveTopic(null);
     setState((prev) => ({ ...prev, currentUserId: null }));
     void signOutSupabase(state.cloudConfig);
-  };
-
-  const handleQuickSwitchToTeacher = () => {
-    const teacher = state.users.find((u) => u.role === 'teacher');
-    if (!teacher) return;
-    setState((prev) => ({ ...prev, currentUserId: teacher.id }));
-    setTeacherInitialTab('corrections');
-    setActiveView('teacher');
-    showToast(`Alternado para ${teacher.name} (Modo Professor)`);
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hash.includes('access_token') ||
+        window.location.search.includes('code='))
+    ) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   };
 
   const handleChangeLanguage = (code: LanguageCode) => {
@@ -974,7 +976,6 @@ export function App() {
         dueVocabCount={dueVocabCount}
         pendingSubmissionsCount={pendingSubmissionsCount}
         onLogout={handleLogout}
-        onQuickSwitchToTeacher={handleQuickSwitchToTeacher}
       />
 
       <main className="flex-1 px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-10">

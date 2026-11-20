@@ -1,7 +1,20 @@
 import { isMasterAdminEmail } from '../config/appConfig';
 import type { PlatformState, UserProfile, VocabCard } from '../types/learning';
 
-export const PLATFORM_STORAGE_KEY = 'fluentbridge_platform_v2';
+export const PLATFORM_STORAGE_KEY = 'fluentbridge_platform_v3';
+
+const LEGACY_DEMO_USER_IDS = new Set([
+  'user-teacher-1',
+  'user-student-mariana',
+  'user-student-lucas',
+  'user-student-sofia',
+]);
+
+const LEGACY_DEMO_SUB_IDS = new Set([
+  'sub-demo-1',
+  'sub-demo-speaking-1',
+  'sub-demo-2',
+]);
 
 function syncUserVocab(
   userVocab: VocabCard[] | undefined,
@@ -27,10 +40,23 @@ export function normalizePlatformState(
   defaults: PlatformState,
   masterVocab: VocabCard[],
 ): PlatformState {
+  const cleanedRawUsers = Array.isArray(raw.users)
+    ? raw.users.filter(
+        (u) =>
+          !LEGACY_DEMO_USER_IDS.has(u.id) &&
+          u.email.toLowerCase() !== 'gabriel@fluentbridge.com',
+      )
+    : [];
+
   const rawMergedUsers: UserProfile[] =
-    Array.isArray(raw.users) && raw.users.length > 0
-      ? raw.users.map((u) => ({
+    cleanedRawUsers.length > 0
+      ? cleanedRawUsers.map((u) => ({
           ...u,
+          name:
+            isMasterAdminEmail(u.email) &&
+            (u.name === 'Silas (Admin Mestre)' || !u.name.trim())
+              ? 'Prof. Silas'
+              : u.name,
           isMasterAdmin: u.isMasterAdmin || isMasterAdminEmail(u.email),
           role: isMasterAdminEmail(u.email) ? 'teacher' : u.role,
           activeLanguage: u.activeLanguage ?? 'en',
@@ -81,9 +107,18 @@ export function normalizePlatformState(
         ]
       : rawMergedUsers;
 
+  const cleanedSubmissions = Array.isArray(raw.submissions)
+    ? raw.submissions.filter((s) => !LEGACY_DEMO_SUB_IDS.has(s.id))
+    : defaults.submissions;
+
+  const resolvedTeacherName =
+    !raw.teacherName || raw.teacherName.trim() === 'Prof. Gabriel'
+      ? defaults.teacherName
+      : raw.teacherName;
+
   return {
     schoolName: raw.schoolName ?? defaults.schoolName,
-    teacherName: raw.teacherName ?? defaults.teacherName,
+    teacherName: resolvedTeacherName,
     currentUserId:
       raw.currentUserId !== undefined ? raw.currentUserId : defaults.currentUserId,
     classes:
@@ -94,9 +129,7 @@ export function normalizePlatformState(
     customTopics: Array.isArray(raw.customTopics)
       ? raw.customTopics
       : defaults.customTopics,
-    submissions: Array.isArray(raw.submissions)
-      ? raw.submissions
-      : defaults.submissions,
+    submissions: cleanedSubmissions,
     cloudConfig: {
       ...defaults.cloudConfig,
       ...(raw.cloudConfig ?? {}),

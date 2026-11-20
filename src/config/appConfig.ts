@@ -1,6 +1,7 @@
 import type { CloudConfig } from '../types/learning';
 
 export const MASTER_ADMIN_EMAIL = 'silaswf@gmail.com';
+export const DEFAULT_TEACHER_ACCESS_CODE = 'SILAS-PROF-2026';
 
 function readViteEnv(key: string): string {
   try {
