@@ -1,0 +1,17 @@
+# Dependencies & Build outputs
+node_modules/
+dist/
+release/
+
+# Local environment & logs
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+
+# Android generated build artifacts (also ignored by android/.gitignore)
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties

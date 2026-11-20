@@ -1,0 +1,11 @@
+{
+  "name": "FluentBridge — Plataforma de Idiomas",
+  "short_name": "FluentBridge",
+  "description": "Aprenda inglês (A1–C1) e novos idiomas com as 4 habilidades, dicas gramaticais, tutor IA e acompanhamento do professor.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F7F9FC",
+  "theme_color": "#116DFF",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR"
+}

@@ -1,0 +1,87 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies & build web bundle
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      - name: Compute version metadata
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION_LABEL="${GITHUB_REF_NAME}"
+          else
+            VERSION_LABEL="v1.0.0-build.${GITHUB_RUN_NUMBER}"
+          fi
+          VERSION_NAME="${VERSION_LABEL#v}"
+          VERSION_CODE="${GITHUB_RUN_NUMBER}"
+          echo "VERSION_LABEL=${VERSION_LABEL}" >> "$GITHUB_ENV"
+          echo "VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=${VERSION_CODE}" >> "$GITHUB_ENV"
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug -PversionCode="$VERSION_CODE" -PversionName="$VERSION_NAME"
+
+      - name: Package APK files
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk "FluentBridge-${VERSION_LABEL}.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "FluentBridge.apk"
+
+      - name: Upload FluentBridge APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FluentBridge-Android-APK
+          path: FluentBridge-${{ env.VERSION_LABEL }}.apk
+
+      - name: Create or update GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" \
+              --title "FluentBridge $GITHUB_REF_NAME" \
+              --generate-notes
+          fi
