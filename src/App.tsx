@@ -9,10 +9,12 @@ import {
   fetchCurrentSupabaseUser,
   pullStateFromCloud,
   pushStateToCloud,
+  registerNativeOAuthListener,
   signInWithSupabaseEmail,
   signInWithSupabaseGoogle,
   signOutSupabase,
   signUpWithSupabaseEmail,
+  type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
 import { AITutor } from './components/AITutor';
 import { AuthScreen } from './components/AuthScreen';
@@ -160,55 +162,7 @@ export function App() {
 
       const authUser = await fetchCurrentSupabaseUser(state.cloudConfig);
       if (!cancelled && authUser?.email) {
-        const master = isMasterAdminEmail(authUser.email);
-        setState((prev) => {
-          const existing = prev.users.find(
-            (u) => u.email.toLowerCase() === authUser.email.toLowerCase(),
-          );
-          if (existing) {
-            return {
-              ...prev,
-              currentUserId: existing.id,
-              users: prev.users.map((u) =>
-                u.id === existing.id && master
-                  ? { ...u, role: 'teacher', isMasterAdmin: true }
-                  : u,
-              ),
-            };
-          }
-          const created: UserProfile = {
-            id: `user-${Date.now()}`,
-            name: authUser.name,
-            email: authUser.email,
-            password: '',
-            role: master ? 'teacher' : authUser.role ?? 'student',
-            isMasterAdmin: master,
-            avatarColor: AVATAR_COLORS[prev.users.length % AVATAR_COLORS.length],
-            activeLanguage: 'en',
-            dialectByLanguage: { en: 'en-US', es: 'es-ES', fr: 'fr-FR' },
-            accent: 'en-US',
-            dailyGoalMinutes: 15,
-            todayMinutes: 0,
-            xp: 0,
-            streakDays: 1,
-            completedTopicIds: [],
-            skillScores: { listening: 45, reading: 45, speaking: 40, writing: 45 },
-            vocab: cloneInitialVocab(),
-            issuedCertificates: [],
-            dailyQuests: {
-              lessonsCompletedToday: 0,
-              vocabReviewedToday: 0,
-              tutorSessionsToday: 0,
-              claimedQuestIds: [],
-            },
-            createdAt: new Date().toISOString().slice(0, 10),
-          };
-          return {
-            ...prev,
-            users: [...prev.users, created],
-            currentUserId: created.id,
-          };
-        });
+        applySupabaseAuthUser(authUser, false);
       }
     })();
 
@@ -221,6 +175,74 @@ export function App() {
     effectiveSupabase.anonKey,
     state.cloudConfig,
   ]);
+
+  const applySupabaseAuthUser = (
+    authUser: SupabaseAuthUserInfo,
+    notifyUser: boolean,
+  ) => {
+    if (!authUser.email) return;
+    const master = isMasterAdminEmail(authUser.email);
+    setState((prev) => {
+      const existing = prev.users.find(
+        (u) => u.email.toLowerCase() === authUser.email.toLowerCase(),
+      );
+      if (existing) {
+        return {
+          ...prev,
+          currentUserId: existing.id,
+          users: prev.users.map((u) =>
+            u.id === existing.id && master
+              ? { ...u, role: 'teacher', isMasterAdmin: true }
+              : u,
+          ),
+        };
+      }
+      const created: UserProfile = {
+        id: `user-${Date.now()}`,
+        name: authUser.name,
+        email: authUser.email,
+        password: '',
+        role: master ? 'teacher' : authUser.role ?? 'student',
+        isMasterAdmin: master,
+        avatarColor: AVATAR_COLORS[prev.users.length % AVATAR_COLORS.length],
+        activeLanguage: 'en',
+        dialectByLanguage: { en: 'en-US', es: 'es-ES', fr: 'fr-FR' },
+        accent: 'en-US',
+        dailyGoalMinutes: 15,
+        todayMinutes: 0,
+        xp: 0,
+        streakDays: 1,
+        completedTopicIds: [],
+        skillScores: { listening: 45, reading: 45, speaking: 40, writing: 45 },
+        vocab: cloneInitialVocab(),
+        issuedCertificates: [],
+        dailyQuests: {
+          lessonsCompletedToday: 0,
+          vocabReviewedToday: 0,
+          tutorSessionsToday: 0,
+          claimedQuestIds: [],
+        },
+        createdAt: new Date().toISOString().slice(0, 10),
+      };
+      return {
+        ...prev,
+        users: [...prev.users, created],
+        currentUserId: created.id,
+      };
+    });
+    setActiveView(master || authUser.role === 'teacher' ? 'teacher' : 'learn');
+    if (notifyUser) {
+      showToast(`Conectado via Google como ${authUser.name}!`);
+    }
+  };
+
+  // Native Android Chrome Custom Tabs OAuth callback listener
+  useEffect(() => {
+    if (!isCloudConfigured) return;
+    return registerNativeOAuthListener(state.cloudConfig, (authUser) => {
+      applySupabaseAuthUser(authUser, true);
+    });
+  }, [isCloudConfigured, state.cloudConfig]);
 
   // Background debounced sync to Supabase when state changes
   useEffect(() => {

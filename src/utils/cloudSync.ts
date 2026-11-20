@@ -1,6 +1,11 @@
+import { App as CapApp } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getEffectiveSupabaseConfig } from '../config/appConfig';
 import type { CloudConfig, PlatformState, UserRole } from '../types/learning';
+
+export const NATIVE_OAUTH_REDIRECT_URL = 'com.fluentbridge.app://auth-callback';
 
 export const SUPABASE_SQL_SCHEMA = `-- Execute este SQL completo no SQL Editor do seu projeto Supabase
 create table if not exists public.fb_school_state (
@@ -504,6 +509,25 @@ export async function signInWithSupabaseGoogle(
   }
   try {
     const client = buildClient(cfg.url, cfg.anonKey, true);
+
+    if (Capacitor.isNativePlatform()) {
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: NATIVE_OAUTH_REDIRECT_URL,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error || !data?.url) {
+        return {
+          ok: false,
+          error: error?.message ?? 'Não foi possível gerar URL de login Google.',
+        };
+      }
+      await Browser.open({ url: data.url, windowName: '_self' });
+      return { ok: true };
+    }
+
     const redirectTo =
       typeof window !== 'undefined' && window.location.protocol.startsWith('http')
         ? window.location.origin
@@ -522,6 +546,93 @@ export async function signInWithSupabaseGoogle(
       error: err instanceof Error ? err.message : 'Falha ao abrir login Google.',
     };
   }
+}
+
+export async function handleNativeOAuthCallbackUrl(
+  callbackUrl: string,
+  cloudConfig?: CloudConfig,
+): Promise<SupabaseAuthUserInfo | null> {
+  if (!callbackUrl || !callbackUrl.startsWith(NATIVE_OAUTH_REDIRECT_URL)) {
+    return null;
+  }
+
+  try {
+    await Browser.close();
+  } catch {
+    // Chrome Custom Tabs may already be closed
+  }
+
+  const cfg = getEffectiveSupabaseConfig(cloudConfig);
+  if (!cfg.url || !cfg.anonKey) return null;
+
+  try {
+    const client = buildClient(cfg.url, cfg.anonKey, true);
+    const parsed = new URL(callbackUrl);
+    const hashParams = new URLSearchParams(
+      parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash,
+    );
+    const queryParams = parsed.searchParams;
+
+    const accessToken =
+      hashParams.get('access_token') ?? queryParams.get('access_token');
+    const refreshToken =
+      hashParams.get('refresh_token') ?? queryParams.get('refresh_token');
+    const authCode = queryParams.get('code') ?? hashParams.get('code');
+
+    if (accessToken && refreshToken) {
+      await client.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+    } else if (authCode) {
+      await client.auth.exchangeCodeForSession(authCode);
+    }
+
+    return await fetchCurrentSupabaseUser(cloudConfig);
+  } catch {
+    return null;
+  }
+}
+
+export function registerNativeOAuthListener(
+  cloudConfig: CloudConfig | undefined,
+  onUser: (user: SupabaseAuthUserInfo) => void,
+): () => void {
+  if (!Capacitor.isNativePlatform()) {
+    return () => {};
+  }
+
+  let disposed = false;
+  let listenerHandle: { remove: () => Promise<void> } | null = null;
+
+  const processUrl = async (incomingUrl?: string | null) => {
+    if (!incomingUrl || disposed) return;
+    const authUser = await handleNativeOAuthCallbackUrl(incomingUrl, cloudConfig);
+    if (!disposed && authUser) {
+      onUser(authUser);
+    }
+  };
+
+  void CapApp.getLaunchUrl()
+    .then((res) => processUrl(res?.url))
+    .catch(() => {});
+
+  void CapApp.addListener('appUrlOpen', ({ url }) => {
+    void processUrl(url);
+  }).then((handle) => {
+    if (disposed) {
+      void handle.remove();
+    } else {
+      listenerHandle = handle;
+    }
+  });
+
+  return () => {
+    disposed = true;
+    if (listenerHandle) {
+      void listenerHandle.remove();
+    }
+  };
 }
 
 export async function fetchCurrentSupabaseUser(

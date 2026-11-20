@@ -15,10 +15,14 @@
     "apk:init": "npx cap add android",
     "apk:sync": "npm run build && npx cap sync android",
     "release:patch": "npm version patch -m \"chore(release): v%s\" && git push origin main --follow-tags",
-    "release:minor": "npm version minor -m \"chore(release): v%s\" && git push origin main --follow-tags"
+    "release:minor": "npm version minor -m \"chore(release): v%s\" && git push origin main --follow-tags",
+    "cf:login": "npx wrangler login",
+    "cf:deploy": "npm run build && npx wrangler pages deploy dist --project-name=fluentbridge --branch=main"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.1",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/browser": "^7.0.5",
     "@capacitor/core": "^7.0.1",
     "@supabase/supabase-js": "^2.49.1",
     "lucide-react": "^0.475.0",
