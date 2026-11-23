@@ -1,16 +1,26 @@
-# FluentBridge Academy (`v1.0.3`)
+# FluentBridge Academy (`v2.0.0`)
 
-Plataforma completa de ensino de idiomas nas **4 habilidades** (*Listening, Reading, Speaking & Writing*) com dicas contextuais voltadas para brasileiros, Tutor de Conversação com IA, vocabulário com revisão SRS, vozes neurais **`🇺🇸 US` / `🇬🇧 UK`**, Estúdio do Professor e emissão de certificados CEFR (`A1`–`C1`), desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino de idiomas (**Inglês, Espanhol e Francês**) de **A1 a C1** nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos e Histórias Multi-Voz*) com dicas contextuais voltadas para brasileiros, Tutor de Conversação IA (texto e **Chamada ao Vivo**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Painel Admin Mestre**, Estúdio do Professor com **Tarefas** e **Gerador IA**, e emissão de certificados CEFR, desenvolvida para o **Prof. Silas**.
 
 ---
 
 ## Plataformas & Links Ativos
 
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
+- **Edge API (Cloudflare Workers AI + STT + Gemini)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
 - **Windows Desktop**: [`release/FluentBridge-win32-x64/FluentBridge.exe`](./release/FluentBridge-win32-x64/FluentBridge.exe) (Electron 34)
-- **Android APK Assinado**: [`release/FluentBridge-v1.0.3.apk`](./release/FluentBridge-v1.0.3.apk)
-- **Google Play Store Bundle**: [`release/FluentBridge-v1.0.3-playstore.aab`](./release/FluentBridge-v1.0.3-playstore.aab)
+- **Android APK Assinado**: [`release/FluentBridge-v2.0.0.apk`](./release/FluentBridge-v2.0.0.apk) (e [`FluentBridge-latest.apk`](./release/FluentBridge-latest.apk))
+- **Google Play Store Bundle**: [`release/FluentBridge-v2.0.0-playstore.aab`](./release/FluentBridge-v2.0.0-playstore.aab)
+
+---
+
+## Números Atuais (`v2.0.0`)
+
+- **92 Unidades CEFR (A1–C1)**: **50** em Inglês + **22** em Espanhol + **20** em Francês
+- **730 Passos Interativos** em **11 formatos** (`tip`, `listening`, `reading`, `matching`, `fill_blank`, `dictation`, `minimal_pairs`, `story`, `speaking`, `writing_builder`, `writing_free`)
+- **278 Flashcards SM-2** + **126 Dicas Contextuais** + **56 Tabelas no Guia Gramatical** (`32` EN, `12` ES, `12` FR)
+- **Qualidade Garantida**: `17/17` testes **Vitest** aprovados · `0` erros TypeScript · `0` erros estruturais em `verify_curriculum.mjs`
 
 ---
 

@@ -1,30 +1,30 @@
-# Documentação de Desenvolvimento — FluentBridge (`v1.3.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v2.0.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma de ensino de idiomas nas **4 habilidades** — *Listening, Reading, Speaking & Writing* — com dicas contextuais para brasileiros, Tutor IA, vocabulário SRS, acompanhamento do **Prof. Silas**, emissão de certificados CEFR e sincronização multiplataforma em **Windows**, **Android** e **Web**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma multi-idiomas — **Inglês, Espanhol e Francês** de `A1` a `C1` — com dicas contextuais para brasileiros, Tutor IA com modo Chamada, vocabulário SM-2, **Painel Admin Mestre**, Estúdio do **Prof. Silas**, emissão de certificados CEFR e sincronização multiplataforma em **Windows**, **Android** e **Web**).
 
 ---
 
 ## Índice de Documentos
 
-1. **[01 - Diagnóstico Atual do Sistema](./01-DIAGNOSTICO-ATUAL.md)** — Inventário técnico completo de tudo o que já está implementado na versão `v1.1.0`.
-2. **[02 - Arquitetura Nativa (Windows + Android + Web)](./02-ARQUITETURA-NATIVA-WINDOWS-ANDROID.md)** — Arquitetura Electron + Capacitor 7 + Cloudflare Pages/Workers, assinatura Release (`.apk`/`.aab`), deep link OAuth e CI/CD no GitHub Actions.
-3. **[03 - Roadmap até a Completude](./03-ROADMAP-DESENVOLVIMENTO.md)** — Histórico das Fases 0 a 5 concluídas (`v1.0.0` → `v1.1.0`) e o plano completo das Fases 6 a 9 (`v1.2` → `v2.0`) rumo ao máximo potencial.
+1. **[01 - Diagnóstico Atual do Sistema](./01-DIAGNOSTICO-ATUAL.md)** — Inventário técnico completo da versão `v2.0.0`.
+2. **[02 - Arquitetura Nativa (Windows + Android + Web)](./02-ARQUITETURA-NATIVA-WINDOWS-ANDROID.md)** — Arquitetura Electron + Capacitor 7 + Cloudflare Pages/Workers (Aura-2 + Gemini Neural TTS + Whisper STT), assinatura Release (`.apk`/`.aab`), deep link OAuth e CI/CD no GitHub Actions.
+3. **[03 - Roadmap até a Completude](./03-ROADMAP-DESENVOLVIMENTO.md)** — Histórico das Fases 0 a 9 concluídas (`v1.0.0` → `v2.0.0`) e o próximo plano das **Fases 10 a 12 (`v2.1` → `v3.0`)**.
 4. **[04 - Guia de Sincronização Online com Supabase](./04-GUIA-SINCRONIZACAO-SUPABASE.md)** — Estrutura do banco (`supabase_schema.sql`), merge granular em `fb_school_state`, tombstones, áudios cross-device e backups JSON.
-5. **[04 - Guia Supabase Autenticação & IA Compartilhada](./04-GUIA-SUPABASE-AUTENTICACAO.md)** — Configuração de Google OAuth Web/Android nativo, separação Aluno vs. Professor (`SILAS-PROF-2026`), usuário Admin Mestre (`silaswf@gmail.com`) e proxy seguro Gemini no Cloudflare Worker.
-6. **[05 - Manual Completo de Funcionalidades](./05-MANUAL-FUNCIONALIDADES.md)** — Guia detalhado de uso de todas as telas do aluno e do Estúdio do Professor.
-7. **[06 - Auditoria Completa & Plano de Otimizações](./06-AUDITORIA-OTIMIZACOES.md)** — Varredura profunda de suficiência, achados reais no código (`TeacherStudio.tsx`, bundle, modularização, SRS SM-2) e plano de melhorias em arquitetura, código, UI/UX, conteúdo e segurança.
-8. **[07 - Plano Técnico das Próximas Fases (Fases 5 a 9)](./07-PLANO-FASE-8-DIFERENCIAIS.md)** — Blueprint detalhado de implementação por Sprints (`v1.1` → `v2.0`) com arquivos impactados e critérios de aceite.
-9. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v1.1.0`).
+5. **[04 - Guia Supabase Autenticação & IA Compartilhada](./04-GUIA-SUPABASE-AUTENTICACAO.md)** — Configuração de Google OAuth Web/Android nativo, separação Aluno vs. Professor, código docente dinâmico, bloqueio de acesso, usuário Admin Mestre (`silaswf@gmail.com`) e proxy seguro Gemini no Cloudflare Worker.
+6. **[05 - Manual Completo de Funcionalidades](./05-MANUAL-FUNCIONALIDADES.md)** — Guia detalhado de uso das telas do aluno, do Estúdio do Professor e do **Painel Admin Mestre**.
+7. **[06 - Auditoria Completa & Plano de Otimizações](./06-AUDITORIA-OTIMIZACOES.md)** — Auditoria pós-`v2.0.0` com medições reais de bundle (`122,94 kB` inicial), segurança, Dark Mode/responsividade, latência TTS/STT e recomendações futuras.
+8. **[07 - Plano Técnico das Próximas Fases (Fases 10 a 12 · v2.1 → v3.0)](./07-PLANO-FASE-8-DIFERENCIAIS.md)** — Histórico da Fase 8 entregue e blueprints técnicos detalhados para as próximas fases.
+9. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v2.0.0`).
 
 ---
 
-## Resumo do Estado Atual (`v1.3.0`)
+## Resumo do Estado Atual (`v2.0.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev` com `vite-plugin-pwa`) + **Edge API** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (Safe Area `WindowInsetsCompat`, `.apk` + `.aab`) + **Windows Desktop** (`FluentBridge.exe`) |
-| **Autenticação & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web e Android nativo), cadastro separado **Aluno** vs. **Professor** (`SILAS-PROF-2026`), Admin Mestre `silaswf@gmail.com` (**Prof. Silas**), senhas com hash `fbh1:` e **merge granular entity-level** com tombstones + upload cross-device de Speaking |
-| **Currículo & Conteúdo** | **`35` unidades totais** (`34` de Inglês A1–C1 + `1` unidade inicial de Espanhol), **`274` passos interativos**, **`69` dicas contextuais**, **`140` flashcards SM-2** e **`24` tabelas** no Guia Gramatical |
-| **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** (`🇺🇸 US` + `🇬🇧 UK` + `0.75x`) com síntese neural **Deepgram Aura-2** (`thalia` US / `pandora` UK / `nestor` ES), reconhecimento **Whisper Cloud STT (`/api/stt`)** sem erro `network` e gravação `32 kbps` sincronizada entre dispositivos |
-| **IA, SRS & UX (`Fase 6–7`)** | **Tutor IA** via `/api/gemini-tutor`, **SRS SM-2** com 4 botões, **Tema Claro/Escuro/Auto**, **Streak Freeze (`🧊`)**, lembretes diários (`@capacitor/local-notifications`), `ErrorBoundary`, lazy chunks e suíte **Vitest** |
-| **Verificação & CI/CD** | `npm test` + `npx tsc --noEmit` (`0` erros) · `verify_curriculum.mjs` (`0` erros) · GitHub Actions gerando `.apk` e `.aab` assinados por tag `v*` |
+| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (Safe Area `WindowInsetsCompat`, `.apk` + `.aab`) + **Windows Desktop** (`FluentBridge.exe`) |
+| **Autenticação, Admin & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web/Android), **Painel Admin Mestre (`AdminPanel.tsx`)** com código docente visível/editável (`SILAS-PROF-2026`), bloqueio/liberação de acesso em tempo real, hash `fbh1:` e **merge granular** com tombstones |
+| **Currículo & Conteúdo (`Fase 9`)** | **`92` unidades totais** (`50` EN + `22` ES + `20` FR de A1 a C1), **`730` passos interativos** em **`11` formatos**, **`126` dicas contextuais**, **`278` flashcards SM-2** e **`56` tabelas** no Guia Gramatical (`32` EN, `12` ES, `12` FR) |
+| **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** com **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`, vozes feminina/masculina) + **Gemini 2.5 Neural TTS** (`fr-FR`, `fr-CA` em WAV) + cache `tts-v3` + **Whisper Cloud STT (`/api/stt`)** |
+| **Pedagogia & UX (`Fases 6–8`)** | **Ditado**, **Minimal Pairs**, **Histórias Multi-Voz**, **Tarefas com Prazo**, **Analytics da Escola**, **Gerador IA de Unidades**, **Tutor IA com Chamada ao Vivo**, **Tema Escuro corrigido**, **Sidebar & Painel recolhíveis**, **SM-2**, **Streak Freeze** |
+| **Verificação & CI/CD** | `npm test` (`6` arquivos / `17` testes OK) · `npx tsc --noEmit` (`0` erros) · `verify_curriculum.mjs` (`0` erros) · `DIST_LEAK=CLEAN` · GitHub Actions `.apk` + `.aab` |

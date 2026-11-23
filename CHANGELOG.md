@@ -4,6 +4,31 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v2.0.0`] — 2026-11-23
+### Fases 8 & 9 Concluídas + Painel Admin Mestre + Vozes Neurais EN/ES/FR + Correções Dark Mode/UI
+- **Correções de Interface, Dark Mode, Sidebar & Legibilidade (`src/index.css`, `src/components/Sidebar.tsx`, `src/components/LearningPath.tsx`, `index.html`):**
+  - Corrigidos seletores Tailwind v4 compilados (`lg:bg-white`, classes com opacidade como `text-amber-950/85`, `bg-amber-50/70`, `aside`) no modo escuro (`html.dark`), garantindo legibilidade integral nas caixas *"Dicas neste tópico"* tanto no Desktop quanto no Mobile/Android.
+  - Barra lateral (`Sidebar.tsx`) agora aplica corretamente o tema escuro/claro, possui botão de recolher/expandir no Desktop (`lg:w-72` ↔ `lg:w-20`), e posiciona os controles de **Sotaque** e **Tema** logo abaixo da navegação principal (no topo, sem ficar presa no rodapé).
+  - Painel lateral direito da trilha (`LearningPath.tsx`) tornou-se desdobrável (`Painel Lateral`), permitindo expandir a trilha de aprendizagem para largura total, e a linha vertical da timeline foi ocultada no mobile (`hidden sm:block`) para evitar sobreposição com os cards.
+  - Atualizado `index.html` com `<meta name="mobile-web-app-capable" content="yes" />` removendo aviso depreciado no DevTools.
+- **Painel de Administrador Mestre Exclusivo (`src/components/AdminPanel.tsx`, `src/App.tsx`, `src/components/AuthScreen.tsx`, `src/utils/storage.ts`, `src/utils/cloudSync.ts`):**
+  - Nova aba exclusiva **`Painel Admin`** visível apenas para o Admin Mestre (`silaswf@gmail.com`).
+  - Exibição explícita do **Código de Cadastro de Professor** (padrão `SILAS-PROF-2026`) com botão de cópia rápida e edição dinâmica (`state.teacherAccessCode`).
+  - Controle total de usuários: **Bloquear / Liberar acesso** com motivo opcional (bloqueia login local, e-mail Supabase e retorno Google OAuth), promoção/rebaixamento `Aluno ↔ Professor`, troca de turma, redefinição de senha local, exclusão de contas e painel de saúde da nuvem e vozes.
+- **Fase 8 — Novos Formatos Pedagógicos, Chamada IA & Tarefas (`LessonPlayer.tsx`, `AITutor.tsx`, `TeacherStudio.tsx`, `SkillBadge.tsx`):**
+  - **3 novos tipos de passo interativo** no `LessonPlayer.tsx` (totalizando **11 tipos**): **`dictation`** (ditado auditivo com comparação normalizada e dicas), **`minimal_pairs`** (contraste fonético para brasileiros com IPA e áudio lento) e **`story`** (histórias multi-vozes alternando falantes feminino/masculino e sotaques).
+  - **Modo Chamada ao Vivo (Mãos-Livres)** no `AITutor.tsx` com detecção automática de fala contínua e cenários dedicados em **Inglês, Espanhol e Francês**.
+  - **Tarefas de Casa com Prazo (`TeacherAssignment`)**: criação no `TeacherStudio.tsx`, exibição na trilha do aluno (`LearningPath.tsx`), tombstones (`deletedAssignmentIds`) e **Analytics Médio da Escola**.
+  - **Gerador de Unidades com IA** integrado ao `TeacherStudio.tsx` (`/api/gemini-tutor`).
+- **Fase 9 — 92 Unidades Multi-Idiomas (EN/ES/FR), 56 Tabelas Gramaticais & Vozes Neurais Gemini/Aura-2:**
+  - **Inglês (`50` unidades A1–C1)**: `34` unidades nucleares + `16` trilhas especializadas em `src/data/curriculum/enSpecialTracks.ts` (*Minimal Pairs*, *Business*, *Tech*, *Viagens*, *IELTS/TOEFL*, *Phrasal Verbs* e *Idioms*).
+  - **Espanhol (`22` unidades A1–C1)** em `src/data/curriculum/spanishCourse.ts` + **`12` tabelas gramaticais**.
+  - **Francês (`20` unidades A1–C1)** em `src/data/curriculum/frenchCourse.ts` + **`12` tabelas gramaticais**.
+  - **Guia Gramatical expandido para `56` tabelas** (`32` EN + `12` ES + `12` FR) em `src/data/grammarGuide.ts`, **`278` cards SRS** e **`730` passos interativos** com `0` erros na validação curricular.
+  - **Vozes Neurais de Alta Naturalidade para Todos os Idiomas (`cloudflare-worker/worker.js`, `src/utils/speech.ts`)**: adicionado suporte masculino/feminino no Deepgram Aura-2 (`en-US`, `en-GB`, `es-ES`, `es-MX`) e integrado **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`, PCM16 → WAV)** para **`fr-FR` (`Aoede`/`Charon`)** e **`fr-CA` (`Kore`/`Puck`)** com cache Edge `/v3/` + IndexedDB `tts-v3:*`.
+
+---
+
 ## [`v1.3.0`] — 2026-11-23
 ### Correções Mobile (Safe Area + Whisper STT) + Fases 6 & 7 (SM-2, Dark Mode, PWA, Streak Freeze & Vitest)
 - **Correção Crítica de Safe Area / Barra Superior e Navegação (`MainActivity.java`, `index.css`, `Sidebar.tsx`, `LessonPlayer.tsx`, `AuthScreen.tsx`, `PlacementTestModal.tsx`, `App.tsx`):**

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Award,
   Bot,
@@ -9,11 +10,15 @@ import {
   LogOut,
   Monitor,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ShieldAlert,
   Snowflake,
   Sparkles,
   Sun,
   Zap,
 } from 'lucide-react';
+import { isMasterAdminEmail } from '../config/appConfig';
 import { LANGUAGE_COURSES } from '../data/languages';
 import type { LanguageCode, LanguageCourse, UserProfile } from '../types/learning';
 import type { ThemeMode } from '../utils/theme';
@@ -24,7 +29,8 @@ export type NavView =
   | 'review'
   | 'tips'
   | 'certificates'
-  | 'teacher';
+  | 'teacher'
+  | 'admin';
 
 interface SidebarProps {
   activeView: NavView;
@@ -69,6 +75,25 @@ export function Sidebar({
     themeMode === 'dark' ? Moon : themeMode === 'system' ? Monitor : Sun;
   const themeLabel =
     themeMode === 'dark' ? 'Escuro' : themeMode === 'system' ? 'Auto' : 'Claro';
+
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('fluentbridge_sidebar_collapsed') === '1';
+  });
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('fluentbridge_sidebar_collapsed', next ? '1' : '0');
+      }
+      return next;
+    });
+  };
+
+  const isMaster =
+    Boolean(user.isMasterAdmin) || isMasterAdminEmail(user.email);
+
   const navItems: {
     id: NavView;
     label: string;
@@ -127,6 +152,16 @@ export function Sidebar({
           },
         ]
       : []),
+    ...(isMaster
+      ? [
+          {
+            id: 'admin' as NavView,
+            label: 'Painel Admin',
+            shortLabel: 'Admin',
+            Icon: ShieldAlert,
+          },
+        ]
+      : []),
   ];
 
   const cycleMobileDialect = () => {
@@ -143,119 +178,151 @@ export function Sidebar({
   return (
     <>
       {/* Desktop Left Sidebar */}
-      <aside className="hidden lg:flex lg:w-72 lg:shrink-0 lg:flex-col lg:border-r lg:border-slate-200/80 lg:bg-white lg:px-5 lg:py-5">
-        <div className="flex items-center gap-3 px-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/25">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate font-display text-base font-extrabold tracking-tight text-slate-900">
-              {schoolName}
-            </p>
-            <p className="truncate text-xs font-medium text-slate-500">
-              {teacherName} · Multi-Idiomas
-            </p>
-          </div>
+      <aside
+        className={`hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-slate-200/80 lg:bg-white lg:py-5 transition-all duration-200 ${
+          isCollapsed ? 'lg:w-20 lg:px-2.5' : 'lg:w-72 lg:px-5'
+        }`}
+      >
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between gap-2 px-1'}`}>
+          {!isCollapsed && (
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/25">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-display text-base font-extrabold tracking-tight text-slate-900">
+                  {schoolName}
+                </p>
+                <p className="truncate text-xs font-medium text-slate-500">
+                  {teacherName} · Multi-Idiomas
+                </p>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 cursor-pointer"
+            title={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+            aria-label={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+          >
+            {isCollapsed ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </button>
         </div>
 
         {/* Multi-Language Course Switcher */}
-        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-2.5">
-          <p className="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-            Idioma em estudo
-          </p>
-          <div className="mt-1.5 grid grid-cols-3 gap-1">
-            {LANGUAGE_COURSES.map((course) => {
-              const selected = course.code === activeCourse.code;
-              return (
-                <button
-                  key={course.code}
-                  type="button"
-                  onClick={() => onChangeLanguage(course.code)}
-                  className={`flex flex-col items-center rounded-xl py-1.5 text-[11px] font-bold transition cursor-pointer ${
-                    selected
-                      ? 'bg-white text-blue-700 shadow-2xs ring-1 ring-blue-200'
-                      : 'text-slate-600 hover:bg-white/60'
-                  }`}
-                >
-                  <span className="text-base leading-none">{course.flag}</span>
-                  <span className="mt-1">{course.namePt}</span>
-                </button>
-              );
-            })}
+        {!isCollapsed && (
+          <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-2.5">
+            <p className="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+              Idioma em estudo
+            </p>
+            <div className="mt-1.5 grid grid-cols-3 gap-1">
+              {LANGUAGE_COURSES.map((course) => {
+                const selected = course.code === activeCourse.code;
+                return (
+                  <button
+                    key={course.code}
+                    type="button"
+                    onClick={() => onChangeLanguage(course.code)}
+                    className={`flex flex-col items-center rounded-xl py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                      selected
+                        ? 'bg-white text-blue-700 shadow-2xs ring-1 ring-blue-200'
+                        : 'text-slate-600 hover:bg-white/60'
+                    }`}
+                  >
+                    <span className="text-base leading-none">{course.flag}</span>
+                    <span className="mt-1">{course.namePt}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Logged-in User Card */}
-        <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
-                style={{ backgroundColor: user.avatarColor }}
+        {!isCollapsed && (
+          <div className="mt-3 rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
+                  style={{ backgroundColor: user.avatarColor }}
+                >
+                  {user.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate font-display text-xs font-bold text-slate-900">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-[11px] font-medium text-slate-500">
+                    {isMaster
+                      ? 'Admin Mestre'
+                      : user.role === 'teacher'
+                        ? 'Professor(a)'
+                        : classNameLabel ?? 'Aluno(a)'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                title="Trocar conta / Sair"
+                aria-label="Trocar conta ou sair"
               >
-                {user.name.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-display text-xs font-bold text-slate-900">
-                  {user.name}
-                </p>
-                <p className="truncate text-[11px] font-medium text-slate-500">
-                  {user.role === 'teacher'
-                    ? 'Professor(a) · Admin'
-                    : classNameLabel ?? 'Aluno(a)'}
-                </p>
-              </div>
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onLogout}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
-              title="Trocar conta / Sair"
-              aria-label="Trocar conta ou sair"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
           </div>
-        </div>
+        )}
 
         {/* Streak & XP Pills */}
-        <div className="mt-3 grid grid-cols-2 gap-2.5">
-          <div className="flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50/70 px-3 py-2">
-            <Flame className="h-4 w-4 text-orange-500" />
-            <div>
-              <p className="font-mono text-sm font-bold text-slate-900">
-                {user.streakDays}d
-              </p>
-              <p className="flex items-center gap-1 text-[11px] text-slate-500">
-                <span>Ofensiva</span>
-                <span title="Proteções de Ofensiva (Streak Freeze)" className="inline-flex items-center gap-0.5 text-sky-600 font-semibold">
-                  <Snowflake className="h-2.5 w-2.5" />
-                  {user.streakFreezes ?? 1}
-                </span>
-              </p>
+        {!isCollapsed && (
+          <div className="mt-3 grid grid-cols-2 gap-2.5">
+            <div className="flex items-center gap-2 rounded-xl border border-orange-100 bg-orange-50/70 px-3 py-2">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <div>
+                <p className="font-mono text-sm font-bold text-slate-900">
+                  {user.streakDays}d
+                </p>
+                <p className="flex items-center gap-1 text-[11px] text-slate-500">
+                  <span>Ofensiva</span>
+                  <span title="Proteções de Ofensiva (Streak Freeze)" className="inline-flex items-center gap-0.5 text-sky-600 font-semibold">
+                    <Snowflake className="h-2.5 w-2.5" />
+                    {user.streakFreezes ?? 1}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2">
+              <Zap className="h-4 w-4 text-blue-600" />
+              <div>
+                <p className="font-mono text-sm font-bold text-slate-900">
+                  {user.xp}
+                </p>
+                <p className="text-[11px] text-slate-500">Total XP</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2">
-            <Zap className="h-4 w-4 text-blue-600" />
-            <div>
-              <p className="font-mono text-sm font-bold text-slate-900">
-                {user.xp}
-              </p>
-              <p className="text-[11px] text-slate-500">Total XP</p>
-            </div>
-          </div>
-        </div>
+        )}
 
-        {/* Navigation Links */}
-        <nav className="mt-4 flex-1 space-y-1" aria-label="Navegação principal">
-          {navItems.map(({ id, label, Icon, badge, badgeColor }) => {
+        {/* Navigation Links (sem flex-1 para manter Sotaque & Tema logo abaixo) */}
+        <nav className="mt-4 space-y-1" aria-label="Navegação principal">
+          {navItems.map(({ id, label, shortLabel, Icon, badge, badgeColor }) => {
             const active = activeView === id;
             return (
               <button
                 key={id}
                 type="button"
                 onClick={() => onChangeView(id)}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold transition-all cursor-pointer ${
+                title={isCollapsed ? label : undefined}
+                className={`flex w-full items-center ${
+                  isCollapsed ? 'justify-center px-2 py-2.5' : 'justify-between px-3.5 py-2.5'
+                } rounded-xl text-left text-sm font-semibold transition-all cursor-pointer ${
                   active
                     ? 'bg-blue-50 text-blue-700 shadow-2xs ring-1 ring-blue-200/80'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -263,13 +330,14 @@ export function Sidebar({
               >
                 <span className="flex items-center gap-3">
                   <Icon
-                    className={`h-4.5 w-4.5 ${
+                    className={`h-4.5 w-4.5 shrink-0 ${
                       active ? 'text-blue-600' : 'text-slate-400'
                     }`}
                   />
-                  <span>{label}</span>
+                  {!isCollapsed && <span>{label}</span>}
+                  {isCollapsed && <span className="sr-only">{shortLabel}</span>}
                 </span>
-                {badge !== undefined && (
+                {!isCollapsed && badge !== undefined && (
                   <span
                     className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-bold ${
                       badgeColor ?? 'bg-slate-100 text-slate-700'
@@ -283,44 +351,73 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Dynamic Dialect & Theme Selector */}
-        <div className="space-y-2.5">
-          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">
-            <p className="text-xs font-semibold text-slate-700">
-              Sotaque ({activeCourse.namePt})
-            </p>
-            <div className="mt-2 grid grid-cols-2 gap-1.5">
-              {activeCourse.dialects.map((dial) => (
-                <button
-                  key={dial.code}
-                  type="button"
-                  onClick={() => onChangeDialect(dial.code)}
-                  className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                    activeDialect === dial.code
-                      ? 'bg-white text-blue-700 shadow-xs ring-1 ring-blue-200'
-                      : 'text-slate-600 hover:bg-white/60'
-                  }`}
-                >
-                  {dial.flag} {dial.label}
-                </button>
-              ))}
+        {/* Dynamic Dialect & Theme Selector right below navigation */}
+        {!isCollapsed ? (
+          <div className="mt-4 space-y-2.5 border-t border-slate-200/70 pt-4">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">
+              <p className="text-xs font-semibold text-slate-700">
+                Sotaque ({activeCourse.namePt})
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                {activeCourse.dialects.map((dial) => (
+                  <button
+                    key={dial.code}
+                    type="button"
+                    onClick={() => onChangeDialect(dial.code)}
+                    className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                      activeDialect === dial.code
+                        ? 'bg-white text-blue-700 shadow-xs ring-1 ring-blue-200'
+                        : 'text-slate-600 hover:bg-white/60'
+                    }`}
+                  >
+                    {dial.flag} {dial.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={onCycleTheme}
-            className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <ThemeIcon className="h-3.5 w-3.5 text-blue-600" />
-              <span>Tema da interface</span>
-            </span>
-            <span className="rounded-md bg-white px-2 py-0.5 font-mono text-[11px] text-slate-600 ring-1 ring-slate-200">
-              {themeLabel}
-            </span>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={onCycleTheme}
+              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <ThemeIcon className="h-3.5 w-3.5 text-blue-600" />
+                <span>Tema da interface</span>
+              </span>
+              <span className="rounded-md bg-white px-2 py-0.5 font-mono text-[11px] text-slate-600 ring-1 ring-slate-200">
+                {themeLabel}
+              </span>
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-col items-center gap-2 border-t border-slate-200/70 pt-4">
+            <button
+              type="button"
+              onClick={cycleMobileDialect}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm cursor-pointer"
+              title={`Sotaque: ${activeDialectObj?.label ?? activeDialect}`}
+            >
+              {activeDialectObj?.flag ?? '🌐'}
+            </button>
+            <button
+              type="button"
+              onClick={onCycleTheme}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 cursor-pointer"
+              title={`Tema: ${themeLabel}`}
+            >
+              <ThemeIcon className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:text-rose-600 cursor-pointer"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Mobile Top Header */}

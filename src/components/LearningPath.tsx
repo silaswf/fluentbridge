@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Activity,
+  AlertCircle,
   Award,
   Bell,
   BellOff,
@@ -13,6 +14,7 @@ import {
   Coffee,
   Compass,
   Cpu,
+  Crown,
   Factory,
   GitBranch,
   Globe,
@@ -29,6 +31,8 @@ import {
   MessageSquareQuote,
   Mic,
   Newspaper,
+  PanelRightClose,
+  PanelRightOpen,
   PenTool,
   Plane,
   Play,
@@ -50,6 +54,7 @@ import type {
   DailyQuestsProgress,
   LanguageCourse,
   StudentSubmission,
+  TeacherAssignment,
   Topic,
   UserProfile,
 } from '../types/learning';
@@ -70,11 +75,13 @@ interface LearningPathProps {
   onToggleReminder?: () => void;
   onStartTopic: (topic: Topic) => void;
   reviewedSubmissions: StudentSubmission[];
+  assignments?: TeacherAssignment[];
   onGoToTeacher?: () => void;
 }
 
 const TOPIC_ICONS = {
   Activity,
+  AlertCircle,
   Award,
   Bell,
   BellOff,
@@ -86,6 +93,7 @@ const TOPIC_ICONS = {
   Coffee,
   Compass,
   Cpu,
+  Crown,
   Factory,
   GitBranch,
   Globe,
@@ -165,10 +173,25 @@ export function LearningPath({
   onToggleReminder,
   onStartTopic,
   reviewedSubmissions,
+  assignments = [],
   onGoToTeacher,
 }: LearningPathProps) {
   const [selectedLevel, setSelectedLevel] =
     useState<'ALL' | CEFRLevel>(initialFilterLevel);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return window.localStorage.getItem('fluentbridge_right_panel_open') !== '0';
+  });
+
+  const toggleRightPanel = () => {
+    setIsRightPanelOpen((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('fluentbridge_right_panel_open', next ? '1' : '0');
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     setSelectedLevel(initialFilterLevel);
@@ -233,7 +256,7 @@ export function LearningPath({
                 <button
                   type="button"
                   onClick={() => onStartTopic(nextTopic)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50 active:scale-[0.99] cursor-pointer"
+                  className="hero-cta-btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50 active:scale-[0.99] cursor-pointer"
                 >
                   <Play className="h-4 w-4 fill-blue-700" />
                   <span>
@@ -363,7 +386,7 @@ export function LearningPath({
       {/* Main 2-column grid */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         {/* Left: Connected Lesson Path */}
-        <div className="space-y-4 xl:col-span-8">
+        <div className={`space-y-4 ${isRightPanelOpen ? 'xl:col-span-8' : 'xl:col-span-12'}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-display text-lg font-bold text-slate-900">
@@ -389,6 +412,24 @@ export function LearningPath({
                   {lvl === 'ALL' ? 'Todos' : lvl}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={toggleRightPanel}
+                className="hidden xl:inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                title={isRightPanelOpen ? 'Recolher painel lateral direito' : 'Expandir painel lateral direito'}
+              >
+                {isRightPanelOpen ? (
+                  <>
+                    <PanelRightClose className="h-3.5 w-3.5 text-blue-600" />
+                    <span>Recolher painel</span>
+                  </>
+                ) : (
+                  <>
+                    <PanelRightOpen className="h-3.5 w-3.5 text-blue-600" />
+                    <span>Painel & Ranking</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -413,7 +454,7 @@ export function LearningPath({
                   <div key={topic.id} className="relative flex gap-4">
                     {idx < filteredTopics.length - 1 && (
                       <div
-                        className="absolute top-12 bottom-[-16px] left-6 w-0.5 bg-slate-200"
+                        className="absolute top-12 bottom-[-16px] left-6 hidden w-0.5 bg-slate-200 sm:block"
                         aria-hidden="true"
                       />
                     )}
@@ -502,18 +543,18 @@ export function LearningPath({
                       <p className="mt-2 text-sm text-slate-600">{topic.subtitle}</p>
 
                       {topic.topicTipsSummary.length > 0 && (
-                        <div className="mt-3.5 rounded-xl border border-amber-200/70 bg-amber-50/70 p-3">
-                          <p className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-                            <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
-                            Dicas neste tópico:
+                        <div className="topic-tips-box mt-3.5 rounded-xl border p-3">
+                          <p className="topic-tips-title flex items-center gap-1.5 text-xs font-bold">
+                            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                            <span>Dicas neste tópico:</span>
                           </p>
                           <ul className="mt-1.5 space-y-1">
                             {topic.topicTipsSummary.map((tipItem, tipIdx) => (
                               <li
                                 key={tipIdx}
-                                className="flex items-start gap-2 text-xs text-amber-950/85"
+                                className="topic-tips-item flex items-start gap-2 text-xs leading-relaxed"
                               >
-                                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                                 <span>{tipItem}</span>
                               </li>
                             ))}
@@ -536,7 +577,70 @@ export function LearningPath({
         </div>
 
         {/* Right: Daily Quests, Skill Radar, Leaderboard & Teacher Feedback */}
+        {isRightPanelOpen && (
         <aside className="space-y-5 xl:col-span-4">
+          {assignments.filter(
+            (a) =>
+              a.languageCode === activeCourse.code &&
+              (!a.classId || a.classId === currentUser.classId || currentUser.role === 'teacher'),
+          ).length > 0 && (
+            <div className="rounded-2xl border border-blue-200/80 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-base font-bold text-slate-900">
+                  Tarefas do Professor
+                </h3>
+                <Calendar className="h-4.5 w-4.5 text-blue-600" />
+              </div>
+              <div className="mt-3 space-y-2.5">
+                {assignments
+                  .filter(
+                    (a) =>
+                      a.languageCode === activeCourse.code &&
+                      (!a.classId || a.classId === currentUser.classId || currentUser.role === 'teacher'),
+                  )
+                  .slice(0, 4)
+                  .map((task) => {
+                    const linkedTopic = task.topicId
+                      ? topics.find((t) => t.id === task.topicId)
+                      : undefined;
+                    const done = linkedTopic
+                      ? completedTopicIds.includes(linkedTopic.id)
+                      : false;
+                    return (
+                      <div
+                        key={task.id}
+                        className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-bold text-slate-900">{task.title}</p>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                              done
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {done ? 'Concluída' : `Prazo ${task.dueDate}`}
+                          </span>
+                        </div>
+                        {task.description && (
+                          <p className="mt-1 text-slate-600">{task.description}</p>
+                        )}
+                        {linkedTopic && (
+                          <button
+                            type="button"
+                            onClick={() => onStartTopic(linkedTopic)}
+                            className="mt-2 font-bold text-blue-600 hover:underline cursor-pointer"
+                          >
+                            Abrir unidade: {linkedTopic.titlePt} →
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
           {/* Daily Quests (Missões Diárias) */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
@@ -724,6 +828,7 @@ export function LearningPath({
             )}
           </div>
         </aside>
+        )}
       </div>
     </div>
   );

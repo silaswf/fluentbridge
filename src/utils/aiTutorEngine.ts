@@ -149,6 +149,140 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
       'Let us reach a fair compromise so quality is not compromised.',
     ],
   },
+  // SPANISH SCENARIOS
+  {
+    id: 'es-tapas-madrid',
+    languageCode: 'es',
+    titlePt: 'Pedindo Tapas em Madri',
+    titleEn: 'Pidiendo Tapas en Madrid',
+    level: 'A1',
+    personaName: 'Camarero Mateo',
+    personaRole: 'Garçom simpático em Madri',
+    settingPt: 'Você entrou em um bar tradicional de tapas em Madri. Cumprimente, peça bebida e tapas sem cair no portunhol.',
+    goalsPt: [
+      'Usar "¿Me pones...?" ou "Quisiera..."',
+      'Evitar "embarazada" para vergonha',
+      'Pedir a conta com "¿Nos trae la cuenta?"',
+    ],
+    openingEn: '¡Hola, buenas tardes! Bienvenido a La Taberna. ¿Qué te pongo de beber?',
+    openingPt: 'Olá, boa tarde! Bem-vindo à Taberna. O que posso servir para beber?',
+    initialSuggestions: [
+      '¡Buenas tardes! ¿Me pones un agua con gas y unas patatas bravas, por favor?',
+      'Hola, quisiera una limonada y el menú del día.',
+      '¿Qué tapas me recomiendas hoy?',
+    ],
+  },
+  {
+    id: 'es-hotel-cdmx',
+    languageCode: 'es',
+    titlePt: 'Check-in e Passeios na Cidade do México',
+    titleEn: 'Check-in en Ciudad de México',
+    level: 'A2',
+    personaName: 'Recepcionista Sofía',
+    personaRole: 'Recepcionista de hotel boutique em Polanco',
+    settingPt: 'Você chegou ao hotel na Cidade do México e precisa confirmar sua reserva, horário do café da manhã e dicas locais.',
+    goalsPt: [
+      'Praticar pretérito ("Reservé una habitación")',
+      'Perguntar horários e direções com clareza',
+      'Usar fórmulas educadas em espanhol latino',
+    ],
+    openingEn: '¡Bienvenido a Ciudad de México! ¿Tiene reservación a su nombre?',
+    openingPt: 'Bem-vindo à Cidade do México! O senhor tem reserva em seu nome?',
+    initialSuggestions: [
+      'Sí, buenas tardes. Reservé una habitación doble a nombre de Silva.',
+      '¿A qué hora sirven el desayuno mañana por la mañana?',
+      '¿Cómo llego al Museo Frida Kahlo desde aquí?',
+    ],
+  },
+  {
+    id: 'es-interview-b1',
+    languageCode: 'es',
+    titlePt: 'Entrevista Remota para Empresa Espanhola',
+    titleEn: 'Entrevista Laboral en Español',
+    level: 'B1',
+    personaName: 'Directora Carmen',
+    personaRole: 'Gerente de Produto em Barcelona',
+    settingPt: 'Converse sobre sua trajetória, projetos recentes e metas profissionais usando tempos do passado e conectores.',
+    goalsPt: [
+      'Diferenciar Pretérito Indefinido e Imperfeito',
+      'Explicar resultados profissionais com conectores',
+      'Fazer perguntas inteligentes sobre a equipe',
+    ],
+    openingEn: '¡Hola! Gracias por conectarte. Cuéntame brevemente sobre tu experiencia reciente.',
+    openingPt: 'Olá! Obrigado por se conectar. Conte-me brevemente sobre sua experiência recente.',
+    initialSuggestions: [
+      'Trabajé tres años liderando proyectos digitales y mejoramos las entregas en un 30%.',
+      'Actualmente busco un reto internacional donde pueda aportar mi experiencia.',
+      '¿Cómo es la dinámica diaria del equipo en Barcelona?',
+    ],
+  },
+  // FRENCH SCENARIOS
+  {
+    id: 'fr-cafe-paris',
+    languageCode: 'fr',
+    titlePt: 'Café da Manhã em Paris',
+    titleEn: 'Au Café à Paris',
+    level: 'A1',
+    personaName: 'Serveuse Camille',
+    personaRole: 'Atendente em um bistrô parisiense',
+    settingPt: 'Na França, começar sempre com "Bonjour!" é regra cultural essencial. Peça um café e um croissant com educação.',
+    goalsPt: [
+      'Sempre iniciar com "Bonjour, madame/monsieur"',
+      'Usar "Je voudrais..." em vez de "Je veux"',
+      'Agradecer com "Merci beaucoup, bonne journée !"',
+    ],
+    openingEn: 'Bonjour ! Bienvenue au Bistrot Lumière. Qu’est-ce que je vous sers ce matin ?',
+    openingPt: 'Bom dia! Bem-vindo ao Bistrô Lumière. O que posso servir nesta manhã?',
+    initialSuggestions: [
+      'Bonjour ! Je voudrais un café allongé et un croissant, s’il vous plaît.',
+      'Bonjour, est-ce que vous avez du thé vert et du pain au chocolat ?',
+      'L’addition, s’il vous plaît. Merci beaucoup !',
+    ],
+  },
+  {
+    id: 'fr-marche-lyon',
+    languageCode: 'fr',
+    titlePt: 'Compras no Mercado & Padaria',
+    titleEn: 'À la Boulangerie',
+    level: 'A2',
+    personaName: 'Boulanger Luc',
+    personaRole: 'Padeiro artesanal em Lyon',
+    settingPt: 'Compre pães, queijos e pergunte preços e quantidades usando partitivos (du, de la, des).',
+    goalsPt: [
+      'Usar artigos partitivos ("du fromage", "une baguette")',
+      'Perguntar preço ("Combien ça coûte ?")',
+      'Pedir para viagem ("À emporter")',
+    ],
+    openingEn: 'Bonjour ! Tout sort du four à l’instant. Vous désirez quelque chose en particulier ?',
+    openingPt: 'Bom dia! Acabou de sair do forno. Deseja algo em especial?',
+    initialSuggestions: [
+      'Bonjour ! Je voudrais une baguette tradition et du fromage de chèvre, s’il vous plaît.',
+      'C’est pour emporter. Combien ça coûte en tout ?',
+      'Est-ce que vous acceptez la carte sans contact ?',
+    ],
+  },
+  {
+    id: 'fr-montreal-b1',
+    languageCode: 'fr',
+    titlePt: 'Reunião & Carreira em Montreal',
+    titleEn: 'Entretien Professionnel à Montréal',
+    level: 'B1',
+    personaName: 'Directrice Chloé',
+    personaRole: 'Líder de Tecnologia em Montreal',
+    settingPt: 'Apresente suas competências e explique por que deseja atuar em um ambiente francófono.',
+    goalsPt: [
+      'Usar Passé Composé corretamente ("J’ai travaillé...")',
+      'Expressar planos futuros com naturalidade',
+      'Manter registro profissional formal ("vous")',
+    ],
+    openingEn: 'Bonjour et ravi de vous rencontrer ! Qu’est-ce qui vous motive à rejoindre notre équipe à Montréal ?',
+    openingPt: 'Bom dia e prazer em conhecê-lo! O que motiva você a se juntar à nossa equipe em Montreal?',
+    initialSuggestions: [
+      'Bonjour ! J’ai travaillé cinq ans dans le numérique et j’aimerais contribuer à vos projets.',
+      'Je parle portugais, anglais et je perfectionne mon français chaque jour.',
+      'Quelles sont les priorités de votre équipe pour les six prochains mois ?',
+    ],
+  },
 ];
 
 export interface TutorReplyResult {
@@ -493,13 +627,20 @@ async function generateGeminiReply(
   userText: string,
 ): Promise<TutorReplyResult | null> {
   const models = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+  const targetLangName =
+    scenario.languageCode === 'es'
+      ? 'Spanish'
+      : scenario.languageCode === 'fr'
+        ? 'French'
+        : 'English';
+
   try {
     const recentHistory = history
       .slice(-6)
       .map((m) => `${m.sender === 'tutor' ? scenario.personaName : 'Student'}: ${m.textEn}`)
       .join('\n');
 
-    const prompt = `You are ${scenario.personaName} (${scenario.personaRole}) in an English learning roleplay for a Brazilian Portuguese-speaking student at CEFR ${scenario.level}.
+    const prompt = `You are ${scenario.personaName} (${scenario.personaRole}) in a ${targetLangName} learning roleplay for a Brazilian Portuguese-speaking student at CEFR ${scenario.level}.
 Scenario: ${scenario.settingPt}
 
 Conversation so far:
@@ -508,11 +649,11 @@ Student just wrote: "${userText}"
 
 Respond ONLY with valid JSON (no markdown fences) matching this exact schema:
 {
-  "replyEn": "Natural, concise response in English staying in character (1-3 sentences)",
+  "replyEn": "Natural, concise response in ${targetLangName} staying in character (1-3 sentences)",
   "replyPt": "Natural Brazilian Portuguese translation of replyEn",
-  "feedbackPt": "Encouraging 1-sentence coaching tip in Portuguese on the student's grammar, politeness, or Brazilian-English pitfalls",
-  "correctedEn": "Optional cleaner/more natural English rewrite of what the student said, or null if already natural",
-  "suggestions": ["3 short natural English reply options the student could say next"]
+  "feedbackPt": "Encouraging 1-sentence coaching tip in Portuguese on the student's grammar, politeness, or Brazilian speaker pitfalls in ${targetLangName}",
+  "correctedEn": "Optional cleaner/more natural ${targetLangName} rewrite of what the student said, or null if already natural",
+  "suggestions": ["3 short natural ${targetLangName} reply options the student could say next"]
 }`;
 
     let data: {

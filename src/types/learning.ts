@@ -155,6 +155,56 @@ export interface FillBlankStep {
   hintTip: string;
 }
 
+export interface DictationStep {
+  id: string;
+  type: 'dictation';
+  promptPt: string;
+  audioText: string;
+  translationPt: string;
+  hintTip: string;
+}
+
+export interface MinimalPairOption {
+  word: string;
+  ipa: string;
+  meaningPt: string;
+}
+
+export interface MinimalPairsStep {
+  id: string;
+  type: 'minimal_pairs';
+  promptPt: string;
+  targetWord: string;
+  targetIpa: string;
+  contrastWord: string;
+  contrastIpa: string;
+  options: MinimalPairOption[];
+  correctIndex: number;
+  explanation: string;
+  hintTip: string;
+}
+
+export interface StoryDialogueLine {
+  speaker: string;
+  voice: 'female' | 'male';
+  dialectCode: string;
+  text: string;
+  translationPt: string;
+}
+
+export interface StoryStep {
+  id: string;
+  type: 'story';
+  title: string;
+  settingPt: string;
+  lines: StoryDialogueLine[];
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  hintTip: string;
+}
+
 export type LessonStep =
   | TipStep
   | ListeningStep
@@ -163,7 +213,10 @@ export type LessonStep =
   | WritingBuilderStep
   | WritingFreeStep
   | MatchingStep
-  | FillBlankStep;
+  | FillBlankStep
+  | DictationStep
+  | MinimalPairsStep
+  | StoryStep;
 
 export interface Topic {
   id: string;
@@ -262,6 +315,18 @@ export interface DailyQuestsProgress {
   claimedQuestIds: string[];
 }
 
+export interface TeacherAssignment {
+  id: string;
+  title: string;
+  description: string;
+  classId?: string;
+  languageCode: LanguageCode;
+  topicId?: string;
+  dueDate: string;
+  createdAt: string;
+  createdBy: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -269,6 +334,8 @@ export interface UserProfile {
   password: string;
   role: UserRole;
   isMasterAdmin?: boolean;
+  blocked?: boolean;
+  blockedReason?: string;
   classId?: string;
   avatarColor: string;
   activeLanguage: LanguageCode;
@@ -302,15 +369,18 @@ export interface CloudConfig {
 export interface PlatformState {
   schoolName: string;
   teacherName: string;
+  teacherAccessCode?: string;
   currentUserId: string | null;
   classes: ClassGroup[];
   users: UserProfile[];
   customTopics: Topic[];
   submissions: StudentSubmission[];
+  assignments?: TeacherAssignment[];
   cloudConfig: CloudConfig;
   deletedUserIds?: string[];
   deletedClassIds?: string[];
   deletedTopicIds?: string[];
+  deletedAssignmentIds?: string[];
 }
 
 export interface AITutorScenario {

@@ -31,6 +31,7 @@ import type {
   PlatformState,
   PronunciationRubric,
   StudentSubmission,
+  TeacherAssignment,
   TipCategory,
   Topic,
 } from '../types/learning';
@@ -46,6 +47,7 @@ import {
 import { getSelectedVoiceLabels } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
 import {
+  DEFAULT_BACKEND_API_URL,
   DEFAULT_TEACHER_ACCESS_CODE,
   getEffectiveGeminiKey,
   getEffectiveSupabaseConfig,
@@ -96,6 +98,15 @@ interface TeacherStudioProps {
   onToggleUserRole: (userId: string) => void;
   onMoveUserClass: (userId: string, classId?: string) => void;
   onDeleteUser: (userId: string) => void;
+  onCreateAssignment?: (payload: {
+    title: string;
+    description: string;
+    classId?: string;
+    languageCode: LanguageCode;
+    topicId?: string;
+    dueDate: string;
+  }) => void;
+  onDeleteAssignment?: (assignmentId: string) => void;
 }
 
 const WRITING_BADGES = [
@@ -132,6 +143,8 @@ export function TeacherStudio({
   onToggleUserRole,
   onMoveUserClass,
   onDeleteUser,
+  onCreateAssignment,
+  onDeleteAssignment,
 }: TeacherStudioProps) {
   const [tab, setTab] = useState<TeacherTab>(initialTab);
   const [voiceLabels, setVoiceLabels] = useState(() => getSelectedVoiceLabels());
@@ -245,6 +258,17 @@ export function TeacherStudio({
   const [newClassSchedule, setNewClassSchedule] = useState('');
   const [newClassDesc, setNewClassDesc] = useState('');
   const [certTargetLevel, setCertTargetLevel] = useState<Record<string, CEFRLevel>>({});
+
+  // Phase 8 Assignments & AI Topic Generator state
+  const [assignTitle, setAssignTitle] = useState('');
+  const [assignDesc, setAssignDesc] = useState('');
+  const [assignClassId, setAssignClassId] = useState('');
+  const [assignLang, setAssignLang] = useState<LanguageCode>('en');
+  const [assignDueDate, setAssignDueDate] = useState(() =>
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  );
+  const [aiTopicIdea, setAiTopicIdea] = useState('');
+  const [isGeneratingAiTopic, setIsGeneratingAiTopic] = useState(false);
 
   // Create Topic Form State
   const [topicLanguage, setTopicLanguage] = useState<LanguageCode>('en');
@@ -978,10 +1002,11 @@ export function TeacherStudio({
       {/* TAB 2: CLASSES, STUDENTS & CERTIFICATES */}
       {tab === 'classes' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Create New Class */}
+          {/* Create New Class + Assignments + School Analytics */}
+          <div className="space-y-4 lg:col-span-4 lg:self-start">
           <form
             onSubmit={handleCreateClassSubmit}
-            className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs lg:col-span-4 lg:self-start"
+            className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs"
           >
             <h2 className="font-display text-lg font-bold text-slate-900">
               Nova Turma
@@ -1039,6 +1064,128 @@ export function TeacherStudio({
               <span>Criar turma e gerar código</span>
             </button>
           </form>
+
+          {/* Phase 8: School Skill Analytics */}
+          {students.length > 0 && (
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs space-y-3">
+              <h3 className="font-display text-sm font-extrabold text-slate-900">
+                Analytics Médio da Escola
+              </h3>
+              {(['listening', 'reading', 'speaking', 'writing'] as const).map((sk) => {
+                const avg = Math.round(
+                  students.reduce((acc, s) => acc + (s.skillScores[sk] ?? 50), 0) /
+                    students.length,
+                );
+                return (
+                  <div key={sk} className="space-y-1">
+                    <div className="flex justify-between text-xs font-semibold text-slate-700">
+                      <span className="capitalize">{sk}</span>
+                      <span className="font-mono">{avg}%</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-blue-600"
+                        style={{ width: `${avg}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Phase 8: Assignments */}
+          {onCreateAssignment && (
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs space-y-3">
+              <h3 className="font-display text-sm font-extrabold text-slate-900">
+                Nova Tarefa de Casa
+              </h3>
+              <input
+                value={assignTitle}
+                onChange={(e) => setAssignTitle(e.target.value)}
+                placeholder="Título (ex: Completar Unidade A1-2)"
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"
+              />
+              <input
+                value={assignDesc}
+                onChange={(e) => setAssignDesc(e.target.value)}
+                placeholder="Instrução rápida para a turma..."
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={assignLang}
+                  onChange={(e) => setAssignLang(e.target.value as LanguageCode)}
+                  className="rounded-xl border border-slate-300 px-2.5 py-2 text-xs"
+                >
+                  <option value="en">Inglês</option>
+                  <option value="es">Espanhol</option>
+                  <option value="fr">Francês</option>
+                </select>
+                <input
+                  type="date"
+                  value={assignDueDate}
+                  onChange={(e) => setAssignDueDate(e.target.value)}
+                  className="rounded-xl border border-slate-300 px-2.5 py-2 text-xs"
+                />
+              </div>
+              <select
+                value={assignClassId}
+                onChange={(e) => setAssignClassId(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"
+              >
+                <option value="">Todas as turmas</option>
+                {state.classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!assignTitle.trim()) return;
+                  onCreateAssignment({
+                    title: assignTitle.trim(),
+                    description: assignDesc.trim(),
+                    classId: assignClassId || undefined,
+                    languageCode: assignLang,
+                    dueDate: assignDueDate,
+                  });
+                  setAssignTitle('');
+                  setAssignDesc('');
+                }}
+                className="w-full rounded-xl bg-indigo-600 py-2 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer"
+              >
+                Publicar tarefa
+              </button>
+
+              {(state.assignments ?? []).length > 0 && (
+                <div className="space-y-1.5 border-t border-slate-100 pt-2">
+                  {(state.assignments ?? []).slice(0, 4).map((a: TeacherAssignment) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-[11px]"
+                    >
+                      <span className="truncate font-semibold text-slate-800">
+                        {a.title} ({a.dueDate})
+                      </span>
+                      {onDeleteAssignment && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteAssignment(a.id)}
+                          className="text-rose-600 hover:underline cursor-pointer"
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          </div>
 
           {/* Existing Classes & Students */}
           <div className="space-y-4 lg:col-span-8">
@@ -1318,13 +1465,88 @@ export function TeacherStudio({
                   Ao publicar, a lição fica disponível para toda a escola na Trilha de Estudos.
                 </p>
               </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrefillSampleTopic}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Exemplo pronto</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Phase 9: AI Unit Generator */}
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3.5">
+              <input
+                type="text"
+                value={aiTopicIdea}
+                onChange={(e) => setAiTopicIdea(e.target.value)}
+                placeholder="Tema p/ IA gerar lição (ex: Negociar aumento, Pedir comida em Paris)..."
+                className="min-w-[200px] flex-1 rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs"
+              />
               <button
                 type="button"
-                onClick={handlePrefillSampleTopic}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+                disabled={isGeneratingAiTopic || !aiTopicIdea.trim()}
+                onClick={async () => {
+                  setIsGeneratingAiTopic(true);
+                  try {
+                    const res = await fetch(
+                      `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/gemini-tutor`,
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          contents: [
+                            {
+                              role: 'user',
+                              parts: [
+                                {
+                                  text: `Create a language lesson draft in ${topicLanguage} (CEFR ${level}) for Brazilian Portuguese students on topic "${aiTopicIdea.trim()}". Reply ONLY with JSON: {"titlePt":"","titleEn":"","subtitle":"","tipTitle":"","tipSummary":"","tipDetails":"","tipExampleEn":"","tipExamplePt":"","listenAudio":"","listenQuestion":"","listenRight":"","listenWrong":"","readText":"","readQuestion":"","readRight":"","readWrong":"","speakSentence":"","speakTranslation":"","speakHint":"","writePrompt":"","writeModel":""}`,
+                                },
+                              ],
+                            },
+                          ],
+                          generationConfig: { responseMimeType: 'application/json' },
+                        }),
+                      },
+                    );
+                    if (res.ok) {
+                      const json = (await res.json()) as {
+                        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+                      };
+                      const raw = json.candidates?.[0]?.content?.parts?.[0]?.text;
+                      if (raw) {
+                        const d = JSON.parse(raw) as Record<string, string>;
+                        if (d.titlePt) setTitlePt(d.titlePt);
+                        if (d.titleEn) setTitleEn(d.titleEn);
+                        if (d.subtitle) setSubtitle(d.subtitle);
+                        if (d.tipTitle) setTipTitle(d.tipTitle);
+                        if (d.tipSummary) setTipSummary(d.tipSummary);
+                        if (d.tipDetails) setTipDetails(d.tipDetails);
+                        if (d.tipExampleEn) setTipExampleEn(d.tipExampleEn);
+                        if (d.tipExamplePt) setTipExamplePt(d.tipExamplePt);
+                        if (d.listenAudio) setListenAudio(d.listenAudio);
+                        if (d.listenQuestion) setListenQuestion(d.listenQuestion);
+                        if (d.listenRight) setListenRight(d.listenRight);
+                        if (d.listenWrong) setListenWrong(d.listenWrong);
+                        if (d.readText) setReadText(d.readText);
+                        if (d.readQuestion) setReadQuestion(d.readQuestion);
+                        if (d.readRight) setReadRight(d.readRight);
+                        if (d.readWrong) setReadWrong(d.readWrong);
+                      }
+                    }
+                  } catch {
+                    // Ignore generation errors cleanly
+                  } finally {
+                    setIsGeneratingAiTopic(false);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Preencher exemplo pronto</span>
+                <span>{isGeneratingAiTopic ? 'Gerando...' : 'Gerar rascunho com IA'}</span>
               </button>
             </div>
 

@@ -20,6 +20,7 @@ import type { ClassGroup, UserProfile, UserRole } from '../types/learning';
 interface AuthScreenProps {
   schoolName: string;
   teacherName: string;
+  teacherAccessCode?: string;
   users: UserProfile[];
   classes: ClassGroup[];
   cloudConfigured: boolean;
@@ -41,6 +42,7 @@ interface AuthScreenProps {
 export function AuthScreen({
   schoolName,
   teacherName,
+  teacherAccessCode,
   users,
   classes,
   cloudConfigured,
@@ -75,6 +77,13 @@ export function AuthScreen({
           verifyPassword(password, u.password),
       );
       if (localMatch) {
+        if (localMatch.blocked) {
+          setError(
+            localMatch.blockedReason ||
+              'Seu acesso está suspenso pelo administrador.',
+          );
+          return;
+        }
         onLogin(localMatch.id);
         return;
       }
@@ -91,6 +100,13 @@ export function AuthScreen({
         verifyPassword(password, u.password),
     );
     if (found) {
+      if (found.blocked) {
+        setError(
+          found.blockedReason ||
+            'Seu acesso está suspenso pelo administrador.',
+        );
+        return;
+      }
       onLogin(found.id);
       return;
     }
@@ -117,10 +133,12 @@ export function AuthScreen({
     const masterEmail = isMasterAdminEmail(email);
     const normalizedRole: UserRole = masterEmail ? 'teacher' : role;
 
+    const expectedTeacherCode = (
+      teacherAccessCode?.trim() || DEFAULT_TEACHER_ACCESS_CODE
+    ).toUpperCase();
+
     if (normalizedRole === 'teacher' && !masterEmail) {
-      if (
-        teacherCode.trim().toUpperCase() !== DEFAULT_TEACHER_ACCESS_CODE
-      ) {
+      if (teacherCode.trim().toUpperCase() !== expectedTeacherCode) {
         setError(
           'Código de Autorização Docente inválido. Solicite o código ao Prof. Silas ou cadastre-se como Aluno(a).',
         );

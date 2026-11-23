@@ -9,22 +9,26 @@ import type {
 import {
   ENGLISH_ALL_TOPICS,
   ENGLISH_ALL_VOCAB,
-  SPANISH_STARTER_TOPICS,
-  SPANISH_VOCAB,
+  FRENCH_ALL_TOPICS,
+  FRENCH_ALL_VOCAB,
+  SPANISH_ALL_TOPICS,
+  SPANISH_ALL_VOCAB,
 } from './languages';
 
 export const BUILTIN_TOPICS: Topic[] = ENGLISH_ALL_TOPICS;
 
 export const ALL_BUILTIN_TOPICS: Topic[] = [
   ...ENGLISH_ALL_TOPICS,
-  ...SPANISH_STARTER_TOPICS,
+  ...SPANISH_ALL_TOPICS,
+  ...FRENCH_ALL_TOPICS,
 ];
 
 export const INITIAL_VOCABULARY: VocabCard[] = ENGLISH_ALL_VOCAB;
 
 export const ALL_INITIAL_VOCABULARY: VocabCard[] = [
   ...ENGLISH_ALL_VOCAB,
-  ...SPANISH_VOCAB,
+  ...SPANISH_ALL_VOCAB,
+  ...FRENCH_ALL_VOCAB,
 ];
 
 export function cloneInitialVocab(): VocabCard[] {

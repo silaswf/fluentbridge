@@ -7,6 +7,9 @@ import { TOPICS_A2, VOCAB_A2 } from './curriculum/levelA2';
 import { TOPICS_B1, VOCAB_B1 } from './curriculum/levelB1';
 import { TOPICS_B2, VOCAB_B2 } from './curriculum/levelB2';
 import { TOPICS_C1, VOCAB_C1 } from './curriculum/levelC1';
+import { TOPICS_EN_SPECIAL, VOCAB_EN_SPECIAL } from './curriculum/enSpecialTracks';
+import { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB } from './curriculum/spanishCourse';
+import { FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB } from './curriculum/frenchCourse';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -15,7 +18,8 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     nativeName: 'English',
     flag: '🇬🇧',
     available: true,
-    descriptionPt: 'Curso completo CEFR A1–C1 com 34 unidades, todas as conjugações, modais e 4 habilidades.',
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 50 unidades, trilhas Business/Tech/Viagens, ditado, pares mínimos, histórias e 4+ habilidades.',
     dialects: [
       { code: 'en-US', label: 'Americano', flag: '🇺🇸' },
       { code: 'en-GB', label: 'Britânico', flag: '🇬🇧' },
@@ -27,7 +31,8 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     nativeName: 'Español',
     flag: '🇪🇸',
     available: true,
-    descriptionPt: 'Estrutura multi-idiomas ativa com unidade inicial A1 e pronto para novas lições.',
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 22 unidades, vozes neurais (ES/MX), guia gramatical e combate ao portunhol.',
     dialects: [
       { code: 'es-ES', label: 'Espanha', flag: '🇪🇸' },
       { code: 'es-MX', label: 'México', flag: '🇲🇽' },
@@ -39,7 +44,8 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     nativeName: 'Français',
     flag: '🇫🇷',
     available: true,
-    descriptionPt: 'Base pronta no app para o professor publicar unidades e vocabulário em Francês.',
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 20 unidades, vozes neurais Gemini (FR/CA), ligações fonéticas e guia gramatical.',
     dialects: [
       { code: 'fr-FR', label: 'França', flag: '🇫🇷' },
       { code: 'fr-CA', label: 'Canadá', flag: '🇨🇦' },
@@ -276,6 +282,7 @@ export const ENGLISH_ALL_TOPICS: Topic[] = [
   ...GRAMMAR_TOPICS_B1_B2.filter((t) => t.level === 'B2'),
   ...TOPICS_C1,
   ...GRAMMAR_TOPICS_C1,
+  ...TOPICS_EN_SPECIAL,
 ]
   .map((t) => ({ ...t, languageCode: t.languageCode ?? ('en' as LanguageCode) }))
   .sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
@@ -289,7 +296,10 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = [
   ...GRAMMAR_VOCAB_A1_A2,
   ...GRAMMAR_VOCAB_B1_B2,
   ...GRAMMAR_VOCAB_C1,
+  ...VOCAB_EN_SPECIAL,
 ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) }));
+
+export { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB, FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
   return (
@@ -305,8 +315,10 @@ export function getCourseTopics(
     languageCode === 'en'
       ? ENGLISH_ALL_TOPICS
       : languageCode === 'es'
-        ? SPANISH_STARTER_TOPICS
-        : [];
+        ? SPANISH_ALL_TOPICS
+        : languageCode === 'fr'
+          ? FRENCH_ALL_TOPICS
+          : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

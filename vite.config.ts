@@ -48,6 +48,15 @@ export default defineConfig(({ command }) => ({
           ) {
             return 'curriculum-c1';
           }
+          if (id.includes('/curriculum/enSpecialTracks')) {
+            return 'curriculum-en-special';
+          }
+          if (id.includes('/curriculum/spanishCourse')) {
+            return 'curriculum-es';
+          }
+          if (id.includes('/curriculum/frenchCourse')) {
+            return 'curriculum-fr';
+          }
           return undefined;
         },
       },

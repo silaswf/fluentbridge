@@ -1,5 +1,10 @@
+import type { LanguageCode } from '../types/learning';
+import { FRENCH_GRAMMAR_GUIDE } from './curriculum/frenchCourse';
+import { SPANISH_GRAMMAR_GUIDE } from './curriculum/spanishCourse';
+
 export interface GrammarReferenceEntry {
   id: string;
+  languageCode?: LanguageCode;
   section:
     | 'Tempos Verbais'
     | 'Condicionais'
@@ -333,4 +338,123 @@ export const SWJ_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
     exampleEn: "They have arrived safely, haven't they? Let's call them, shall we?",
     examplePt: 'Eles chegaram bem, não chegaram? Vamos ligar para eles, vamos?',
   },
+  {
+    id: 'ref-cleft-sentences',
+    section: 'Regras Extras',
+    title: 'Cleft Sentences (Ênfase: It is ... that / What ... is)',
+    level: 'B2',
+    usage: 'Dar foco dramático ou clareza absoluta a uma parte específica da frase.',
+    keywords: 'It is ... that/who, What I need is, All I want is',
+    aff: 'It was Prof. Silas who explained this nuance clearly.',
+    neg: 'What matters most is daily consistency, not speed.',
+    int: 'Was it yesterday that you submitted the report?',
+    exampleEn: 'What helps Brazilians most is hearing natural pronunciation daily.',
+    examplePt: 'O que mais ajuda brasileiros é ouvir pronúncia natural diariamente.',
+  },
+  {
+    id: 'ref-negative-inversion',
+    section: 'Regras Extras',
+    title: 'Inversão Negativa Formal (Rarely / Never / Not only)',
+    level: 'C1',
+    usage: 'Quando advérbio negativo abre a frase, o auxiliar vem ANTES do sujeito (como pergunta!).',
+    keywords: 'Never have I, Rarely do we, Not only did she, By no means',
+    aff: 'Rarely have I seen such steady progress in three months.',
+    neg: 'By no means should we compromise on clarity.',
+    int: 'Not only did she finish early, but she also helped her team.',
+    exampleEn: 'Never have I met a more dedicated group of learners.',
+    examplePt: 'Nunca conheci um grupo de alunos mais dedicado.',
+  },
+  {
+    id: 'ref-causative-have-get',
+    section: 'Voz Passiva & Relatos',
+    title: 'Causative Have / Get (Mandar Fazer Algo)',
+    level: 'B2',
+    usage: 'Quando contratamos ou pedimos para outra pessoa executar um serviço: Have/Get + Objeto + Particípio.',
+    keywords: 'have my car fixed, get my hair cut, had the contract reviewed',
+    aff: 'I had my presentation reviewed before the board meeting.',
+    neg: 'We didn’t fix it ourselves; we got it repaired.',
+    int: 'Where do you usually have your suit tailored?',
+    exampleEn: 'She had her laptop upgraded so she could edit videos faster.',
+    examplePt: 'Ela mandou atualizar o notebook para editar vídeos mais rápido.',
+  },
+  {
+    id: 'ref-mixed-conditionals',
+    section: 'Condicionais',
+    title: 'Mixed Conditionals (Passado ↔ Presente)',
+    level: 'C1',
+    usage: 'Conectar uma condição irreal no passado (If + had + Part.) a uma consequência no presente (would + base).',
+    keywords: 'If I had studied, I would be / If she weren’t so busy, she would have come',
+    aff: 'If I had started five years ago, I would be fluent today.',
+    neg: 'If he hadn’t missed the train, he wouldn’t be waiting now.',
+    int: 'Where would we be today if we hadn’t taken that risk?',
+    exampleEn: 'If we had launched earlier, we would lead the market right now.',
+    examplePt: 'Se tivéssemos lançado antes, lideraríamos o mercado agora.',
+  },
+  {
+    id: 'ref-subjunctive-english',
+    section: 'Condicionais',
+    title: 'Subjuntivo Formal (Suggest / Insist / Recommend that + Base)',
+    level: 'C1',
+    usage: 'Após verbos de exigência/sugestão, o inglês formal usa o verbo na forma base (sem -s e sem "to")!',
+    keywords: 'suggest that he go, insist that she be, essential that we arrive',
+    aff: 'The contract requires that the vendor notify us within 24 hours.',
+    neg: 'I recommend that he not rush the final decision.',
+    int: 'Is it mandatory that everyone attend the briefing?',
+    exampleEn: 'The board insisted that the audit be completed by Friday.',
+    examplePt: 'O conselho insistiu que a auditoria fosse concluída até sexta.',
+  },
+  {
+    id: 'ref-phrasal-separability',
+    section: 'Regras Extras',
+    title: 'Separabilidade de Phrasal Verbs',
+    level: 'B1',
+    usage: 'Com substantivo pode ir no meio ou no fim; com PRONOME (it/them), o pronome vai SEMPRE no meio!',
+    keywords: 'turn it off, pick them up, figure it out, look after (inseparável)',
+    aff: 'Turn off the light = Turn the light off = Turn it off!',
+    neg: 'NUNCA diga "Turn off it" ou "Pick up them"!',
+    int: 'Did you figure it out in time?',
+    exampleEn: 'Your jacket is on the floor—please pick it up and hang it up.',
+    examplePt: 'Sua jaqueta está no chão — por favor pegue-a e pendure-a.',
+  },
+  {
+    id: 'ref-future-in-the-past',
+    section: 'Tempos Verbais',
+    title: 'Future in the Past (Was going to / Would)',
+    level: 'B2',
+    usage: 'Expressar um plano passado que mudou ou algo que estava prestes a acontecer.',
+    keywords: 'was going to, were about to, knew it would happen',
+    aff: 'I was going to call you, but my battery died.',
+    neg: 'We didn’t know the meeting would last three hours.',
+    int: 'Were you going to mention that during the call?',
+    exampleEn: 'She was about to leave when the confirmation email arrived.',
+    examplePt: 'Ela estava prestes a sair quando o e-mail de confirmação chegou.',
+  },
+  {
+    id: 'ref-discourse-markers-c1',
+    section: 'Regras Extras',
+    title: 'Conectores C1 (Nevertheless, Albeit, Whereas, Provided that)',
+    level: 'C1',
+    usage: 'Marcadores de contraste, ressalva e condição para redações IELTS/TOEFL e reuniões executivas.',
+    keywords: 'Nevertheless, Albeit, Whereas, Provided that, Consequently',
+    aff: 'The timeline is tight, albeit achievable with clear priorities.',
+    neg: 'We will sign provided that all terms remain unchanged.',
+    int: 'Whereas A focuses on cost, B prioritizes reliability.',
+    exampleEn: 'Nevertheless, consistent daily practice remains paramount.',
+    examplePt: 'Ainda assim, a prática diária consistente segue primordial.',
+  },
 ];
+
+export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
+  ...SWJ_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'en' as LanguageCode })),
+  ...SPANISH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'es' as LanguageCode })),
+  ...FRENCH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'fr' as LanguageCode })),
+];
+
+export function getGrammarGuideByLanguage(
+  languageCode: LanguageCode = 'en',
+): GrammarReferenceEntry[] {
+  const scoped = ALL_GRAMMAR_GUIDE.filter(
+    (e) => (e.languageCode ?? 'en') === languageCode,
+  );
+  return scoped.length > 0 ? scoped : SWJ_GRAMMAR_GUIDE;
+}

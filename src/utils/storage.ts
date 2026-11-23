@@ -156,6 +156,7 @@ export function normalizePlatformState(
   return {
     schoolName: raw.schoolName ?? defaults.schoolName,
     teacherName: resolvedTeacherName,
+    teacherAccessCode: raw.teacherAccessCode ?? defaults.teacherAccessCode,
     currentUserId:
       raw.currentUserId !== undefined ? raw.currentUserId : defaults.currentUserId,
     classes:
@@ -167,6 +168,9 @@ export function normalizePlatformState(
       ? raw.customTopics
       : defaults.customTopics,
     submissions: cleanedSubmissions,
+    assignments: Array.isArray(raw.assignments)
+      ? raw.assignments
+      : defaults.assignments ?? [],
     deletedUserIds: Array.isArray(raw.deletedUserIds)
       ? raw.deletedUserIds
       : defaults.deletedUserIds ?? [],
@@ -176,6 +180,9 @@ export function normalizePlatformState(
     deletedTopicIds: Array.isArray(raw.deletedTopicIds)
       ? raw.deletedTopicIds
       : defaults.deletedTopicIds ?? [],
+    deletedAssignmentIds: Array.isArray(raw.deletedAssignmentIds)
+      ? raw.deletedAssignmentIds
+      : defaults.deletedAssignmentIds ?? [],
     cloudConfig: {
       ...defaults.cloudConfig,
       ...(raw.cloudConfig ?? {}),

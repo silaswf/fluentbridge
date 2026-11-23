@@ -38,6 +38,9 @@ import {
 const AITutor = lazy(() =>
   import('./components/AITutor').then((m) => ({ default: m.AITutor })),
 );
+const AdminPanel = lazy(() =>
+  import('./components/AdminPanel').then((m) => ({ default: m.AdminPanel })),
+);
 const CertificatesView = lazy(() =>
   import('./components/CertificatesView').then((m) => ({
     default: m.CertificatesView,
@@ -68,6 +71,7 @@ import {
   getLanguageCourse,
 } from './data/languages';
 import {
+  ALL_BUILTIN_TOPICS,
   ALL_INITIAL_VOCABULARY,
   BUILTIN_TOPICS,
   DEFAULT_PLATFORM_STATE,
@@ -225,6 +229,20 @@ export function App() {
     if (!authUser.email) return;
     const normalizedEmail = authUser.email.toLowerCase();
     const master = isMasterAdminEmail(normalizedEmail);
+    const knownExisting = state.users.find(
+      (u) => u.email.toLowerCase() === normalizedEmail,
+    );
+    if (knownExisting?.blocked && !master) {
+      void signOutSupabase(state.cloudConfig);
+      setState((prev) => ({ ...prev, currentUserId: null }));
+      showToast(
+        knownExisting.blockedReason
+          ? `Acesso suspenso: ${knownExisting.blockedReason}`
+          : 'Seu acesso foi suspenso pelo administrador.',
+      );
+      return;
+    }
+
     const computedTargetView: NavView =
       master || authUser.role === 'teacher' ? 'teacher' : 'learn';
 
@@ -233,12 +251,15 @@ export function App() {
         (u) => u.email.toLowerCase() === normalizedEmail,
       );
       if (existing) {
+        if (existing.blocked && !master) {
+          return { ...prev, currentUserId: null };
+        }
         return {
           ...prev,
           currentUserId: existing.id,
           users: prev.users.map((u) =>
             u.id === existing.id && master
-              ? { ...u, role: 'teacher', isMasterAdmin: true }
+              ? { ...u, role: 'teacher', isMasterAdmin: true, blocked: false }
               : u,
           ),
         };
@@ -520,6 +541,15 @@ export function App() {
     );
 
     if (existing) {
+      if (existing.blocked && !master) {
+        void signOutSupabase(state.cloudConfig);
+        return {
+          ok: false,
+          error: existing.blockedReason
+            ? `Seu acesso foi suspenso pelo administrador (${existing.blockedReason}).`
+            : 'Seu acesso foi suspenso pelo administrador.',
+        };
+      }
       const targetRole = master ? 'teacher' : existing.role;
       setState((prev) => ({
         ...prev,
@@ -1022,11 +1052,93 @@ export function App() {
     showToast('Usuário removido.');
   };
 
+  const handleUpdateTeacherAccessCode = (nextCode: string) => {
+    const cleaned = nextCode.trim().toUpperCase();
+    if (!cleaned) return;
+    setState((prev) => ({ ...prev, teacherAccessCode: cleaned }));
+    showToast(`Código de cadastro de professor atualizado: ${cleaned}`);
+  };
+
+  const handleToggleBlockUser = (userId: string, reason?: string) => {
+    let wasBlocked = false;
+    let targetName = '';
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) => {
+        if (u.id !== userId) return u;
+        if (u.isMasterAdmin || isMasterAdminEmail(u.email)) return u;
+        wasBlocked = Boolean(u.blocked);
+        targetName = u.name;
+        return {
+          ...u,
+          blocked: !u.blocked,
+          blockedReason: !u.blocked ? reason?.trim() || undefined : undefined,
+        };
+      }),
+    }));
+    if (targetName) {
+      showToast(
+        wasBlocked
+          ? `Acesso de ${targetName} liberado!`
+          : `Acesso de ${targetName} bloqueado.`,
+      );
+    }
+  };
+
+  const handleResetUserLocalPassword = (userId: string, newPassword: string) => {
+    if (!newPassword.trim()) return;
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === userId ? { ...u, password: hashPassword(newPassword) } : u,
+      ),
+    }));
+    showToast('Senha local do usuário redefinida!');
+  };
+
+  const handleCreateAssignment = (payload: {
+    title: string;
+    description: string;
+    classId?: string;
+    languageCode: LanguageCode;
+    topicId?: string;
+    dueDate: string;
+  }) => {
+    const newAssignment = {
+      id: `assign-${Date.now()}`,
+      title: payload.title.trim(),
+      description: payload.description.trim(),
+      classId: payload.classId || undefined,
+      languageCode: payload.languageCode,
+      topicId: payload.topicId || undefined,
+      dueDate: payload.dueDate,
+      createdAt: new Date().toISOString().slice(0, 10),
+      createdBy: currentUser?.name ?? state.teacherName,
+    };
+    setState((prev) => ({
+      ...prev,
+      assignments: [newAssignment, ...(prev.assignments ?? [])],
+    }));
+    showToast(`Tarefa "${newAssignment.title}" enviada!`);
+  };
+
+  const handleDeleteAssignment = (assignmentId: string) => {
+    setState((prev) => ({
+      ...prev,
+      assignments: (prev.assignments ?? []).filter((a) => a.id !== assignmentId),
+      deletedAssignmentIds: Array.from(
+        new Set([...(prev.deletedAssignmentIds ?? []), assignmentId]),
+      ),
+    }));
+    showToast('Tarefa removida.');
+  };
+
   if (!currentUser) {
     return (
       <AuthScreen
         schoolName={state.schoolName}
         teacherName={state.teacherName}
+        teacherAccessCode={state.teacherAccessCode}
         users={state.users}
         classes={state.classes}
         cloudConfigured={isCloudConfigured}
@@ -1118,6 +1230,7 @@ export function App() {
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             reviewedSubmissions={reviewedForUser}
+            assignments={state.assignments}
             onGoToTeacher={
               currentUser.role === 'teacher'
                 ? () => {
@@ -1139,6 +1252,8 @@ export function App() {
           {activeView === 'tutor' && (
             <AITutor
               accent={currentUser.accent}
+              languageCode={activeLanguage}
+              activeDialect={activeDialect}
               geminiApiKey={effectiveGeminiKey}
               onCompleteSession={handleTutorSessionComplete}
             />
@@ -1155,6 +1270,7 @@ export function App() {
           {activeView === 'tips' && (
             <TipsLibrary
               topics={courseTopics}
+              languageCode={activeLanguage}
               onPracticeTopic={(topic) => setActiveTopic(topic)}
             />
           )}
@@ -1235,8 +1351,28 @@ export function App() {
               onToggleUserRole={handleToggleUserRole}
               onMoveUserClass={handleMoveUserClass}
               onDeleteUser={handleDeleteUser}
+              onCreateAssignment={handleCreateAssignment}
+              onDeleteAssignment={handleDeleteAssignment}
             />
           )}
+
+          {activeView === 'admin' &&
+            (currentUser.isMasterAdmin ||
+              isMasterAdminEmail(currentUser.email)) && (
+              <AdminPanel
+                state={state}
+                currentUser={currentUser}
+                totalBuiltinTopicsCount={ALL_BUILTIN_TOPICS.length}
+                autoSyncStatus={autoSyncStatus}
+                onUpdateTeacherAccessCode={handleUpdateTeacherAccessCode}
+                onToggleBlockUser={handleToggleBlockUser}
+                onToggleUserRole={handleToggleUserRole}
+                onMoveUserClass={handleMoveUserClass}
+                onResetUserLocalPassword={handleResetUserLocalPassword}
+                onDeleteUser={handleDeleteUser}
+                onGoToTeacherStudio={() => setActiveView('teacher')}
+              />
+            )}
         </Suspense>
       </main>
 

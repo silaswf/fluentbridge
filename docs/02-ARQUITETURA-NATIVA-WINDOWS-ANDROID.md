@@ -18,6 +18,10 @@ Este documento detalha como o **FluentBridge** é compilado e distribuído a par
 ```
 
 - **Base Relativa em Produção (`vite.config.ts`)**: usa `base: command === 'build' ? './' : '/'`, garantindo que o `dist/index.html` carregue `./assets/...` tanto via protocolo `file://` no Electron quanto via `https://localhost` no Capacitor Android e HTTPS no Cloudflare Pages.
+- **Code-Splitting Curricular (`vite.config.ts`)**: separa `curriculum-a1a2` (`101.80 kB`), `curriculum-b1b2` (`111.59 kB`), `curriculum-c1` (`50.48 kB`), `curriculum-en-special` (`49.14 kB`), `curriculum-es` (`69.17 kB`) e `curriculum-fr` (`65.84 kB`), mantendo o chunk principal `index.js` em **`122.94 kB`** (`36.30 kB` gzip).
+- **Edge Audio & IA (`cloudflare-worker/worker.js`)**:
+  - `POST/GET /api/tts`: roteamento automático por idioma e gênero de voz (`voice: 'female' | 'male'`). Inglês e Espanhol usam Deepgram Aura-2 (`@cf/deepgram/aura-2-en` / `aura-2-es`), enquanto **Francês (`fr-FR` / `fr-CA`)** utiliza **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`)** com conversão server-side `PCM16 → RIFF/WAV` (`pcm16ToWavBuffer`) e cache CDN `/v3/` + IndexedDB `tts-v3:*`.
+  - `POST /api/stt`: transcrição de áudio `webm/mp4` via `@cf/openai/whisper-large-v3-turbo` (com fallback `@cf/openai/whisper`), suportando EN, ES e FR sem depender da API `SpeechRecognition` do WebView.
 
 ---
 

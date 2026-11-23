@@ -25,54 +25,159 @@ function jsonResponse(payload, status = 200) {
   });
 }
 
-function resolveTtsConfig(rawLang) {
+function resolveTtsConfig(rawLang, rawVoice) {
   const lower = (rawLang || 'en-US').trim().toLowerCase();
+  const isMale = (rawVoice || '').trim().toLowerCase() === 'male';
+
   if (lower === 'en-gb' || lower.startsWith('en-gb') || lower === 'uk') {
     return {
+      engine: 'deepgram',
       locale: 'en-GB',
       model: '@cf/deepgram/aura-2-en',
-      speaker: 'pandora',
+      speaker: isMale ? 'draco' : 'pandora',
       googleLang: 'en-GB',
     };
   }
   if (lower === 'es-es') {
     return {
+      engine: 'deepgram',
       locale: 'es-ES',
       model: '@cf/deepgram/aura-2-es',
-      speaker: 'nestor',
+      speaker: isMale ? 'nestor' : 'carina',
       googleLang: 'es-ES',
     };
   }
   if (lower.startsWith('es')) {
     return {
+      engine: 'deepgram',
       locale: 'es-MX',
       model: '@cf/deepgram/aura-2-es',
-      speaker: 'estrella',
+      speaker: isMale ? 'javier' : 'estrella',
       googleLang: 'es',
+    };
+  }
+  if (lower === 'fr-ca') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'fr-CA',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Québécois French text naturally and clearly, without adding any commentary:',
+      googleLang: 'fr-CA',
     };
   }
   if (lower.startsWith('fr')) {
     return {
+      engine: 'gemini-tts',
       locale: 'fr-FR',
-      model: null,
-      speaker: 'google-fr',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following Parisian French text naturally and clearly, without adding any commentary:',
       googleLang: 'fr',
     };
   }
   if (lower.startsWith('pt')) {
     return {
+      engine: 'gemini-tts',
       locale: 'pt-BR',
-      model: null,
-      speaker: 'google-pt',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Aoede',
+      promptPrefix: 'Leia o texto a seguir em português brasileiro com voz natural:',
       googleLang: 'pt-BR',
     };
   }
   return {
+    engine: 'deepgram',
     locale: 'en-US',
     model: '@cf/deepgram/aura-2-en',
-    speaker: 'thalia',
+    speaker: isMale ? 'apollo' : 'thalia',
     googleLang: 'en-US',
   };
+}
+
+function pcm16ToWavBuffer(pcmBytes, sampleRate = 24000, numChannels = 1) {
+  const byteLength = pcmBytes.byteLength;
+  const wavBuffer = new ArrayBuffer(44 + byteLength);
+  const view = new DataView(wavBuffer);
+  const writeString = (offset, str) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + byteLength, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, byteLength, true);
+  new Uint8Array(wavBuffer, 44).set(pcmBytes);
+  return wavBuffer;
+}
+
+async function synthesizeGeminiNeuralTts(text, cfg, env) {
+  const apiKey = (env.GEMINI_API_KEY || '').trim();
+  if (!apiKey) return null;
+
+  const models = [cfg.model || 'gemini-2.5-flash-preview-tts', 'gemini-3.8-flash-lite-tts'];
+  const promptText = `${cfg.promptPrefix || 'Read aloud naturally:'} ${text}`;
+
+  for (const model of models) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        model,
+      )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: cfg.speaker },
+              },
+            },
+          },
+        }),
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const inlineData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+      if (!inlineData?.data) continue;
+
+      const pcmBytes = base64ToUint8Array(inlineData.data);
+      if (pcmBytes.byteLength <= 200) continue;
+
+      const mime = (inlineData.mimeType || '').toLowerCase();
+      if (mime.includes('wav') || mime.includes('mpeg') || mime.includes('mp3')) {
+        return {
+          buffer: pcmBytes.buffer,
+          contentType: mime.includes('wav') ? 'audio/wav' : 'audio/mpeg',
+          provider: `gemini-neural-tts:${cfg.speaker}`,
+        };
+      }
+
+      const rateMatch = mime.match(/rate=(\d+)/);
+      const sampleRate = rateMatch ? Number(rateMatch[1]) : 24000;
+      const wavBuffer = pcm16ToWavBuffer(pcmBytes, sampleRate, 1);
+      return {
+        buffer: wavBuffer,
+        contentType: 'audio/wav',
+        provider: `gemini-neural-tts:${cfg.speaker}`,
+      };
+    } catch {
+      // Try next Gemini TTS model
+    }
+  }
+  return null;
 }
 
 function base64ToUint8Array(base64) {
@@ -124,16 +229,19 @@ async function fetchGoogleTtsFallback(text, googleLang) {
 async function handleTtsRequest(request, env, ctx) {
   let text = '';
   let lang = 'en-US';
+  let voice = '';
 
   if (request.method === 'GET') {
     const url = new URL(request.url);
     text = (url.searchParams.get('text') || '').trim();
     lang = url.searchParams.get('lang') || 'en-US';
+    voice = url.searchParams.get('voice') || '';
   } else if (request.method === 'POST') {
     try {
       const body = await request.json();
       text = typeof body.text === 'string' ? body.text.trim() : '';
       lang = typeof body.lang === 'string' ? body.lang : 'en-US';
+      voice = typeof body.voice === 'string' ? body.voice : '';
     } catch {
       return jsonResponse({ error: 'Invalid JSON body for /api/tts' }, 400);
     }
@@ -146,9 +254,9 @@ async function handleTtsRequest(request, env, ctx) {
   }
 
   const clippedText = text.slice(0, MAX_TTS_CHARS);
-  const cfg = resolveTtsConfig(lang);
+  const cfg = resolveTtsConfig(lang, voice);
   const cacheUrl = new URL(
-    `https://fluentbridge-tts-cache.internal/v2/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(clippedText)}`,
+    `https://fluentbridge-tts-cache.internal/v3/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(cfg.speaker)}/${encodeURIComponent(clippedText)}`,
   );
   const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
   const cache = typeof caches !== 'undefined' ? caches.default : null;
@@ -167,9 +275,17 @@ async function handleTtsRequest(request, env, ctx) {
   }
 
   let audioBuffer = null;
+  let contentType = 'audio/mpeg';
   let provider = 'none';
 
-  if (cfg.model && env.AI) {
+  if (cfg.engine === 'gemini-tts') {
+    const gem = await synthesizeGeminiNeuralTts(clippedText, cfg, env);
+    if (gem && gem.buffer && gem.buffer.byteLength > 200) {
+      audioBuffer = gem.buffer;
+      contentType = gem.contentType;
+      provider = gem.provider;
+    }
+  } else if (cfg.model && env.AI) {
     try {
       const aiResult = await env.AI.run(cfg.model, {
         text: clippedText,
@@ -182,7 +298,6 @@ async function handleTtsRequest(request, env, ctx) {
         provider = `deepgram-aura-2:${cfg.speaker}`;
       }
     } catch (err) {
-      // Fallback gracefully if encoding/model call fails
       try {
         const retryResult = await env.AI.run(cfg.model, {
           text: clippedText,
@@ -202,6 +317,7 @@ async function handleTtsRequest(request, env, ctx) {
   if (!audioBuffer) {
     audioBuffer = await fetchGoogleTtsFallback(clippedText, cfg.googleLang);
     if (audioBuffer) {
+      contentType = 'audio/mpeg';
       provider = 'google-tts-fallback';
     }
   }
@@ -211,7 +327,7 @@ async function handleTtsRequest(request, env, ctx) {
   }
 
   const responseHeaders = {
-    'Content-Type': 'audio/mpeg',
+    'Content-Type': contentType,
     'Cache-Control': 'public, max-age=604800',
     'X-TTS-Provider': provider,
     'X-TTS-Locale': cfg.locale,
@@ -223,7 +339,7 @@ async function handleTtsRequest(request, env, ctx) {
     const toCache = new Response(audioBuffer.slice(0), {
       status: 200,
       headers: {
-        'Content-Type': 'audio/mpeg',
+        'Content-Type': contentType,
         'Cache-Control': 'public, max-age=604800',
         'X-TTS-Provider': provider,
         'X-TTS-Locale': cfg.locale,

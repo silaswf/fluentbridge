@@ -7,20 +7,26 @@ import {
   Lightbulb,
   Mic,
   MicOff,
+  PhoneCall,
   Send,
   Sparkles,
   Volume2,
   VolumeX,
   Zap,
 } from 'lucide-react';
-import type { AITutorScenario, Accent, TutorMessage } from '../types/learning';
+import type {
+  AITutorScenario,
+  Accent,
+  LanguageCode,
+  TutorMessage,
+} from '../types/learning';
 import {
   AI_TUTOR_SCENARIOS,
   generateTutorReply,
 } from '../utils/aiTutorEngine';
 import {
   isSpeechRecognitionSupported,
-  speakEnglish,
+  speakText,
   startSpeechRecognition,
   stopSpeaking,
 } from '../utils/speech';
@@ -28,15 +34,26 @@ import { DualAudioButtons } from './DualAudioButtons';
 
 interface AITutorProps {
   accent: Accent;
+  languageCode?: LanguageCode;
+  activeDialect?: string;
   geminiApiKey?: string;
   onCompleteSession: (xpEarned: number) => void;
 }
 
 export function AITutor({
   accent,
+  languageCode = 'en',
+  activeDialect,
   geminiApiKey,
   onCompleteSession,
 }: AITutorProps) {
+  const effectiveDialect = activeDialect || accent;
+  const scopedScenarios = AI_TUTOR_SCENARIOS.filter(
+    (s) => (s.languageCode ?? 'en') === languageCode,
+  );
+  const visibleScenarios =
+    scopedScenarios.length > 0 ? scopedScenarios : AI_TUTOR_SCENARIOS;
+
   const [selectedScenario, setSelectedScenario] = useState<AITutorScenario | null>(
     null,
   );
@@ -45,6 +62,7 @@ export function AITutor({
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showTranslations, setShowTranslations] = useState<Record<string, boolean>>({});
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [callMode, setCallMode] = useState(false);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
@@ -85,8 +103,8 @@ export function AITutor({
     setVoiceError('');
     setSessionAwarded(false);
     setUsedGeminiSession(Boolean(geminiApiKey?.trim()));
-    if (autoSpeak) {
-      speakEnglish(scenario.openingEn, { accent });
+    if (autoSpeak || callMode) {
+      speakText(scenario.openingEn, { langCode: effectiveDialect });
     }
   };
 
@@ -142,8 +160,8 @@ export function AITutor({
     setSuggestions(result.suggestions);
     setIsSending(false);
 
-    if (autoSpeak) {
-      speakEnglish(result.replyEn, { accent });
+    if (autoSpeak || callMode) {
+      speakText(result.replyEn, { langCode: effectiveDialect });
     }
 
     const totalStudentTurns =
@@ -164,9 +182,13 @@ export function AITutor({
     setVoiceError('');
     setVoiceStatus('');
     setIsListeningVoice(true);
-    stopRecRef.current = startSpeechRecognition(accent, {
+    stopRecRef.current = startSpeechRecognition(effectiveDialect, {
       onResult: (transcript) => {
-        setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        if (callMode) {
+          void handleSendText(transcript);
+        } else {
+          setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
       },
       onStatus: (msg) => setVoiceStatus(msg),
       onError: (msg) => setVoiceError(msg),
@@ -209,7 +231,7 @@ export function AITutor({
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {AI_TUTOR_SCENARIOS.map((sc) => (
+          {visibleScenarios.map((sc) => (
             <article
               key={sc.id}
               className="flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-blue-300 hover:shadow-sm"
@@ -301,6 +323,23 @@ export function AITutor({
               {studentTurns}/3 falas p/ +35 XP
             </span>
           )}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !callMode;
+              setCallMode(next);
+              if (next) setAutoSpeak(true);
+            }}
+            className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-xs font-bold cursor-pointer ${
+              callMode
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                : 'border-slate-200 bg-white text-slate-600'
+            }`}
+            title="Modo Chamada: envia sua fala e lê a resposta automaticamente"
+          >
+            <PhoneCall className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">{callMode ? 'Chamada ON' : 'Chamada'}</span>
+          </button>
           <button
             type="button"
             onClick={() => setAutoSpeak((v) => !v)}

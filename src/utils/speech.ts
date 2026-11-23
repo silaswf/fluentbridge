@@ -7,6 +7,7 @@ import { isAudioRecordingSupported, startAudioRecording } from './audioRecorder'
 interface SpeakOptions {
   accent?: Accent | string;
   langCode?: string;
+  voice?: 'female' | 'male';
   rate?: number;
   onStart?: () => void;
   onEnd?: () => void;
@@ -165,12 +166,17 @@ function normalizeTtsLocale(locale: string): string {
   if (lower === 'en-gb' || lower.startsWith('en-gb') || lower === 'uk') return 'en-GB';
   if (lower === 'es-es') return 'es-ES';
   if (lower.startsWith('es')) return 'es-MX';
+  if (lower === 'fr-ca') return 'fr-CA';
   if (lower.startsWith('fr')) return 'fr-FR';
   if (lower.startsWith('pt')) return 'pt-BR';
   return 'en-US';
 }
 
-async function fetchNeuralTtsBlob(text: string, targetLocale: string): Promise<Blob | null> {
+async function fetchNeuralTtsBlob(
+  text: string,
+  targetLocale: string,
+  voice?: 'female' | 'male',
+): Promise<Blob | null> {
   const apiBase = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
   if (!apiBase || typeof fetch === 'undefined') return null;
 
@@ -178,7 +184,8 @@ async function fetchNeuralTtsBlob(text: string, targetLocale: string): Promise<B
   if (!cleanText) return null;
 
   const normLocale = normalizeTtsLocale(targetLocale);
-  const cacheId = `tts-v2:${normLocale}:${cleanText.length}:${hashTtsKey(cleanText)}`;
+  const voiceTag = voice === 'male' ? 'male' : 'default';
+  const cacheId = `tts-v3:${normLocale}:${voiceTag}:${cleanText.length}:${hashTtsKey(cleanText)}`;
 
   const cachedBlob = await getAudioClip(cacheId);
   if (cachedBlob && cachedBlob.size > 200) {
@@ -192,11 +199,12 @@ async function fetchNeuralTtsBlob(text: string, targetLocale: string): Promise<B
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeoutId =
       controller !== null
-        ? globalThis.setTimeout(() => controller.abort(), 7500)
+        ? globalThis.setTimeout(() => controller.abort(), 9000)
         : undefined;
 
     try {
-      const endpoint = `${apiBase}/api/tts?lang=${encodeURIComponent(normLocale)}&text=${encodeURIComponent(
+      const voiceQuery = voice ? `&voice=${encodeURIComponent(voice)}` : '';
+      const endpoint = `${apiBase}/api/tts?lang=${encodeURIComponent(normLocale)}${voiceQuery}&text=${encodeURIComponent(
         cleanText,
       )}`;
       const response = await fetch(endpoint, {
@@ -228,8 +236,8 @@ export function getSelectedVoiceLabels(): { us: string; uk: string } {
   const apiBase = DEFAULT_BACKEND_API_URL.trim();
   if (apiBase) {
     return {
-      us: 'Deepgram Aura-2 · Thalia (Neural US)',
-      uk: 'Deepgram Aura-2 · Pandora (Neural UK)',
+      us: 'Deepgram Aura-2 · Thalia / Apollo (Neural US)',
+      uk: 'Deepgram Aura-2 · Pandora / Draco (Neural UK)',
     };
   }
   const voices = refreshVoices();
@@ -238,6 +246,17 @@ export function getSelectedVoiceLabels(): { us: string; uk: string } {
   return {
     us: us?.name ?? 'Voz padrão US',
     uk: uk?.name ?? 'Voz padrão UK',
+  };
+}
+
+export function getAllVoiceProviderLabels() {
+  return {
+    enUs: 'Deepgram Aura-2 · Thalia / Apollo (US)',
+    enGb: 'Deepgram Aura-2 · Pandora / Draco (UK)',
+    esEs: 'Deepgram Aura-2 · Nestor / Carina (ES)',
+    esMx: 'Deepgram Aura-2 · Estrella / Javier (MX)',
+    frFr: 'Gemini 2.5 Neural TTS · Aoede / Charon (Paris)',
+    frCa: 'Gemini 2.5 Neural TTS · Kore / Puck (Canadá)',
   };
 }
 
@@ -323,7 +342,7 @@ function speakWithBrowserSynthesis(
 }
 
 export function speakText(text: string, options: SpeakOptions = {}): void {
-  const { accent = 'en-US', langCode, rate = 1, onStart, onEnd } = options;
+  const { accent = 'en-US', langCode, voice, rate = 1, onStart, onEnd } = options;
   const targetLocale = langCode ?? accent;
   const cleanText = text.trim();
 
@@ -355,7 +374,7 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
   onStart?.();
 
   void (async () => {
-    const neuralBlob = await fetchNeuralTtsBlob(cleanText, targetLocale);
+    const neuralBlob = await fetchNeuralTtsBlob(cleanText, targetLocale, voice);
     if (myToken !== activePlayToken) return;
 
     if (neuralBlob && typeof Audio !== 'undefined' && typeof URL !== 'undefined') {

@@ -1,10 +1,10 @@
-# 03 — Roadmap de Desenvolvimento até a Completude (`v1.3.0` → `v2.0.0`)
+# 03 — Roadmap de Desenvolvimento até a Completude (`v2.0.0` → `v3.0.0`)
 
-Este roadmap registra as entregas já concluídas do **FluentBridge Academy** e define o plano completo de evolução técnica, pedagógica, visual, de conteúdo e de segurança para levar o aplicativo ao seu potencial máximo (equiparando e superando plataformas comerciais como Busuu e Duolingo para o ecossistema particular do **Prof. Silas**).
+Este roadmap registra todas as entregas já concluídas do **FluentBridge Academy** (Fases 0 a 9, encerrando o marco **`v2.0.0`**) e define o próximo plano de evolução (**Fases 10 a 12 · `v2.1` → `v3.0`**) para levar a plataforma ao máximo potencial pedagógico, arquitetural e comercial.
 
 ---
 
-## Fases Concluídas (`v1.0.0` → `v1.3.0`)
+## Fases Concluídas (`v1.0.0` → `v2.0.0`)
 
 ### Fase 0 — Fundação das 4 Habilidades & Experiência Busuu Base — CONCLUÍDA
 - [x] Trilha visual por níveis CEFR (`A1` a `C1`) com `LearningPath.tsx` e `SkillRadar.tsx`.
@@ -51,19 +51,36 @@ Este roadmap registra as entregas já concluídas do **FluentBridge Academy** e 
 
 ---
 
-## Roadmap Futuro — Rumo ao Potencial Máximo (`v1.4.0` → `v2.0.0`)
+## Fases 8 & 9 Concluídas (`v2.0.0`)
 
-Os detalhes técnicos completos de implementação de cada sprint estão em [`06 - Auditoria e Otimizações`](./06-AUDITORIA-OTIMIZACOES.md) e [`07 - Plano Técnico das Próximas Fases`](./07-PLANO-FASE-8-DIFERENCIAIS.md).
+### Fase 8 — Novos Modos Pedagógicos, Admin Mestre & Chamada IA (`v2.0.0`) — CONCLUÍDA
+- [x] **3 Novos Formatos no `LessonPlayer.tsx` (`11` formatos totais)**: **Ditado Auditivo (`dictation`)**, **Minimal Pairs (`minimal_pairs`)** para brasileiros com IPA e áudio lento, e **Histórias Multi-Vozes (`story`)** alternando falantes feminino/masculino e sotaques.
+- [x] **Modo Chamada ao Vivo (Mãos-Livres)** no `AITutor.tsx` com detecção contínua de fala e cenários em **Inglês, Espanhol e Francês**.
+- [x] **Tarefas de Casa com Prazo (`TeacherAssignment`) + Analytics da Escola**: criação no `TeacherStudio.tsx`, exibição na trilha do aluno (`LearningPath.tsx`), tombstones (`deletedAssignmentIds`) e indicadores médios por turma.
+- [x] **Painel de Administrador Mestre Exclusivo (`AdminPanel.tsx`)**: controle exclusivo de `silaswf@gmail.com` com exibição/edição do **Código de Cadastro de Professor**, bloqueio/liberação de acesso com motivo, promoção de papéis, troca de turma, redefinição de senha local e exclusão de usuários.
+- [x] **Correções de Dark Mode, Sidebar Recolhível & Legibilidade**: ajustes de seletores Tailwind v4 (`lg:bg-white`, `text-amber-950/85`, `.topic-tips-box`), posicionamento de Sotaque/Tema no topo da sidebar, painel direito recolhível e correção da timeline mobile.
 
-### Fase 8 — Novos Modos Pedagógicos & Ecossistema Escolar (`v1.4.0`) — PLANEJADA
-- [ ] **Tarefas de Casa & Prazos (*Teacher Assignments*)**: Prof. Silas atribui unidades, redações ou desafios de speaking específicos para uma turma com data limite e acompanhamento de entregas pendentes/atrasadas.
-- [ ] **Ditado Auditivo (*Listening Dictation*) & Exercícios de Ordenação de Áudio**: ouvir frases reais em velocidades `1x` e `0.75x` e digitar/montar palavra por palavra para treinar escuta fina (*connected speech*).
-- [ ] **Histórias Interativas & Mini-Podcasts por Nível CEFR**: diálogos com múltiplos personagens (voz US + voz UK alternadas) e perguntas de compreensão no meio da narrativa.
-- [ ] **Laboratório de Pronúncia (*Minimal Pairs* para Brasileiros)**: treino focado de sons críticos (`/θ/` vs `/t/` em *think/tink*, `/ɪ/` vs `/iː/` em *live/leave*, `-ed` final `/t/ /d/ /ɪd/`).
-- [ ] **Modo Chamada ao Vivo com Tutor IA + Analytics Docente Avançado**: fluxo contínuo mãos-livres (fala → resposta falada automática) + mapa de calor mostrando em quais tópicos gramaticais cada turma erra mais.
+### Fase 9 — Expansão Massiva de Conteúdo (92 Unidades) & Vozes Neurais Multi-Idiomas (`v2.0.0`) — CONCLUÍDA
+- [x] **Inglês (`50` unidades A1–C1)**: `34` unidades nucleares + `16` trilhas especializadas (`enSpecialTracks.ts`: *Minimal Pairs*, *Business*, *Tech*, *Viagens*, *IELTS/TOEFL*, *Phrasal Verbs* e *Idioms*).
+- [x] **Espanhol (`22` unidades A1–C1)** (`spanishCourse.ts`) e **Francês (`20` unidades A1–C1)** (`frenchCourse.ts`), totalizando **`92` unidades**, **`730` passos**, **`278` cards SM-2** e **`56` tabelas gramaticais** (`32` EN, `12` ES, `12` FR).
+- [x] **Vozes Neurais para Todos os Idiomas (`cloudflare-worker/worker.js`)**: Deepgram Aura-2 masculino/feminino para EN/ES + **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`, PCM16 → WAV)** para **Francês (`fr-FR` `Aoede`/`Charon` e `fr-CA` `Kore`/`Puck`)** + Whisper Large v3 Turbo STT.
+- [x] **Gerador de Unidades com IA no Estúdio**: criação assistida via `/api/gemini-tutor` direto no `TeacherStudio.tsx`.
 
-### Fase 9 — Expansão Massiva de Conteúdo & Multi-Idiomas Completo (`v2.0.0`) — VISÃO FINAL
-- [ ] **Inglês de 34 para 60+ Unidades**: trilhas temáticas extras (*Business English & Negociações*, *Viagens & Imigração Avançada*, *IELTS / TOEFL Prep*, *Phrasal Verbs na Prática*, *Inglês de Séries & Idioms*).
-- [ ] **Novos Idiomas Completos (A1–B2)**: aproveitar a arquitetura já existente de `LanguageCourse` (`es`, `fr`, `de`, `it`) para preencher **Espanhol, Francês, Alemão e Italiano** completos com dicas contrastivas para falantes de português.
-- [ ] **Gerador de Unidades Assistido por IA no Estúdio**: Prof. Silas informa tema, nível CEFR e foco gramatical, a IA gera rascunho completo dos 8 passos + vocabulário SRS e o professor revisa e publica em 1 minuto.
-- [ ] **Publicação Oficial nas Lojas**: submissão do `.aab` assinado (`FluentBridge-playstore.aab`) na **Google Play Store** e build iOS (Xcode / Apple App Store) ou PWA otimizado para iPhone.
+---
+
+## Próximo Roadmap (`v2.1.0` → `v3.0.0`)
+
+### Fase 10 — Arquitetura Relacional Pura, Segurança Server-Side & Modularização (`v2.1.0`)
+- [ ] **Migração Completa para Tabelas Relacionais Supabase (`supabase_schema.sql`)**: substituir o snapshot único `fb_school_state` por leituras/escritas autenticadas por JWT em `profiles`, `classes`, `student_progress`, `submissions`, `assignments` e `certificates` com RLS estrito.
+- [ ] **Modularização de `LessonPlayer.tsx` (`2.174` linhas) e `TeacherStudio.tsx` (`2.133` linhas)**: dividir em subcomponentes (`src/components/steps/*` e `src/components/teacher/*`) e hooks dedicados (`useCloudSyncController`), mantendo cada arquivo abaixo de 400 linhas.
+- [ ] **Rate-Limit & Telemetria no Cloudflare Worker**: cotas diárias por usuário autenticado em `/api/gemini-tutor`, `/api/tts` e `/api/stt` usando Workers KV / Durable Objects e headers de observabilidade.
+
+### Fase 11 — Inteligência Pedagógica, Lazy Curricular Real & Engajamento Social (`v2.5.0`)
+- [ ] **Importação Dinâmica Real dos Cursos por Idioma**: carregar `spanishCourse.ts` e `frenchCourse.ts` via `import()` apenas quando o aluno selecionar ES/FR, zerando o download de outros idiomas no boot inicial.
+- [ ] **Diagnóstico de Fonemas & Histórico de Pronúncia**: salvar evolução temporal da nota de Speaking e palavras com maior taxa de erro por aluno.
+- [ ] **Simulados Cronometrados (IELTS / TOEFL / DELE / DELF)** e **Ligas Semanais / Desafios entre Turmas** com notificações push e resumo semanal para o Prof. Silas.
+
+### Fase 12 — Ecossistema Mobile/iOS & Lojas Oficiais (`v3.0.0`)
+- [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** com Apple Sign-In e notificações push FCM/APNs.
+- [ ] **Pacotes Offline Seletivos de Áudio**: botão *"Baixar áudios do nível A1/A2"* pré-populando `IndexedDB` (`tts-v3:*`) para estudo em viagens sem internet.
+- [ ] **Suíte E2E Automatizada (`Playwright`)**: testes visuais automatizados de Light/Dark Mode, responsividade mobile/desktop, login e fluxo completo de lição no CI.

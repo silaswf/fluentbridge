@@ -98,4 +98,48 @@ describe('cloudSync granular mergePlatformStates', () => {
     const merged = mergePlatformStates(local, remote, 'remote');
     expect(merged.classes.some((c) => c.id === 'class-deleted')).toBe(false);
   });
+
+  it('preserves teacherAccessCode, user blocked flags, and assignment tombstones', () => {
+    const local: PlatformState = {
+      ...DEFAULT_PLATFORM_STATE,
+      teacherAccessCode: 'SILAS-VIP-99',
+      deletedAssignmentIds: ['assign-old'],
+      users: [
+        DEFAULT_PLATFORM_STATE.users[0],
+        makeStudent({ id: 'stu-1', email: 'a@teste.com', blocked: true, blockedReason: 'Inadimplência' }),
+      ],
+      assignments: [
+        {
+          id: 'assign-1',
+          title: 'Praticar Ditado A2',
+          description: 'Conclua a unidade até sexta',
+          languageCode: 'en',
+          dueDate: '2026-12-01',
+          createdAt: '2026-11-23',
+          createdBy: 'Prof. Silas',
+        },
+      ],
+    };
+
+    const remote: Partial<PlatformState> = {
+      teacherAccessCode: 'OLD-CODE',
+      assignments: [
+        {
+          id: 'assign-old',
+          title: 'Tarefa Apagada',
+          description: 'Deve ficar oculta',
+          languageCode: 'es',
+          dueDate: '2026-11-30',
+          createdAt: '2026-11-20',
+          createdBy: 'Prof. Silas',
+        },
+      ],
+    };
+
+    const merged = mergePlatformStates(local, remote, 'local');
+    expect(merged.teacherAccessCode).toBe('SILAS-VIP-99');
+    expect(merged.users.find((u) => u.id === 'stu-1')?.blocked).toBe(true);
+    expect(merged.assignments?.some((a) => a.id === 'assign-1')).toBe(true);
+    expect(merged.assignments?.some((a) => a.id === 'assign-old')).toBe(false);
+  });
 });

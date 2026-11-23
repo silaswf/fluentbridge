@@ -1,6 +1,6 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v1.3.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v2.0.0`)
 
-Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** após a entrega da **Fase 5** (sync granular sem perda de dados, hash de senhas, áudios de Speaking cross-device e proxy seguro do Tutor IA) e do motor de **Vozes Neurais Deepgram Aura-2** via Cloudflare Workers AI.
+Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.0.0`** após a entrega completa das **Fases 5, 6, 7, 8 e 9**, do **Painel Admin Mestre (`AdminPanel.tsx`)**, das correções de **Dark Mode / Sidebar / Legibilidade** e do motor multi-idiomas de **Vozes Neurais** (`Deepgram Aura-2 + Gemini 2.5 Neural TTS`).
 
 ---
 
@@ -8,16 +8,17 @@ Este documento apresenta o diagnóstico técnico real do código-fonte do **Flue
 
 - **Frontend**: `React 19.0.0` + `TypeScript 5.7.3` + `Vite 6.2.0` + `Tailwind CSS v4.0.9` + `lucide-react 0.475.0`.
 - **Alvos de Execução**:
-  - **Web / PWA**: hospedado em `https://fluentbridge.pages.dev` (Cloudflare Pages, com `public/_redirects` e `public/manifest.webmanifest`).
-  - **Edge API (`cloudflare-worker/worker.js`)**: Cloudflare Worker **`fluentbridge-api`** (`https://fluentbridge-api.silaswf.workers.dev`) provendo síntese neural (`/api/tts` via Workers AI `@cf/deepgram/aura-2-en` e `aura-2-es` + cache Edge CDN) e proxy seguro Gemini (`/api/gemini-tutor` com secret `GEMINI_API_KEY` no servidor).
-  - **Android Nativo (`android/`)**: `Capacitor 7.0.1` (`@capacitor/core`, `@capacitor/android`) com plugins `@capacitor/app` (`^7.1.2`) e `@capacitor/browser` (`^7.0.5`), permissões `INTERNET`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, deep link `com.fluentbridge.app://auth-callback`, keystore Release PKCS12 e geração de `.apk` assinado + `.aab` da Google Play Store.
-  - **Windows Desktop (`electron/main.cjs`)**: `Electron 34.2.0` empacotado com `@electron/packager 18.3.6` gerando executável standalone (`release/FluentBridge-win32-x64/FluentBridge.exe`), com auto-permissão de microfone/captura de áudio.
-- **Backend & IA**:
-  - **Supabase (`@supabase/supabase-js 2.49.1`)**: cliente singleton (`getSupabaseClient` em `src/utils/cloudSync.ts`) com persistência de sessão (`persistSession: true`, `autoRefreshToken: true`, `detectSessionInUrl: true`), merge granular por entidade (`mergePlatformStates` + tombstones) na tabela `fb_school_state` e upload cross-device de Speaking (`uploadSpeakingAudioToCloud` / `resolveSubmissionAudioUrl`).
-  - **Google Gemini (Proxy Server-Side) + Tutor Local**: `src/utils/aiTutorEngine.ts` consulta `https://fluentbridge-api.silaswf.workers.dev/api/gemini-tutor` (`gemini-3.8-flash` / fallback `gemini-2.5-flash`) sem expor chaves no bundle JS do navegador, mantendo suporte opcional a chave própria no Estúdio e motor heurístico offline.
-- **Persistência Local**:
-  - Estado da plataforma salvo em `localStorage` (`fluentbridge_platform_v3` via `src/utils/storage.ts`) com senhas protegidas pelo prefixo de hash `fbh1:...`.
-  - Áudios gravados (`audioRecorder.ts` a `32 kbps`) e MP3s do motor neural (`tts-v2:*`) armazenados em `IndexedDB` (`fluentbridge_audio_v1`, store `clips` via `src/utils/audioDb.ts`).
+  - **Web / PWA**: hospedado em `https://fluentbridge.pages.dev` (Cloudflare Pages, com `vite-plugin-pwa` offline Workbox, `public/_redirects` e `public/manifest.webmanifest`).
+  - **Edge API (`cloudflare-worker/worker.js`)**: Cloudflare Worker **`fluentbridge-api`** (`https://fluentbridge-api.silaswf.workers.dev`) provendo:
+    - `/api/tts`: síntese neural **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`, vozes feminina e masculina) + **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`, PCM16 → WAV)** para **Francês (`fr-FR`, `fr-CA`)** e fallback, com cache Edge `/v3/`.
+    - `/api/stt`: transcrição em nuvem via **Whisper Large v3 Turbo** (`@cf/openai/whisper-large-v3-turbo` + fallback `@cf/openai/whisper`) para EN, ES e FR.
+    - `/api/gemini-tutor`: proxy seguro server-side com `GEMINI_API_KEY` protegida em `secret_text` (para o Tutor IA e Gerador de Unidades).
+  - **Android Nativo (`android/`)**: `Capacitor 7.0.1` com `@capacitor/app`, `@capacitor/browser`, `@capacitor/local-notifications`, `WindowInsetsCompat` Safe Area no `MainActivity.java`, deep link `com.fluentbridge.app://auth-callback`, keystore Release PKCS12 e geração de `.apk` assinado + `.aab` da Play Store.
+  - **Windows Desktop (`electron/main.cjs`)**: `Electron 34.2.0` empacotado com `@electron/packager 18.3.6` gerando `release/FluentBridge-win32-x64/FluentBridge.exe`.
+- **Persistência & Sync (`cloudSync.ts`, `storage.ts`, `audioDb.ts`)**:
+  - `localStorage` (`fluentbridge_platform_v3`) com hash `fbh1:...`, `teacherAccessCode` configurável, `assignments` com tombstones e flag `blocked`/`blockedReason` por usuário.
+  - `IndexedDB` (`fluentbridge_audio_v1`) guardando gravações de Speaking (`32 kbps`) e cache de áudio neural (`tts-v3:*`).
+  - Supabase singleton (`getSupabaseClient`) com `mergePlatformStates` (união granular entity-level + tombstones + upload para bucket `fb-audio`).
 
 ---
 

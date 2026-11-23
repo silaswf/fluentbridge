@@ -8,6 +8,7 @@ import type {
   CloudConfig,
   PlatformState,
   StudentSubmission,
+  TeacherAssignment,
   Topic,
   UserProfile,
   UserRole,
@@ -415,6 +416,8 @@ function mergeUserProfiles(
     themeMode: primary.themeMode ?? secondary.themeMode,
     reminderEnabled: primary.reminderEnabled ?? secondary.reminderEnabled,
     reminderTime: primary.reminderTime ?? secondary.reminderTime,
+    blocked: primary.isMasterAdmin ? false : (primary.blocked ?? secondary.blocked),
+    blockedReason: primary.isMasterAdmin ? undefined : (primary.blockedReason ?? secondary.blockedReason),
     todayMinutes: Math.max(localUser.todayMinutes ?? 0, remoteUser.todayMinutes ?? 0),
     skillScores: {
       listening: Math.max(
@@ -520,6 +523,10 @@ export function mergePlatformStates(
     ...(local.deletedTopicIds ?? []),
     ...(Array.isArray(remote.deletedTopicIds) ? remote.deletedTopicIds : []),
   ]);
+  const deletedAssignmentIds = new Set<string>([
+    ...(local.deletedAssignmentIds ?? []),
+    ...(Array.isArray(remote.deletedAssignmentIds) ? remote.deletedAssignmentIds : []),
+  ]);
 
   // Users by email (preserve master admin even if somehow listed)
   const localUsers = local.users ?? [];
@@ -578,6 +585,18 @@ export function mergePlatformStates(
   const remoteSubs = Array.isArray(remote.submissions) ? remote.submissions : [];
   const mergedSubs = mergeSubmissions(local.submissions ?? [], remoteSubs, preferSide);
 
+  // Assignments by id
+  const assignmentMap = new Map<string, TeacherAssignment>();
+  const remoteAssignments = Array.isArray(remote.assignments) ? remote.assignments : [];
+  const orderedAssignments =
+    preferSide === 'local'
+      ? [...remoteAssignments, ...(local.assignments ?? [])]
+      : [...(local.assignments ?? []), ...remoteAssignments];
+  for (const a of orderedAssignments) {
+    if (!a?.id || deletedAssignmentIds.has(a.id)) continue;
+    assignmentMap.set(a.id, a);
+  }
+
   return {
     schoolName:
       preferSide === 'remote' && remote.schoolName
@@ -587,14 +606,20 @@ export function mergePlatformStates(
       preferSide === 'remote' && remote.teacherName
         ? remote.teacherName
         : local.teacherName,
+    teacherAccessCode:
+      preferSide === 'remote' && remote.teacherAccessCode
+        ? remote.teacherAccessCode
+        : (local.teacherAccessCode ?? remote.teacherAccessCode),
     currentUserId: local.currentUserId,
     classes: Array.from(classMap.values()),
     users: Array.from(userByEmail.values()),
     customTopics: Array.from(topicMap.values()),
     submissions: mergedSubs,
+    assignments: Array.from(assignmentMap.values()),
     deletedUserIds: Array.from(deletedUserIds),
     deletedClassIds: Array.from(deletedClassIds),
     deletedTopicIds: Array.from(deletedTopicIds),
+    deletedAssignmentIds: Array.from(deletedAssignmentIds),
     cloudConfig: {
       ...(remote.cloudConfig ?? {}),
       ...local.cloudConfig,

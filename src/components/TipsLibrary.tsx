@@ -7,11 +7,12 @@ import {
   Search,
 } from 'lucide-react';
 import {
-  SWJ_GRAMMAR_GUIDE,
+  getGrammarGuideByLanguage,
   type GrammarReferenceEntry,
 } from '../data/grammarGuide';
 import type {
   CEFRLevel,
+  LanguageCode,
   TipCategory,
   TipContent,
   Topic,
@@ -21,6 +22,7 @@ import { TIP_CATEGORY_META } from './SkillBadge';
 
 interface TipsLibraryProps {
   topics: Topic[];
+  languageCode?: LanguageCode;
   onPracticeTopic: (topic: Topic) => void;
 }
 
@@ -37,18 +39,9 @@ const FILTER_OPTIONS: { id: 'all' | TipCategory; label: string }[] = [
   { id: 'culture', label: 'Cultura & Uso Real' },
 ];
 
-const GUIDE_SECTIONS: ('ALL' | GrammarReferenceEntry['section'])[] = [
-  'ALL',
-  'Tempos Verbais',
-  'Condicionais',
-  'Modais',
-  'Regras Extras',
-  'Voz Passiva & Relatos',
-  'Question Tags',
-];
-
 export function TipsLibrary({
   topics,
+  languageCode = 'en',
   onPracticeTopic,
 }: TipsLibraryProps) {
   const [viewMode, setViewMode] = useState<'tips' | 'guide'>('tips');
@@ -58,6 +51,24 @@ export function TipsLibrary({
   const [guideSection, setGuideSection] = useState<
     'ALL' | GrammarReferenceEntry['section']
   >('ALL');
+
+  const grammarGuide = useMemo(
+    () => getGrammarGuideByLanguage(languageCode),
+    [languageCode],
+  );
+
+  const guideSections = useMemo(
+    () =>
+      [
+        'ALL',
+        ...Array.from(new Set(grammarGuide.map((entry) => entry.section))),
+      ] as ('ALL' | GrammarReferenceEntry['section'])[],
+    [grammarGuide],
+  );
+
+  const activeGuideSection = guideSections.includes(guideSection)
+    ? guideSection
+    : 'ALL';
 
   const allTips = useMemo<TipEntry[]>(() => {
     const list: TipEntry[] = [];
@@ -87,8 +98,9 @@ export function TipsLibrary({
   }, [allTips, category, levelFilter, search]);
 
   const filteredGuide = useMemo(() => {
-    return SWJ_GRAMMAR_GUIDE.filter((entry) => {
-      if (guideSection !== 'ALL' && entry.section !== guideSection) return false;
+    return grammarGuide.filter((entry) => {
+      if (activeGuideSection !== 'ALL' && entry.section !== activeGuideSection)
+        return false;
       if (levelFilter !== 'ALL' && entry.level !== levelFilter) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
@@ -99,7 +111,7 @@ export function TipsLibrary({
         entry.aff.toLowerCase().includes(q)
       );
     });
-  }, [guideSection, levelFilter, search]);
+  }, [grammarGuide, activeGuideSection, levelFilter, search]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -107,7 +119,7 @@ export function TipsLibrary({
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
             <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
-            Biblioteca & Guia Gramatical · {allTips.length} dicas + {SWJ_GRAMMAR_GUIDE.length} tabelas
+            Biblioteca & Guia Gramatical · {allTips.length} dicas + {grammarGuide.length} tabelas
           </span>
           <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900">
             Central de Dicas & Guia Gramatical
@@ -141,7 +153,7 @@ export function TipsLibrary({
             }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
-            <span>Guia Gramatical ({SWJ_GRAMMAR_GUIDE.length})</span>
+            <span>Guia Gramatical ({grammarGuide.length})</span>
           </button>
         </div>
       </div>
@@ -183,13 +195,13 @@ export function TipsLibrary({
             </div>
           ) : (
             <div className="flex flex-wrap gap-1.5">
-              {GUIDE_SECTIONS.map((sec) => (
+              {guideSections.map((sec) => (
                 <button
                   key={sec}
                   type="button"
                   onClick={() => setGuideSection(sec)}
                   className={`rounded-full px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
-                    guideSection === sec
+                    activeGuideSection === sec
                       ? 'bg-slate-900 text-white'
                       : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   }`}
@@ -371,7 +383,7 @@ export function TipsLibrary({
                   </div>
                   <DualAudioButtons
                     text={entry.exampleEn}
-                    languageCode="en"
+                    languageCode={languageCode}
                     size="xs"
                   />
                 </div>
