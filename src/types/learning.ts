@@ -353,6 +353,7 @@ export interface UserProfile {
   dialectByLanguage: Record<string, string>;
   accent: Accent;
   recommendedLevel?: CEFRLevel;
+  recommendedLevelByLanguage?: Partial<Record<LanguageCode, CEFRLevel>>;
   dailyGoalMinutes: number;
   todayMinutes: number;
   xp: number;

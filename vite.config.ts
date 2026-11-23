@@ -87,6 +87,9 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/grammar/frGrammarExtra')) return 'grammar-fr';
           if (id.includes('/grammar/itGrammarExtra')) return 'grammar-it';
           if (id.includes('/grammar/deGrammarExtra')) return 'grammar-de';
+          if (id.includes('/data/placement/')) {
+            return 'placement-bank';
+          }
           if (id.includes('/data/grammarGuide')) {
             return 'grammar-guide';
           }

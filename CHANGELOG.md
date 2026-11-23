@@ -4,6 +4,19 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v2.4.0`] — 2026-11-23
+### Nivelamento Adaptativo (CAT) nos 5 Idiomas, Banco de 200 Questões no Idioma-Alvo (`40`/idioma) & Diagnóstico em 15 Etapas
+- **Motor Adaptativo de Nivelamento (`src/utils/placementEngine.ts`, `src/components/PlacementTestModal.tsx`):**
+  - Substituído o antigo questionário fixo de 10 questões em inglês por um motor de **Teste Adaptativo Computadorizado (CAT)** disponível nos **5 idiomas (`EN / ES / FR / IT / DE`)**.
+  - O teste inicia no nível intermediário (`B1`) e **aumenta ou diminui o nível da próxima questão a cada acerto ou erro**, encerrando após **15 questões respondidas** para calcular o índice de competência ponderado (`1.0` a `5.0`) e recomendar com precisão o nível CEFR (`A1` a `C1`).
+  - Persistência do nível recomendado por idioma (`recommendedLevelByLanguage`) no perfil do aluno e exibição na Trilha (`LearningPath.tsx`) para todos os 5 idiomas.
+- **Banco de 200 Questões 100% no Idioma Estudado (`src/data/placement/*`):**
+  - **`40` questões por idioma** (`8` por nível CEFR `A1, A2, B1, B2, C1` em [`placementEn.ts`](./src/data/placement/placementEn.ts), [`placementEs.ts`](./src/data/placement/placementEs.ts), [`placementFr.ts`](./src/data/placement/placementFr.ts), [`placementIt.ts`](./src/data/placement/placementIt.ts) e [`placementDe.ts`](./src/data/placement/placementDe.ts)), com enunciados, alternativas, explicações gramaticais e interface do modal escritos **100% no idioma que o aluno está estudando**.
+  - Separado em chunk dedicado `placement-bank` no `vite.config.ts`, carregado sob demanda apenas ao abrir o nivelamento.
+- **Qualidade Validada (`v2.4.0`):** **`7` suítes / `24` testes Vitest aprovados** (incluindo `placementEngine.test.ts`), **`0` erros TypeScript**, **`DIST_LEAK=CLEAN`**.
+
+---
+
 ## [`v2.3.0`] — 2026-11-23
 ### 260 Unidades CEFR, Imersão Total B2/C1, 500 Guias Gramaticais & Tutor IA Dinâmico
 - **Expansão Curricular para 260 Unidades (`60` EN + `50` ES + `50` FR + `50` IT + `50` DE):**

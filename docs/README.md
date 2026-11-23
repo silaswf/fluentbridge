@@ -1,4 +1,4 @@
-# Documentação de Desenvolvimento — FluentBridge (`v2.3.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v2.4.0`)
 
 Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma em **5 idiomas** — **Inglês, Espanhol, Francês, Italiano e Alemão** de `A1` a `C1` — com dicas contextuais para brasileiros, Tutor IA com modo Chamada, vocabulário SM-2, **Painel Admin Mestre**, Estúdio do **Prof. Silas**, emissão de certificados CEFR por idioma e sincronização multiplataforma em **Windows**, **Android** e **Web**).
 
@@ -18,13 +18,13 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de ot
 
 ---
 
-## Resumo do Estado Atual (`v2.3.0`)
+## Resumo do Estado Atual (`v2.4.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
 | **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API `v2.2.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (Safe Area `WindowInsetsCompat`, `.apk` + `.aab`) + **Windows Desktop** (`FluentBridge.exe`) |
 | **Autenticação, VIP, Admin & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web/Android), **Vinculação Aluno VIP ↔ Professor (`PROF-SILAS`)**, aviso obrigatório pós-desvinculação (`TeacherLinkModal`), **Painel Admin Mestre (`AdminPanel.tsx`)**, confirmações (`ConfirmDialog`) e sync relacional + merge granular |
-| **Currículo & Imersão B2/C1 (`5 Idiomas`)** | **`260` unidades totais** (`60` EN + `50` ES + `50` FR + `50` IT + `50` DE de A1 a C1), **imersão 100% no idioma-alvo a partir do B2 (`immersion.ts`)**, **`100+` dicas por idioma** e **`500` tabelas** no Guia Gramatical (`100` por idioma) |
+| **Currículo, Nivelamento CAT & Imersão B2/C1** | **`260` unidades** (`60` EN + `50` ES/FR/IT/DE), **Nivelamento Adaptativo (CAT) de `15` questões** com banco de **`200` questões (`40`/idioma) 100% no idioma-alvo**, **imersão B2/C1 (`immersion.ts`)**, **`100+` dicas/idioma** e **`500` tabelas** no Guia Gramatical (`100`/idioma) |
 | **Tutor IA Dinâmico** | **`20` situações/idioma (`100` total)** com **"Variação IA"**, **`10` modos dinâmicos por unidade (`2.600` combinações)** e **Cenário Livre / Surpreenda-me** via Gemini + fallback offline em 5 idiomas |
 | **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** com **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`) + **Gemini 2.5 Neural TTS** (`fr-FR`, `fr-CA`, `it-IT`, `it-CH`, `de-DE`, `de-AT` em WAV) + cache `tts-v3` + **Whisper Cloud STT (`/api/stt`)** nos 5 idiomas + Rate-Limit Edge |
-| **Verificação & CI/CD** | `npm test` (`6` arquivos / `21` testes OK) · `npx tsc --noEmit` (`0` erros) · `DIST_LEAK=CLEAN` · GitHub Actions `.apk` + `.aab` |
+| **Verificação & CI/CD** | `npm test` (`7` arquivos / `24` testes OK) · `npx tsc --noEmit` (`0` erros) · `DIST_LEAK=CLEAN` · GitHub Actions `.apk` + `.aab` |

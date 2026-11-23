@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v2.3.0`)
+# FluentBridge Academy (`v2.4.0`)
 
-Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** (com **imersão total no idioma estudado a partir do B2**) nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*), Tutor de Conversação IA dinâmico (**20 situações/idioma + 10 modos por unidade + cenário livre**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** (com **imersão total no idioma estudado a partir do B2** e **Teste de Nivelamento Adaptativo de 15 questões com banco de 40 questões no idioma-alvo para cada língua**), nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*), Tutor de Conversação IA dinâmico (**20 situações/idioma + 10 modos por unidade + cenário livre**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
 
 ---
 
@@ -15,12 +15,13 @@ Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Itali
 
 ---
 
-## Números Atuais (`v2.3.0`)
+## Números Atuais (`v2.4.0`)
 
 - **260 Unidades CEFR (A1–C1)**: **60** em Inglês + **50** em Espanhol + **50** em Francês + **50** em Italiano + **50** em Alemão (B2/C1 em **imersão total no idioma estudado**)
+- **Nivelamento Adaptativo (CAT) nos 5 Idiomas**: **`200` questões 100% no idioma-alvo** (`40` por idioma · `8` por nível A1–C1), adaptando a dificuldade a cada resposta ao longo de **`15` questões**
 - **Central & Guia Gramatical**: **`100+` Dicas** E **`100` Tabelas Gramaticais** por idioma (**`500` tabelas** no total)
 - **Tutor IA Dinâmico**: **`20` Situações Reais por idioma (`100` total)** + **`10` Modos Dinâmicos por Unidade (`2.600` combinações)** + **Cenário Livre / Surpreenda-me**
-- **Qualidade Garantida**: `21/21` testes **Vitest** aprovados · `0` erros TypeScript · `DIST_LEAK=CLEAN` · Worker `v2.2.0` com Rate-Limit por IP
+- **Qualidade Garantida**: `24/24` testes **Vitest** aprovados (`7` suítes) · `0` erros TypeScript · `DIST_LEAK=CLEAN` · Worker `v2.2.0` com Rate-Limit por IP
 
 ---
 

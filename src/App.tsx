@@ -875,12 +875,18 @@ export function App() {
     updateCurrentUser((u) => ({
       ...u,
       recommendedLevel,
+      recommendedLevelByLanguage: {
+        ...(u.recommendedLevelByLanguage ?? {}),
+        [activeLanguage]: recommendedLevel,
+      },
       xp: u.xp + 40,
     }));
     setPathFilterLevel(recommendedLevel);
     setShowPlacementModal(false);
     setActiveView('learn');
-    showToast(`Nível indicado: ${recommendedLevel} (+40 XP)! Trilha filtrada para você.`);
+    showToast(
+      `Nível indicado em ${activeCourse.namePt}: ${recommendedLevel} (+40 XP)!`,
+    );
   };
 
   const handleUnlockCertificate = (level: CEFRLevel) => {
@@ -1507,6 +1513,7 @@ export function App() {
       <Suspense fallback={null}>
         {showPlacementModal && (
           <PlacementTestModal
+            languageCode={activeLanguage}
             onClose={() => setShowPlacementModal(false)}
             onCompletePlacement={(lvl) => handleCompletePlacement(lvl)}
           />

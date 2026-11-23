@@ -274,9 +274,14 @@ export function LearningPath({
                   Sem professor · Vincular agora
                 </button>
               )}
-              {currentUser.recommendedLevel && activeCourse.code === 'en' && (
+              {(currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
+                (activeCourse.code === 'en'
+                  ? currentUser.recommendedLevel
+                  : undefined)) && (
                 <span className="rounded-full bg-amber-300 px-2.5 py-0.5 font-mono text-[11px] font-extrabold text-amber-950">
-                  Nível indicado: {currentUser.recommendedLevel}
+                  Nível indicado ({activeCourse.namePt}):{' '}
+                  {currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
+                    currentUser.recommendedLevel}
                 </span>
               )}
             </div>
@@ -304,16 +309,14 @@ export function LearningPath({
                 </button>
               )}
 
-              {activeCourse.code === 'en' && (
-                <button
-                  type="button"
-                  onClick={onOpenPlacementTest}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
-                >
-                  <Compass className="h-4 w-4" />
-                  <span>Teste de Nivelamento (2 min)</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={onOpenPlacementTest}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
+              >
+                <Compass className="h-4 w-4" />
+                <span>Teste de Nivelamento Adaptativo (15 questões)</span>
+              </button>
             </div>
           </div>
 
