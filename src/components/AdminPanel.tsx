@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Check,
   Copy,
@@ -26,6 +26,10 @@ import {
   AUDIO_RETENTION_DAYS,
   getAudioRetentionSummary,
 } from '../utils/audioRetention';
+import {
+  getSecurityAuditStatus,
+  type SecurityAuditStatus,
+} from '../utils/relationalSync';
 import { getAllVoiceProviderLabels } from '../utils/speech';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -80,7 +84,13 @@ export function AdminPanel({
 
   const [codeDraft, setCodeDraft] = useState(activeTeacherCode);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [rlsCopied, setRlsCopied] = useState(false);
+  const [secStatus, setSecStatus] = useState<SecurityAuditStatus | null>(null);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    void getSecurityAuditStatus(state.cloudConfig).then(setSecStatus);
+  }, [state.cloudConfig]);
   const [filter, setFilter] = useState<'all' | 'students' | 'teachers' | 'blocked'>(
     'all',
   );
@@ -713,6 +723,59 @@ export function AdminPanel({
           </section>
         );
       })()}
+
+      {/* Segurança & Migração Definitiva RLS (v4.0) */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
+              <ShieldCheck className="h-4.5 w-4.5 text-emerald-600" />
+              <span>Segurança &amp; Migração Definitiva RLS (v4.0)</span>
+            </h2>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+              Armazenamento esparso de vocabulário ativo (economia ~95% no JSONB/localStorage) + sincronização relacional autenticada com políticas RLS por aluno/professor/admin (<code className="font-mono">supabase_schema.sql</code> Seção 9).
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const sqlSnippet = `-- Cole no SQL Editor do Supabase (Seção 9 do supabase_schema.sql)\nalter table public.student_progress add column if not exists recommended_level_by_language jsonb not null default '{}'::jsonb;\nalter table public.student_progress add column if not exists topic_step_progress jsonb not null default '{}'::jsonb;\nalter table public.student_progress add column if not exists learned_vocab_ids text[] not null default '{}';\nalter table public.student_progress add column if not exists mistake_bank jsonb not null default '[]'::jsonb;`;
+              void navigator.clipboard?.writeText(sqlSnippet);
+              setRlsCopied(true);
+              window.setTimeout(() => setRlsCopied(false), 2500);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer"
+          >
+            {rlsCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            <span>{rlsCopied ? 'SQL RLS copiado!' : 'Copiar SQL Migração v4.0'}</span>
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
+            <p className="font-bold text-slate-800">Sessão Supabase Auth (JWT)</p>
+            <p className="mt-0.5 text-slate-600">
+              {secStatus?.authenticated
+                ? `Autenticado (${secStatus.userEmail})`
+                : 'Modo local/demo (sem JWT ativo)'}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
+            <p className="font-bold text-slate-800">Sync Relacional Estrito</p>
+            <p className="mt-0.5 text-slate-600">
+              {secStatus?.relationalReady
+                ? 'Ativo (profiles, student_progress, submissions, certificates)'
+                : 'Pronto (aguardando login Supabase Auth)'}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
+            <p className="font-bold text-slate-800">Compactação Esparsa</p>
+            <p className="mt-0.5 text-emerald-700 font-semibold">
+              Ativa (~95% menor no Supabase)
+            </p>
+          </div>
+        </div>
+      </section>
 
       <ConfirmDialog
         open={Boolean(pendingConfirm)}

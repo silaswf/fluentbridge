@@ -1,0 +1,183 @@
+import type { LanguageCode } from '../types/learning';
+import { evaluatePronunciation } from './speech';
+
+export interface PhoneticTipItem {
+  ruleTitle: string;
+  tipPt: string;
+  highlight?: string;
+}
+
+export interface PhoneticWordDetail {
+  word: string;
+  syllables: string[];
+  matched: boolean;
+}
+
+export interface PhoneticFeedbackResult {
+  score: number;
+  words: PhoneticWordDetail[];
+  phoneticTips: PhoneticTipItem[];
+  summaryPt: string;
+}
+
+/**
+ * Divide palavras em blocos silábicos legíveis para destacar pontos de pronúncia.
+ */
+export function splitSyllables(rawWord: string): string[] {
+  const clean = rawWord.replace(/[.,!?;:¿¡"“”()[\]]/g, '').trim();
+  if (!clean) return [rawWord];
+
+  // CJK (Japonês / Chinês): retorna caractere por caractere
+  if (/[\u3040-\u30ff\u3400-\u9fff]/.test(clean)) {
+    return Array.from(clean);
+  }
+
+  if (clean.length <= 3) return [clean];
+
+  // Heurística silábica baseada em núcleos vocálicos (latim + cirílico)
+  const vowelRegex = /[aeiouyáéíóúàèìòùâêîôûäöüßаеёиоуыэюя]+[^aeiouyáéíóúàèìòùâêîôûäöüßаеёиоуыэюя]*/gi;
+  const matches = clean.match(vowelRegex);
+  if (!matches || matches.length <= 1) return [clean];
+  return matches;
+}
+
+interface PhoneticRule {
+  languages: LanguageCode[];
+  pattern: RegExp;
+  ruleTitle: string;
+  tipPt: string;
+}
+
+const PHONETIC_RULES: PhoneticRule[] = [
+  {
+    languages: ['en'],
+    pattern: /\b(th|the|this|that|they|there|think|three|with|weather|thanks)\w*/i,
+    ruleTitle: 'Som do TH (/θ/ ou /ð/)',
+    tipPt: 'Encoste suavemente a ponta da língua entre os dentes superiores e inferiores sem fazer som de "S", "T" ou "F".',
+  },
+  {
+    languages: ['en'],
+    pattern: /\w+ed\b/i,
+    ruleTitle: 'Terminação -ED no passado',
+    tipPt: 'Evite pronunciar "-ed" como sílaba extra ("worked" = /wɜːrkt/, 1 sílaba). Só adicione /ɪd/ após T ou D ("wanted", "needed").',
+  },
+  {
+    languages: ['en'],
+    pattern: /\b(r\w+|world|work|water|really|right|wrong)\b/i,
+    ruleTitle: 'R retroflexo do Inglês',
+    tipPt: 'No início de palavras ("really", "right"), enrole a língua para trás sem encostar no céu da boca (evite som de "R" forte do português).',
+  },
+  {
+    languages: ['es'],
+    pattern: /(rr|\br[aeiouáéíóú])/i,
+    ruleTitle: 'R vibrante múltipla (RR / R inicial)',
+    tipPt: 'Vibre a ponta da língua atrás dos dentes superiores ("perro", "rápido"), sem usar o R gutural da garganta.',
+  },
+  {
+    languages: ['es'],
+    pattern: /\b\w*[jg][ei]\w*\b|\b\w*j[aouáóú]\w*\b/i,
+    ruleTitle: 'Som forte de J / GE / GI (/x/)',
+    tipPt: 'Pronuncie como um "R" forte raspado na garganta ("trabajo", "gente"), nunca como o J de "janela".',
+  },
+  {
+    languages: ['fr'],
+    pattern: /(an|am|en|em|on|om|in|im|un)\b|(an|en|on)[^aeiou]/i,
+    ruleTitle: 'Vogais Nasais do Francês',
+    tipPt: 'Não feche os lábios nem encoste a língua no céu da boca no N/M final ("bon", "france", "matin") — deixe o som sair pelo nariz.',
+  },
+  {
+    languages: ['fr'],
+    pattern: /\b\w*(u|ou|eu|œu)\w*\b/i,
+    ruleTitle: 'Contraste U (/y/) vs. OU (/u/)',
+    tipPt: 'Para "U" ("tu", "rue"), faça bico de "u" tentando falar "i". Para "OU" ("vous", "tout"), use o som fechado de "u" normal.',
+  },
+  {
+    languages: ['it'],
+    pattern: /(cc|ll|tt|pp|ss|zz|mm|nn)/i,
+    ruleTitle: 'Consoantes Duplas (Geminação)',
+    tipPt: 'Segure brevemente a consoante dobrada ("caffè", "tutto", "bella") — a pausa muda o significado ("note" vs. "notte").',
+  },
+  {
+    languages: ['it'],
+    pattern: /(gn|gl|sci|sce|chi|che)/i,
+    ruleTitle: 'Dígrafos Italianos (GN, GL, SC, CH)',
+    tipPt: 'GN = "nh" ("gnocchi"), GLI = "lh" ("famiglia"), CHE/CHI = som de "K" ("perché"), SCE/SCI = "xê/xi".',
+  },
+  {
+    languages: ['de'],
+    pattern: /(ch|ich|ach|sp|st|sch|ü|ö|ä)/i,
+    ruleTitle: 'Sons Típicos do Alemão (CH, SCH, Umlaute)',
+    tipPt: '"ich" é suave perto do céu da boca; após a/o/u ("ach", "Buch") é raspado atrás. Em "ü/ö", arredonde os lábios enquanto fala "i/e".',
+  },
+  {
+    languages: ['ru'],
+    pattern: /[ьыжшщчц]/i,
+    ruleTitle: 'Consoantes Suaves (Ь) e Vogal Ы',
+    tipPt: 'O sinal brando (Ь) suaviza a consoante anterior como um leve "i" oculto. Em Ы, puxe a língua para trás mantendo os lábios relaxados.',
+  },
+  {
+    languages: ['ru'],
+    pattern: /[оа]/i,
+    ruleTitle: 'Redução Vocálica (Аканье)',
+    tipPt: 'Em Russo, a letra "О" sem acento tônico soa como um "A" aberto suave (ex.: "хорошо" = kha-ra-SHÔ).',
+  },
+  {
+    languages: ['ja'],
+    pattern: /[っーおうえい]/,
+    ruleTitle: 'Vogais Longas e Pausa Sokuon (っ)',
+    tipPt: 'Respeite a duração dupla em "ー/おう/えい" e faça uma micro-pausa antes de consoantes dobradas com "っ" (ex.: ki-tte).',
+  },
+  {
+    languages: ['zh'],
+    pattern: /[\u4e00-\u9fff]/,
+    ruleTitle: 'Contorno dos 4 Tons do Mandarim',
+    tipPt: 'Mantenha cada tom nítido: 1º alto e plano (55), 2º subindo (35), 3º descendo e subindo (214), 4º caindo firme (51).',
+  },
+];
+
+export function analyzePhoneticFeedback(
+  target: string,
+  spoken: string,
+  languageCode: LanguageCode = 'en',
+): PhoneticFeedbackResult {
+  const base = evaluatePronunciation(target, spoken);
+  const words: PhoneticWordDetail[] = base.words.map((w) => ({
+    word: w.word,
+    syllables: splitSyllables(w.word),
+    matched: w.matched,
+  }));
+
+  const missedWords = words.filter((w) => !w.matched).map((w) => w.word);
+  const probeText = missedWords.length > 0 ? missedWords.join(' ') : target;
+
+  const tips: PhoneticTipItem[] = [];
+  for (const rule of PHONETIC_RULES) {
+    if (!rule.languages.includes(languageCode)) continue;
+    const match = probeText.match(rule.pattern) ?? target.match(rule.pattern);
+    if (match) {
+      tips.push({
+        ruleTitle: rule.ruleTitle,
+        tipPt: rule.tipPt,
+        highlight: match[0],
+      });
+    }
+    if (tips.length >= 2) break;
+  }
+
+  let summaryPt = '';
+  if (base.score >= 90) {
+    summaryPt =
+      'Excelente clareza fonética! Todas as sílabas-chave foram reconhecidas com precisão.';
+  } else if (base.score >= 70) {
+    summaryPt = `Boa pronúncia (${base.score}%). Foque nas sílabas destacadas em vermelho e ouça novamente em 0.75x.`;
+  } else {
+    summaryPt = `Precisa de reforço (${base.score}%). Pratique devagar em 0.75x sílaba por sílaba antes de acelerar.`;
+  }
+
+  return {
+    score: base.score,
+    words,
+    phoneticTips: tips,
+    summaryPt,
+  };
+}

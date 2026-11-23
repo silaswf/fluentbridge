@@ -13,26 +13,30 @@ import {
   UNIT_ROLEPLAY_ANGLES,
 } from '../../data/tutorScenarios';
 
-describe('Multi-language curriculum, immersion & AI tutor integrity (v3.0.0)', () => {
-  it('ships 410 units across 8 languages (60 EN + 50 each for ES/FR/IT/DE/RU/JA/ZH) with >= 100 tips each', () => {
-    expect(BUILTIN_TOPICS.length).toBe(60);
-    expect(ALL_BUILTIN_TOPICS.length).toBe(410);
+describe('Multi-language curriculum, immersion & AI tutor integrity (v4.0.0)', () => {
+  it('ships 800 units across 8 languages (100 per language, 20 per CEFR level A1–C1) with >= 200 tips each', () => {
+    expect(BUILTIN_TOPICS.length).toBe(100);
+    expect(ALL_BUILTIN_TOPICS.length).toBe(800);
 
     for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'] as const) {
       const langTopics = ALL_BUILTIN_TOPICS.filter(
         (t) => (t.languageCode ?? 'en') === lang,
       );
-      expect(langTopics.length).toBe(lang === 'en' ? 60 : 50);
+      expect(langTopics.length).toBe(100);
+
+      for (const lvl of ['A1', 'A2', 'B1', 'B2', 'C1'] as const) {
+        expect(langTopics.filter((t) => t.level === lvl).length).toBe(20);
+      }
 
       const tipCount = langTopics.reduce(
         (acc, t) => acc + t.steps.filter((s) => s.type === 'tip').length,
         0,
       );
-      expect(tipCount).toBeGreaterThanOrEqual(100);
+      expect(tipCount).toBeGreaterThanOrEqual(200);
     }
 
     const topicIds = new Set(ALL_BUILTIN_TOPICS.map((t) => t.id));
-    expect(topicIds.size).toBe(410);
+    expect(topicIds.size).toBe(800);
 
     for (const v of ALL_INITIAL_VOCABULARY) {
       expect(topicIds.has(v.topicId)).toBe(true);
@@ -75,19 +79,19 @@ describe('Multi-language curriculum, immersion & AI tutor integrity (v3.0.0)', (
     }
   });
 
-  it('ships 800 grammar reference entries (100 per language across 8 languages)', () => {
-    expect(ALL_GRAMMAR_GUIDE.length).toBe(800);
+  it('ships 1600 grammar reference entries (200 per language across 8 languages)', () => {
+    expect(ALL_GRAMMAR_GUIDE.length).toBe(1600);
     for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'] as const) {
-      expect(getGrammarGuideByLanguage(lang).length).toBe(100);
+      expect(getGrammarGuideByLanguage(lang).length).toBe(200);
     }
   });
 
-  it('ships 160 AI tutor scenarios (20 per language across 8 languages) and 10 unit roleplay angles', () => {
-    expect(AI_TUTOR_SCENARIOS.length).toBe(160);
+  it('ships 320 AI tutor scenarios (40 per language across 8 languages) and 10 unit roleplay angles', () => {
+    expect(AI_TUTOR_SCENARIOS.length).toBe(320);
     for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'] as const) {
       expect(
         AI_TUTOR_SCENARIOS.filter((s) => s.languageCode === lang).length,
-      ).toBe(20);
+      ).toBe(40);
     }
     expect(UNIT_ROLEPLAY_ANGLES.length).toBe(10);
   });

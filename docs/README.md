@@ -1,6 +1,6 @@
-# Documentação de Desenvolvimento — FluentBridge (`v3.0.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v4.0.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **8 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês e Chinês Mandarim** de `A1` a `C1` — com subunidades estilo Busuu, revisão progressiva SM-2, autolimpeza de áudios em 60 dias, Tutor IA dinâmico, **Painel Admin Mestre**, Estúdio do **Prof. Silas**, emissão de certificados CEFR por idioma e sincronização multiplataforma em **Windows**, **Android** e **Web**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **8 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês e Chinês Mandarim** de `A1` a `C1`, com **`800` unidades**, **`1.600` guias gramaticais**, **`320` cenários IA**, **Treinador de Escrita/Traços**, **Feedback Fonético**, **Modo Shadowing**, **Caderno de Erros**, **Podcasts Curtos**, **RLS Relacional Estrito** e **Compactação Esparsa**).
 
 ---
 
@@ -19,13 +19,12 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°
 
 ---
 
-## Resumo do Estado Atual (`v3.0.0`)
+## Resumo do Estado Atual (`v4.0.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API `v3.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (`.apk` + `.aab`) + **Windows Setup** (`FluentBridge-Setup-3.0.0.exe`) |
-| **Autenticação, VIP, Retenção & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth), **Vinculação VIP (`PROF-SILAS`)**, **Painel Admin Mestre**, **autolimpeza de áudios de Speaking > 60 dias** preservando feedbacks escritos e sync granular |
-| **Currículo, Subunidades & Nivelamento CAT** | **`410` unidades** (`60` EN + `50` ES/FR/IT/DE/RU/JA/ZH) em **subunidades estilo Busuu com progresso salvo**, **vocabulário progressivo SM-2**, **Nivelamento CAT (`320` questões, `40`/idioma)**, **imersão B2/C1**, **`800` tabelas gramaticais** |
-| **Tutor IA Dinâmico** | **`20` situações/idioma (`160` total)** + **`10` modos dinâmicos por unidade (`4.100` combinações)** + **Cenário Livre** via Gemini + fallback offline nos 8 idiomas |
-| **Áudio Neural, STT & Pronúncia** | **Deepgram Aura-2** (`EN/ES`) + **Gemini 2.5 Neural TTS** (`FR/IT/DE/RU/JA/ZH`) + **Whisper Cloud STT (`/api/stt`)** nos 8 idiomas + avaliador Unicode/CJK |
-| **Verificação & CI/CD** | `npm test` (`9` arquivos / `29` testes OK) · `npx tsc --noEmit` (`0` erros) · `DIST_LEAK=CLEAN` · GitHub Actions `.apk` + `.aab` |
+| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API `v3.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (`.apk` + `.aab`) + **Windows Setup** (`FluentBridge-Setup-4.0.0.exe`) |
+| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito (`v4.0` Seção 9)**, `syncRelationalFullState`, **compactação esparsa (~95% menor no JSONB/localStorage)**, **autolimpeza de áudios > 60 dias** preservando feedbacks escritos e **Painel Admin Mestre** |
+| **Currículo, Escrita & Nivelamento CAT** | **`800` unidades** (`100`/idioma, `20`/nível A1–C1), **Treinador de Escrita & Traços** (`JA/ZH/RU`), **botão Traduzir PT em B2/C1**, **`1.600` tabelas gramaticais**, **`320` questões CAT** |
+| **Voz, Fonética, Shadowing, Erros & Podcasts** | **Feedback Fonético Silábico**, **Modo Shadowing** (`0.75x–1.15x`), **Caderno Inteligente de Erros**, **`40` Podcasts Curtos Multi-Voz**, **Tutor IA (`320` cenários + `8.000` modos)** |
+| **Verificação & CI/CD** | `npm test` (`12` arquivos / `33` testes OK) · `npx tsc --noEmit` (`0` erros) · GitHub Actions `.apk` + `.aab` |

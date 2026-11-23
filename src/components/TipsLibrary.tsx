@@ -3,9 +3,13 @@ import {
   AlertCircle,
   ArrowRight,
   BookOpen,
+  Headphones,
   Lightbulb,
+  PenTool,
   Search,
 } from 'lucide-react';
+import { PodcastImmersionView } from './PodcastImmersionView';
+import { ScriptStrokeTrainer } from './ScriptStrokeTrainer';
 import {
   getGrammarGuideByLanguage,
   type GrammarReferenceEntry,
@@ -47,7 +51,8 @@ export function TipsLibrary({
   onPracticeTopic,
   onPracticeTopicWithAI,
 }: TipsLibraryProps) {
-  const [viewMode, setViewMode] = useState<'tips' | 'guide'>('tips');
+  const [viewMode, setViewMode] = useState<'tips' | 'guide' | 'scripts' | 'podcasts'>('tips');
+  const [showB2C1Translation, setShowB2C1Translation] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<'all' | TipCategory>('all');
   const [levelFilter, setLevelFilter] = useState<'ALL' | CEFRLevel>('ALL');
@@ -133,35 +138,76 @@ export function TipsLibrary({
         </div>
 
         {/* Mode Toggle */}
-        <div className="inline-flex self-start rounded-2xl border border-slate-200 bg-white p-1 shadow-2xs">
-          <button
-            type="button"
-            onClick={() => setViewMode('tips')}
-            className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
-              viewMode === 'tips'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <Lightbulb className="h-3.5 w-3.5" />
-            <span>Dicas ({allTips.length})</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('guide')}
-            className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
-              viewMode === 'guide'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            <span>Guia Gramatical ({grammarGuide.length})</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          <div className="inline-flex flex-wrap rounded-2xl border border-slate-200 bg-white p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('tips')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'tips'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Lightbulb className="h-3.5 w-3.5" />
+              <span>Dicas ({allTips.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('guide')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'guide'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>Guia ({grammarGuide.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('scripts')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'scripts'
+                  ? 'bg-cyan-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <PenTool className="h-3.5 w-3.5" />
+              <span>Escrita &amp; Traços</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('podcasts')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'podcasts'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Headphones className="h-3.5 w-3.5" />
+              <span>Podcasts</span>
+            </button>
+          </div>
+
+          {(viewMode === 'tips' || viewMode === 'guide') && (
+            <button
+              type="button"
+              onClick={() => setShowB2C1Translation((v) => !v)}
+              className={`rounded-xl border px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                showB2C1Translation
+                  ? 'border-indigo-400 bg-indigo-100 text-indigo-900'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              🌐 {showB2C1Translation ? 'Ocultar Tradução B2/C1' : 'Mostrar Tradução PT (B2/C1)'}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Search & Filters */}
+      {/* Search & Filters (tips & guide only) */}
+      {(viewMode === 'tips' || viewMode === 'guide') && (
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -233,6 +279,7 @@ export function TipsLibrary({
           </div>
         </div>
       </div>
+      )}
 
       {/* TOPIC TIPS GRID */}
       {viewMode === 'tips' &&
@@ -412,10 +459,23 @@ export function TipsLibrary({
                     💡 {entry.note}
                   </p>
                 )}
+                {showB2C1Translation && isImmersionLevel(entry.level) && (
+                  <p className="mt-2 rounded-xl bg-indigo-50 px-3 py-1.5 text-[11px] font-medium text-indigo-900">
+                    🌐 PT: {entry.examplePt}
+                  </p>
+                )}
               </div>
             </article>
           ))}
         </div>
+      )}
+
+      {viewMode === 'scripts' && (
+        <ScriptStrokeTrainer languageCode={languageCode} />
+      )}
+
+      {viewMode === 'podcasts' && (
+        <PodcastImmersionView languageCode={languageCode} />
       )}
     </div>
   );

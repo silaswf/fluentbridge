@@ -141,6 +141,7 @@ export function normalizePlatformState(
           learnedVocabIds: Array.isArray(u.learnedVocabIds)
             ? u.learnedVocabIds
             : [],
+          mistakeBank: Array.isArray(u.mistakeBank) ? u.mistakeBank : [],
           skillScores: {
             listening: u.skillScores?.listening ?? 50,
             reading: u.skillScores?.reading ?? 50,
@@ -243,10 +244,36 @@ export function loadPlatformState(
   }
 }
 
+/**
+ * Compacta o estado antes de gravar no localStorage / Supabase JSONB:
+ * remove cards de vocabulário ainda intocados (reviewCount === 0, weak, sem nextReviewAt),
+ * pois o catálogo completo (~2.900+ cards) é reidratado automaticamente em normalizePlatformState.
+ */
+export function compactPlatformStateForStorage(
+  state: PlatformState,
+): PlatformState {
+  return {
+    ...state,
+    users: state.users.map((u) => ({
+      ...u,
+      vocab: (u.vocab ?? []).filter(
+        (c) =>
+          c.reviewCount > 0 ||
+          c.strength !== 'weak' ||
+          Boolean(c.nextReviewAt) ||
+          (c.repetitions ?? 0) > 0 ||
+          (c.lapses ?? 0) > 0,
+      ),
+      mistakeBank: (u.mistakeBank ?? []).slice(0, 150),
+    })),
+  };
+}
+
 export function savePlatformState(state: PlatformState): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(state));
+    const compacted = compactPlatformStateForStorage(state);
+    window.localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(compacted));
   } catch {
     // Ignore storage quota errors gracefully
   }

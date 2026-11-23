@@ -9,6 +9,7 @@ import {
 } from '../utils/cloudSync';
 import type { PlatformState, VocabCard } from '../types/learning';
 import { purgeExpiredSpeakingAudios } from '../utils/audioRetention';
+import { syncRelationalFullState } from '../utils/relationalSync';
 import { normalizePlatformState } from '../utils/storage';
 
 interface UseCloudSyncControllerOptions {
@@ -114,6 +115,7 @@ export function useCloudSyncController({
       void pushStateToCloud(state).then((res) => {
         if (res.ok) {
           void syncRelationalTablesBestEffort(state, supabaseUrl, supabaseAnonKey);
+          void syncRelationalFullState(state, supabaseUrl, supabaseAnonKey);
           setAutoSyncStatus({
             state: 'synced',
             message: 'Sincronizado automaticamente com a nuvem.',

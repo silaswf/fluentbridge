@@ -1,6 +1,6 @@
-# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v2.4.0`)
+# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v4.0.0`)
 
-Relatório técnico da auditoria pós-`v2.4.0` do **FluentBridge Academy**, validando o **Nivelamento Adaptativo (CAT) de `15` questões (`200` questões totais em `placement-bank`)**, **`260` unidades**, **imersão B2/C1**, **`500` guias gramaticais**, **Tutor IA dinâmico**, **Alunos VIP** e segurança (`DIST_LEAK=CLEAN` + `24/24` testes Vitest).
+Relatório técnico da auditoria pós-`v4.0.0` do **FluentBridge Academy**, validando **`800` unidades** (`100`/idioma), **`1.600` guias gramaticais**, **`320` cenários IA**, **Treinador de Escrita/Traços**, **Feedback Fonético**, **Modo Shadowing**, **Caderno de Erros**, **Podcasts Curtos**, **Compactação Esparsa (~95%)**, **RLS Relacional Estrito (`Seção 9`)** e **`33/33` testes Vitest** com `0` erros TypeScript.
 
 ---
 

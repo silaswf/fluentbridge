@@ -100,14 +100,25 @@ export default defineConfig(({ command }) => ({
           ) {
             return 'curriculum-zh';
           }
-          if (id.includes('/grammar/enGrammarExtra')) return 'grammar-en';
-          if (id.includes('/grammar/esGrammarExtra')) return 'grammar-es';
-          if (id.includes('/grammar/frGrammarExtra')) return 'grammar-fr';
-          if (id.includes('/grammar/itGrammarExtra')) return 'grammar-it';
-          if (id.includes('/grammar/deGrammarExtra')) return 'grammar-de';
-          if (id.includes('/grammar/ruGrammarGuide')) return 'grammar-ru';
-          if (id.includes('/grammar/jaGrammarGuide')) return 'grammar-ja';
-          if (id.includes('/grammar/zhGrammarGuide')) return 'grammar-zh';
+          if (id.includes('/curriculum/enExpansionV4')) return 'curriculum-en-v4';
+          if (id.includes('/curriculum/spanishExpansionV4')) return 'curriculum-es-v4';
+          if (id.includes('/curriculum/frenchExpansionV4')) return 'curriculum-fr-v4';
+          if (id.includes('/curriculum/italianExpansionV4')) return 'curriculum-it-v4';
+          if (id.includes('/curriculum/germanExpansionV4')) return 'curriculum-de-v4';
+          if (id.includes('/curriculum/russianExpansionV4')) return 'curriculum-ru-v4';
+          if (id.includes('/curriculum/japaneseExpansionV4')) return 'curriculum-ja-v4';
+          if (id.includes('/curriculum/chineseExpansionV4')) return 'curriculum-zh-v4';
+          if (id.includes('/grammar/enGrammarExtra') || id.includes('/grammar/enGrammarV4')) return 'grammar-en';
+          if (id.includes('/grammar/esGrammarExtra') || id.includes('/grammar/esGrammarV4')) return 'grammar-es';
+          if (id.includes('/grammar/frGrammarExtra') || id.includes('/grammar/frGrammarV4')) return 'grammar-fr';
+          if (id.includes('/grammar/itGrammarExtra') || id.includes('/grammar/itGrammarV4')) return 'grammar-it';
+          if (id.includes('/grammar/deGrammarExtra') || id.includes('/grammar/deGrammarV4')) return 'grammar-de';
+          if (id.includes('/grammar/ruGrammarGuide') || id.includes('/grammar/ruGrammarV4')) return 'grammar-ru';
+          if (id.includes('/grammar/jaGrammarGuide') || id.includes('/grammar/jaGrammarV4')) return 'grammar-ja';
+          if (id.includes('/grammar/zhGrammarGuide') || id.includes('/grammar/zhGrammarV4')) return 'grammar-zh';
+          if (id.includes('/data/scriptTrainerData')) return 'script-trainer';
+          if (id.includes('/data/podcastEpisodes')) return 'podcasts';
+          if (id.includes('/data/tutorScenarios')) return 'tutor-scenarios';
           if (id.includes('/data/placement/')) {
             return 'placement-bank';
           }

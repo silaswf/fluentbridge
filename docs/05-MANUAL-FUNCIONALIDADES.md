@@ -1,6 +1,6 @@
-# 05 — Manual Completo de Funcionalidades (`v2.4.0`)
+# 05 — Manual Completo de Funcionalidades (`v4.0.0`)
 
-Guia prático cobrindo todas as telas e fluxos do **FluentBridge Academy** em **5 idiomas (`260` unidades, Nivelamento Adaptativo de `15` questões sobre banco de `40`/idioma no idioma-alvo, imersão B2/C1, `500` guias gramaticais e Tutor IA dinâmico)** para alunos (Turma, VIP ou Autônomo), professores e o **Painel Admin Mestre** do **Prof. Silas**.
+Guia prático cobrindo todas as telas e fluxos do **FluentBridge Academy** em **8 idiomas (`800` unidades = `100`/idioma, Nivelamento Adaptativo de `15` questões sobre `320` questões no idioma-alvo, imersão B2/C1 com botão Traduzir PT, Treinador de Escrita & Traços, Feedback Fonético Silábico, Modo Shadowing, Caderno Inteligente de Erros, `40` Podcasts Curtos, `1.600` guias gramaticais e Tutor IA dinâmico)** para alunos (Turma, VIP ou Autônomo), professores e o **Painel Admin Mestre** do **Prof. Silas**.
 
 ---
 

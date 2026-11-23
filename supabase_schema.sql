@@ -383,3 +383,66 @@ $$;
 
 -- Opcional (se pg_cron estiver habilitado no Supabase):
 -- select cron.schedule('fb-cleanup-60d-audios', '0 3 * * *', $$select public.cleanup_expired_speaking_audios(60);$$);
+
+-- ============================================================================
+-- 9. Migração Definitiva de Segurança v4.0 (RLS Relacional Estrito)
+-- ============================================================================
+
+alter table public.student_progress add column if not exists recommended_level_by_language jsonb not null default '{}'::jsonb;
+alter table public.student_progress add column if not exists topic_step_progress jsonb not null default '{}'::jsonb;
+alter table public.student_progress add column if not exists learned_vocab_ids text[] not null default '{}';
+alter table public.student_progress add column if not exists mistake_bank jsonb not null default '[]'::jsonb;
+
+create or replace function public.is_master_admin()
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select lower(coalesce(auth.jwt()->>'email', '')) = 'silaswf@gmail.com';
+$$;
+
+-- Helper: verifica se o professor autenticado é responsável pelo aluno (VIP ou Turma)
+create or replace function public.teaches_student(target_student_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select public.is_master_admin()
+  or exists (
+    select 1 from public.profiles p
+    where p.id = target_student_id and p.assigned_teacher_id = auth.uid()
+  )
+  or exists (
+    select 1 from public.class_members cm
+    join public.classes c on c.id = cm.class_id
+    where cm.student_id = target_student_id and c.teacher_id = auth.uid()
+  );
+$$;
+
+drop policy if exists "profiles_self_select" on public.profiles;
+create policy "profiles_self_select" on public.profiles
+  for select to authenticated
+  using (id = auth.uid() or public.teaches_student(id) or role = 'teacher');
+
+drop policy if exists "progress_teacher_read" on public.student_progress;
+create policy "progress_teacher_read" on public.student_progress
+  for select to authenticated
+  using (user_id = auth.uid() or public.teaches_student(user_id));
+
+drop policy if exists "submissions_student_rw" on public.submissions;
+create policy "submissions_student_rw" on public.submissions
+  for select to authenticated
+  using (student_id = auth.uid() or public.teaches_student(student_id));
+
+drop policy if exists "submissions_teacher_grade" on public.submissions;
+create policy "submissions_teacher_grade" on public.submissions
+  for update to authenticated
+  using (public.teaches_student(student_id))
+  with check (public.teaches_student(student_id));
+
+-- Quando todos os alunos estiverem autenticados via Supabase Auth, ative o bloqueio estrito abaixo:
+-- drop policy if exists "Allow anon read write school state" on public.fb_school_state;
+-- create policy "Authenticated read write school state" on public.fb_school_state
+--   for all to authenticated using (auth.uid() is not null) with check (auth.uid() is not null);

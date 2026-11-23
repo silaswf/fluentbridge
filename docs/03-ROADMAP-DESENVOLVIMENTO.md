@@ -1,6 +1,6 @@
-# 03 — Roadmap de Desenvolvimento até a Completude (`v2.0.0` → `v3.0.0`)
+# 03 — Roadmap de Desenvolvimento até a Completude (`v1.0.0` → `v4.0.0`+)
 
-Este roadmap registra todas as entregas já concluídas do **FluentBridge Academy** (Fases 0 a 9, encerrando o marco **`v2.0.0`**) e define o próximo plano de evolução (**Fases 10 a 12 · `v2.1` → `v3.0`**) para levar a plataforma ao máximo potencial pedagógico, arquitetural e comercial.
+Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** até o marco **`v4.0.0`** (`800` unidades em `8` idiomas, `1.600` guias gramaticais, `320` cenários IA, Treinador de Escrita/Traços, Feedback Fonético, Modo Shadowing, Caderno de Erros, Podcasts Curtos e RLS Relacional Estrito) e aponta as evoluções futuras (`v4.1+`).
 
 ---
 

@@ -6,6 +6,7 @@ import { getEffectiveSupabaseConfig } from '../config/appConfig';
 import type {
   ClassGroup,
   CloudConfig,
+  MistakeEntry,
   PlatformState,
   StudentSubmission,
   TeacherAssignment,
@@ -15,6 +16,7 @@ import type {
   VocabCard,
 } from '../types/learning';
 import { blobToDataUrl } from './audioDb';
+import { compactPlatformStateForStorage } from './storage';
 
 export const NATIVE_OAUTH_REDIRECT_URL = 'com.fluentbridge.app://auth-callback';
 
@@ -238,7 +240,7 @@ const DEFAULT_SLUG = 'fluentbridge-main';
 let cachedClientKey = '';
 let cachedClient: SupabaseClient | null = null;
 
-function getSupabaseClient(url: string, anonKey: string): SupabaseClient {
+export function getSupabaseClient(url: string, anonKey: string): SupabaseClient {
   const cleanUrl = url.trim();
   const cleanKey = anonKey.trim();
   const cacheKey = `${cleanUrl}::${cleanKey}`;
@@ -433,6 +435,16 @@ function mergeUserProfiles(
     completedTopicIds,
     learnedVocabIds,
     topicStepProgress: mergedTopicProgress,
+    mistakeBank: (() => {
+      const map = new Map<string, MistakeEntry>();
+      for (const m of [...(secondary.mistakeBank ?? []), ...(primary.mistakeBank ?? [])]) {
+        const prev = map.get(m.id);
+        if (!prev || m.resolved || m.reviewCount > prev.reviewCount) {
+          map.set(m.id, m);
+        }
+      }
+      return Array.from(map.values()).slice(0, 150);
+    })(),
     recommendedLevelByLanguage: {
       ...(secondary.recommendedLevelByLanguage ?? {}),
       ...(primary.recommendedLevelByLanguage ?? {}),
@@ -813,12 +825,13 @@ export async function pushStateToCloud(
       // Proceed with local snapshot if pre-fetch fails
     }
 
-    // Never persist client Gemini keys inside shared cloud JSON snapshot
+    // Never persist client Gemini keys inside shared cloud JSON snapshot, and compact sparse vocab
+    const compacted = compactPlatformStateForStorage(stateToSave);
     const sanitizedState: PlatformState = {
-      ...stateToSave,
+      ...compacted,
       currentUserId: null,
       cloudConfig: {
-        ...stateToSave.cloudConfig,
+        ...compacted.cloudConfig,
         geminiApiKey: '',
         lastSyncedAt: nowIso,
       },

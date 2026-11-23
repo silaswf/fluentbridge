@@ -4,6 +4,32 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v4.0.0`] — 2026-11-23
+### 800 Unidades CEFR (`100`/Idioma), 1.600 Tabelas Gramaticais, 320 Cenários IA, Treinador de Escrita & Traços, Feedback Fonético, Shadowing, Caderno de Erros, Podcasts Curtos & Migração RLS Definitiva
+- **Expansão Curricular Massiva para `800` Unidades (`100` por idioma × `8` idiomas, `20` por nível A1–C1 em todos os idiomas):**
+  - Expansão profunda nos níveis iniciais (`A1`, `A2`, `B1`) e avançados (`B2`, `C1`) com vocabulário essencial de sobrevivência, viagens, aeroporto, hotel, farmácia/médico, supermercado, banco, moradia e carreira (`enExpansionV4.ts`, `spanishExpansionV4.ts`, `frenchExpansionV4.ts`, `italianExpansionV4.ts`, `germanExpansionV4.ts`, `russianExpansionV4.ts`, `japaneseExpansionV4.ts`, `chineseExpansionV4.ts`).
+  - **`1.600` Tabelas no Guia Gramatical** (`200` por idioma) e **`320` Cenários Base no Tutor IA** (`40` por idioma + `8.000` combinações dinâmicas por unidade).
+- **Treinador de Escrita & Ordem de Traços (`src/components/ScriptStrokeTrainer.tsx`, `src/data/scriptTrainerData.ts`):**
+  - Canvas interativo (mouse e touch) com grade guia, marca d'água alternável, contagem de traços, dicas passo a passo e áudio nativo para **Japonês** (Hiragana, Katakana, Kanji), **Chinês Mandarim** (Hanzi + Guia Visual dos **4 Tons**) e **Russo** (Cirílico + falsos amigos visuais).
+  - Integrado **duplamente**: de forma progressiva dentro da etapa `Vocabulário da Unidade` no `LessonPlayer` (`✍️ Traços`) e como aba dedicada **`Escrita & Traços`** em `TipsLibrary.tsx`.
+- **Botão "Traduzir PT" em Imersão B2/C1 (`LessonPlayer.tsx`, `TipsLibrary.tsx`):**
+  - Unidades, dicas e guias gramaticais B2/C1 continuam em **imersão 100% no idioma estudado** por padrão, agora com botão discreto **`🌐 Traduzir PT`** para revelar apoio em Português quando o aluno sentir dificuldade.
+- **Feedback Fonético & Silábico (`src/utils/phoneticFeedback.ts`, `LessonPlayer.tsx`):**
+  - Análise palavra-a-palavra e **por blocos silábicos** na etapa de Speaking, com detecção automática de armadilhas fonéticas para brasileiros nos 8 idiomas (`TH`, `-ed`, `RR`, nasais francesas, duplas italianas, `CH/Umlaut`, `Ь/Ы/Аканье`, `っ/vogais longas`, `4 tons`).
+- **Modo Shadowing (`src/components/steps/ShadowingPanel.tsx`):**
+  - Integrado ao Speaking no `LessonPlayer.tsx` com seletor de velocidade (`0.75x / 0.9x / 1.0x / 1.15x`), contagem regressiva `3-2-1`, gravação simultânea, comparação nativa vs. gravação do aluno e transcrição Whisper.
+- **Caderno Inteligente de Erros (`src/utils/mistakeBank.ts`, `src/components/MistakeNotebookView.tsx`, `VocabReview.tsx`):**
+  - Captura automática de erros em lições, ditados e montagem de frases, acessível na aba **`Caderno de Erros`** dentro de `Revisão` (sem poluir o menu lateral), com prática de reescrita, áudio e recompensa de `+10 XP` ao marcar como dominado.
+- **Podcasts Curtos & Imersão Multi-Voz (`src/data/podcastEpisodes.ts`, `src/components/PodcastImmersionView.tsx`):**
+  - `40` episódios curtos (`5` por idioma, A1–C1) com duas vozes neurais sincronizadas, controle de velocidade, tradução alternável, compreensão auditiva e indicação de vídeos para imersão dentro da aba **`Podcasts`** em `Central & Guia`.
+- **Migração Definitiva de Segurança (RLS Relacional) & Compactação Esparsa (`supabase_schema.sql`, `src/utils/relationalSync.ts`, `src/utils/storage.ts`, `AdminPanel.tsx`):**
+  - Compactação esparsa (`compactPlatformStateForStorage`) reduz o payload de vocabulário salvo no `localStorage` e Supabase JSONB em **~95%**, mantendo reidratação completa dos `2.900+` cards em memória.
+  - Seção 9 de `supabase_schema.sql` adiciona `is_master_admin()`, `teaches_student()`, colunas relacionais em `student_progress` (`topic_step_progress`, `learned_vocab_ids`, `mistake_bank`) e `syncRelationalFullState`.
+- **Proteção de Cota Gratuita (Ponto 4):** pacotes de download em massa offline por nível **não foram ativados** para evitar estouro das cotas gratuitas de Cloudflare Workers AI / Gemini TTS (mantendo cache `IndexedDB` sob demanda).
+- **Qualidade Validada (`v4.0.0`):** **`12` suítes / `33` testes Vitest aprovados**, **`0` erros TypeScript**, **`vite build` limpo** com chunks modulares.
+
+---
+
 ## [`v3.0.0`] — 2026-11-23
 ### Correção Crítica (`React #300`), Subunidades estilo Busuu, Vocabulário Progressivo, Limpeza Automática de Áudios (60d) & 3 Novos Idiomas (`Russo`, `Japonês`, `Chinês Mandarim`)
 - **Correção Crítica do Crash ao Finalizar Unidade (`Minified React error #300` em `src/components/LessonPlayer.tsx`):**

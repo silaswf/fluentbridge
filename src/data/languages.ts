@@ -16,6 +16,14 @@ import { GERMAN_ALL_TOPICS, GERMAN_ALL_VOCAB } from './curriculum/germanExtra';
 import { RUSSIAN_ALL_TOPICS, RUSSIAN_ALL_VOCAB } from './curriculum/russianExtra';
 import { JAPANESE_ALL_TOPICS, JAPANESE_ALL_VOCAB } from './curriculum/japaneseExtra';
 import { CHINESE_ALL_TOPICS, CHINESE_ALL_VOCAB } from './curriculum/chineseExtra';
+import { EN_V4_TOPICS, EN_V4_VOCAB } from './curriculum/enExpansionV4';
+import { SPANISH_V4_TOPICS, SPANISH_V4_VOCAB } from './curriculum/spanishExpansionV4';
+import { FRENCH_V4_TOPICS, FRENCH_V4_VOCAB } from './curriculum/frenchExpansionV4';
+import { ITALIAN_V4_TOPICS, ITALIAN_V4_VOCAB } from './curriculum/italianExpansionV4';
+import { GERMAN_V4_TOPICS, GERMAN_V4_VOCAB } from './curriculum/germanExpansionV4';
+import { RUSSIAN_V4_TOPICS, RUSSIAN_V4_VOCAB } from './curriculum/russianExpansionV4';
+import { JAPANESE_V4_TOPICS, JAPANESE_V4_VOCAB } from './curriculum/japaneseExpansionV4';
+import { CHINESE_V4_TOPICS, CHINESE_V4_VOCAB } from './curriculum/chineseExpansionV4';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -355,6 +363,7 @@ export const ENGLISH_ALL_TOPICS: Topic[] = [
   ...GRAMMAR_TOPICS_C1,
   ...TOPICS_EN_SPECIAL,
   ...TOPICS_EN_EXPANSION,
+  ...EN_V4_TOPICS,
 ]
   .map((t) => ({ ...t, languageCode: t.languageCode ?? ('en' as LanguageCode) }))
   .sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
@@ -370,7 +379,26 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = [
   ...GRAMMAR_VOCAB_C1,
   ...VOCAB_EN_SPECIAL,
   ...VOCAB_EN_EXPANSION,
+  ...EN_V4_VOCAB,
 ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) }));
+
+const sortByLevel = (list: Topic[]) =>
+  [...list].sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
+
+export const SPANISH_100_TOPICS: Topic[] = sortByLevel([...SPANISH_ALL_TOPICS, ...SPANISH_V4_TOPICS]);
+export const SPANISH_100_VOCAB: VocabCard[] = [...SPANISH_ALL_VOCAB, ...SPANISH_V4_VOCAB];
+export const FRENCH_100_TOPICS: Topic[] = sortByLevel([...FRENCH_ALL_TOPICS, ...FRENCH_V4_TOPICS]);
+export const FRENCH_100_VOCAB: VocabCard[] = [...FRENCH_ALL_VOCAB, ...FRENCH_V4_VOCAB];
+export const ITALIAN_100_TOPICS: Topic[] = sortByLevel([...ITALIAN_ALL_TOPICS, ...ITALIAN_V4_TOPICS]);
+export const ITALIAN_100_VOCAB: VocabCard[] = [...ITALIAN_ALL_VOCAB, ...ITALIAN_V4_VOCAB];
+export const GERMAN_100_TOPICS: Topic[] = sortByLevel([...GERMAN_ALL_TOPICS, ...GERMAN_V4_TOPICS]);
+export const GERMAN_100_VOCAB: VocabCard[] = [...GERMAN_ALL_VOCAB, ...GERMAN_V4_VOCAB];
+export const RUSSIAN_100_TOPICS: Topic[] = sortByLevel([...RUSSIAN_ALL_TOPICS, ...RUSSIAN_V4_TOPICS]);
+export const RUSSIAN_100_VOCAB: VocabCard[] = [...RUSSIAN_ALL_VOCAB, ...RUSSIAN_V4_VOCAB];
+export const JAPANESE_100_TOPICS: Topic[] = sortByLevel([...JAPANESE_ALL_TOPICS, ...JAPANESE_V4_TOPICS]);
+export const JAPANESE_100_VOCAB: VocabCard[] = [...JAPANESE_ALL_VOCAB, ...JAPANESE_V4_VOCAB];
+export const CHINESE_100_TOPICS: Topic[] = sortByLevel([...CHINESE_ALL_TOPICS, ...CHINESE_V4_TOPICS]);
+export const CHINESE_100_VOCAB: VocabCard[] = [...CHINESE_ALL_VOCAB, ...CHINESE_V4_VOCAB];
 
 export {
   SPANISH_ALL_TOPICS,
@@ -403,19 +431,19 @@ export function getCourseTopics(
     languageCode === 'en'
       ? ENGLISH_ALL_TOPICS
       : languageCode === 'es'
-        ? SPANISH_ALL_TOPICS
+        ? SPANISH_100_TOPICS
         : languageCode === 'fr'
-          ? FRENCH_ALL_TOPICS
+          ? FRENCH_100_TOPICS
           : languageCode === 'it'
-            ? ITALIAN_ALL_TOPICS
+            ? ITALIAN_100_TOPICS
             : languageCode === 'de'
-              ? GERMAN_ALL_TOPICS
+              ? GERMAN_100_TOPICS
               : languageCode === 'ru'
-                ? RUSSIAN_ALL_TOPICS
+                ? RUSSIAN_100_TOPICS
                 : languageCode === 'ja'
-                  ? JAPANESE_ALL_TOPICS
+                  ? JAPANESE_100_TOPICS
                   : languageCode === 'zh'
-                    ? CHINESE_ALL_TOPICS
+                    ? CHINESE_100_TOPICS
                     : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,

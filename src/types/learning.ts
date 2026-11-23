@@ -351,6 +351,21 @@ export interface TopicProgressRecord {
   updatedAt: string;
 }
 
+export interface MistakeEntry {
+  id: string;
+  languageCode: LanguageCode;
+  topicId: string;
+  topicTitle: string;
+  skill: SkillType | 'grammar' | 'vocab';
+  prompt: string;
+  studentAnswer: string;
+  expectedAnswer: string;
+  explanation: string;
+  createdAt: string;
+  reviewCount: number;
+  resolved?: boolean;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -379,6 +394,7 @@ export interface UserProfile {
   completedTopicIds: string[];
   topicStepProgress?: Record<string, TopicProgressRecord>;
   learnedVocabIds?: string[];
+  mistakeBank?: MistakeEntry[];
   skillScores: Record<SkillType, number>;
   vocab: VocabCard[];
   issuedCertificates: CertificateRecord[];

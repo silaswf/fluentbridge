@@ -54,9 +54,13 @@ import {
   transcribeAudioBlob,
 } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
+import { ScriptStrokeTrainer } from './ScriptStrokeTrainer';
 import { SkillBadge, TIP_CATEGORY_META } from './SkillBadge';
 import { Phase8StepsView } from './steps/Phase8StepsView';
-import { getImmersionStrings } from '../utils/immersion';
+import { ShadowingPanel } from './steps/ShadowingPanel';
+import { extractScriptCharsFromWord } from '../data/scriptTrainerData';
+import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
+import { analyzePhoneticFeedback } from '../utils/phoneticFeedback';
 
 interface LessonPlayerProps {
   topic: Topic;
@@ -71,6 +75,15 @@ interface LessonPlayerProps {
   onChangeDialect: (dialectCode: string) => void;
   onSaveProgress?: (topicId: string, progress: TopicProgressRecord) => void;
   onUnlockVocab?: (vocabIds: string[]) => void;
+  onRecordMistake?: (payload: {
+    topicId: string;
+    topicTitle: string;
+    skill: SkillType | 'grammar' | 'vocab';
+    prompt: string;
+    studentAnswer: string;
+    expectedAnswer: string;
+    explanation: string;
+  }) => void;
   onSubmitWriting: (payload: {
     topicId: string;
     topicTitle: string;
@@ -206,6 +219,7 @@ export function LessonPlayer({
   onChangeDialect,
   onSaveProgress,
   onUnlockVocab,
+  onRecordMistake,
   onSubmitWriting,
   onSubmitSpeaking,
   onCompleteLesson,
@@ -241,6 +255,8 @@ export function LessonPlayer({
   );
   const [maxReachedStepIdx, setMaxReachedStepIdx] = useState(safeInitialIdx);
   const [studiedVocabIds, setStudiedVocabIds] = useState<string[]>([]);
+  const [expandedTraceCardId, setExpandedTraceCardId] = useState<string | null>(null);
+  const [showPtTranslation, setShowPtTranslation] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [isCompletedScreen, setIsCompletedScreen] = useState(false);
 
@@ -454,8 +470,36 @@ export function LessonPlayer({
       if (selectedOption === null) return;
       const ok = selectedOption === currentStep.correctIndex;
       setCheckedStatus(ok ? 'correct' : 'incorrect');
-      if (ok) registerCorrect(20);
-      else registerMistake();
+      if (ok) {
+        registerCorrect(20);
+      } else {
+        registerMistake();
+        onRecordMistake?.({
+          topicId: topic.id,
+          topicTitle: topic.titlePt,
+          skill:
+            currentStep.type === 'reading' || currentStep.type === 'story'
+              ? 'reading'
+              : currentStep.type === 'fill_blank'
+                ? 'grammar'
+                : 'listening',
+          prompt:
+            currentStep.type === 'fill_blank'
+              ? `${currentStep.sentenceBefore} ___ ${currentStep.sentenceAfter}`
+              : currentStep.type === 'minimal_pairs'
+                ? currentStep.promptPt
+                : currentStep.question,
+          studentAnswer:
+            currentStep.type === 'minimal_pairs'
+              ? currentStep.options[selectedOption]?.word ?? ''
+              : currentStep.options[selectedOption] ?? '',
+          expectedAnswer:
+            currentStep.type === 'minimal_pairs'
+              ? currentStep.options[currentStep.correctIndex]?.word ?? ''
+              : currentStep.options[currentStep.correctIndex] ?? '',
+          explanation: currentStep.explanation,
+        });
+      }
       return;
     }
 
@@ -464,8 +508,20 @@ export function LessonPlayer({
       const evalRes = evaluatePronunciation(currentStep.audioText, dictationText);
       const ok = evalRes.score >= 75;
       setCheckedStatus(ok ? 'correct' : 'incorrect');
-      if (ok) registerCorrect(25);
-      else registerMistake();
+      if (ok) {
+        registerCorrect(25);
+      } else {
+        registerMistake();
+        onRecordMistake?.({
+          topicId: topic.id,
+          topicTitle: topic.titlePt,
+          skill: 'listening',
+          prompt: currentStep.promptPt,
+          studentAnswer: dictationText.trim(),
+          expectedAnswer: currentStep.audioText,
+          explanation: `Tradução: ${currentStep.translationPt}`,
+        });
+      }
       return;
     }
 
@@ -474,8 +530,20 @@ export function LessonPlayer({
       const ok =
         normalizeAnswer(built) === normalizeAnswer(currentStep.targetSentence);
       setCheckedStatus(ok ? 'correct' : 'incorrect');
-      if (ok) registerCorrect(20);
-      else registerMistake();
+      if (ok) {
+        registerCorrect(20);
+      } else {
+        registerMistake();
+        onRecordMistake?.({
+          topicId: topic.id,
+          topicTitle: topic.titlePt,
+          skill: 'writing',
+          prompt: currentStep.promptPt,
+          studentAnswer: built,
+          expectedAnswer: currentStep.targetSentence,
+          explanation: currentStep.explanation,
+        });
+      }
     }
   };
 
@@ -915,7 +983,10 @@ export function LessonPlayer({
 
   if (!currentStep) return null;
 
-  const imm = getImmersionStrings(topic.languageCode ?? 'en', topic.level);
+  const imm = getImmersionStrings(
+    topic.languageCode ?? 'en',
+    showPtTranslation ? 'A1' : topic.level,
+  );
 
   const badgeKind =
     currentStep.type === 'vocab_intro'
@@ -928,7 +999,11 @@ export function LessonPlayer({
 
   const speakingEval =
     currentStep.type === 'speaking' && spokenText
-      ? evaluatePronunciation(currentStep.targetSentence, spokenText)
+      ? analyzePhoneticFeedback(
+          currentStep.targetSentence,
+          spokenText,
+          topic.languageCode ?? 'en',
+        )
       : null;
 
   const activeHint = getActiveHintText();
@@ -1055,6 +1130,21 @@ export function LessonPlayer({
                 title="Alternar sotaque"
               >
                 {activeDialectObj.flag} {activeDialectObj.code.split('-')[1]}
+              </button>
+            )}
+
+            {isImmersionLevel(topic.level) && (
+              <button
+                type="button"
+                onClick={() => setShowPtTranslation((v) => !v)}
+                className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                  showPtTranslation
+                    ? 'border-indigo-400 bg-indigo-100 text-indigo-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+                title="Alternar auxílio em Português para níveis B2/C1"
+              >
+                <span>🌐 {showPtTranslation ? 'Imersão' : 'Traduzir PT'}</span>
               </button>
             )}
 
@@ -1235,12 +1325,39 @@ export function LessonPlayer({
                             {card.examplePt}
                           </p>
                         </div>
-                        <DualAudioButtons
-                          text={card.exampleEn}
-                          languageCode={lang}
-                          size="xs"
-                        />
+                        <div className="flex items-center gap-1.5">
+                          {(lang === 'ja' || lang === 'zh' || lang === 'ru') &&
+                            extractScriptCharsFromWord(card.word, lang).length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedTraceCardId((prev) =>
+                                    prev === card.id ? null : card.id,
+                                  )
+                                }
+                                className="rounded-lg border border-cyan-200 bg-cyan-50 px-2 py-1 text-[11px] font-bold text-cyan-800 hover:bg-cyan-100 cursor-pointer"
+                              >
+                                ✍️ {expandedTraceCardId === card.id ? 'Fechar' : 'Traços'}
+                              </button>
+                            )}
+                          <DualAudioButtons
+                            text={card.exampleEn}
+                            languageCode={lang}
+                            size="xs"
+                          />
+                        </div>
                       </div>
+
+                      {expandedTraceCardId === card.id &&
+                        (lang === 'ja' || lang === 'zh' || lang === 'ru') && (
+                          <div className="mt-3 rounded-xl border border-cyan-200 bg-cyan-50/30 p-3">
+                            <ScriptStrokeTrainer
+                              languageCode={lang}
+                              initialChars={extractScriptCharsFromWord(card.word, lang)}
+                              compact
+                            />
+                          </div>
+                        )}
                     </div>
                   );
                 })}
@@ -1814,7 +1931,7 @@ export function LessonPlayer({
               )}
 
               {speakingEval && (
-                <div className="animate-fade-up rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-left">
+                <div className="animate-fade-up space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-left">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-900">
                       Você disse: “{spokenText}”
@@ -1823,22 +1940,41 @@ export function LessonPlayer({
                       {speakingEval.score}% precisão
                     </span>
                   </div>
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  <p className="text-xs font-medium text-emerald-900">
+                    {speakingEval.summaryPt}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
                     {speakingEval.words.map((w, idx) => (
                       <span
                         key={idx}
                         className={`rounded-lg px-2 py-0.5 text-xs font-semibold ${
                           w.matched
                             ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
+                            : 'bg-rose-100 text-rose-800 ring-1 ring-rose-300'
                         }`}
+                        title={`Sílabas: ${w.syllables.join(' · ')}`}
                       >
-                        {w.word}
+                        {w.syllables.join('·')}
                       </span>
                     ))}
                   </div>
+                  {speakingEval.phoneticTips.length > 0 && (
+                    <div className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">
+                      {speakingEval.phoneticTips.map((pt, pIdx) => (
+                        <p key={pIdx}>
+                          <strong>🎯 {pt.ruleTitle}:</strong> {pt.tipPt}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
+
+              <ShadowingPanel
+                targetText={currentStep.targetSentence}
+                dialectCode={dialectCode}
+                languageCode={topic.languageCode ?? 'en'}
+              />
 
               {recordedAudioUrl && (
                 <div className="animate-fade-up space-y-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4">

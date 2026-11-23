@@ -23,6 +23,7 @@ import { TeacherLinkModal } from './components/TeacherLinkModal';
 import type { TeacherTab } from './components/TeacherStudio';
 import { useCloudSyncController } from './hooks/useCloudSyncController';
 import { purgeExpiredSpeakingAudios } from './utils/audioRetention';
+import { addMistakeEntry, markMistakeResolved } from './utils/mistakeBank';
 import { scheduleDailyStudyReminder } from './utils/notifications';
 import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
 import { recordStudyActivity } from './utils/streakEngine';
@@ -1317,6 +1318,35 @@ export function App() {
     });
   };
 
+  const handleRecordMistake = (payload: {
+    topicId: string;
+    topicTitle: string;
+    skill: SkillType | 'grammar' | 'vocab';
+    prompt: string;
+    studentAnswer: string;
+    expectedAnswer: string;
+    explanation: string;
+  }) => {
+    updateCurrentUser((u) => ({
+      ...u,
+      mistakeBank: addMistakeEntry(u.mistakeBank, {
+        ...payload,
+        languageCode: u.activeLanguage,
+      }),
+    }));
+  };
+
+  const handleResolveMistake = (mistakeId: string, resolved: boolean) => {
+    updateCurrentUser((u) => ({
+      ...u,
+      xp: resolved ? u.xp + 10 : u.xp,
+      mistakeBank: markMistakeResolved(u.mistakeBank, mistakeId, resolved),
+    }));
+    if (resolved) {
+      showToast('Erro marcado como dominado! +10 XP');
+    }
+  };
+
   const handleRunAudioRetentionCleanup = async (): Promise<string> => {
     const res = await purgeExpiredSpeakingAudios(
       state.submissions,
@@ -1445,6 +1475,9 @@ export function App() {
               vocab={unlockedCourseVocab}
               allCourseVocab={courseVocab}
               topics={courseTopics}
+              languageCode={activeLanguage}
+              mistakes={currentUser.mistakeBank ?? []}
+              onResolveMistake={handleResolveMistake}
               onRateCard={handleRateVocab}
               onGoToLearn={() => setActiveView('learn')}
             />
@@ -1619,6 +1652,7 @@ export function App() {
             onChangeDialect={handleChangeDialect}
             onSaveProgress={handleSaveTopicProgress}
             onUnlockVocab={handleUnlockVocab}
+            onRecordMistake={handleRecordMistake}
             onSubmitWriting={handleSubmitWriting}
             onSubmitSpeaking={handleSubmitSpeaking}
             onCompleteLesson={handleCompleteLesson}

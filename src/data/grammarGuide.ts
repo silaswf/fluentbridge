@@ -11,6 +11,14 @@ import { DE_GRAMMAR_EXTRA } from './grammar/deGrammarExtra';
 import { RU_GRAMMAR_GUIDE } from './grammar/ruGrammarGuide';
 import { JA_GRAMMAR_GUIDE } from './grammar/jaGrammarGuide';
 import { ZH_GRAMMAR_GUIDE } from './grammar/zhGrammarGuide';
+import { EN_GRAMMAR_V4 } from './grammar/enGrammarV4';
+import { ES_GRAMMAR_V4 } from './grammar/esGrammarV4';
+import { FR_GRAMMAR_V4 } from './grammar/frGrammarV4';
+import { IT_GRAMMAR_V4 } from './grammar/itGrammarV4';
+import { DE_GRAMMAR_V4 } from './grammar/deGrammarV4';
+import { RU_GRAMMAR_V4 } from './grammar/ruGrammarV4';
+import { JA_GRAMMAR_V4 } from './grammar/jaGrammarV4';
+import { ZH_GRAMMAR_V4 } from './grammar/zhGrammarV4';
 
 export interface GrammarReferenceEntry {
   id: string;
@@ -468,6 +476,14 @@ export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...RU_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'ru' as LanguageCode })),
   ...JA_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'ja' as LanguageCode })),
   ...ZH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'zh' as LanguageCode })),
+  ...EN_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'en' as LanguageCode })),
+  ...ES_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'es' as LanguageCode })),
+  ...FR_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'fr' as LanguageCode })),
+  ...IT_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'it' as LanguageCode })),
+  ...DE_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
+  ...RU_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'ru' as LanguageCode })),
+  ...JA_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'ja' as LanguageCode })),
+  ...ZH_GRAMMAR_V4.map((e) => ({ ...e, languageCode: 'zh' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

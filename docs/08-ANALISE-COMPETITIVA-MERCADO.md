@@ -1,7 +1,7 @@
-# 08 — Auditoria 360° (`v3.0.0`) & Análise Competitiva de Mercado
+# 08 — Auditoria 360° (`v4.0.0`), Saúde da Arquitetura & Análise Competitiva de Mercado
 
-> **Data da auditoria:** 23/11/2026 · **Versão auditada:** `v3.0.0`  
-> **Escopo:** Arquitetura, Bundle/PWA, UI/UX, Pedagogia, Segurança, Sincronização & Retenção de Áudios, Voz/IA, Multiplataforma e Comparativo Completo com Líderes de Mercado (**Duolingo, Busuu, Babbel, Speak, Cambly, Preply e Rosetta Stone**).
+> **Data da auditoria:** 23/11/2026 · **Versão auditada:** `v4.0.0`  
+> **Escopo:** Arquitetura e Estrutura do Código, Bundle/PWA, UI/UX, Pedagogia (`800` unidades), Segurança (RLS Relacional + Compactação Esparsa), Retenção de Áudios (60d), Voz/Fonética/Shadowing/Escrita e Comparativo de Mercado.
 
 ---
 
@@ -103,3 +103,22 @@
    - Migrar a persistência principal do blob `fb_school_state` para tabelas relacionais autenticadas com RLS estrito por `auth.uid()` e Edge Functions para validação de roles, evitando qualquer exposição cruzada de dados entre turmas diferentes.
 9. **Modo Shadowing & Imersão por Vídeo/Podcast Curto:**
    - Exercícios de *shadowing* com controle de velocidade (`0.75x / 0.9x / 1.0x / 1.15x`) e comparação lado a lado da onda sonora do aluno vs. falante nativo.
+
+
+---
+
+## 4. Avaliação de Arquitetura & Estrutura do Programa (`v4.0.0`)
+
+Para responder diretamente sobre a saúde estrutural do projeto: **sim, a arquitetura e a estrutura do programa estão muito sólidas e bem organizadas**, especialmente considerando o salto para `800` unidades e `8` idiomas:
+
+1. **Separação clara de camadas (`src/types/`, `src/data/`, `src/utils/`, `src/components/`, `src/hooks/`):**
+   - Toda a lógica de negócio pura (SRS SM-2, nivelamento adaptativo CAT, desbloqueio progressivo de vocabulário, compactação esparsa, retenção de áudio 60d, feedback fonético, caderno de erros e sync relacional) é desacoplada da UI e coberta por **`33` testes automatizados Vitest (`12` suítes)**.
+2. **Code-Splitting & Bundle Saudável (`vite.config.ts`):**
+   - O shell inicial carrega em **`160,04 kB`** (`47,02 kB` gzip). Todo o conteúdo pesado (currículos por idioma, guias gramaticais, banco de 320 questões CAT, treinador de traços e podcasts) é fatiado em **chunks independentes** (`< 350 kB` cada), muito abaixo do limite de `3 MB` do PWA.
+3. **Resiliência de Armazenamento & Cota Gratuita:**
+   - A compactação esparsa (`compactPlatformStateForStorage`) evita que `2.900+` cards saturem o `localStorage` ou o plano gratuito do Supabase.
+   - A decisão de **não** pré-baixar pacotes de áudio inteiros por nível protege suas cotas gratuitas do Cloudflare Workers AI e Gemini TTS.
+4. **Segurança & Multiplataforma:**
+   - `GEMINI_API_KEY` fica isolado no Cloudflare Worker (`fluentbridge-api`), senhas locais usam hash `fbh1:`, e a Seção 9 do `supabase_schema.sql` + `relationalSync.ts` habilita o RLS estrito por `auth.uid()`.
+5. **Único ponto de atenção futuro (manutenibilidade, não é bug):**
+   - `TeacherStudio.tsx` (~2.212 linhas) e `LessonPlayer.tsx` (~2.350 linhas) cresceram naturalmente com tantas funcionalidades. Já iniciamos a modularização em subpastas (`src/components/steps/` e `src/components/teacher/`), e em ciclos futuros (`v4.1+`) vale continuar extraindo sub-etapas isoladas desses dois arquivos apenas para manter a leitura do código ainda mais leve.

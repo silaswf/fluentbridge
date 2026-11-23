@@ -8,7 +8,13 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import type { CEFRLevel, Topic, VocabCard } from '../types/learning';
+import type {
+  CEFRLevel,
+  LanguageCode,
+  MistakeEntry,
+  Topic,
+  VocabCard,
+} from '../types/learning';
 import {
   isCardDue,
   previewNextIntervalLabel,
@@ -16,11 +22,15 @@ import {
   type SrsRating,
 } from '../utils/srsEngine';
 import { DualAudioButtons } from './DualAudioButtons';
+import { MistakeNotebookView } from './MistakeNotebookView';
 
 interface VocabReviewProps {
   vocab: VocabCard[];
   allCourseVocab?: VocabCard[];
   topics: Topic[];
+  languageCode?: LanguageCode;
+  mistakes?: MistakeEntry[];
+  onResolveMistake?: (mistakeId: string, resolved: boolean) => void;
   onRateCard: (cardId: string, rating: SrsRating) => void;
   onGoToLearn?: () => void;
 }
@@ -47,9 +57,13 @@ export function VocabReview({
   vocab,
   allCourseVocab,
   topics,
+  languageCode = 'en',
+  mistakes = [],
+  onResolveMistake,
   onRateCard,
   onGoToLearn,
 }: VocabReviewProps) {
+  const [sectionTab, setSectionTab] = useState<'vocab' | 'mistakes'>('vocab');
   const [scope, setScope] = useState<'learned' | 'catalog'>('learned');
   const [mode, setMode] = useState<'flashcards' | 'list'>('flashcards');
   const [filterStrength, setFilterStrength] = useState<'all' | 'due' | VocabCard['strength']>('all');
@@ -175,6 +189,33 @@ export function VocabReview({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setSectionTab('vocab')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                sectionTab === 'vocab'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              Vocabulário SRS
+            </button>
+            <button
+              type="button"
+              onClick={() => setSectionTab('mistakes')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                sectionTab === 'mistakes'
+                  ? 'bg-amber-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              Caderno de Erros (
+              {mistakes.filter((m) => m.languageCode === languageCode && !m.resolved).length}
+              )
+            </button>
+          </div>
+
           {allCourseVocab && allCourseVocab.length > vocab.length && (
             <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
               <button
@@ -240,6 +281,14 @@ export function VocabReview({
         </div>
       </div>
 
+      {sectionTab === 'mistakes' && onResolveMistake ? (
+        <MistakeNotebookView
+          mistakes={mistakes}
+          languageCode={languageCode}
+          onResolveMistake={onResolveMistake}
+        />
+      ) : (
+        <>
       {/* CEFR Level Pills */}
       <div className="flex flex-wrap items-center gap-1.5">
         {(['ALL', 'A1', 'A2', 'B1', 'B2', 'C1'] as const).map((lvl) => (
@@ -627,6 +676,8 @@ export function VocabReview({
             ))}
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

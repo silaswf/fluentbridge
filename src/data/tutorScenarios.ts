@@ -2,6 +2,14 @@ import type { AITutorScenario, LanguageCode } from '../types/learning';
 import { RU_TUTOR_SCENARIOS } from './tutorScenariosRu';
 import { JA_TUTOR_SCENARIOS } from './tutorScenariosJa';
 import { ZH_TUTOR_SCENARIOS } from './tutorScenariosZh';
+import { EN_TUTOR_SCENARIOS_V4 } from './tutorScenariosEnV4';
+import { ES_TUTOR_SCENARIOS_V4 } from './tutorScenariosEsV4';
+import { FR_TUTOR_SCENARIOS_V4 } from './tutorScenariosFrV4';
+import { IT_TUTOR_SCENARIOS_V4 } from './tutorScenariosItV4';
+import { DE_TUTOR_SCENARIOS_V4 } from './tutorScenariosDeV4';
+import { RU_TUTOR_SCENARIOS_V4 } from './tutorScenariosRuV4';
+import { JA_TUTOR_SCENARIOS_V4 } from './tutorScenariosJaV4';
+import { ZH_TUTOR_SCENARIOS_V4 } from './tutorScenariosZhV4';
 
 export interface UnitRoleplayAngle {
   id: string;
@@ -1414,4 +1422,12 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
   ...RU_TUTOR_SCENARIOS,
   ...JA_TUTOR_SCENARIOS,
   ...ZH_TUTOR_SCENARIOS,
+  ...EN_TUTOR_SCENARIOS_V4,
+  ...ES_TUTOR_SCENARIOS_V4,
+  ...FR_TUTOR_SCENARIOS_V4,
+  ...IT_TUTOR_SCENARIOS_V4,
+  ...DE_TUTOR_SCENARIOS_V4,
+  ...RU_TUTOR_SCENARIOS_V4,
+  ...JA_TUTOR_SCENARIOS_V4,
+  ...ZH_TUTOR_SCENARIOS_V4,
 ];

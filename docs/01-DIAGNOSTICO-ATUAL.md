@@ -1,6 +1,6 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v2.4.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v4.0.0`)
 
-Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.4.0`** com **5 idiomas completos (`260` unidades: `60` EN + `50` cada ES/FR/IT/DE)**, **Teste de Nivelamento Adaptativo (CAT) de `15` questões com banco de `200` questões (`40`/idioma) 100% no idioma-alvo**, **imersão total B2/C1**, **`500` tabelas gramaticais (`100`/idioma)**, **Tutor IA dinâmico (`20` situações/idioma + `10` modos/unidade)** e **Alunos VIP**.
+Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v4.0.0`** com **8 idiomas completos (`800` unidades: `100` por idioma, `20` por nível CEFR A1–C1)**, **Treinador de Escrita & Ordem de Traços** (`JA/ZH/RU`), **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno Inteligente de Erros**, **`40` Podcasts Curtos Multi-Voz**, **botão Traduzir PT em B2/C1**, **Teste de Nivelamento Adaptativo CAT (`320` questões)**, **`1.600` tabelas gramaticais (`200`/idioma)**, **Tutor IA dinâmico (`40` situações/idioma + `10` modos/unidade)**, **Compactação Esparsa de Vocabulário** e **Migração Definitiva de Segurança (RLS Relacional Estrito)**.
 
 ---
 
