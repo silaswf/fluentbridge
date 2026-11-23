@@ -865,16 +865,18 @@ export function TeacherStudio({
                           ) : (
                             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-rose-200 bg-white p-3">
                               <span className="text-xs text-slate-600">
-                                {selectedSub.audioId
-                                  ? 'Áudio gravado em outro dispositivo (use o player modelo abaixo).'
-                                  : 'Áudio demonstrativo da aluna · Clique para ouvir a frase:'}
+                                {selectedSub.audioArchived
+                                  ? 'Áudio removido automaticamente após 60 dias (transcrição, nota e feedback escritos preservados).'
+                                  : selectedSub.audioId
+                                    ? 'Áudio gravado em outro dispositivo (use o player modelo abaixo).'
+                                    : 'Áudio demonstrativo · Clique para ouvir a frase:'}
                               </span>
                               <DualAudioButtons
                                 text={
                                   selectedSub.targetSentence ??
                                   selectedSub.responseText
                                 }
-                                languageCode="en"
+                                languageCode={selectedSub.languageCode ?? 'en'}
                                 showSlow
                                 size="xs"
                               />

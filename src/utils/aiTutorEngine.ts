@@ -98,6 +98,9 @@ const LANG_NAME_EN: Record<LanguageCode, string> = {
   fr: 'French',
   it: 'Italian',
   de: 'German',
+  ru: 'Russian',
+  ja: 'Japanese',
+  zh: 'Mandarin Chinese',
 };
 
 function analyzeStudentInput(
@@ -133,6 +136,15 @@ function analyzeStudentInput(
       de: wordCount <= 3
         ? 'Gute kurze Antwort – baue gern eine Begründung oder Rückfrage ein.'
         : 'Sehr natürlich! Nutze weiterhin klare Nebensätze und Konnektoren.',
+      ru: wordCount <= 3
+        ? 'Хороший краткий ответ! Попробуйте добавить причину или встречный вопрос.'
+        : 'Очень естественно! Продолжайте использовать связки и точные падежные формы.',
+      ja: wordCount <= 3
+        ? '自然な短い返答ですね！理由や相手への質問も一言添えてみましょう。'
+        : 'とても自然な流れです！接続詞や敬語のニュアンスもよく使えています。',
+      zh: wordCount <= 3
+        ? '简短回答很自然！试着补充一个原因或反问句，让对话更深入。'
+        : '表达非常地道流畅！继续保持准确的声调词序和关联词。',
     };
     return { feedbackPt: immersionFeedback[lang] };
   }
@@ -267,6 +279,63 @@ function buildMultiLangLocalFallbackTurn(
         'Das passt mir gut! Könnten wir die genaue Uhrzeit bestätigen?',
         'Nur zur Sicherheit: Brauche ich noch etwas Bestimmtes?',
         'Vielen Dank für Ihre Hilfe!',
+      ],
+    },
+    ru: {
+      askReply:
+        'Отличный вопрос! Да, мы легко можем это организовать. Какой вариант вам удобнее?',
+      askReplyPt:
+        'Ótima pergunta! Sim, podemos organizar isso facilmente. Qual opção é melhor para você?',
+      followReply:
+        'Понимаю. Не могли бы вы уточнить ещё одну небольшую деталь, чтобы всё прошло идеально?',
+      followReplyPt:
+        'Entendo. Poderia esclarecer mais um pequeno detalhe para que tudo saia perfeito?',
+      closeReply:
+        'Прекрасно, всё подтверждено! Большое спасибо за практику и хорошего дня!',
+      closeReplyPt:
+        'Perfeito, tudo confirmado! Muito obrigado pela prática e tenha um ótimo dia!',
+      suggestions: [
+        'Мне это отлично подходит! Подскажите точное время, пожалуйста?',
+        'На всякий случай: нужно ли мне подготовить что-то ещё?',
+        'Большое спасибо за помощь!',
+      ],
+    },
+    ja: {
+      askReply:
+        'いい質問ですね！はい、もちろん調整できます。どの時間帯が一番ご都合がよいですか？',
+      askReplyPt:
+        'Ótima pergunta! Sim, claro que podemos ajustar. Qual horário é melhor para você?',
+      followReply:
+        'よく分かりました。念のため、もう一つだけ詳しい点を確認してもよろしいですか？',
+      followReplyPt:
+        'Entendi bem. Por garantia, poderia confirmar só mais um detalhe?',
+      closeReply:
+        '完璧です、すべて確認できました！本日はありがとうございました。良い一日を！',
+      closeReplyPt:
+        'Perfeito, tudo confirmado! Muito obrigado por hoje e tenha um ótimo dia!',
+      suggestions: [
+        'それで大丈夫です！正確な時間を確認できますか？',
+        '念のため、他に準備しておくものはありますか？',
+        'ご丁寧な対応、本当にありがとうございます！',
+      ],
+    },
+    zh: {
+      askReply:
+        '问得好！没问题，我们可以这样安排。您觉得哪个时间或方案更合适？',
+      askReplyPt:
+        'Ótima pergunta! Sem problemas, podemos organizar assim. Qual horário ou opção prefere?',
+      followReply:
+        '我完全明白。为了确保万无一失，您能再补充说明一个小细节吗？',
+      followReplyPt:
+        'Entendo perfeitamente. Para garantir tudo certo, poderia esclarecer mais um detalhe?',
+      closeReply:
+        '太好了，这边已经全部确认！非常感谢您的配合，祝您今天愉快！',
+      closeReplyPt:
+        'Ótimo, tudo confirmado por aqui! Muito obrigado pela colaboração e tenha um excelente dia!',
+      suggestions: [
+        '这个安排很合适！能再确认一下具体时间吗？',
+        '为了保险起见，我还需要提前准备什么吗？',
+        '非常感谢您的帮助！',
       ],
     },
   };
@@ -447,6 +516,9 @@ Return ONLY valid JSON:
     fr: `Bonjour ! Pratiquons « ${topic.titleEn} » (${angle.labelEn}). Comment réagiriez-vous ?`,
     it: `Ciao! Esercitiamoci su "${topic.titleEn}" (${angle.labelEn}). Come risponderesti in questa situazione?`,
     de: `Hallo! Lass uns „${topic.titleEn}“ (${angle.labelEn}) üben. Wie würdest du reagieren?`,
+    ru: `Привет! Потренируем тему «${topic.titleEn}» (${angle.labelEn}). Как бы вы ответили в этой ситуации?`,
+    ja: `こんにちは！「${topic.titleEn}」（${angle.labelEn}）のロールプレイを始めましょう。どう対応しますか？`,
+    zh: `你好！我们来练习“${topic.titleEn}”（${angle.labelEn}）。在这种情境下你会怎么回应？`,
   };
   return {
     usedGemini: false,

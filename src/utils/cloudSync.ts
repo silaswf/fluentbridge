@@ -34,8 +34,8 @@ create table if not exists public.profiles (
   full_name text not null,
   email text not null,
   role text not null check (role in ('teacher', 'student')) default 'student',
-  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de')),
-  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE"}'::jsonb,
+  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de','ru','ja','zh')),
+  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE","ru":"ru-RU","ja":"ja-JP","zh":"zh-CN"}'::jsonb,
   assigned_teacher_id uuid references public.profiles(id) on delete set null,
   enrollment_type text not null default 'independent' check (enrollment_type in ('class','vip','independent')),
   teacher_invite_code text unique,
@@ -407,11 +407,36 @@ function mergeUserProfiles(
     ]),
   );
 
+  const learnedVocabIds = Array.from(
+    new Set([
+      ...(localUser.learnedVocabIds ?? []),
+      ...(remoteUser.learnedVocabIds ?? []),
+    ]),
+  );
+
+  const mergedTopicProgress = { ...(secondary.topicStepProgress ?? {}) };
+  for (const [topicId, rec] of Object.entries(primary.topicStepProgress ?? {})) {
+    const prevRec = mergedTopicProgress[topicId];
+    if (
+      !prevRec ||
+      rec.completedSteps.length > prevRec.completedSteps.length ||
+      rec.updatedAt > prevRec.updatedAt
+    ) {
+      mergedTopicProgress[topicId] = rec;
+    }
+  }
+
   return {
     ...secondary,
     ...primary,
     password: primary.password || secondary.password,
     completedTopicIds,
+    learnedVocabIds,
+    topicStepProgress: mergedTopicProgress,
+    recommendedLevelByLanguage: {
+      ...(secondary.recommendedLevelByLanguage ?? {}),
+      ...(primary.recommendedLevelByLanguage ?? {}),
+    },
     xp: Math.max(localUser.xp ?? 0, remoteUser.xp ?? 0),
     streakDays: Math.max(localUser.streakDays ?? 1, remoteUser.streakDays ?? 1),
     streakFreezes: primary.streakFreezes ?? secondary.streakFreezes ?? 1,
@@ -491,6 +516,8 @@ function mergeSubmissions(
     const winningReview =
       existingReviewed && !nextReviewed ? existing : sub;
 
+    const isArchived = Boolean(existing.audioArchived || sub.audioArchived);
+
     map.set(sub.id, {
       ...existing,
       ...sub,
@@ -502,9 +529,16 @@ function mergeSubmissions(
         winningReview.pronunciationRubric ??
         existing.pronunciationRubric ??
         sub.pronunciationRubric,
-      audioId: sub.audioId ?? existing.audioId,
-      audioPath: sub.audioPath ?? existing.audioPath,
-      audioDataUrl: sub.audioDataUrl ?? existing.audioDataUrl,
+      createdAtIso: sub.createdAtIso ?? existing.createdAtIso,
+      audioArchived: isArchived || undefined,
+      audioExpiredAt: isArchived
+        ? sub.audioExpiredAt ?? existing.audioExpiredAt
+        : undefined,
+      audioId: isArchived ? undefined : (sub.audioId ?? existing.audioId),
+      audioPath: isArchived ? undefined : (sub.audioPath ?? existing.audioPath),
+      audioDataUrl: isArchived
+        ? undefined
+        : (sub.audioDataUrl ?? existing.audioDataUrl),
       audioDurationSec: sub.audioDurationSec ?? existing.audioDurationSec,
     });
   }
@@ -707,6 +741,42 @@ export function resolveSubmissionAudioUrl(
     return submission.audioDataUrl;
   }
   return null;
+}
+
+export async function deleteSpeakingAudiosFromCloud(
+  paths: string[],
+  cloudConfig?: CloudConfig,
+): Promise<{ ok: boolean; deleted: number; error?: string }> {
+  const cleanPaths = Array.from(
+    new Set(paths.map((p) => p.trim()).filter(Boolean)),
+  );
+  if (cleanPaths.length === 0) return { ok: true, deleted: 0 };
+
+  const cfg = getEffectiveSupabaseConfig(cloudConfig);
+  if (!cfg.url || !cfg.anonKey) {
+    return { ok: false, deleted: 0, error: 'Supabase não configurado.' };
+  }
+
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    let deleted = 0;
+    const chunkSize = 50;
+    for (let i = 0; i < cleanPaths.length; i += chunkSize) {
+      const batch = cleanPaths.slice(i, i + chunkSize);
+      const { error } = await client.storage.from('fb-audio').remove(batch);
+      if (error) {
+        return { ok: false, deleted, error: error.message };
+      }
+      deleted += batch.length;
+    }
+    return { ok: true, deleted };
+  } catch (err) {
+    return {
+      ok: false,
+      deleted: 0,
+      error: err instanceof Error ? err.message : 'Erro ao remover áudios expirados.',
+    };
+  }
 }
 
 export async function pushStateToCloud(
@@ -1155,6 +1225,9 @@ export async function syncRelationalTablesBestEffort(
         fr: 'fr-FR',
         it: 'it-IT',
         de: 'de-DE',
+        ru: 'ru-RU',
+        ja: 'ja-JP',
+        zh: 'zh-CN',
       },
       enrollment_type: localUser.enrollmentType ?? 'independent',
       teacher_invite_code: localUser.teacherInviteCode ?? null,

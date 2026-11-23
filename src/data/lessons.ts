@@ -7,6 +7,8 @@ import type {
   VocabCard,
 } from '../types/learning';
 import {
+  CHINESE_ALL_TOPICS,
+  CHINESE_ALL_VOCAB,
   ENGLISH_ALL_TOPICS,
   ENGLISH_ALL_VOCAB,
   FRENCH_ALL_TOPICS,
@@ -15,6 +17,10 @@ import {
   GERMAN_ALL_VOCAB,
   ITALIAN_ALL_TOPICS,
   ITALIAN_ALL_VOCAB,
+  JAPANESE_ALL_TOPICS,
+  JAPANESE_ALL_VOCAB,
+  RUSSIAN_ALL_TOPICS,
+  RUSSIAN_ALL_VOCAB,
   SPANISH_ALL_TOPICS,
   SPANISH_ALL_VOCAB,
 } from './languages';
@@ -27,6 +33,9 @@ export const ALL_BUILTIN_TOPICS: Topic[] = [
   ...FRENCH_ALL_TOPICS,
   ...ITALIAN_ALL_TOPICS,
   ...GERMAN_ALL_TOPICS,
+  ...RUSSIAN_ALL_TOPICS,
+  ...JAPANESE_ALL_TOPICS,
+  ...CHINESE_ALL_TOPICS,
 ];
 
 export const INITIAL_VOCABULARY: VocabCard[] = ENGLISH_ALL_VOCAB;
@@ -37,6 +46,9 @@ export const ALL_INITIAL_VOCABULARY: VocabCard[] = [
   ...FRENCH_ALL_VOCAB,
   ...ITALIAN_ALL_VOCAB,
   ...GERMAN_ALL_VOCAB,
+  ...RUSSIAN_ALL_VOCAB,
+  ...JAPANESE_ALL_VOCAB,
+  ...CHINESE_ALL_VOCAB,
 ];
 
 export function cloneInitialVocab(): VocabCard[] {
@@ -100,6 +112,9 @@ export const INITIAL_USERS: UserProfile[] = [
       fr: 'fr-FR',
       it: 'it-IT',
       de: 'de-DE',
+      ru: 'ru-RU',
+      ja: 'ja-JP',
+      zh: 'zh-CN',
     },
     accent: 'en-US',
     recommendedLevel: 'C1',

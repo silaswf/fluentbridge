@@ -148,6 +148,66 @@ function resolveTtsConfig(rawLang, rawVoice) {
       googleLang: 'de',
     };
   }
+  if (lower === 'ru-spb') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ru-SPB',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Saint Petersburg Russian text naturally and clearly, without adding any commentary:',
+      googleLang: 'ru',
+    };
+  }
+  if (lower.startsWith('ru')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ru-RU',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Moscow Russian text clearly and naturally, without adding any commentary:',
+      googleLang: 'ru',
+    };
+  }
+  if (lower === 'ja-kansai') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ja-KANSAI',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following natural Japanese text with warm Kansai/Osaka intonation clearly, without adding any commentary:',
+      googleLang: 'ja',
+    };
+  }
+  if (lower.startsWith('ja')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ja-JP',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Tokyo Japanese text clearly and naturally, without adding any commentary:',
+      googleLang: 'ja',
+    };
+  }
+  if (lower === 'zh-tw') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'zh-TW',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Taiwanese Mandarin Chinese text clearly and naturally, without adding any commentary:',
+      googleLang: 'zh-TW',
+    };
+  }
+  if (lower.startsWith('zh')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'zh-CN',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Mandarin Chinese (Putonghua) text clearly and naturally, without adding any commentary:',
+      googleLang: 'zh-CN',
+    };
+  }
   if (lower.startsWith('pt')) {
     return {
       engine: 'gemini-tts',
@@ -519,6 +579,9 @@ function resolveSttLanguage(rawLang) {
   if (lower.startsWith('fr')) return 'fr';
   if (lower.startsWith('it')) return 'it';
   if (lower.startsWith('de')) return 'de';
+  if (lower.startsWith('ru')) return 'ru';
+  if (lower.startsWith('ja')) return 'ja';
+  if (lower.startsWith('zh')) return 'zh';
   if (lower.startsWith('pt')) return 'pt';
   return 'en';
 }
@@ -620,8 +683,8 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '2.2.0',
-        supportedLanguages: ['en', 'es', 'fr', 'it', 'de'],
+        version: '3.0.0',
+        supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'],
         endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
         rateLimits: {
           ttsPerMin: 120,

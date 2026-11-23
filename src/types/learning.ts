@@ -6,7 +6,7 @@ export type TipCategory = 'grammar' | 'pronunciation' | 'false_friend' | 'cultur
 
 export type Accent = 'en-US' | 'en-GB';
 
-export type LanguageCode = 'en' | 'es' | 'fr' | 'de' | 'it';
+export type LanguageCode = 'en' | 'es' | 'fr' | 'de' | 'it' | 'ru' | 'ja' | 'zh';
 
 export type UserRole = 'teacher' | 'student';
 
@@ -207,7 +207,15 @@ export interface StoryStep {
   hintTip: string;
 }
 
+export interface VocabIntroStep {
+  id: string;
+  type: 'vocab_intro';
+  titlePt?: string;
+  cards: VocabCard[];
+}
+
 export type LessonStep =
+  | VocabIntroStep
   | TipStep
   | ListeningStep
   | ReadingStep
@@ -279,6 +287,9 @@ export interface StudentSubmission {
   targetSentence?: string;
   autoPronunciationScore?: number;
   createdAt: string;
+  createdAtIso?: string;
+  audioArchived?: boolean;
+  audioExpiredAt?: string;
   status: 'pending' | 'reviewed';
   teacherFeedback?: string;
   correctedText?: string;
@@ -333,6 +344,13 @@ export interface TeacherAssignment {
   createdBy: string;
 }
 
+export interface TopicProgressRecord {
+  stepIdx: number;
+  completedSteps: number[];
+  totalSteps: number;
+  updatedAt: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -359,6 +377,8 @@ export interface UserProfile {
   xp: number;
   streakDays: number;
   completedTopicIds: string[];
+  topicStepProgress?: Record<string, TopicProgressRecord>;
+  learnedVocabIds?: string[];
   skillScores: Record<SkillType, number>;
   vocab: VocabCard[];
   issuedCertificates: CertificateRecord[];

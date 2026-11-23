@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v2.4.0`)
+# FluentBridge Academy (`v3.0.0`)
 
-Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** (com **imersão total no idioma estudado a partir do B2** e **Teste de Nivelamento Adaptativo de 15 questões com banco de 40 questões no idioma-alvo para cada língua**), nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*), Tutor de Conversação IA dinâmico (**20 situações/idioma + 10 modos por unidade + cenário livre**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **8 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês e Chinês Mandarim)** de **A1 a C1** (com **imersão total no idioma estudado a partir do B2** e **Teste de Nivelamento Adaptativo de 15 questões com banco de 40 questões no idioma-alvo para cada língua**), unidades divididas em **subunidades/etapas estilo Busuu com progresso salvo**, vocabulário **SM-2 progressivo** com frases de exemplo, autolimpeza de áudios em **60 dias** preservando feedbacks escritos, Tutor IA dinâmico (**20 situações/idioma + 10 modos por unidade**), vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
 
 ---
 
@@ -39,6 +39,7 @@ Toda a documentação detalhada está organizada na pasta **[`docs/`](./docs/REA
 - [05 — Manual Completo de Funcionalidades](./docs/05-MANUAL-FUNCIONALIDADES.md)
 - [06 — Auditoria Completa & Plano de Otimizações](./docs/06-AUDITORIA-OTIMIZACOES.md)
 - [07 — Plano Técnico das Próximas Fases (v1.1 → v2.0)](./docs/07-PLANO-FASE-8-DIFERENCIAIS.md)
+- [08 — Auditoria 360° & Análise Competitiva de Mercado (v3.0.0)](./docs/08-ANALISE-COMPETITIVA-MERCADO.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 
 ---

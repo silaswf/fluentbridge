@@ -4,6 +4,27 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v3.0.0`] — 2026-11-23
+### Correção Crítica (`React #300`), Subunidades estilo Busuu, Vocabulário Progressivo, Limpeza Automática de Áudios (60d) & 3 Novos Idiomas (`Russo`, `Japonês`, `Chinês Mandarim`)
+- **Correção Crítica do Crash ao Finalizar Unidade (`Minified React error #300` em `src/components/LessonPlayer.tsx`):**
+  - Identificada e corrigida a violação da regra de hooks do React: o `useEffect` de atalhos de teclado estava declarado **após** os retornos condicionais `if (isCompletedScreen)` e `if (!currentStep)`, quebrando a tela de conclusão (especialmente reportado em Alemão) e impedindo o registro na trilha em alguns fluxos.
+- **Unidades em Subunidades / Etapas + Progresso Salvo Dentro da Unidade (`LessonPlayer.tsx`, `LearningPath.tsx`, `App.tsx`):**
+  - Toda unidade passa a exibir uma barra superior interativa de **etapas/subunidades** (`Vocabulário`, `Dicas`, `Listening`, `Reading`, `Prática`, `Speaking`, `Writing`), permitindo navegar pelas etapas já alcançadas.
+  - O progresso parcial (`topicStepProgress`: `stepIdx`, `completedSteps`, `totalSteps`, `updatedAt`) é salvo continuamente e sincronizado com a nuvem — ao sair no meio da unidade, o card exibe barra de progresso e botão **"Continuar (X/Y)"**.
+- **Revisão Inteligente Progressiva estilo Duolingo/Busuu (`src/utils/vocabUnlock.ts`, `VocabReview.tsx`, `LessonPlayer.tsx`):**
+  - Substituído o comportamento anterior que exibia todo o vocabulário do curso desde o primeiro acesso.
+  - Cada unidade agora inicia com a etapa interativa **Vocabulário da Unidade** (palavra, IPA/romanização/pinyin, tradução, frase de exemplo e áudio separado para palavra e frase), desbloqueando essas palavras na aba **Revisão (SRS)** apenas conforme o aluno as estuda (`learnedVocabIds` / `completedTopicIds`). Mantido modo opcional **"Catálogo"** para consulta.
+- **Autolimpeza de Áudios a Cada 60 Dias (`src/utils/audioRetention.ts`, `useCloudSyncController.ts`, `AdminPanel.tsx`, `supabase_schema.sql`):**
+  - Documentado e implementado controle automático de retenção (`60` dias) que remove apenas arquivos de áudio expirados no bucket `fb-audio` (Supabase Storage) e `IndexedDB` local, preservando **100% dos feedbacks escritos, transcrições, notas, rubricas e selos** (`audioArchived: true`). Inclui painel de métricas e limpeza manual no `AdminPanel` + função SQL `cleanup_expired_speaking_audios(60)`.
+- **3 Novos Idiomas Completos (`Russo · ru`, `Japonês · ja`, `Chinês Mandarim · zh` — Total `8` Idiomas):**
+  - **`50` unidades CEFR (A1–C1)** por idioma (com **imersão total B2/C1** em Russo, Japonês e Chinês), **`150` cards de vocabulário** com transliteração/Romaji/Pinyin, **`100` guias gramaticais** por idioma (`ruGrammarGuide.ts`, `jaGrammarGuide.ts`, `zhGrammarGuide.ts`), **`20` cenários de Tutor IA** por idioma e **`40` questões adaptativas CAT** no idioma-alvo (`placementRu.ts`, `placementJa.ts`, `placementZh.ts`).
+  - Vozes neurais **Gemini 2.5 Neural TTS** (`ru-RU`, `ru-SPB`, `ja-JP`, `ja-KANSAI`, `zh-CN`, `zh-TW`) + **Whisper STT** no Worker `v3.0.0`, suporte Unicode/CJK em `evaluatePronunciation` (`speech.ts`) e seletor compacto de 8 idiomas em `Sidebar.tsx`.
+- **Auditoria 360° & Comparativo de Mercado (`docs/08-ANALISE-COMPETITIVA-MERCADO.md`):**
+  - Relatório completo de auditoria técnica e comparação competitiva frente a **Duolingo, Busuu, Babbel, Speak, Cambly, Preply e Rosetta Stone**.
+- **Qualidade Validada (`v3.0.0`):** **`9` suítes / `29` testes Vitest aprovados** (`410` unidades, `800` tabelas gramaticais, `160` cenários IA, `320` questões CAT, `audioRetention`, `vocabUnlock`), **`0` erros TypeScript**, **`DIST_LEAK=CLEAN`**.
+
+---
+
 ## [`v2.4.0`] — 2026-11-23
 ### Nivelamento Adaptativo (CAT) nos 5 Idiomas, Banco de 200 Questões no Idioma-Alvo (`40`/idioma) & Diagnóstico em 15 Etapas
 - **Motor Adaptativo de Nivelamento (`src/utils/placementEngine.ts`, `src/components/PlacementTestModal.tsx`):**

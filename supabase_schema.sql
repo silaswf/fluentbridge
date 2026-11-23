@@ -28,8 +28,8 @@ create table if not exists public.profiles (
   full_name text not null,
   email text not null,
   role text not null check (role in ('teacher', 'student')) default 'student',
-  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de')),
-  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE"}'::jsonb,
+  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de','ru','ja','zh')),
+  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE","ru":"ru-RU","ja":"ja-JP","zh":"zh-CN"}'::jsonb,
   assigned_teacher_id uuid references public.profiles(id) on delete set null,
   enrollment_type text not null default 'independent' check (enrollment_type in ('class','vip','independent')),
   teacher_invite_code text unique,
@@ -334,3 +334,52 @@ drop policy if exists "assignments_select_all" on public.assignments;
 create policy "assignments_select_all" on public.assignments for select to authenticated using (true);
 drop policy if exists "assignments_teacher_manage" on public.assignments;
 create policy "assignments_teacher_manage" on public.assignments for all to authenticated using (public.is_teacher()) with check (public.is_teacher());
+
+-- ============================================================================
+-- 8. Migração v3.0.0: 8 Idiomas (RU/JA/ZH) & Autolimpeza de Áudios (60 dias)
+-- ============================================================================
+
+alter table public.profiles drop constraint if exists profiles_active_language_check;
+alter table public.profiles
+  add constraint profiles_active_language_check
+  check (active_language in ('en','es','fr','it','de','ru','ja','zh'));
+
+alter table public.assignments drop constraint if exists assignments_language_code_check;
+alter table public.assignments
+  add constraint assignments_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh'));
+
+alter table public.submissions add column if not exists audio_archived boolean not null default false;
+alter table public.submissions add column if not exists audio_expired_at timestamptz;
+
+create or replace function public.cleanup_expired_speaking_audios(retention_days integer default 60)
+returns integer
+language plpgsql
+security definer set search_path = public, storage
+as $$
+declare
+  removed_count integer := 0;
+begin
+  -- Remove arquivos de áudio do bucket fb-audio mais antigos que retention_days
+  delete from storage.objects
+  where bucket_id = 'fb-audio'
+    and created_at < (now() - make_interval(days => retention_days));
+
+  get diagnostics removed_count = row_count;
+
+  -- Marca envios Speaking expirados preservando 100% os feedbacks, notas e transcrições escritas
+  update public.submissions
+  set audio_path = null,
+      audio_archived = true,
+      audio_expired_at = now()
+  where type = 'speaking'
+    and coalesce(audio_archived, false) = false
+    and audio_path is not null
+    and created_at < (now() - make_interval(days => retention_days));
+
+  return removed_count;
+end;
+$$;
+
+-- Opcional (se pg_cron estiver habilitado no Supabase):
+-- select cron.schedule('fb-cleanup-60d-audios', '0 3 * * *', $$select public.cleanup_expired_speaking_audios(60);$$);

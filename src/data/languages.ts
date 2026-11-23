@@ -13,6 +13,9 @@ import { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB } from './curriculum/spanishCours
 import { FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB } from './curriculum/frenchCourse';
 import { ITALIAN_ALL_TOPICS, ITALIAN_ALL_VOCAB } from './curriculum/italianExtra';
 import { GERMAN_ALL_TOPICS, GERMAN_ALL_VOCAB } from './curriculum/germanExtra';
+import { RUSSIAN_ALL_TOPICS, RUSSIAN_ALL_VOCAB } from './curriculum/russianExtra';
+import { JAPANESE_ALL_TOPICS, JAPANESE_ALL_VOCAB } from './curriculum/japaneseExtra';
+import { CHINESE_ALL_TOPICS, CHINESE_ALL_VOCAB } from './curriculum/chineseExtra';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -78,6 +81,45 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     dialects: [
       { code: 'de-DE', label: 'Alemanha', flag: '🇩🇪' },
       { code: 'de-AT', label: 'Áustria', flag: '🇦🇹' },
+    ],
+  },
+  {
+    code: 'ru',
+    namePt: 'Russo',
+    nativeName: 'Русский',
+    flag: '🇷🇺',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 50 unidades (imersão B2/C1 em russo), 100 guias gramaticais, vozes neurais Gemini (Moscou/S. Petersburgo), cirílico e os 6 casos.',
+    dialects: [
+      { code: 'ru-RU', label: 'Moscou', flag: '🇷🇺' },
+      { code: 'ru-SPB', label: 'S. Petersburgo', flag: '🏛️' },
+    ],
+  },
+  {
+    code: 'ja',
+    namePt: 'Japonês',
+    nativeName: '日本語',
+    flag: '🇯🇵',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 (JLPT N5–N1) com 50 unidades (imersão B2/C1 em japonês), 100 guias gramaticais, vozes neurais Gemini (Tóquio/Kansai) e Keigo.',
+    dialects: [
+      { code: 'ja-JP', label: 'Tóquio', flag: '🇯🇵' },
+      { code: 'ja-KANSAI', label: 'Kansai', flag: '🏯' },
+    ],
+  },
+  {
+    code: 'zh',
+    namePt: 'Chinês',
+    nativeName: '中文',
+    flag: '🇨🇳',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 (HSK 1–6) com 50 unidades (imersão B2/C1 em mandarim), 100 guias gramaticais, vozes neurais Gemini (Pequim/Taiwan), tons e Pinyin.',
+    dialects: [
+      { code: 'zh-CN', label: 'Mandarim (CN)', flag: '🇨🇳' },
+      { code: 'zh-TW', label: 'Taiwan (TW)', flag: '🇹🇼' },
     ],
   },
 ];
@@ -339,6 +381,12 @@ export {
   ITALIAN_ALL_VOCAB,
   GERMAN_ALL_TOPICS,
   GERMAN_ALL_VOCAB,
+  RUSSIAN_ALL_TOPICS,
+  RUSSIAN_ALL_VOCAB,
+  JAPANESE_ALL_TOPICS,
+  JAPANESE_ALL_VOCAB,
+  CHINESE_ALL_TOPICS,
+  CHINESE_ALL_VOCAB,
 };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
@@ -362,7 +410,13 @@ export function getCourseTopics(
             ? ITALIAN_ALL_TOPICS
             : languageCode === 'de'
               ? GERMAN_ALL_TOPICS
-              : [];
+              : languageCode === 'ru'
+                ? RUSSIAN_ALL_TOPICS
+                : languageCode === 'ja'
+                  ? JAPANESE_ALL_TOPICS
+                  : languageCode === 'zh'
+                    ? CHINESE_ALL_TOPICS
+                    : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

@@ -347,11 +347,10 @@ export function LearningPath({
                     key={min}
                     type="button"
                     onClick={() => onChangeDailyGoal(min)}
-                    className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold transition cursor-pointer ${
-                      currentUser.dailyGoalMinutes === min
-                        ? 'bg-white text-blue-700'
-                        : 'bg-white/15 text-white hover:bg-white/25'
-                    }`}
+                    className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold transition cursor-pointer ${currentUser.dailyGoalMinutes === min
+                      ? 'bg-white text-blue-700'
+                      : 'bg-white/15 text-white hover:bg-white/25'
+                      }`}
                   >
                     {min}m
                   </button>
@@ -402,17 +401,15 @@ export function LearningPath({
                   onClick={() =>
                     setSelectedLevel((cur) => (cur === lvl ? 'ALL' : lvl))
                   }
-                  className={`rounded-xl px-2 py-2 text-center transition cursor-pointer ${
-                    selectedLevel === lvl
-                      ? 'bg-white text-blue-700 shadow-xs'
-                      : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
+                  className={`rounded-xl px-2 py-2 text-center transition cursor-pointer ${selectedLevel === lvl
+                    ? 'bg-white text-blue-700 shadow-xs'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
                 >
                   <p className="font-mono text-xs font-extrabold">{lvl}</p>
                   <p
-                    className={`text-[10px] font-semibold ${
-                      selectedLevel === lvl ? 'text-blue-600' : 'text-blue-100'
-                    }`}
+                    className={`text-[10px] font-semibold ${selectedLevel === lvl ? 'text-blue-600' : 'text-blue-100'
+                      }`}
                   >
                     {done}/{lvlTopics.length} unid.
                   </p>
@@ -473,11 +470,10 @@ export function LearningPath({
                   key={lvl}
                   type="button"
                   onClick={() => setSelectedLevel(lvl)}
-                  className={`rounded-full px-3 py-1 text-xs font-bold transition cursor-pointer ${
-                    selectedLevel === lvl
-                      ? 'bg-slate-900 text-white'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
+                  className={`rounded-full px-3 py-1 text-xs font-bold transition cursor-pointer ${selectedLevel === lvl
+                    ? 'bg-slate-900 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
                 >
                   {lvl === 'ALL' ? 'Todos' : lvl}
                 </button>
@@ -519,6 +515,27 @@ export function LearningPath({
                 const Icon = getTopicIcon(topic.icon);
                 const isCompleted = completedTopicIds.includes(topic.id);
                 const isNext = nextTopic?.id === topic.id && !isCompleted;
+                const savedProgress = !isCompleted
+                  ? currentUser.topicStepProgress?.[topic.id]
+                  : undefined;
+                const hasPartialProgress = Boolean(
+                  savedProgress &&
+                    (savedProgress.stepIdx > 0 ||
+                      savedProgress.completedSteps.length > 0),
+                );
+                const partialPct = savedProgress
+                  ? Math.min(
+                      95,
+                      Math.max(
+                        10,
+                        Math.round(
+                          ((savedProgress.stepIdx + 1) /
+                            Math.max(1, savedProgress.totalSteps)) *
+                            100,
+                        ),
+                      ),
+                    )
+                  : 0;
 
                 return (
                   <div key={topic.id} className="relative flex gap-4">
@@ -531,13 +548,12 @@ export function LearningPath({
 
                     <div className="relative z-10 mt-5 hidden sm:block">
                       <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 shadow-xs transition ${
-                          isCompleted
-                            ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : isNext
-                              ? 'border-blue-600 bg-blue-600 text-white ring-4 ring-blue-100'
-                              : 'border-slate-200 bg-white text-slate-700'
-                        }`}
+                        className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 shadow-xs transition ${isCompleted
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : isNext
+                            ? 'border-blue-600 bg-blue-600 text-white ring-4 ring-blue-100'
+                            : 'border-slate-200 bg-white text-slate-700'
+                          }`}
                       >
                         {isCompleted ? (
                           <CheckCircle2 className="h-6 w-6" />
@@ -548,11 +564,10 @@ export function LearningPath({
                     </div>
 
                     <article
-                      className={`flex-1 rounded-2xl border bg-white p-5 transition ${
-                        isNext
-                          ? 'border-blue-300 shadow-sm ring-1 ring-blue-100'
-                          : 'border-slate-200/90 shadow-2xs hover:border-slate-300'
-                      }`}
+                      className={`flex-1 rounded-2xl border bg-white p-5 transition ${isNext
+                        ? 'border-blue-300 shadow-sm ring-1 ring-blue-100'
+                        : 'border-slate-200/90 shadow-2xs hover:border-slate-300'
+                        }`}
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -606,16 +621,23 @@ export function LearningPath({
                           <button
                             type="button"
                             onClick={() => onStartTopic(topic)}
-                            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                              isCompleted
-                                ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
-                            }`}
+                            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${isCompleted
+                              ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                              : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                              }`}
                           >
                             {isCompleted ? (
                               <>
                                 <RotateCcw className="h-3.5 w-3.5" />
                                 <span>Refazer</span>
+                              </>
+                            ) : hasPartialProgress && savedProgress ? (
+                              <>
+                                <Play className="h-3.5 w-3.5 fill-white" />
+                                <span>
+                                  Continuar ({savedProgress.stepIdx + 1}/
+                                  {savedProgress.totalSteps})
+                                </span>
                               </>
                             ) : (
                               <>
@@ -628,6 +650,24 @@ export function LearningPath({
                       </div>
 
                       <p className="mt-2 text-sm text-slate-600">{topic.subtitle}</p>
+
+                      {hasPartialProgress && savedProgress && (
+                        <div className="mt-3 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-blue-800">
+                            <span>
+                              Em andamento · Etapa {savedProgress.stepIdx + 1} de{' '}
+                              {savedProgress.totalSteps}
+                            </span>
+                            <span className="font-mono">{partialPct}%</span>
+                          </div>
+                          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
+                            <div
+                              className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                              style={{ width: `${partialPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
                       {topic.topicTipsSummary.length > 0 && (
                         <div className="topic-tips-box mt-3.5 rounded-xl border p-3">
@@ -652,6 +692,7 @@ export function LearningPath({
                       )}
 
                       <div className="mt-3.5 flex flex-wrap gap-1.5">
+                        <SkillBadge kind="vocab_intro" compact />
                         <SkillBadge kind="listening" compact />
                         <SkillBadge kind="reading" compact />
                         <SkillBadge kind="speaking" compact />
@@ -667,262 +708,259 @@ export function LearningPath({
 
         {/* Right: Daily Quests, Skill Radar, Leaderboard & Teacher Feedback */}
         {isRightPanelOpen && (
-        <aside className="space-y-5 xl:col-span-4">
-          {assignments.filter(
-            (a) =>
-              a.languageCode === activeCourse.code &&
-              ((!a.classId && !a.studentId) ||
-                (a.classId && a.classId === currentUser.classId) ||
-                (a.studentId && a.studentId === currentUser.id) ||
-                currentUser.role === 'teacher'),
-          ).length > 0 && (
-            <div className="rounded-2xl border border-blue-200/80 bg-white p-5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <h3 className="font-display text-base font-bold text-slate-900">
-                  Tarefas do Professor
-                </h3>
-                <Calendar className="h-4.5 w-4.5 text-blue-600" />
-              </div>
-              <div className="mt-3 space-y-2.5">
-                {assignments
-                  .filter(
-                    (a) =>
-                      a.languageCode === activeCourse.code &&
-                      ((!a.classId && !a.studentId) ||
-                        (a.classId && a.classId === currentUser.classId) ||
-                        (a.studentId && a.studentId === currentUser.id) ||
-                        currentUser.role === 'teacher'),
-                  )
-                  .slice(0, 4)
-                  .map((task) => {
-                    const linkedTopic = task.topicId
-                      ? topics.find((t) => t.id === task.topicId)
-                      : undefined;
-                    const done = linkedTopic
-                      ? completedTopicIds.includes(linkedTopic.id)
-                      : false;
-                    return (
-                      <div
-                        key={task.id}
-                        className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-bold text-slate-900">{task.title}</p>
-                          <span
-                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                              done
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
-                          >
-                            {done ? 'Concluída' : `Prazo ${task.dueDate}`}
-                          </span>
-                        </div>
-                        {task.description && (
-                          <p className="mt-1 text-slate-600">{task.description}</p>
-                        )}
-                        {linkedTopic && (
-                          <button
-                            type="button"
-                            onClick={() => onStartTopic(linkedTopic)}
-                            className="mt-2 font-bold text-blue-600 hover:underline cursor-pointer"
-                          >
-                            Abrir unidade: {linkedTopic.titlePt} →
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-          {/* Daily Quests (Missões Diárias) */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-base font-bold text-slate-900">
-                Missões Diárias
-              </h3>
-              <Zap className="h-4.5 w-4.5 text-amber-500" />
-            </div>
-            <div className="mt-3 space-y-3">
-              {quests.map((q) => {
-                const done = q.progress >= q.target;
-                const claimed = currentUser.dailyQuests.claimedQuestIds.includes(
-                  q.id,
-                );
-                const pct = Math.round((q.progress / q.target) * 100);
-                return (
-                  <div
-                    key={q.id}
-                    className="rounded-xl border border-slate-100 bg-slate-50/70 p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-800">
-                      <span>{q.title}</span>
-                      <span className="font-mono text-[11px] text-blue-700">
-                        {q.progress}/{q.target}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          done ? 'bg-emerald-500' : 'bg-blue-600'
-                        }`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    {done && (
-                      <div className="mt-2 flex justify-end">
-                        {claimed ? (
-                          <span className="text-[11px] font-bold text-emerald-700">
-                            ✓ +{q.bonusXp} XP resgatados
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => onClaimDailyQuest(q.id, q.bonusXp)}
-                            className="rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 cursor-pointer"
-                          >
-                            Resgatar +{q.bonusXp} XP
-                          </button>
-                        )}
-                      </div>
-                    )}
+          <aside className="space-y-5 xl:col-span-4">
+            {assignments.filter(
+              (a) =>
+                a.languageCode === activeCourse.code &&
+                ((!a.classId && !a.studentId) ||
+                  (a.classId && a.classId === currentUser.classId) ||
+                  (a.studentId && a.studentId === currentUser.id) ||
+                  currentUser.role === 'teacher'),
+            ).length > 0 && (
+                <div className="rounded-2xl border border-blue-200/80 bg-white p-5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-base font-bold text-slate-900">
+                      Tarefas do Professor
+                    </h3>
+                    <Calendar className="h-4.5 w-4.5 text-blue-600" />
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <SkillRadar
-            scores={currentUser.skillScores}
-            onPracticeLowest={
-              nextTopic ? () => onStartTopic(nextTopic) : undefined
-            }
-          />
-
-          {/* Class Leaderboard */}
-          {sortedLeaderboard.length > 0 && (
+                  <div className="mt-3 space-y-2.5">
+                    {assignments
+                      .filter(
+                        (a) =>
+                          a.languageCode === activeCourse.code &&
+                          ((!a.classId && !a.studentId) ||
+                            (a.classId && a.classId === currentUser.classId) ||
+                            (a.studentId && a.studentId === currentUser.id) ||
+                            currentUser.role === 'teacher'),
+                      )
+                      .slice(0, 4)
+                      .map((task) => {
+                        const linkedTopic = task.topicId
+                          ? topics.find((t) => t.id === task.topicId)
+                          : undefined;
+                        const done = linkedTopic
+                          ? completedTopicIds.includes(linkedTopic.id)
+                          : false;
+                        return (
+                          <div
+                            key={task.id}
+                            className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-bold text-slate-900">{task.title}</p>
+                              <span
+                                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${done
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-amber-100 text-amber-800'
+                                  }`}
+                              >
+                                {done ? 'Concluída' : `Prazo ${task.dueDate}`}
+                              </span>
+                            </div>
+                            {task.description && (
+                              <p className="mt-1 text-slate-600">{task.description}</p>
+                            )}
+                            {linkedTopic && (
+                              <button
+                                type="button"
+                                onClick={() => onStartTopic(linkedTopic)}
+                                className="mt-2 font-bold text-blue-600 hover:underline cursor-pointer"
+                              >
+                                Abrir unidade: {linkedTopic.titlePt} →
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            {/* Daily Quests (Missões Diárias) */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
                 <h3 className="font-display text-base font-bold text-slate-900">
-                  Ranking da Escola
+                  Missões Diárias
                 </h3>
-                <Trophy className="h-4.5 w-4.5 text-amber-500" />
+                <Zap className="h-4.5 w-4.5 text-amber-500" />
               </div>
-              <div className="mt-3 space-y-2">
-                {sortedLeaderboard.map((member, rankIdx) => {
-                  const isMe = member.id === currentUser.id;
+              <div className="mt-3 space-y-3">
+                {quests.map((q) => {
+                  const done = q.progress >= q.target;
+                  const claimed = currentUser.dailyQuests.claimedQuestIds.includes(
+                    q.id,
+                  );
+                  const pct = Math.round((q.progress / q.target) * 100);
                   return (
                     <div
-                      key={member.id}
-                      className={`flex items-center justify-between rounded-xl px-3 py-2 text-xs ${
-                        isMe
-                          ? 'bg-blue-50 font-bold text-blue-900 ring-1 ring-blue-200'
-                          : 'bg-slate-50 text-slate-700'
-                      }`}
+                      key={q.id}
+                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-3"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-4 font-mono font-extrabold text-slate-400">
-                          #{rankIdx + 1}
-                        </span>
-                        <span
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-extrabold text-white"
-                          style={{ backgroundColor: member.avatarColor }}
-                        >
-                          {member.name.slice(0, 2).toUpperCase()}
-                        </span>
-                        <span className="truncate">
-                          {member.name} {isMe ? '(Você)' : ''}
+                      <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-800">
+                        <span>{q.title}</span>
+                        <span className="font-mono text-[11px] text-blue-700">
+                          {q.progress}/{q.target}
                         </span>
                       </div>
-                      <span className="font-mono font-bold text-blue-700">
-                        {member.xp} XP
-                      </span>
+                      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-emerald-500' : 'bg-blue-600'
+                            }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      {done && (
+                        <div className="mt-2 flex justify-end">
+                          {claimed ? (
+                            <span className="text-[11px] font-bold text-emerald-700">
+                              ✓ +{q.bonusXp} XP resgatados
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onClaimDailyQuest(q.id, q.bonusXp)}
+                              className="rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 cursor-pointer"
+                            >
+                              Resgatar +{q.bonusXp} XP
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
-          )}
 
-          {/* Recent Teacher Feedback Card */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-base font-bold text-slate-900">
-                Correções do Professor
-              </h3>
-              <MessageSquareHeart className="h-4.5 w-4.5 text-amber-500" />
-            </div>
+            <SkillRadar
+              scores={currentUser.skillScores}
+              onPracticeLowest={
+                nextTopic ? () => onStartTopic(nextTopic) : undefined
+              }
+            />
 
-            {reviewedSubmissions.length === 0 ? (
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                Envie seu áudio de <strong>Speaking</strong> ou texto de{' '}
-                <strong>Writing</strong> nas lições para receber feedback e selos do professor!
-              </p>
-            ) : (
-              <div className="mt-3 space-y-3">
-                {reviewedSubmissions.slice(0, 3).map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3.5"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-1.5">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-800">
-                        {sub.type === 'speaking' ? (
-                          <Mic className="h-3.5 w-3.5 text-rose-500" />
-                        ) : (
-                          <PenTool className="h-3.5 w-3.5 text-amber-600" />
-                        )}
-                        {sub.studentName} · {sub.topicTitle}
-                      </span>
-                      {sub.teacherBadge && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                          <Award className="h-3 w-3" />
-                          {sub.teacherBadge}
-                        </span>
-                      )}
-                    </div>
-
-                    {sub.pronunciationRubric && (
-                      <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[10px] font-bold text-rose-700">
-                        <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
-                          Clareza {sub.pronunciationRubric.clarity}/5
-                        </span>
-                        <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
-                          Entonação {sub.pronunciationRubric.intonation}/5
-                        </span>
-                        <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
-                          Ritmo {sub.pronunciationRubric.rhythm}/5
+            {/* Class Leaderboard */}
+            {sortedLeaderboard.length > 0 && (
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display text-base font-bold text-slate-900">
+                    Ranking da Escola
+                  </h3>
+                  <Trophy className="h-4.5 w-4.5 text-amber-500" />
+                </div>
+                <div className="mt-3 space-y-2">
+                  {sortedLeaderboard.map((member, rankIdx) => {
+                    const isMe = member.id === currentUser.id;
+                    return (
+                      <div
+                        key={member.id}
+                        className={`flex items-center justify-between rounded-xl px-3 py-2 text-xs ${isMe
+                          ? 'bg-blue-50 font-bold text-blue-900 ring-1 ring-blue-200'
+                          : 'bg-slate-50 text-slate-700'
+                          }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-4 font-mono font-extrabold text-slate-400">
+                            #{rankIdx + 1}
+                          </span>
+                          <span
+                            className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-extrabold text-white"
+                            style={{ backgroundColor: member.avatarColor }}
+                          >
+                            {member.name.slice(0, 2).toUpperCase()}
+                          </span>
+                          <span className="truncate">
+                            {member.name} {isMe ? '(Você)' : ''}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-blue-700">
+                          {member.xp} XP
                         </span>
                       </div>
-                    )}
-
-                    {sub.teacherFeedback && (
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
-                        “{sub.teacherFeedback}”
-                      </p>
-                    )}
-                    {sub.correctedText && (
-                      <p className="mt-2 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-medium text-emerald-900 ring-1 ring-emerald-200/70">
-                        Sugestão: {sub.correctedText}
-                      </p>
-                    )}
-                  </div>
-                ))}
-
-                {onGoToTeacher && (
-                  <button
-                    type="button"
-                    onClick={onGoToTeacher}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Abrir fila completa no Modo Professor →
-                  </button>
-                )}
+                    );
+                  })}
+                </div>
               </div>
             )}
-          </div>
-        </aside>
+
+            {/* Recent Teacher Feedback Card */}
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-base font-bold text-slate-900">
+                  Correções do Professor
+                </h3>
+                <MessageSquareHeart className="h-4.5 w-4.5 text-amber-500" />
+              </div>
+
+              {reviewedSubmissions.length === 0 ? (
+                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                  Envie seu áudio de <strong>Speaking</strong> ou texto de{' '}
+                  <strong>Writing</strong> nas lições para receber feedback e selos do professor!
+                </p>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  {reviewedSubmissions.slice(0, 3).map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3.5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-1.5">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-800">
+                          {sub.type === 'speaking' ? (
+                            <Mic className="h-3.5 w-3.5 text-rose-500" />
+                          ) : (
+                            <PenTool className="h-3.5 w-3.5 text-amber-600" />
+                          )}
+                          {sub.studentName} · {sub.topicTitle}
+                        </span>
+                        {sub.teacherBadge && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                            <Award className="h-3 w-3" />
+                            {sub.teacherBadge}
+                          </span>
+                        )}
+                      </div>
+
+                      {sub.pronunciationRubric && (
+                        <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[10px] font-bold text-rose-700">
+                          <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
+                            Clareza {sub.pronunciationRubric.clarity}/5
+                          </span>
+                          <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
+                            Entonação {sub.pronunciationRubric.intonation}/5
+                          </span>
+                          <span className="rounded-md bg-rose-50 px-1.5 py-0.5">
+                            Ritmo {sub.pronunciationRubric.rhythm}/5
+                          </span>
+                        </div>
+                      )}
+
+                      {sub.teacherFeedback && (
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
+                          “{sub.teacherFeedback}”
+                        </p>
+                      )}
+                      {sub.correctedText && (
+                        <p className="mt-2 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-medium text-emerald-900 ring-1 ring-emerald-200/70">
+                          Sugestão: {sub.correctedText}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+
+                  {onGoToTeacher && (
+                    <button
+                      type="button"
+                      onClick={onGoToTeacher}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                    >
+                      Abrir fila completa no Modo Professor →
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </aside>
         )}
       </div>
 

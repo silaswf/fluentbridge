@@ -22,9 +22,11 @@ import { Sidebar, type NavView } from './components/Sidebar';
 import { TeacherLinkModal } from './components/TeacherLinkModal';
 import type { TeacherTab } from './components/TeacherStudio';
 import { useCloudSyncController } from './hooks/useCloudSyncController';
+import { purgeExpiredSpeakingAudios } from './utils/audioRetention';
 import { scheduleDailyStudyReminder } from './utils/notifications';
 import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
 import { recordStudyActivity } from './utils/streakEngine';
+import { getUnlockedVocabCards } from './utils/vocabUnlock';
 import {
   applyThemeMode,
   loadStoredThemeMode,
@@ -71,7 +73,6 @@ import {
 import {
   ALL_BUILTIN_TOPICS,
   ALL_INITIAL_VOCABULARY,
-  BUILTIN_TOPICS,
   DEFAULT_PLATFORM_STATE,
   cloneInitialVocab,
 } from './data/lessons';
@@ -113,7 +114,7 @@ function buildCertificate(
       student.skillScores.reading +
       student.skillScores.speaking +
       student.skillScores.writing) /
-      4,
+    4,
   );
   const randCode = Math.floor(1000 + Math.random() * 9000);
   return {
@@ -321,10 +322,10 @@ export function App() {
 
   const activeDialect = currentUser
     ? getActiveDialect(
-        activeLanguage,
-        currentUser.dialectByLanguage,
-        currentUser.accent,
-      )
+      activeLanguage,
+      currentUser.dialectByLanguage,
+      currentUser.accent,
+    )
     : 'en-US';
 
   const courseTopics = useMemo(
@@ -381,11 +382,11 @@ export function App() {
       enrollmentType:
         effectiveRole === 'student'
           ? payload.enrollmentType ??
-            (payload.assignedTeacherId
-              ? 'vip'
-              : payload.classId
-                ? 'class'
-                : 'independent')
+          (payload.assignedTeacherId
+            ? 'vip'
+            : payload.classId
+              ? 'class'
+              : 'independent')
           : undefined,
       teacherInviteCode:
         effectiveRole === 'teacher'
@@ -400,6 +401,9 @@ export function App() {
         fr: 'fr-FR',
         it: 'it-IT',
         de: 'de-DE',
+        ru: 'ru-RU',
+        ja: 'ja-JP',
+        zh: 'zh-CN',
       },
       accent: 'en-US',
       dailyGoalMinutes: 15,
@@ -463,12 +467,12 @@ export function App() {
         users: prev.users.map((u) =>
           u.id === existing.id
             ? {
-                ...u,
-                name: payload.name,
-                password: hashPassword(payload.password),
-                role: 'teacher',
-                isMasterAdmin: true,
-              }
+              ...u,
+              name: payload.name,
+              password: hashPassword(payload.password),
+              role: 'teacher',
+              isMasterAdmin: true,
+            }
             : u,
         ),
         currentUserId: existing.id,
@@ -523,11 +527,11 @@ export function App() {
         users: prev.users.map((u) =>
           u.id === existing.id
             ? {
-                ...u,
-                password: hashPassword(password),
-                role: targetRole,
-                isMasterAdmin: u.isMasterAdmin || master,
-              }
+              ...u,
+              password: hashPassword(password),
+              role: targetRole,
+              isMasterAdmin: u.isMasterAdmin || master,
+            }
             : u,
         ),
         currentUserId: existing.id,
@@ -627,20 +631,25 @@ export function App() {
           nextScores[skill] = Math.min(100, nextScores[skill] + 7);
         }
 
-        const completedTopicObj = BUILTIN_TOPICS.find(
+        const completedTopicObj = ALL_BUILTIN_TOPICS.find(
           (t) => t.id === result.topicId,
         );
         let nextCerts = baseUser.issuedCertificates;
 
         if (completedTopicObj) {
-          const levelTopics = BUILTIN_TOPICS.filter(
-            (t) => t.level === completedTopicObj.level,
+          const targetLang = completedTopicObj.languageCode ?? 'en';
+          const levelTopics = ALL_BUILTIN_TOPICS.filter(
+            (t) =>
+              (t.languageCode ?? 'en') === targetLang &&
+              t.level === completedTopicObj.level,
           );
           const allLevelDone = levelTopics.every((t) =>
             nextCompleted.includes(t.id),
           );
           const hasCert = nextCerts.some(
-            (c) => c.level === completedTopicObj.level,
+            (c) =>
+              (c.languageCode ?? 'en') === targetLang &&
+              c.level === completedTopicObj.level,
           );
           if (allLevelDone && !hasCert) {
             unlockedLevel = completedTopicObj.level;
@@ -654,17 +663,21 @@ export function App() {
                 draftStudent,
                 completedTopicObj.level,
                 prev.teacherName,
-                'en',
+                targetLang,
               ),
             ];
           }
         }
+
+        const nextStepProgress = { ...(baseUser.topicStepProgress ?? {}) };
+        delete nextStepProgress[result.topicId];
 
         return {
           ...baseUser,
           xp: baseUser.xp + result.xpEarned,
           todayMinutes: baseUser.todayMinutes + result.minutesSpent,
           completedTopicIds: nextCompleted,
+          topicStepProgress: nextStepProgress,
           skillScores: nextScores,
           issuedCertificates: nextCerts,
           dailyQuests: {
@@ -726,6 +739,7 @@ export function App() {
           promptPt: payload.promptPt,
           responseText: payload.responseText,
           createdAt: timestamp,
+          createdAtIso: new Date().toISOString(),
           status: 'pending',
         },
         ...prev.submissions,
@@ -786,6 +800,7 @@ export function App() {
           audioDurationSec: payload.audioDurationSec,
           autoPronunciationScore: payload.autoPronunciationScore,
           createdAt: timestamp,
+          createdAtIso: new Date().toISOString(),
           status: 'pending',
         },
         ...prev.submissions,
@@ -808,10 +823,10 @@ export function App() {
         submissions: prev.submissions.map((sub) =>
           sub.id === submissionId
             ? {
-                ...sub,
-                audioPath: uploaded.audioPath ?? sub.audioPath,
-                audioDataUrl: uploaded.audioDataUrl ?? sub.audioDataUrl,
-              }
+              ...sub,
+              audioPath: uploaded.audioPath ?? sub.audioPath,
+              audioDataUrl: uploaded.audioDataUrl ?? sub.audioDataUrl,
+            }
             : sub,
         ),
       }));
@@ -927,13 +942,13 @@ export function App() {
       submissions: prev.submissions.map((sub) =>
         sub.id === submissionId
           ? {
-              ...sub,
-              status: 'reviewed',
-              teacherFeedback: payload.teacherFeedback,
-              correctedText: payload.correctedText || undefined,
-              teacherBadge: payload.teacherBadge,
-              pronunciationRubric: payload.pronunciationRubric,
-            }
+            ...sub,
+            status: 'reviewed',
+            teacherFeedback: payload.teacherFeedback,
+            correctedText: payload.correctedText || undefined,
+            teacherBadge: payload.teacherBadge,
+            pronunciationRubric: payload.pronunciationRubric,
+          }
           : sub,
       ),
     }));
@@ -1146,12 +1161,12 @@ export function App() {
       users: prev.users.map((u) =>
         u.id === studentId
           ? {
-              ...u,
-              assignedTeacherId: teacherId,
-              enrollmentType: 'vip',
-              unlinkedNoticePending: false,
-              unlinkedByTeacherName: undefined,
-            }
+            ...u,
+            assignedTeacherId: teacherId,
+            enrollmentType: 'vip',
+            unlinkedNoticePending: false,
+            unlinkedByTeacherName: undefined,
+          }
           : u,
       ),
     }));
@@ -1168,13 +1183,13 @@ export function App() {
       users: prev.users.map((u) =>
         u.id === studentId
           ? {
-              ...u,
-              assignedTeacherId: undefined,
-              classId: undefined,
-              enrollmentType: 'independent',
-              unlinkedNoticePending: !bySelf,
-              unlinkedByTeacherName: bySelf ? undefined : unlinkedBy,
-            }
+            ...u,
+            assignedTeacherId: undefined,
+            classId: undefined,
+            enrollmentType: 'independent',
+            unlinkedNoticePending: !bySelf,
+            unlinkedByTeacherName: bySelf ? undefined : unlinkedBy,
+          }
           : u,
       ),
     }));
@@ -1192,13 +1207,13 @@ export function App() {
       users: prev.users.map((u) =>
         u.id === currentUser.id
           ? {
-              ...u,
-              assignedTeacherId: undefined,
-              classId: undefined,
-              enrollmentType: 'independent',
-              unlinkedNoticePending: false,
-              unlinkedByTeacherName: undefined,
-            }
+            ...u,
+            assignedTeacherId: undefined,
+            classId: undefined,
+            enrollmentType: 'independent',
+            unlinkedNoticePending: false,
+            unlinkedByTeacherName: undefined,
+          }
           : u,
       ),
     }));
@@ -1272,7 +1287,53 @@ export function App() {
     showToast(res.message);
   };
 
-  const dueVocabCount = courseVocab.filter((v) => isCardDue(v)).length;
+  const unlockedCourseVocab = useMemo(
+    () => getUnlockedVocabCards(courseVocab, currentUser),
+    [courseVocab, currentUser],
+  );
+  const dueVocabCount = unlockedCourseVocab.filter((v) => isCardDue(v)).length;
+
+  const handleSaveTopicProgress = (
+    topicId: string,
+    progress: import('./types/learning').TopicProgressRecord,
+  ) => {
+    updateCurrentUser((u) => ({
+      ...u,
+      topicStepProgress: {
+        ...(u.topicStepProgress ?? {}),
+        [topicId]: progress,
+      },
+    }));
+  };
+
+  const handleUnlockVocab = (vocabIds: string[]) => {
+    if (vocabIds.length === 0) return;
+    updateCurrentUser((u) => {
+      const merged = Array.from(
+        new Set([...(u.learnedVocabIds ?? []), ...vocabIds]),
+      );
+      if (merged.length === (u.learnedVocabIds?.length ?? 0)) return u;
+      return { ...u, learnedVocabIds: merged };
+    });
+  };
+
+  const handleRunAudioRetentionCleanup = async (): Promise<string> => {
+    const res = await purgeExpiredSpeakingAudios(
+      state.submissions,
+      state.cloudConfig,
+    );
+    if (res.purgedCount === 0) {
+      showToast('Nenhum áudio expirado (> 60 dias) encontrado.');
+      return 'Nenhum áudio expirado encontrado.';
+    }
+    setState((prev) => ({
+      ...prev,
+      submissions: res.nextSubmissions,
+    }));
+    const msg = `${res.purgedCount} áudio(s) > 60 dias limpos (feedbacks escritos preservados).`;
+    showToast(msg);
+    return msg;
+  };
   const pendingSubmissionsCount = state.submissions.filter(
     (s) => s.status === 'pending',
   ).length;
@@ -1308,7 +1369,7 @@ export function App() {
         activeCourse={activeCourse}
         activeDialect={activeDialect}
         topicsCount={courseTopics.length}
-        vocabCount={courseVocab.length}
+        vocabCount={unlockedCourseVocab.length}
         classNameLabel={userClassName}
         onChangeLanguage={handleChangeLanguage}
         onChangeDialect={handleChangeDialect}
@@ -1351,9 +1412,9 @@ export function App() {
             onGoToTeacher={
               currentUser.role === 'teacher'
                 ? () => {
-                    setTeacherInitialTab('corrections');
-                    setActiveView('teacher');
-                  }
+                  setTeacherInitialTab('corrections');
+                  setActiveView('teacher');
+                }
                 : undefined
             }
           />
@@ -1381,9 +1442,11 @@ export function App() {
 
           {activeView === 'review' && (
             <VocabReview
-              vocab={courseVocab}
+              vocab={unlockedCourseVocab}
+              allCourseVocab={courseVocab}
               topics={courseTopics}
               onRateCard={handleRateVocab}
+              onGoToLearn={() => setActiveView('learn')}
             />
           )}
 
@@ -1411,9 +1474,9 @@ export function App() {
               onGoToTeacherClasses={
                 currentUser.role === 'teacher'
                   ? () => {
-                      setTeacherInitialTab('classes');
-                      setActiveView('teacher');
-                    }
+                    setTeacherInitialTab('classes');
+                    setActiveView('teacher');
+                  }
                   : undefined
               }
             />
@@ -1505,6 +1568,7 @@ export function App() {
                 onResetUserLocalPassword={handleResetUserLocalPassword}
                 onDeleteUser={handleDeleteUser}
                 onGoToTeacherStudio={() => setActiveView('teacher')}
+                onRunAudioRetentionCleanup={handleRunAudioRetentionCleanup}
               />
             )}
         </Suspense>
@@ -1521,14 +1585,26 @@ export function App() {
 
         {activeTopic && (
           <LessonPlayer
+            key={activeTopic.id}
             topic={activeTopic}
+            topicVocab={courseVocab.filter((v) => v.topicId === activeTopic.id)}
+            initialStepIdx={
+              currentUser.completedTopicIds.includes(activeTopic.id)
+                ? 0
+                : currentUser.topicStepProgress?.[activeTopic.id]?.stepIdx ?? 0
+            }
+            initialCompletedSteps={
+              currentUser.completedTopicIds.includes(activeTopic.id)
+                ? []
+                : currentUser.topicStepProgress?.[activeTopic.id]?.completedSteps ?? []
+            }
             dialectCode={
               activeTopic.languageCode && activeTopic.languageCode !== activeLanguage
                 ? getActiveDialect(
-                    activeTopic.languageCode,
-                    currentUser.dialectByLanguage,
-                    currentUser.accent,
-                  )
+                  activeTopic.languageCode,
+                  currentUser.dialectByLanguage,
+                  currentUser.accent,
+                )
                 : activeDialect
             }
             dialects={
@@ -1541,6 +1617,8 @@ export function App() {
               setShowTeacherLinkModal(true);
             }}
             onChangeDialect={handleChangeDialect}
+            onSaveProgress={handleSaveTopicProgress}
+            onUnlockVocab={handleUnlockVocab}
             onSubmitWriting={handleSubmitWriting}
             onSubmitSpeaking={handleSubmitSpeaking}
             onCompleteLesson={handleCompleteLesson}

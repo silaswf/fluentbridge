@@ -82,11 +82,32 @@ export default defineConfig(({ command }) => ({
           ) {
             return 'curriculum-de';
           }
+          if (
+            id.includes('/curriculum/russianCourse') ||
+            id.includes('/curriculum/russianExtra')
+          ) {
+            return 'curriculum-ru';
+          }
+          if (
+            id.includes('/curriculum/japaneseCourse') ||
+            id.includes('/curriculum/japaneseExtra')
+          ) {
+            return 'curriculum-ja';
+          }
+          if (
+            id.includes('/curriculum/chineseCourse') ||
+            id.includes('/curriculum/chineseExtra')
+          ) {
+            return 'curriculum-zh';
+          }
           if (id.includes('/grammar/enGrammarExtra')) return 'grammar-en';
           if (id.includes('/grammar/esGrammarExtra')) return 'grammar-es';
           if (id.includes('/grammar/frGrammarExtra')) return 'grammar-fr';
           if (id.includes('/grammar/itGrammarExtra')) return 'grammar-it';
           if (id.includes('/grammar/deGrammarExtra')) return 'grammar-de';
+          if (id.includes('/grammar/ruGrammarGuide')) return 'grammar-ru';
+          if (id.includes('/grammar/jaGrammarGuide')) return 'grammar-ja';
+          if (id.includes('/grammar/zhGrammarGuide')) return 'grammar-zh';
           if (id.includes('/data/placement/')) {
             return 'placement-bank';
           }

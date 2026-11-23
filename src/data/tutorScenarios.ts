@@ -1,4 +1,7 @@
 import type { AITutorScenario, LanguageCode } from '../types/learning';
+import { RU_TUTOR_SCENARIOS } from './tutorScenariosRu';
+import { JA_TUTOR_SCENARIOS } from './tutorScenariosJa';
+import { ZH_TUTOR_SCENARIOS } from './tutorScenariosZh';
 
 export interface UnitRoleplayAngle {
   id: string;
@@ -1408,4 +1411,7 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
       initialSuggestions: ['Was dabei oft übersehen wird, ist die langfristige Bindung unserer Unternehmenskunden.', 'Keineswegs war der Schritt verfrüht; die Nachfrage war bereits vorab belegt.', 'Nachhaltiges Wachstum bemisst sich nicht an einem Quartal, sondern an stabilen Partnerschaften.'],
     },
   ]),
+  ...RU_TUTOR_SCENARIOS,
+  ...JA_TUTOR_SCENARIOS,
+  ...ZH_TUTOR_SCENARIOS,
 ];

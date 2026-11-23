@@ -34,7 +34,10 @@ import type {
   ReadingStep,
   SkillType,
   Topic,
+  TopicProgressRecord,
+  VocabCard,
 } from '../types/learning';
+import { getStepStageMeta } from '../utils/vocabUnlock';
 import { saveAudioClip } from '../utils/audioDb';
 import {
   type AudioRecorderHandle,
@@ -57,12 +60,17 @@ import { getImmersionStrings } from '../utils/immersion';
 
 interface LessonPlayerProps {
   topic: Topic;
+  topicVocab?: VocabCard[];
+  initialStepIdx?: number;
+  initialCompletedSteps?: number[];
   dialectCode: string;
   dialects: LanguageDialect[];
   studentName: string;
   hasLinkedTeacher?: boolean;
   onRequestTeacherLink?: () => void;
   onChangeDialect: (dialectCode: string) => void;
+  onSaveProgress?: (topicId: string, progress: TopicProgressRecord) => void;
+  onUnlockVocab?: (vocabIds: string[]) => void;
   onSubmitWriting: (payload: {
     topicId: string;
     topicTitle: string;
@@ -187,12 +195,17 @@ const FORMAT_LABELS: Record<ReadingStep['format'], string> = {
 
 export function LessonPlayer({
   topic,
+  topicVocab = [],
+  initialStepIdx = 0,
+  initialCompletedSteps = [],
   dialectCode,
   dialects,
   studentName,
   hasLinkedTeacher = true,
   onRequestTeacherLink,
   onChangeDialect,
+  onSaveProgress,
+  onUnlockVocab,
   onSubmitWriting,
   onSubmitSpeaking,
   onCompleteLesson,
@@ -200,7 +213,34 @@ export function LessonPlayer({
   onPracticeWithAI,
   onClose,
 }: LessonPlayerProps) {
-  const [stepIdx, setStepIdx] = useState(0);
+  const steps = useMemo<LessonStep[]>(() => {
+    if (
+      topicVocab.length > 0 &&
+      !topic.steps.some((s) => s.type === 'vocab_intro')
+    ) {
+      return [
+        {
+          id: `${topic.id}-vocab-intro`,
+          type: 'vocab_intro',
+          titlePt: topic.titlePt,
+          cards: topicVocab,
+        },
+        ...topic.steps,
+      ];
+    }
+    return topic.steps;
+  }, [topic.id, topic.steps, topic.titlePt, topicVocab]);
+
+  const safeInitialIdx = Math.max(
+    0,
+    Math.min(initialStepIdx, Math.max(0, steps.length - 1)),
+  );
+  const [stepIdx, setStepIdx] = useState(safeInitialIdx);
+  const [completedStepIndices, setCompletedStepIndices] = useState<number[]>(
+    () => initialCompletedSteps,
+  );
+  const [maxReachedStepIdx, setMaxReachedStepIdx] = useState(safeInitialIdx);
+  const [studiedVocabIds, setStudiedVocabIds] = useState<string[]>([]);
   const [showHint, setShowHint] = useState(false);
   const [isCompletedScreen, setIsCompletedScreen] = useState(false);
 
@@ -261,7 +301,6 @@ export function LessonPlayer({
   const [checkedStatus, setCheckedStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const [earnedXp, setEarnedXp] = useState(0);
 
-  const steps = topic.steps;
   const currentStep: LessonStep | undefined = steps[stepIdx];
   const progressPct = isCompletedScreen
     ? 100
@@ -466,18 +505,40 @@ export function LessonPlayer({
   };
 
   const handleNext = () => {
+    const nextCompleted = completedStepIndices.includes(stepIdx)
+      ? completedStepIndices
+      : [...completedStepIndices, stepIdx];
+    setCompletedStepIndices(nextCompleted);
+
+    if (currentStep?.type === 'vocab_intro' && currentStep.cards.length > 0) {
+      onUnlockVocab?.(currentStep.cards.map((c) => c.id));
+    }
+
     if (stepIdx < steps.length - 1) {
+      const nextIdx = stepIdx + 1;
+      setMaxReachedStepIdx((prev) => Math.max(prev, nextIdx));
+      onSaveProgress?.(topic.id, {
+        stepIdx: nextIdx,
+        completedSteps: nextCompleted,
+        totalSteps: steps.length,
+        updatedAt: new Date().toISOString(),
+      });
       resetStepState();
-      setStepIdx((prev) => prev + 1);
+      setStepIdx(nextIdx);
       return;
     }
 
     stopSpeaking();
     playSound('complete');
+    if (topicVocab.length > 0) {
+      onUnlockVocab?.(topicVocab.map((c) => c.id));
+    }
     const practicedSet = new Set<SkillType>();
     for (const s of steps) {
-      if (s.type === 'listening') practicedSet.add('listening');
-      if (s.type === 'reading') practicedSet.add('reading');
+      if (s.type === 'listening' || s.type === 'dictation' || s.type === 'minimal_pairs') {
+        practicedSet.add('listening');
+      }
+      if (s.type === 'reading' || s.type === 'story') practicedSet.add('reading');
       if (s.type === 'speaking') practicedSet.add('speaking');
       if (s.type === 'writing_builder' || s.type === 'writing_free') {
         practicedSet.add('writing');
@@ -491,6 +552,18 @@ export function LessonPlayer({
       xpEarned: finalXp,
       practicedSkills: Array.from(practicedSet),
       minutesSpent: topic.estimatedMinutes,
+    });
+  };
+
+  const handleJumpToStep = (targetIdx: number) => {
+    if (targetIdx === stepIdx || targetIdx > maxReachedStepIdx) return;
+    resetStepState();
+    setStepIdx(targetIdx);
+    onSaveProgress?.(topic.id, {
+      stepIdx: targetIdx,
+      completedSteps: completedStepIndices,
+      totalSteps: steps.length,
+      updatedAt: new Date().toISOString(),
     });
   };
 
@@ -649,10 +722,111 @@ export function LessonPlayer({
 
   const getActiveHintText = (): string | null => {
     if (!currentStep) return null;
+    if (currentStep.type === 'vocab_intro') {
+      return 'Ouça cada palavra e frase de exemplo antes de seguir. Ao concluir esta etapa, os cards entram automaticamente na sua aba de Revisão!';
+    }
     if (currentStep.type === 'tip') return currentStep.tip.warning ?? currentStep.tip.summary;
     if (currentStep.type === 'speaking') return currentStep.focusTip;
     return currentStep.hintTip;
   };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isCompletedScreen || !currentStep) return;
+
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT')
+      ) {
+        if (e.key === 'Escape') target.blur();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (showHeartRecovery) {
+          setShowHeartRecovery(false);
+        } else if (showHint) {
+          setShowHint(false);
+        } else {
+          stopSpeaking();
+          onClose();
+        }
+        return;
+      }
+
+      if (
+        (currentStep.type === 'listening' ||
+          currentStep.type === 'reading' ||
+          currentStep.type === 'fill_blank' ||
+          currentStep.type === 'minimal_pairs' ||
+          currentStep.type === 'story') &&
+        checkedStatus === 'idle' &&
+        ['1', '2', '3', '4'].includes(e.key)
+      ) {
+        const idx = Number(e.key) - 1;
+        if (idx < currentStep.options.length) {
+          setSelectedOption(idx);
+        }
+        return;
+      }
+
+      if (
+        (e.key === 'r' || e.key === 'R') &&
+        (currentStep.type === 'listening' ||
+          currentStep.type === 'speaking' ||
+          currentStep.type === 'dictation' ||
+          currentStep.type === 'minimal_pairs')
+      ) {
+        const text =
+          currentStep.type === 'listening' || currentStep.type === 'dictation'
+            ? currentStep.audioText
+            : currentStep.type === 'minimal_pairs'
+              ? currentStep.targetWord
+              : currentStep.targetSentence;
+        speakText(text, { langCode: dialectCode });
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        if (
+          currentStep.type === 'vocab_intro' ||
+          currentStep.type === 'tip' ||
+          checkedStatus !== 'idle'
+        ) {
+          e.preventDefault();
+          handleNext();
+        } else if (
+          (currentStep.type === 'listening' ||
+            currentStep.type === 'reading' ||
+            currentStep.type === 'fill_blank' ||
+            currentStep.type === 'minimal_pairs' ||
+            currentStep.type === 'story') &&
+          selectedOption !== null
+        ) {
+          e.preventDefault();
+          handleCheck();
+        } else if (
+          currentStep.type === 'dictation' &&
+          dictationText.trim().length > 0
+        ) {
+          e.preventDefault();
+          handleCheck();
+        } else if (
+          currentStep.type === 'writing_builder' &&
+          pickedIndices.length > 0
+        ) {
+          e.preventDefault();
+          handleCheck();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
 
   if (isCompletedScreen) {
     return (
@@ -692,6 +866,11 @@ export function LessonPlayer({
           </div>
 
           <div className="mt-5 flex flex-wrap justify-center gap-1.5">
+            {topicVocab.length > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-0.5 text-[11px] font-bold text-cyan-700">
+                <BookOpen className="h-3 w-3" />+{topicVocab.length} palavras na Revisão
+              </span>
+            )}
             <SkillBadge kind="listening" compact />
             <SkillBadge kind="reading" compact />
             <SkillBadge kind="speaking" compact />
@@ -739,11 +918,13 @@ export function LessonPlayer({
   const imm = getImmersionStrings(topic.languageCode ?? 'en', topic.level);
 
   const badgeKind =
-    currentStep.type === 'tip'
-      ? 'tip'
-      : currentStep.type === 'writing_builder' || currentStep.type === 'writing_free'
-        ? 'writing'
-        : currentStep.type;
+    currentStep.type === 'vocab_intro'
+      ? 'vocab_intro'
+      : currentStep.type === 'tip'
+        ? 'tip'
+        : currentStep.type === 'writing_builder' || currentStep.type === 'writing_free'
+          ? 'writing'
+          : currentStep.type;
 
   const speakingEval =
     currentStep.type === 'speaking' && spokenText
@@ -757,100 +938,6 @@ export function LessonPlayer({
     currentStep.type === 'writing_free'
       ? freeText.trim().split(/\s+/).filter(Boolean).length
       : 0;
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.tagName === 'SELECT')
-      ) {
-        if (e.key === 'Escape') target.blur();
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        if (showHeartRecovery) {
-          setShowHeartRecovery(false);
-        } else if (showHint) {
-          setShowHint(false);
-        } else {
-          stopSpeaking();
-          onClose();
-        }
-        return;
-      }
-
-      if (!currentStep) return;
-
-      if (
-        (currentStep.type === 'listening' ||
-          currentStep.type === 'reading' ||
-          currentStep.type === 'fill_blank' ||
-          currentStep.type === 'minimal_pairs' ||
-          currentStep.type === 'story') &&
-        checkedStatus === 'idle' &&
-        ['1', '2', '3', '4'].includes(e.key)
-      ) {
-        const idx = Number(e.key) - 1;
-        if (idx < currentStep.options.length) {
-          setSelectedOption(idx);
-        }
-        return;
-      }
-
-      if (
-        (e.key === 'r' || e.key === 'R') &&
-        (currentStep.type === 'listening' ||
-          currentStep.type === 'speaking' ||
-          currentStep.type === 'dictation' ||
-          currentStep.type === 'minimal_pairs')
-      ) {
-        const text =
-          currentStep.type === 'listening' || currentStep.type === 'dictation'
-            ? currentStep.audioText
-            : currentStep.type === 'minimal_pairs'
-              ? currentStep.targetWord
-              : currentStep.targetSentence;
-        speakText(text, { langCode: dialectCode });
-        return;
-      }
-
-      if (e.key === 'Enter') {
-        if (currentStep.type === 'tip' || checkedStatus !== 'idle') {
-          e.preventDefault();
-          handleNext();
-        } else if (
-          (currentStep.type === 'listening' ||
-            currentStep.type === 'reading' ||
-            currentStep.type === 'fill_blank' ||
-            currentStep.type === 'minimal_pairs' ||
-            currentStep.type === 'story') &&
-          selectedOption !== null
-        ) {
-          e.preventDefault();
-          handleCheck();
-        } else if (
-          currentStep.type === 'dictation' &&
-          dictationText.trim().length > 0
-        ) {
-          e.preventDefault();
-          handleCheck();
-        } else if (
-          currentStep.type === 'writing_builder' &&
-          pickedIndices.length > 0
-        ) {
-          e.preventDefault();
-          handleCheck();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  });
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F9FC]">
@@ -987,6 +1074,41 @@ export function LessonPlayer({
             )}
           </div>
         </div>
+
+        {/* Busuu-style Subunit / Stage Navigation Strip */}
+        <div className="mx-auto mt-2.5 flex max-w-4xl items-center gap-1.5 overflow-x-auto pb-0.5">
+          {steps.map((s, idx) => {
+            const stage = getStepStageMeta(s);
+            const isCurrent = idx === stepIdx;
+            const isDone = completedStepIndices.includes(idx) || idx < stepIdx;
+            const isReachable = idx <= maxReachedStepIdx || isDone;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                disabled={!isReachable}
+                onClick={() => handleJumpToStep(idx)}
+                className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${
+                  isCurrent
+                    ? 'border-blue-500 bg-blue-600 text-white shadow-2xs'
+                    : isDone
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer'
+                      : isReachable
+                        ? 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer'
+                        : 'border-slate-200/70 bg-slate-50/50 text-slate-400 cursor-not-allowed'
+                }`}
+                title={`Etapa ${idx + 1}: ${stage.label}`}
+              >
+                {isDone && !isCurrent ? (
+                  <Check className="h-3 w-3 text-emerald-600" />
+                ) : (
+                  <span className="font-mono text-[10px] opacity-80">{idx + 1}.</span>
+                )}
+                <span>{stage.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </header>
 
       {/* Main Content */}
@@ -1014,6 +1136,114 @@ export function LessonPlayer({
                   <p className="font-bold">Dica rápida do professor:</p>
                   <p className="mt-0.5">{activeHint}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* VOCAB INTRO STAGE (Busuu-style progressive vocabulary unlock) */}
+          {currentStep.type === 'vocab_intro' && (
+            <div className="animate-fade-up rounded-3xl border border-cyan-200/90 bg-white p-6 shadow-xs sm:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-800">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Etapa 1 · Vocabulário da Unidade ({currentStep.cards.length} palavras)
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setStudiedVocabIds(currentStep.cards.map((c) => c.id))
+                  }
+                  className="text-xs font-bold text-cyan-700 hover:underline cursor-pointer"
+                >
+                  Marcar todas como estudadas
+                </button>
+              </div>
+
+              <h2 className="mt-3 font-display text-xl font-extrabold text-slate-900 sm:text-2xl">
+                Palavras-chave com áudio e frase de exemplo
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Ouça cada expressão e sua frase real de uso. Ao avançar, essas palavras entram automaticamente na sua aba de <strong>Revisão (SRS)</strong>!
+              </p>
+
+              <div className="mt-5 space-y-3">
+                {currentStep.cards.map((card) => {
+                  const isStudied = studiedVocabIds.includes(card.id);
+                  const lang = card.languageCode ?? topic.languageCode ?? 'en';
+                  return (
+                    <div
+                      key={card.id}
+                      className={`rounded-2xl border p-4 transition ${
+                        isStudied
+                          ? 'border-emerald-200 bg-emerald-50/40'
+                          : 'border-slate-200 bg-slate-50/60'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-display text-lg font-extrabold text-slate-900">
+                              {card.word}
+                            </span>
+                            {card.ipa && (
+                              <span className="font-mono text-xs text-slate-500">
+                                {card.ipa}
+                              </span>
+                            )}
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
+                              {card.category}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm font-bold text-emerald-700">
+                            {card.translation}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <DualAudioButtons
+                            text={card.word}
+                            languageCode={lang}
+                            size="xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setStudiedVocabIds((prev) =>
+                                prev.includes(card.id)
+                                  ? prev
+                                  : [...prev, card.id],
+                              )
+                            }
+                            className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-xs font-bold transition cursor-pointer ${
+                              isStudied
+                                ? 'border-emerald-300 bg-emerald-100 text-emerald-800'
+                                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                            <span>{isStudied ? 'Aprendida' : 'Marcar'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/80 bg-white p-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900">
+                            “{card.exampleEn}”
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-slate-600">
+                            {card.examplePt}
+                          </p>
+                        </div>
+                        <DualAudioButtons
+                          text={card.exampleEn}
+                          languageCode={lang}
+                          size="xs"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1978,7 +2208,16 @@ export function LessonPlayer({
           </div>
 
           <div className="flex shrink-0 justify-end">
-            {currentStep.type === 'tip' ? (
+            {currentStep.type === 'vocab_intro' ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-cyan-700 sm:w-auto cursor-pointer"
+              >
+                <span>Desbloquear palavras &amp; continuar</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            ) : currentStep.type === 'tip' ? (
               <button
                 type="button"
                 onClick={handleNext}

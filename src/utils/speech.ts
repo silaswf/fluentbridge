@@ -265,6 +265,12 @@ export function getAllVoiceProviderLabels() {
     itCh: 'Gemini 2.5 Neural TTS · Kore / Puck (Suíça IT)',
     deDe: 'Gemini 2.5 Neural TTS · Aoede / Charon (Alemanha)',
     deAt: 'Gemini 2.5 Neural TTS · Kore / Puck (Áustria)',
+    ruRu: 'Gemini 2.5 Neural TTS · Aoede / Charon (Moscou)',
+    ruSpb: 'Gemini 2.5 Neural TTS · Kore / Puck (São Petersburgo)',
+    jaJp: 'Gemini 2.5 Neural TTS · Aoede / Charon (Tóquio)',
+    jaKansai: 'Gemini 2.5 Neural TTS · Kore / Puck (Kansai)',
+    zhCn: 'Gemini 2.5 Neural TTS · Aoede / Charon (Mandarim CN)',
+    zhTw: 'Gemini 2.5 Neural TTS · Kore / Puck (Taiwan TW)',
   };
 }
 
@@ -695,14 +701,20 @@ const CONTRACTION_EXPANSIONS: Record<string, string[]> = {
 
 function cleanToken(raw: string): string {
   return raw
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFKC')
     .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[’‘]/g, "'")
-    .replace(/[^a-z0-9']/g, '');
+    .replace(/[^\p{L}\p{N}']/gu, '');
 }
 
+const CJK_SCRIPT_REGEX = /[\u3040-\u30ff\u3400-\u9fff]/;
+
 function expandTokens(sentence: string): string[] {
+  if (CJK_SCRIPT_REGEX.test(sentence)) {
+    const chars = Array.from(cleanToken(sentence).replace(/'/g, ''));
+    return chars;
+  }
   const rawTokens = sentence.split(/\s+/).map(cleanToken).filter(Boolean);
   const expanded: string[] = [];
   for (const token of rawTokens) {
@@ -720,13 +732,43 @@ export function evaluatePronunciation(
   target: string,
   spoken: string,
 ): { score: number; words: { word: string; matched: boolean }[] } {
-  const displayWords = target.split(/\s+/).filter(Boolean);
+  const isCjk = CJK_SCRIPT_REGEX.test(target);
+  const displayWords = isCjk
+    ? target
+        .split(/\s+/)
+        .flatMap((chunk) => {
+          const cleanedChunk = cleanToken(chunk).replace(/'/g, '');
+          return cleanedChunk ? [chunk] : [];
+        })
+    : target.split(/\s+/).filter(Boolean);
+
   const spokenExpanded = expandTokens(spoken);
   const spokenSet = new Set(spokenExpanded);
+
+  if (isCjk && displayWords.length <= 2) {
+    const targetChars = Array.from(cleanToken(target).replace(/'/g, ''));
+    let charHits = 0;
+    const charWords = targetChars.map((ch) => {
+      const matched = spokenSet.has(ch);
+      if (matched) charHits += 1;
+      return { word: ch, matched };
+    });
+    const score =
+      targetChars.length === 0
+        ? 0
+        : Math.round((charHits / targetChars.length) * 100);
+    return { score, words: charWords };
+  }
 
   let matchedCount = 0;
   const words = displayWords.map((rawWord) => {
     const cleaned = cleanToken(rawWord);
+    if (isCjk) {
+      const chars = Array.from(cleaned.replace(/'/g, ''));
+      const matched = chars.length > 0 && chars.filter((c) => spokenSet.has(c)).length >= Math.ceil(chars.length * 0.6);
+      if (matched) matchedCount += 1;
+      return { word: rawWord, matched };
+    }
     const expanded = CONTRACTION_EXPANSIONS[cleaned] ?? [cleaned.replace(/'/g, '')];
     const matched = expanded.every((part) => spokenSet.has(part));
     if (matched) matchedCount += 1;

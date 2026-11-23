@@ -8,6 +8,9 @@ import { ES_GRAMMAR_EXTRA } from './grammar/esGrammarExtra';
 import { FR_GRAMMAR_EXTRA } from './grammar/frGrammarExtra';
 import { IT_GRAMMAR_EXTRA } from './grammar/itGrammarExtra';
 import { DE_GRAMMAR_EXTRA } from './grammar/deGrammarExtra';
+import { RU_GRAMMAR_GUIDE } from './grammar/ruGrammarGuide';
+import { JA_GRAMMAR_GUIDE } from './grammar/jaGrammarGuide';
+import { ZH_GRAMMAR_GUIDE } from './grammar/zhGrammarGuide';
 
 export interface GrammarReferenceEntry {
   id: string;
@@ -462,6 +465,9 @@ export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...IT_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'it' as LanguageCode })),
   ...GERMAN_ALL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
   ...DE_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
+  ...RU_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'ru' as LanguageCode })),
+  ...JA_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'ja' as LanguageCode })),
+  ...ZH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'zh' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

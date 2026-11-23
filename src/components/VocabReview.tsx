@@ -19,8 +19,10 @@ import { DualAudioButtons } from './DualAudioButtons';
 
 interface VocabReviewProps {
   vocab: VocabCard[];
+  allCourseVocab?: VocabCard[];
   topics: Topic[];
   onRateCard: (cardId: string, rating: SrsRating) => void;
+  onGoToLearn?: () => void;
 }
 
 const STRENGTH_META: Record<
@@ -43,15 +45,32 @@ const STRENGTH_META: Record<
 
 export function VocabReview({
   vocab,
+  allCourseVocab,
   topics,
   onRateCard,
+  onGoToLearn,
 }: VocabReviewProps) {
+  const [scope, setScope] = useState<'learned' | 'catalog'>('learned');
   const [mode, setMode] = useState<'flashcards' | 'list'>('flashcards');
   const [filterStrength, setFilterStrength] = useState<'all' | 'due' | VocabCard['strength']>('all');
   const [filterLevel, setFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [search, setSearch] = useState('');
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+
+  const unlockedIdSet = useMemo(() => new Set(vocab.map((c) => c.id)), [vocab]);
+  const activeSourceVocab =
+    scope === 'catalog' && allCourseVocab && allCourseVocab.length > 0
+      ? allCourseVocab
+      : vocab;
+
+  const topicTitleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const t of topics) {
+      map.set(t.id, t.titlePt);
+    }
+    return map;
+  }, [topics]);
 
   const topicLevelMap = useMemo(() => {
     const map = new Map<string, CEFRLevel>();
@@ -72,18 +91,18 @@ export function VocabReview({
   const counts = useMemo(() => {
     const levelScoped =
       filterLevel === 'ALL'
-        ? vocab
-        : vocab.filter((v) => topicLevelMap.get(v.topicId) === filterLevel);
+        ? activeSourceVocab
+        : activeSourceVocab.filter((v) => topicLevelMap.get(v.topicId) === filterLevel);
     return {
       due: levelScoped.filter((v) => isCardDue(v)).length,
       weak: levelScoped.filter((v) => v.strength === 'weak').length,
       medium: levelScoped.filter((v) => v.strength === 'medium').length,
       mastered: levelScoped.filter((v) => v.strength === 'mastered').length,
     };
-  }, [vocab, filterLevel, topicLevelMap]);
+  }, [activeSourceVocab, filterLevel, topicLevelMap]);
 
   const deck = useMemo(() => {
-    const filtered = vocab
+    const filtered = activeSourceVocab
       .filter((v) =>
         filterLevel === 'ALL' ? true : topicLevelMap.get(v.topicId) === filterLevel,
       )
@@ -102,7 +121,7 @@ export function VocabReview({
         );
       });
     return sortCardsForReview(filtered);
-  }, [vocab, filterLevel, filterStrength, search, topicLevelMap]);
+  }, [activeSourceVocab, filterLevel, filterStrength, search, topicLevelMap]);
 
   const safeIdx = deck.length === 0 ? 0 : cardIndex % deck.length;
   const activeCard = deck[safeIdx];
@@ -146,39 +165,78 @@ export function VocabReview({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="font-display text-2xl font-extrabold text-slate-900">
-            Revisão Inteligente (SRS · {vocab.length} cards)
+            Revisão Inteligente (SRS · {activeSourceVocab.length} cards)
           </h1>
           <p className="mt-0.5 text-sm text-slate-600">
-            Filtre por nível CEFR ou grau de domínio para fixar falsos cognatos, phrasal verbs e expressões.
+            {scope === 'learned'
+              ? 'Palavras desbloqueadas progressivamente nas unidades que você já estudou.'
+              : 'Catálogo completo do idioma (inclui palavras de unidades futuras).'}
           </p>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
-          <button
-            type="button"
-            onClick={() => setMode('flashcards')}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
-              mode === 'flashcards'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <BrainCircuit className="h-4 w-4" />
-            <span>Flashcards</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('list')}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
-              mode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            <List className="h-4 w-4" />
-            <span>Lista ({deck.length})</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {allCourseVocab && allCourseVocab.length > vocab.length && (
+            <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setScope('learned');
+                  setCardIndex(0);
+                  setFlipped(false);
+                }}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  scope === 'learned'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                Aprendidas ({vocab.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setScope('catalog');
+                  setCardIndex(0);
+                  setFlipped(false);
+                }}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  scope === 'catalog'
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                Catálogo ({allCourseVocab.length})
+              </button>
+            </div>
+          )}
+
+          {/* Mode Toggle */}
+          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setMode('flashcards')}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+                mode === 'flashcards'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <BrainCircuit className="h-4 w-4" />
+              <span>Flashcards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('list')}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+                mode === 'list'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <List className="h-4 w-4" />
+              <span>Lista ({deck.length})</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -278,19 +336,52 @@ export function VocabReview({
           {!activeCard ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
               <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
-              <p className="mt-3 font-display text-lg font-bold text-slate-900">
-                Nenhum card neste filtro!
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setFilterStrength('all');
-                  setFilterLevel('ALL');
-                }}
-                className="mt-3 text-xs font-bold text-blue-600 hover:underline cursor-pointer"
-              >
-                Mostrar todos os {vocab.length} cards
-              </button>
+              {scope === 'learned' && vocab.length === 0 ? (
+                <>
+                  <p className="mt-3 font-display text-lg font-bold text-slate-900">
+                    Seu deck de revisão começa vazio de propósito!
+                  </p>
+                  <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-slate-600">
+                    Assim como no Busuu e Duolingo, as palavras aparecem aqui automaticamente conforme você avança pela etapa de <strong>Vocabulário</strong> ou conclui cada unidade na trilha.
+                  </p>
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    {onGoToLearn && (
+                      <button
+                        type="button"
+                        onClick={onGoToLearn}
+                        className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+                      >
+                        Ir para a Trilha de Aulas
+                      </button>
+                    )}
+                    {allCourseVocab && allCourseVocab.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setScope('catalog')}
+                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                      >
+                        Espiar catálogo ({allCourseVocab.length} palavras)
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 font-display text-lg font-bold text-slate-900">
+                    Nenhum card neste filtro!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFilterStrength('all');
+                      setFilterLevel('ALL');
+                    }}
+                    className="mt-3 text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                  >
+                    Mostrar todos os {activeSourceVocab.length} cards
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -309,10 +400,22 @@ export function VocabReview({
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-600">
-                    {activeCard.category}
-                  </span>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-600">
+                      {activeCard.category}
+                    </span>
+                    {topicTitleMap.get(activeCard.topicId) && (
+                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+                        {topicTitleMap.get(activeCard.topicId)}
+                      </span>
+                    )}
+                    {!unlockedIdSet.has(activeCard.id) && (
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+                        Prévia (unidade futura)
+                      </span>
+                    )}
+                  </div>
                   <DualAudioButtons
                     text={activeCard.word}
                     languageCode={
@@ -331,6 +434,32 @@ export function VocabReview({
                   <p className="mt-1.5 font-mono text-sm text-slate-400">
                     {activeCard.ipa}
                   </p>
+                </div>
+
+                {/* Contextual Example Sentence Preview (Front & Back) */}
+                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                      Frase de exemplo
+                    </p>
+                    <p className="mt-0.5 text-sm font-bold text-slate-800">
+                      “{activeCard.exampleEn}”
+                    </p>
+                    {flipped && (
+                      <p className="mt-0.5 text-xs text-slate-600">
+                        {activeCard.examplePt}
+                      </p>
+                    )}
+                  </div>
+                  <DualAudioButtons
+                    text={activeCard.exampleEn}
+                    languageCode={
+                      activeCard.languageCode ??
+                      topicLangMap.get(activeCard.topicId) ??
+                      'en'
+                    }
+                    size="xs"
+                  />
                 </div>
 
                 {!flipped ? (

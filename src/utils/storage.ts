@@ -129,10 +129,17 @@ export function normalizePlatformState(
             fr: 'fr-FR',
             it: 'it-IT',
             de: 'de-DE',
+            ru: 'ru-RU',
+            ja: 'ja-JP',
+            zh: 'zh-CN',
             ...(u.dialectByLanguage ?? {}),
           },
           completedTopicIds: Array.isArray(u.completedTopicIds)
             ? u.completedTopicIds
+            : [],
+          topicStepProgress: u.topicStepProgress ?? {},
+          learnedVocabIds: Array.isArray(u.learnedVocabIds)
+            ? u.learnedVocabIds
             : [],
           skillScores: {
             listening: u.skillScores?.listening ?? 50,
