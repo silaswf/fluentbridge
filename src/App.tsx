@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import {
   getEffectiveGeminiKey,
@@ -20,16 +20,48 @@ import {
   uploadSpeakingAudioToCloud,
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
-import { AITutor } from './components/AITutor';
 import { AuthScreen } from './components/AuthScreen';
-import { CertificatesView } from './components/CertificatesView';
 import { LearningPath } from './components/LearningPath';
-import { LessonPlayer } from './components/LessonPlayer';
-import { PlacementTestModal } from './components/PlacementTestModal';
 import { Sidebar, type NavView } from './components/Sidebar';
-import { TeacherStudio, type TeacherTab } from './components/TeacherStudio';
-import { TipsLibrary } from './components/TipsLibrary';
-import { VocabReview } from './components/VocabReview';
+import type { TeacherTab } from './components/TeacherStudio';
+import { scheduleDailyStudyReminder } from './utils/notifications';
+import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
+import { recordStudyActivity } from './utils/streakEngine';
+import {
+  applyThemeMode,
+  loadStoredThemeMode,
+  nextThemeMode,
+  saveThemeMode,
+  type ThemeMode,
+} from './utils/theme';
+
+const AITutor = lazy(() =>
+  import('./components/AITutor').then((m) => ({ default: m.AITutor })),
+);
+const CertificatesView = lazy(() =>
+  import('./components/CertificatesView').then((m) => ({
+    default: m.CertificatesView,
+  })),
+);
+const LessonPlayer = lazy(() =>
+  import('./components/LessonPlayer').then((m) => ({ default: m.LessonPlayer })),
+);
+const PlacementTestModal = lazy(() =>
+  import('./components/PlacementTestModal').then((m) => ({
+    default: m.PlacementTestModal,
+  })),
+);
+const TeacherStudio = lazy(() =>
+  import('./components/TeacherStudio').then((m) => ({
+    default: m.TeacherStudio,
+  })),
+);
+const TipsLibrary = lazy(() =>
+  import('./components/TipsLibrary').then((m) => ({ default: m.TipsLibrary })),
+);
+const VocabReview = lazy(() =>
+  import('./components/VocabReview').then((m) => ({ default: m.VocabReview })),
+);
 import {
   getActiveDialect,
   getCourseTopics,
@@ -53,7 +85,6 @@ import type {
   Topic,
   UserProfile,
   UserRole,
-  VocabCard,
 } from './types/learning';
 import { playSound } from './utils/soundFx';
 import {
@@ -107,6 +138,7 @@ export function App() {
   const [showPlacementModal, setShowPlacementModal] = useState(false);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
   const [autoSyncStatus, setAutoSyncStatus] = useState<{
     state: 'idle' | 'syncing' | 'synced' | 'error';
     message?: string;
@@ -129,6 +161,18 @@ export function App() {
   useEffect(() => {
     savePlatformState(state);
   }, [state]);
+
+  useEffect(() => {
+    applyThemeMode(themeMode);
+    saveThemeMode(themeMode);
+    if (themeMode !== 'system' || typeof window === 'undefined' || !window.matchMedia) {
+      return undefined;
+    }
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => applyThemeMode('system');
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, [themeMode]);
 
   // Bootstrap from Supabase & hydrate Supabase OAuth / Auth user on startup
   useEffect(() => {
@@ -564,17 +608,24 @@ export function App() {
     if (!currentUser) return;
 
     let unlockedLevel: CEFRLevel | null = null;
+    let streakFreezeUsed = false;
+    let streakEarnedFreeze = false;
 
     setState((prev) => ({
       ...prev,
       users: prev.users.map((u) => {
         if (u.id !== prev.currentUserId) return u;
 
-        const nextCompleted = u.completedTopicIds.includes(result.topicId)
-          ? u.completedTopicIds
-          : [...u.completedTopicIds, result.topicId];
+        const streakRes = recordStudyActivity(u);
+        if (streakRes.freezeUsed) streakFreezeUsed = true;
+        if (streakRes.earnedFreeze) streakEarnedFreeze = true;
+        const baseUser = streakRes.user;
 
-        const nextScores = { ...u.skillScores };
+        const nextCompleted = baseUser.completedTopicIds.includes(result.topicId)
+          ? baseUser.completedTopicIds
+          : [...baseUser.completedTopicIds, result.topicId];
+
+        const nextScores = { ...baseUser.skillScores };
         for (const skill of result.practicedSkills) {
           nextScores[skill] = Math.min(100, nextScores[skill] + 7);
         }
@@ -582,7 +633,7 @@ export function App() {
         const completedTopicObj = BUILTIN_TOPICS.find(
           (t) => t.id === result.topicId,
         );
-        let nextCerts = u.issuedCertificates;
+        let nextCerts = baseUser.issuedCertificates;
 
         if (completedTopicObj) {
           const levelTopics = BUILTIN_TOPICS.filter(
@@ -597,7 +648,7 @@ export function App() {
           if (allLevelDone && !hasCert) {
             unlockedLevel = completedTopicObj.level;
             const draftStudent: UserProfile = {
-              ...u,
+              ...baseUser,
               skillScores: nextScores,
             };
             nextCerts = [
@@ -613,15 +664,15 @@ export function App() {
         }
 
         return {
-          ...u,
-          xp: u.xp + result.xpEarned,
-          todayMinutes: u.todayMinutes + result.minutesSpent,
+          ...baseUser,
+          xp: baseUser.xp + result.xpEarned,
+          todayMinutes: baseUser.todayMinutes + result.minutesSpent,
           completedTopicIds: nextCompleted,
           skillScores: nextScores,
           issuedCertificates: nextCerts,
           dailyQuests: {
-            ...u.dailyQuests,
-            lessonsCompletedToday: u.dailyQuests.lessonsCompletedToday + 1,
+            ...baseUser.dailyQuests,
+            lessonsCompletedToday: baseUser.dailyQuests.lessonsCompletedToday + 1,
           },
         };
       }),
@@ -631,6 +682,10 @@ export function App() {
       showToast(
         `Parabéns! Você desbloqueou o Certificado CEFR ${unlockedLevel}!`,
       );
+    } else if (streakEarnedFreeze) {
+      showToast('Incrível! Você ganhou +1 Proteção de Ofensiva (🧊) pela sequência!');
+    } else if (streakFreezeUsed) {
+      showToast('Sua Proteção de Ofensiva (🧊) manteve sua sequência ativa!');
     }
   };
 
@@ -641,6 +696,12 @@ export function App() {
     responseText: string;
   }) => {
     if (!currentUser) return;
+    const timestamp = new Date().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
     setState((prev) => ({
       ...prev,
       submissions: [
@@ -655,7 +716,7 @@ export function App() {
           topicTitle: payload.topicTitle,
           promptPt: payload.promptPt,
           responseText: payload.responseText,
-          createdAt: 'Agora mesmo',
+          createdAt: timestamp,
           status: 'pending',
         },
         ...prev.submissions,
@@ -671,12 +732,19 @@ export function App() {
     targetSentence: string;
     responseText: string;
     audioId: string;
+    audioBlob?: Blob;
     audioDurationSec: number;
     autoPronunciationScore?: number;
   }) => {
     if (!currentUser) return;
     const submissionId = `sub-s-${Date.now()}`;
     const cloudConfigSnapshot = state.cloudConfig;
+    const timestamp = new Date().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     setState((prev) => ({
       ...prev,
@@ -696,7 +764,7 @@ export function App() {
           audioId: payload.audioId,
           audioDurationSec: payload.audioDurationSec,
           autoPronunciationScore: payload.autoPronunciationScore,
-          createdAt: 'Agora mesmo',
+          createdAt: timestamp,
           status: 'pending',
         },
         ...prev.submissions,
@@ -705,7 +773,7 @@ export function App() {
     showToast('Áudio enviado para o Professor avaliar sua pronúncia!');
 
     void (async () => {
-      const blob = await getAudioClip(payload.audioId);
+      const blob = payload.audioBlob ?? (await getAudioClip(payload.audioId));
       if (!blob) return;
       const uploaded = await uploadSpeakingAudioToCloud(
         blob,
@@ -729,37 +797,41 @@ export function App() {
     })();
   };
 
-  const handleRateVocab = (cardId: string, nextStrength: VocabCard['strength']) => {
-    updateCurrentUser((u) => ({
-      ...u,
-      xp: u.xp + 5,
-      vocab: u.vocab.map((c) =>
-        c.id === cardId
-          ? { ...c, strength: nextStrength, reviewCount: c.reviewCount + 1 }
-          : c,
-      ),
-      dailyQuests: {
-        ...u.dailyQuests,
-        vocabReviewedToday: u.dailyQuests.vocabReviewedToday + 1,
-      },
-    }));
+  const handleRateVocab = (cardId: string, rating: SrsRating) => {
+    updateCurrentUser((u) => {
+      const base = recordStudyActivity(u).user;
+      return {
+        ...base,
+        xp: base.xp + 5,
+        vocab: base.vocab.map((c) =>
+          c.id === cardId ? reviewVocabCardSM2(c, rating) : c,
+        ),
+        dailyQuests: {
+          ...base.dailyQuests,
+          vocabReviewedToday: base.dailyQuests.vocabReviewedToday + 1,
+        },
+      };
+    });
   };
 
   const handleTutorSessionComplete = (xpEarned: number) => {
-    updateCurrentUser((u) => ({
-      ...u,
-      xp: u.xp + xpEarned,
-      todayMinutes: u.todayMinutes + 5,
-      skillScores: {
-        ...u.skillScores,
-        speaking: Math.min(100, u.skillScores.speaking + 4),
-        writing: Math.min(100, u.skillScores.writing + 3),
-      },
-      dailyQuests: {
-        ...u.dailyQuests,
-        tutorSessionsToday: u.dailyQuests.tutorSessionsToday + 1,
-      },
-    }));
+    updateCurrentUser((u) => {
+      const base = recordStudyActivity(u).user;
+      return {
+        ...base,
+        xp: base.xp + xpEarned,
+        todayMinutes: base.todayMinutes + 5,
+        skillScores: {
+          ...base.skillScores,
+          speaking: Math.min(100, base.skillScores.speaking + 4),
+          writing: Math.min(100, base.skillScores.writing + 3),
+        },
+        dailyQuests: {
+          ...base.dailyQuests,
+          tutorSessionsToday: base.dailyQuests.tutorSessionsToday + 1,
+        },
+      };
+    });
     showToast(`+${xpEarned} XP no Tutor de Conversação IA!`);
   };
 
@@ -966,9 +1038,30 @@ export function App() {
     );
   }
 
-  const dueVocabCount = courseVocab.filter(
-    (v) => v.strength !== 'mastered',
-  ).length;
+  const handleCycleTheme = () => {
+    const next = nextThemeMode(themeMode);
+    setThemeMode(next);
+    updateCurrentUser((u) => ({ ...u, themeMode: next }));
+    const label = next === 'dark' ? 'Escuro' : next === 'system' ? 'Automático' : 'Claro';
+    showToast(`Tema alterado para ${label}`);
+  };
+
+  const handleToggleReminder = async () => {
+    if (!currentUser) return;
+    const nextEnabled = !currentUser.reminderEnabled;
+    const targetTime = currentUser.reminderTime ?? '19:30';
+    const res = await scheduleDailyStudyReminder(nextEnabled, targetTime);
+    if (res.ok) {
+      updateCurrentUser((u) => ({
+        ...u,
+        reminderEnabled: nextEnabled,
+        reminderTime: targetTime,
+      }));
+    }
+    showToast(res.message);
+  };
+
+  const dueVocabCount = courseVocab.filter((v) => isCardDue(v)).length;
   const pendingSubmissionsCount = state.submissions.filter(
     (s) => s.status === 'pending',
   ).length;
@@ -1002,10 +1095,12 @@ export function App() {
         onChangeDialect={handleChangeDialect}
         dueVocabCount={dueVocabCount}
         pendingSubmissionsCount={pendingSubmissionsCount}
+        themeMode={themeMode}
+        onCycleTheme={handleCycleTheme}
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-10">
+      <main className="safe-main-pb flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 lg:pb-10">
         {activeView === 'learn' && (
           <LearningPath
             currentUser={currentUser}
@@ -1020,6 +1115,7 @@ export function App() {
             onChangeDailyGoal={(dailyGoalMinutes) =>
               updateCurrentUser((u) => ({ ...u, dailyGoalMinutes }))
             }
+            onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             reviewedSubmissions={reviewedForUser}
             onGoToTeacher={
@@ -1033,140 +1129,150 @@ export function App() {
           />
         )}
 
-        {activeView === 'tutor' && (
-          <AITutor
-            accent={currentUser.accent}
-            geminiApiKey={effectiveGeminiKey}
-            onCompleteSession={handleTutorSessionComplete}
-          />
-        )}
+        <Suspense
+          fallback={
+            <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm font-semibold text-slate-500">
+              Carregando módulo...
+            </div>
+          }
+        >
+          {activeView === 'tutor' && (
+            <AITutor
+              accent={currentUser.accent}
+              geminiApiKey={effectiveGeminiKey}
+              onCompleteSession={handleTutorSessionComplete}
+            />
+          )}
 
-        {activeView === 'review' && (
-          <VocabReview
-            vocab={courseVocab}
-            topics={courseTopics}
-            onRateCard={handleRateVocab}
-          />
-        )}
+          {activeView === 'review' && (
+            <VocabReview
+              vocab={courseVocab}
+              topics={courseTopics}
+              onRateCard={handleRateVocab}
+            />
+          )}
 
-        {activeView === 'tips' && (
-          <TipsLibrary
-            topics={courseTopics}
-            onPracticeTopic={(topic) => setActiveTopic(topic)}
-          />
-        )}
+          {activeView === 'tips' && (
+            <TipsLibrary
+              topics={courseTopics}
+              onPracticeTopic={(topic) => setActiveTopic(topic)}
+            />
+          )}
 
-        {activeView === 'certificates' && (
-          <CertificatesView
-            user={currentUser}
-            topics={BUILTIN_TOPICS}
-            schoolName={state.schoolName}
-            teacherName={state.teacherName}
-            className={userClassName}
-            onUnlockCertificate={handleUnlockCertificate}
-            onGoToTeacherClasses={
-              currentUser.role === 'teacher'
-                ? () => {
-                    setTeacherInitialTab('classes');
-                    setActiveView('teacher');
-                  }
-                : undefined
-            }
-          />
-        )}
+          {activeView === 'certificates' && (
+            <CertificatesView
+              user={currentUser}
+              topics={BUILTIN_TOPICS}
+              schoolName={state.schoolName}
+              teacherName={state.teacherName}
+              className={userClassName}
+              onUnlockCertificate={handleUnlockCertificate}
+              onGoToTeacherClasses={
+                currentUser.role === 'teacher'
+                  ? () => {
+                      setTeacherInitialTab('classes');
+                      setActiveView('teacher');
+                    }
+                  : undefined
+              }
+            />
+          )}
 
-        {activeView === 'teacher' && currentUser.role === 'teacher' && (
-          <TeacherStudio
-            state={state}
-            currentUser={currentUser}
-            autoSyncStatus={autoSyncStatus}
-            initialTab={teacherInitialTab}
-            onGradeSubmission={handleGradeSubmission}
-            onCreateClass={handleCreateClass}
-            onDeleteClass={handleDeleteClass}
-            onIssueCertificateToStudent={handleIssueCertificateToStudent}
-            onAddCustomTopic={handleAddCustomTopic}
-            onDeleteCustomTopic={handleDeleteCustomTopic}
-            onUpdateSettings={(settings) => {
-              setState((prev) => ({ ...prev, ...settings }));
-              showToast('Configurações da escola atualizadas!');
-            }}
-            onUpdateCloudConfig={(cloudConfig: CloudConfig) =>
-              setState((prev) => ({ ...prev, cloudConfig }))
-            }
-            onApplyCloudSnapshot={(snapshot) => {
-              skipNextCloudPushRef.current = true;
-              const normalized = normalizePlatformState(
-                { ...snapshot, currentUserId: state.currentUserId },
-                DEFAULT_PLATFORM_STATE,
-                ALL_INITIAL_VOCABULARY,
-              );
-              setState(normalized);
-              showToast('Estado da nuvem aplicado!');
-            }}
-            onImportState={(imported) => {
-              setState(
-                normalizePlatformState(
-                  imported,
+          {activeView === 'teacher' && currentUser.role === 'teacher' && (
+            <TeacherStudio
+              state={state}
+              currentUser={currentUser}
+              autoSyncStatus={autoSyncStatus}
+              initialTab={teacherInitialTab}
+              onGradeSubmission={handleGradeSubmission}
+              onCreateClass={handleCreateClass}
+              onDeleteClass={handleDeleteClass}
+              onIssueCertificateToStudent={handleIssueCertificateToStudent}
+              onAddCustomTopic={handleAddCustomTopic}
+              onDeleteCustomTopic={handleDeleteCustomTopic}
+              onUpdateSettings={(settings) => {
+                setState((prev) => ({ ...prev, ...settings }));
+                showToast('Configurações da escola atualizadas!');
+              }}
+              onUpdateCloudConfig={(cloudConfig: CloudConfig) =>
+                setState((prev) => ({ ...prev, cloudConfig }))
+              }
+              onApplyCloudSnapshot={(snapshot) => {
+                skipNextCloudPushRef.current = true;
+                const normalized = normalizePlatformState(
+                  { ...snapshot, currentUserId: state.currentUserId },
                   DEFAULT_PLATFORM_STATE,
                   ALL_INITIAL_VOCABULARY,
-                ),
-              );
-              showToast('Backup importado com sucesso!');
-            }}
-            onResetDemo={() => {
-              clearPlatformState();
-              setState(
-                normalizePlatformState(
-                  {
-                    ...DEFAULT_PLATFORM_STATE,
-                    currentUserId: state.currentUserId,
-                  },
-                  DEFAULT_PLATFORM_STATE,
-                  ALL_INITIAL_VOCABULARY,
-                ),
-              );
-              showToast('Dados de demonstração restaurados.');
-            }}
-            onPlayTopic={(topic) => setActiveTopic(topic)}
-            onToggleUserRole={handleToggleUserRole}
-            onMoveUserClass={handleMoveUserClass}
-            onDeleteUser={handleDeleteUser}
-          />
-        )}
+                );
+                setState(normalized);
+                showToast('Estado da nuvem aplicado!');
+              }}
+              onImportState={(imported) => {
+                setState(
+                  normalizePlatformState(
+                    imported,
+                    DEFAULT_PLATFORM_STATE,
+                    ALL_INITIAL_VOCABULARY,
+                  ),
+                );
+                showToast('Backup importado com sucesso!');
+              }}
+              onResetDemo={() => {
+                clearPlatformState();
+                setState(
+                  normalizePlatformState(
+                    {
+                      ...DEFAULT_PLATFORM_STATE,
+                      currentUserId: state.currentUserId,
+                    },
+                    DEFAULT_PLATFORM_STATE,
+                    ALL_INITIAL_VOCABULARY,
+                  ),
+                );
+                showToast('Dados de demonstração restaurados.');
+              }}
+              onPlayTopic={(topic) => setActiveTopic(topic)}
+              onToggleUserRole={handleToggleUserRole}
+              onMoveUserClass={handleMoveUserClass}
+              onDeleteUser={handleDeleteUser}
+            />
+          )}
+        </Suspense>
       </main>
 
-      {showPlacementModal && (
-        <PlacementTestModal
-          onClose={() => setShowPlacementModal(false)}
-          onCompletePlacement={(lvl) => handleCompletePlacement(lvl)}
-        />
-      )}
+      <Suspense fallback={null}>
+        {showPlacementModal && (
+          <PlacementTestModal
+            onClose={() => setShowPlacementModal(false)}
+            onCompletePlacement={(lvl) => handleCompletePlacement(lvl)}
+          />
+        )}
 
-      {activeTopic && (
-        <LessonPlayer
-          topic={activeTopic}
-          dialectCode={
-            activeTopic.languageCode && activeTopic.languageCode !== activeLanguage
-              ? getActiveDialect(
-                  activeTopic.languageCode,
-                  currentUser.dialectByLanguage,
-                  currentUser.accent,
-                )
-              : activeDialect
-          }
-          dialects={
-            getLanguageCourse(activeTopic.languageCode ?? activeLanguage).dialects
-          }
-          studentName={currentUser.name}
-          onChangeDialect={handleChangeDialect}
-          onSubmitWriting={handleSubmitWriting}
-          onSubmitSpeaking={handleSubmitSpeaking}
-          onCompleteLesson={handleCompleteLesson}
-          onGoToReview={() => setActiveView('review')}
-          onClose={() => setActiveTopic(null)}
-        />
-      )}
+        {activeTopic && (
+          <LessonPlayer
+            topic={activeTopic}
+            dialectCode={
+              activeTopic.languageCode && activeTopic.languageCode !== activeLanguage
+                ? getActiveDialect(
+                    activeTopic.languageCode,
+                    currentUser.dialectByLanguage,
+                    currentUser.accent,
+                  )
+                : activeDialect
+            }
+            dialects={
+              getLanguageCourse(activeTopic.languageCode ?? activeLanguage).dialects
+            }
+            studentName={currentUser.name}
+            onChangeDialect={handleChangeDialect}
+            onSubmitWriting={handleSubmitWriting}
+            onSubmitSpeaking={handleSubmitSpeaking}
+            onCompleteLesson={handleCompleteLesson}
+            onGoToReview={() => setActiveView('review')}
+            onClose={() => setActiveTopic(null)}
+          />
+        )}
+      </Suspense>
 
       {toastMessage && (
         <div className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6">

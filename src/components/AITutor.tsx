@@ -48,6 +48,7 @@ export function AITutor({
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState('');
   const [voiceError, setVoiceError] = useState('');
   const [usedGeminiSession, setUsedGeminiSession] = useState(false);
   const [sessionAwarded, setSessionAwarded] = useState(false);
@@ -161,13 +162,18 @@ export function AITutor({
     }
 
     setVoiceError('');
+    setVoiceStatus('');
     setIsListeningVoice(true);
     stopRecRef.current = startSpeechRecognition(accent, {
       onResult: (transcript) => {
         setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
       },
+      onStatus: (msg) => setVoiceStatus(msg),
       onError: (msg) => setVoiceError(msg),
-      onEnd: () => setIsListeningVoice(false),
+      onEnd: () => {
+        setIsListeningVoice(false);
+        setVoiceStatus('');
+      },
     });
   };
 
@@ -429,6 +435,10 @@ export function AITutor({
               </div>
             )}
           </div>
+        )}
+
+        {voiceStatus && (
+          <p className="mb-2 text-xs font-semibold text-blue-700">{voiceStatus}</p>
         )}
 
         {voiceError && (

@@ -35,9 +35,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install dependencies & build web bundle
+      - name: Install dependencies, test & build web bundle
         run: |
           npm ci
+          npm test
           npm run build
           npx cap sync android
 

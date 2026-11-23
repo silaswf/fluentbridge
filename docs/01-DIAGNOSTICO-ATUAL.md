@@ -1,4 +1,4 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v1.1.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v1.3.0`)
 
 Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** após a entrega da **Fase 5** (sync granular sem perda de dados, hash de senhas, áudios de Speaking cross-device e proxy seguro do Tutor IA) e do motor de **Vozes Neurais Deepgram Aura-2** via Cloudflare Workers AI.
 

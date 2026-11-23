@@ -1,6 +1,7 @@
 /**
  * FluentBridge Cloud API Worker
  * - /api/tts: Neural TTS via Cloudflare Workers AI (Deepgram Aura-2) + Google TTS fallback
+ * - /api/stt: Cloud Whisper STT via Cloudflare Workers AI (@cf/openai/whisper-large-v3-turbo)
  * - /api/gemini-tutor: Secure proxy for Gemini AI Tutor without exposing API keys in client JS
  */
 
@@ -313,6 +314,109 @@ async function handleGeminiTutorRequest(request, env) {
   );
 }
 
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const slice = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...slice);
+  }
+  return btoa(binary);
+}
+
+function resolveSttLanguage(rawLang) {
+  const lower = (rawLang || 'en').trim().toLowerCase();
+  if (lower.startsWith('es')) return 'es';
+  if (lower.startsWith('fr')) return 'fr';
+  if (lower.startsWith('pt')) return 'pt';
+  return 'en';
+}
+
+async function handleSttRequest(request, env) {
+  if (request.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+  if (!env.AI) {
+    return jsonResponse({ error: 'Workers AI binding unavailable' }, 503);
+  }
+
+  const url = new URL(request.url);
+  let lang = url.searchParams.get('lang') || 'en-US';
+  let audioBuffer = null;
+  let base64Audio = '';
+
+  const contentType = (request.headers.get('content-type') || '').toLowerCase();
+  if (contentType.includes('application/json')) {
+    try {
+      const body = await request.json();
+      if (typeof body.lang === 'string') lang = body.lang;
+      if (typeof body.audioBase64 === 'string' && body.audioBase64.trim()) {
+        base64Audio = body.audioBase64.includes(',')
+          ? body.audioBase64.split(',')[1]
+          : body.audioBase64.trim();
+        audioBuffer = base64ToUint8Array(base64Audio).buffer;
+      }
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON payload for /api/stt' }, 400);
+    }
+  } else {
+    audioBuffer = await request.arrayBuffer();
+  }
+
+  if (!audioBuffer || audioBuffer.byteLength <= 100) {
+    return jsonResponse({ error: 'Audio payload too small or empty' }, 400);
+  }
+  if (audioBuffer.byteLength > 4_000_000) {
+    return jsonResponse({ error: 'Audio payload exceeds 4MB limit' }, 413);
+  }
+
+  if (!base64Audio) {
+    base64Audio = arrayBufferToBase64(audioBuffer);
+  }
+
+  const isoLang = resolveSttLanguage(lang);
+
+  try {
+    const turboRes = await env.AI.run('@cf/openai/whisper-large-v3-turbo', {
+      audio: base64Audio,
+      language: isoLang,
+      task: 'transcribe',
+      vad_filter: true,
+    });
+    const text = typeof turboRes?.text === 'string' ? turboRes.text.trim() : '';
+    if (text) {
+      return jsonResponse({
+        ok: true,
+        text,
+        model: '@cf/openai/whisper-large-v3-turbo',
+      });
+    }
+  } catch (err) {
+    console.warn('Whisper turbo error:', err instanceof Error ? err.message : String(err));
+  }
+
+  try {
+    const fallbackRes = await env.AI.run('@cf/openai/whisper', {
+      audio: [...new Uint8Array(audioBuffer)],
+    });
+    const text = typeof fallbackRes?.text === 'string' ? fallbackRes.text.trim() : '';
+    return jsonResponse({
+      ok: true,
+      text,
+      model: '@cf/openai/whisper',
+    });
+  } catch (err) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: err instanceof Error ? err.message : 'Whisper transcription failed',
+      },
+      502,
+    );
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
@@ -326,7 +430,7 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        endpoints: ['/api/tts', '/api/gemini-tutor'],
+        endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
         hasAiBinding: Boolean(env.AI),
         hasGeminiSecret: Boolean(env.GEMINI_API_KEY),
       });
@@ -334,6 +438,10 @@ export default {
 
     if (path === '/api/tts') {
       return handleTtsRequest(request, env, ctx);
+    }
+
+    if (path === '/api/stt') {
+      return handleSttRequest(request, env);
     }
 
     if (path === '/api/gemini-tutor') {

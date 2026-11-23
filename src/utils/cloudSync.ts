@@ -356,10 +356,16 @@ function mergeVocabCards(
     }
     const usePrimaryStrength =
       STRENGTH_RANK[card.strength] >= STRENGTH_RANK[other.strength];
+    const best = (card.reviewCount ?? 0) >= (other.reviewCount ?? 0) ? card : other;
     map.set(card.id, {
       ...card,
       strength: usePrimaryStrength ? card.strength : other.strength,
       reviewCount: Math.max(card.reviewCount ?? 0, other.reviewCount ?? 0),
+      nextReviewAt: best.nextReviewAt ?? card.nextReviewAt ?? other.nextReviewAt,
+      intervalDays: best.intervalDays ?? card.intervalDays ?? other.intervalDays,
+      easeFactor: best.easeFactor ?? card.easeFactor ?? other.easeFactor,
+      repetitions: Math.max(card.repetitions ?? 0, other.repetitions ?? 0) || undefined,
+      lapses: Math.max(card.lapses ?? 0, other.lapses ?? 0) || undefined,
     });
   }
   return Array.from(map.values());
@@ -400,6 +406,15 @@ function mergeUserProfiles(
     completedTopicIds,
     xp: Math.max(localUser.xp ?? 0, remoteUser.xp ?? 0),
     streakDays: Math.max(localUser.streakDays ?? 1, remoteUser.streakDays ?? 1),
+    streakFreezes: primary.streakFreezes ?? secondary.streakFreezes ?? 1,
+    lastStudyDate:
+      [localUser.lastStudyDate, remoteUser.lastStudyDate]
+        .filter(Boolean)
+        .sort()
+        .pop() ?? undefined,
+    themeMode: primary.themeMode ?? secondary.themeMode,
+    reminderEnabled: primary.reminderEnabled ?? secondary.reminderEnabled,
+    reminderTime: primary.reminderTime ?? secondary.reminderTime,
     todayMinutes: Math.max(localUser.todayMinutes ?? 0, remoteUser.todayMinutes ?? 0),
     skillScores: {
       listening: Math.max(
@@ -620,8 +635,8 @@ export async function uploadSpeakingAudioToCloud(
     }
   }
 
-  // Fallback sem configuração adicional: embute áudio compacto (< 450 KB) para tocar no PC do professor
-  if (blob.size <= 450_000) {
+  // Fallback sem configuração adicional: embute áudio compacto (< 600 KB) para tocar no PC do professor
+  if (blob.size <= 600_000) {
     try {
       const dataUrl = await blobToDataUrl(blob);
       return { audioDataUrl: dataUrl };

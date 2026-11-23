@@ -176,7 +176,7 @@ export function AuthScreen({
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] px-4 py-8 sm:px-6 lg:flex lg:items-center lg:justify-center">
+    <div className="safe-top safe-bottom min-h-screen bg-[#F7F9FC] px-4 py-8 sm:px-6 lg:flex lg:items-center lg:justify-center">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch">
         {/* Left Value Prop */}
         <div className="flex flex-col justify-between rounded-3xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 p-7 text-white shadow-xl shadow-blue-600/15 lg:col-span-6 lg:p-9">

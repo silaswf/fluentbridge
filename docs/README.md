@@ -1,4 +1,4 @@
-# Documentação de Desenvolvimento — FluentBridge (`v1.1.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v1.3.0`)
 
 Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma de ensino de idiomas nas **4 habilidades** — *Listening, Reading, Speaking & Writing* — com dicas contextuais para brasileiros, Tutor IA, vocabulário SRS, acompanhamento do **Prof. Silas**, emissão de certificados CEFR e sincronização multiplataforma em **Windows**, **Android** e **Web**).
 
@@ -18,13 +18,13 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de ot
 
 ---
 
-## Resumo do Estado Atual (`v1.1.0`)
+## Resumo do Estado Atual (`v1.3.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas** | **Web / PWA** (`https://fluentbridge.pages.dev` no Cloudflare Pages) + **API Edge** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (`.apk` + `.aab` Google Play Store via Capacitor 7) + **Windows Desktop** (`FluentBridge.exe` via Electron 34) |
-| **Autenticação & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web e Chrome Custom Tabs nativo), cadastro separado **Aluno** vs. **Professor** (`SILAS-PROF-2026`), Admin Mestre `silaswf@gmail.com` (**Prof. Silas**), senhas com hash `fbh1:` e **merge granular entity-level** com tombstones + upload cross-device de Speaking |
-| **Currículo & Conteúdo** | **`35` unidades totais** (`34` de Inglês A1–C1 + `1` unidade inicial de Espanhol preparando arquitetura multi-idioma), **`274` passos interativos**, **`69` dicas contextuais**, **`140` flashcards SRS** e **`24` tabelas** no Guia Gramatical |
-| **Áudio Neural & Pronúncia** | **`DualAudioButtons`** (`🇺🇸 US` + `🇬🇧 UK` + `0.75x`) com síntese neural **Deepgram Aura-2** (`thalia` US / `pandora` UK / `nestor` ES) via Cloudflare Workers AI + cache IndexedDB (`tts-v2:*`) + gravação `32 kbps` sincronizada entre dispositivos |
-| **IA & Estúdio Docente** | **Tutor IA** via proxy seguro `/api/gemini-tutor` no Cloudflare Worker (`GEMINI_API_KEY` protegida no servidor + fallback offline/chave própria), correção de Writing/Speaking com reprodução remota de áudio e rubrica, gestão de turmas, usuários, criador de tópicos e certificados CEFR |
-| **Verificação & CI/CD** | `npx tsc --noEmit` (`0` erros) · `verify_curriculum.mjs` (`0` erros) · GitHub Actions (`.github/workflows/build-android-apk.yml`) gerando `.apk` e `.aab` assinados e Releases automáticas por tag `v*` |
+| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev` com `vite-plugin-pwa`) + **Edge API** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (Safe Area `WindowInsetsCompat`, `.apk` + `.aab`) + **Windows Desktop** (`FluentBridge.exe`) |
+| **Autenticação & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web e Android nativo), cadastro separado **Aluno** vs. **Professor** (`SILAS-PROF-2026`), Admin Mestre `silaswf@gmail.com` (**Prof. Silas**), senhas com hash `fbh1:` e **merge granular entity-level** com tombstones + upload cross-device de Speaking |
+| **Currículo & Conteúdo** | **`35` unidades totais** (`34` de Inglês A1–C1 + `1` unidade inicial de Espanhol), **`274` passos interativos**, **`69` dicas contextuais**, **`140` flashcards SM-2** e **`24` tabelas** no Guia Gramatical |
+| **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** (`🇺🇸 US` + `🇬🇧 UK` + `0.75x`) com síntese neural **Deepgram Aura-2** (`thalia` US / `pandora` UK / `nestor` ES), reconhecimento **Whisper Cloud STT (`/api/stt`)** sem erro `network` e gravação `32 kbps` sincronizada entre dispositivos |
+| **IA, SRS & UX (`Fase 6–7`)** | **Tutor IA** via `/api/gemini-tutor`, **SRS SM-2** com 4 botões, **Tema Claro/Escuro/Auto**, **Streak Freeze (`🧊`)**, lembretes diários (`@capacitor/local-notifications`), `ErrorBoundary`, lazy chunks e suíte **Vitest** |
+| **Verificação & CI/CD** | `npm test` + `npx tsc --noEmit` (`0` erros) · `verify_curriculum.mjs` (`0` erros) · GitHub Actions gerando `.apk` e `.aab` assinados por tag `v*` |

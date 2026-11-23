@@ -4,6 +4,24 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v1.3.0`] — 2026-11-23
+### Correções Mobile (Safe Area + Whisper STT) + Fases 6 & 7 (SM-2, Dark Mode, PWA, Streak Freeze & Vitest)
+- **Correção Crítica de Safe Area / Barra Superior e Navegação (`MainActivity.java`, `index.css`, `Sidebar.tsx`, `LessonPlayer.tsx`, `AuthScreen.tsx`, `PlacementTestModal.tsx`, `App.tsx`):**
+  - Configurado `WindowInsetsCompat.Type.systemBars() | displayCutout() | ime()` diretamente no `MainActivity.java` (Android nativo) com contraste claro na status bar e barra de navegação, além de classes `env(safe-area-inset-*)` (`.safe-top`, `.safe-bottom`, `.safe-pt-3`, `.safe-pb-4`, `.safe-pb-nav`, `.safe-main-pb`) para iOS/PWA — impedindo invasão de botões e títulos em qualquer tamanho de tela.
+- **Correção Definitiva do Erro `network` no Microfone (`worker.js`, `speech.ts`, `LessonPlayer.tsx`, `AITutor.tsx`, `App.tsx`, `cloudSync.ts`):**
+  - Adicionado endpoint **`POST /api/stt`** no Cloudflare Worker `fluentbridge-api` usando **Cloudflare Workers AI (`@cf/openai/whisper-large-v3-turbo` + fallback `@cf/openai/whisper`)**.
+  - Em dispositivos Android WebView, Electron ou navegadores em que a API nativa `SpeechRecognition` falha com `network`, o app agora grava e transcreve automaticamente via Whisper Cloud (`transcribeAudioBlob`), mantendo a checagem de pronúncia e o ditado do Tutor IA funcionando sem erros.
+  - Hardening de envios de Speaking (`audioBlob` direto em `handleSubmitSpeaking`, fallback inline até `600 KB` em `uploadSpeakingAudioToCloud`, transcrição automática caso o aluno envie áudio direto ao professor, e timestamps reais `DD/MM HH:MM` nas submissões).
+- **Fase 6 — Performance, Offline Web & Testes (`vite.config.ts`, `App.tsx`, `ErrorBoundary.tsx`, `src/utils/__tests__/`):**
+  - Lazy loading (`React.lazy` + `<Suspense>`) de `AITutor`, `VocabReview`, `TipsLibrary`, `CertificatesView`, `TeacherStudio`, `LessonPlayer` e `PlacementTestModal`, mais `manualChunks` separando vendors e níveis curriculares (`curriculum-a1a2`, `curriculum-b1b2`, `curriculum-c1`).
+  - Adicionado `ErrorBoundary` global e Service Worker offline (`vite-plugin-pwa` / Workbox).
+  - Suíte automatizada `Vitest` (`npm test`) cobrindo `storage`, `cloudSync`, `speech`, `srsEngine` e `streakEngine`, executada também no CI do GitHub Actions.
+- **Fase 7 — SRS Científico SM-2, Tema Escuro, Streak Freeze, Lembretes & Atalhos (`srsEngine.ts`, `VocabReview.tsx`, `streakEngine.ts`, `theme.ts`, `notifications.ts`, `index.css`):**
+  - Algoritmo **SM-2** real (`nextReviewAt`, `intervalDays`, `easeFactor`, `repetitions`, `lapses`) com filtro *"Para hoje (SM-2)"* e 4 botões (*Errei*, *Difícil*, *Bom*, *Fácil*).
+  - Alternador de tema **Claro / Escuro / Automático** (`html.dark`), **Proteção de Ofensiva (`🧊 Streak Freeze`)**, agendamento de lembretes diários (`@capacitor/local-notifications` + Web fallback) e atalhos de teclado (`1–4`, `Enter`, `R`, `Espaço`, `Escape`).
+
+---
+
 ## [`v1.1.0`] — 2026-11-20
 ### Fase 5 (Sync Granular, Áudios Cross-Device & Proxy Seguro) + Vozes Neurais Deepgram Aura-2
 - **Motor de Vozes Neurais em Nuvem (`cloudflare-worker/worker.js`, `src/utils/speech.ts`, `src/utils/audioDb.ts`):**

@@ -60,6 +60,11 @@ function syncUserVocab(
       ...masterCard,
       strength: saved.strength,
       reviewCount: saved.reviewCount,
+      nextReviewAt: saved.nextReviewAt,
+      intervalDays: saved.intervalDays,
+      easeFactor: saved.easeFactor,
+      repetitions: saved.repetitions,
+      lapses: saved.lapses,
     };
   });
 }

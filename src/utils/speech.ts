@@ -1,6 +1,8 @@
+import { Capacitor } from '@capacitor/core';
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { Accent } from '../types/learning';
 import { getAudioClip, saveAudioClip } from './audioDb';
+import { isAudioRecordingSupported, startAudioRecording } from './audioRecorder';
 
 interface SpeakOptions {
   accent?: Accent | string;
@@ -415,8 +417,71 @@ function getSpeechRecognitionConstructor(): SpeechRecognitionConstructor | null 
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+let preferCloudStt = false;
+
+function shouldUseCloudStt(): boolean {
+  if (!DEFAULT_BACKEND_API_URL.trim() || !isAudioRecordingSupported()) {
+    return false;
+  }
+  if (preferCloudStt) return true;
+  if (Capacitor.isNativePlatform()) return true;
+  if (typeof navigator !== 'undefined' && /Electron/i.test(navigator.userAgent)) {
+    return true;
+  }
+  return getSpeechRecognitionConstructor() === null;
+}
+
+export async function transcribeAudioBlob(
+  blob: Blob,
+  langCode = 'en-US',
+): Promise<{ ok: boolean; text?: string; error?: string }> {
+  const apiBase = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
+  if (!apiBase || typeof fetch === 'undefined') {
+    return { ok: false, error: 'Serviço de transcrição em nuvem não configurado.' };
+  }
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId =
+    controller !== null
+      ? globalThis.setTimeout(() => controller.abort(), 15000)
+      : undefined;
+  try {
+    const res = await fetch(`${apiBase}/api/stt?lang=${encodeURIComponent(langCode)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': blob.type || 'audio/webm',
+      },
+      body: blob,
+      signal: controller?.signal,
+    });
+    if (!res.ok) {
+      return { ok: false, error: `Falha ao transcrever áudio (${res.status}).` };
+    }
+    const data = (await res.json()) as { ok?: boolean; text?: string; error?: string };
+    const text = (data.text ?? '').trim();
+    if (!text) {
+      return {
+        ok: false,
+        error: 'Não captamos fala clara. Tente falar mais perto do microfone.',
+      };
+    }
+    return { ok: true, text };
+  } catch {
+    return {
+      ok: false,
+      error: 'Sem conexão para transcrever agora. Você pode gravar para o Professor ou praticar manualmente.',
+    };
+  } finally {
+    if (timeoutId !== undefined) {
+      globalThis.clearTimeout(timeoutId);
+    }
+  }
+}
+
 export function isSpeechRecognitionSupported(): boolean {
-  return getSpeechRecognitionConstructor() !== null;
+  return (
+    getSpeechRecognitionConstructor() !== null ||
+    (isAudioRecordingSupported() && DEFAULT_BACKEND_API_URL.trim().length > 0)
+  );
 }
 
 export function startSpeechRecognition(
@@ -425,15 +490,72 @@ export function startSpeechRecognition(
     onResult: (transcript: string) => void;
     onError: (message: string) => void;
     onEnd: () => void;
+    onStatus?: (message: string) => void;
   },
 ): () => void {
+  let finished = false;
+  const finish = () => {
+    if (!finished) {
+      finished = true;
+      callbacks.onEnd();
+    }
+  };
+
+  let activeStopFn: () => void = () => undefined;
+  let cancelled = false;
+
+  const startCloudStt = () => {
+    callbacks.onStatus?.('Gravando... toque no microfone para analisar');
+    void startAudioRecording({
+      maxSeconds: 12,
+      onComplete: async (blob) => {
+        if (cancelled) {
+          finish();
+          return;
+        }
+        callbacks.onStatus?.('Analisando sua pronúncia...');
+        const stt = await transcribeAudioBlob(blob, langCode);
+        if (!cancelled) {
+          if (stt.ok && stt.text) {
+            callbacks.onResult(stt.text);
+          } else {
+            callbacks.onError(
+              stt.error ?? 'Não captamos áudio claro. Tente falar mais perto do microfone.',
+            );
+          }
+        }
+        finish();
+      },
+      onError: (msg) => {
+        if (!cancelled) callbacks.onError(msg);
+        finish();
+      },
+    }).then((handle) => {
+      if (!handle) {
+        finish();
+        return;
+      }
+      if (cancelled) {
+        handle.cancel();
+        return;
+      }
+      activeStopFn = () => handle.stop();
+    });
+  };
+
   const Recognition = getSpeechRecognitionConstructor();
-  if (!Recognition) {
-    callbacks.onError(
-      'Reconhecimento de voz não disponível neste navegador. Use o botão de prática manual abaixo.',
-    );
-    callbacks.onEnd();
-    return () => undefined;
+  if (shouldUseCloudStt() || !Recognition) {
+    if (!isAudioRecordingSupported() || !DEFAULT_BACKEND_API_URL.trim()) {
+      callbacks.onError(
+        'Reconhecimento de voz não disponível neste navegador. Use o botão de prática manual abaixo.',
+      );
+      finish();
+      return () => undefined;
+    }
+    startCloudStt();
+    return () => {
+      activeStopFn();
+    };
   }
 
   const recognition = new Recognition();
@@ -442,13 +564,8 @@ export function startSpeechRecognition(
   recognition.maxAlternatives = 1;
   recognition.continuous = false;
 
-  let finished = false;
-  const finish = () => {
-    if (!finished) {
-      finished = true;
-      callbacks.onEnd();
-    }
-  };
+  let switchedToCloud = false;
+  callbacks.onStatus?.('Ouvindo...');
 
   recognition.onresult = (event) => {
     const first = event.results[0];
@@ -461,7 +578,24 @@ export function startSpeechRecognition(
   };
 
   recognition.onerror = (event) => {
-    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+    if (
+      (event.error === 'network' || event.error === 'service-not-allowed') &&
+      isAudioRecordingSupported() &&
+      DEFAULT_BACKEND_API_URL.trim()
+    ) {
+      // WebView/Chrome sem serviço Google Speech -> muda automaticamente para Cloud Whisper STT
+      preferCloudStt = true;
+      switchedToCloud = true;
+      try {
+        recognition.abort();
+      } catch {
+        // Ignore abort errors
+      }
+      startCloudStt();
+      return;
+    }
+
+    if (event.error === 'not-allowed') {
       callbacks.onError('Permissão de microfone negada. Libere o microfone ou use a prática sem microfone.');
     } else if (event.error === 'no-speech') {
       callbacks.onError('Nenhuma fala detectada. Tente novamente!');
@@ -471,20 +605,42 @@ export function startSpeechRecognition(
     finish();
   };
 
-  recognition.onend = finish;
+  recognition.onend = () => {
+    if (!switchedToCloud) {
+      finish();
+    }
+  };
 
   try {
     recognition.start();
+    activeStopFn = () => {
+      try {
+        recognition.stop();
+      } catch {
+        try {
+          recognition.abort();
+        } catch {
+          // Ignore abort errors
+        }
+      }
+    };
   } catch {
-    callbacks.onError('Não foi possível iniciar o microfone neste momento.');
-    finish();
+    if (isAudioRecordingSupported() && DEFAULT_BACKEND_API_URL.trim()) {
+      preferCloudStt = true;
+      switchedToCloud = true;
+      startCloudStt();
+    } else {
+      callbacks.onError('Não foi possível iniciar o microfone neste momento.');
+      finish();
+    }
   }
 
   return () => {
-    try {
-      recognition.abort();
-    } catch {
-      // Ignore abort failures
+    if (switchedToCloud) {
+      activeStopFn();
+    } else {
+      cancelled = true;
+      activeStopFn();
     }
   };
 }

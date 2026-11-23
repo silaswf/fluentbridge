@@ -1,10 +1,10 @@
-# 03 — Roadmap de Desenvolvimento até a Completude (`v1.1.0` → `v2.0.0`)
+# 03 — Roadmap de Desenvolvimento até a Completude (`v1.3.0` → `v2.0.0`)
 
 Este roadmap registra as entregas já concluídas do **FluentBridge Academy** e define o plano completo de evolução técnica, pedagógica, visual, de conteúdo e de segurança para levar o aplicativo ao seu potencial máximo (equiparando e superando plataformas comerciais como Busuu e Duolingo para o ecossistema particular do **Prof. Silas**).
 
 ---
 
-## Fases Concluídas (`v1.0.0` → `v1.1.0`)
+## Fases Concluídas (`v1.0.0` → `v1.3.0`)
 
 ### Fase 0 — Fundação das 4 Habilidades & Experiência Busuu Base — CONCLUÍDA
 - [x] Trilha visual por níveis CEFR (`A1` a `C1`) com `LearningPath.tsx` e `SkillRadar.tsx`.
@@ -38,23 +38,22 @@ Este roadmap registra as entregas já concluídas do **FluentBridge Academy** e 
 - [x] **Upload & Reprodução Cross-Device de Áudios de Speaking**: gravações compactadas (`32 kbps`) com envio automático (`uploadSpeakingAudioToCloud` para bucket `fb-audio` ou fallback `audioDataUrl`) e player remoto no `TeacherStudio.tsx` (`resolveSubmissionAudioUrl`), permitindo que o **Prof. Silas ouça no PC a pronúncia gravada pelo aluno no celular**.
 - [x] **Merge Granular Entity-Level + Hash de Senhas (`cloudSync.ts`, `storage.ts`)**: implementado `mergePlatformStates` (união sem sobrescrita de usuários, turmas, tópicos customizados, submissões `reviewed` > `pending`, XP/progresso) com tombstones de exclusão (`deletedUserIds`, `deletedClassIds`, `deletedTopicIds`) e hashing de senhas com salt (`fbh1:...`). *(Nota: migração opcional completa para consultas relacionais diretas em `supabase_schema.sql` permanece como evolução natural para escolas com milhares de usuários).*
 
+### Fase 6 — Performance, Arquitetura Modular, Offline Web & Testes (`v1.2.0` → `v1.3.0`) — CONCLUÍDA
+- [x] **Code-Splitting real dos Níveis CEFR & Telas (`vite.config.ts`, `App.tsx`)**: carregamento sob demanda via `React.lazy` + `<Suspense>` (`AITutor`, `VocabReview`, `TipsLibrary`, `CertificatesView`, `TeacherStudio`, `LessonPlayer`, `PlacementTestModal`) e `manualChunks` para vendors e módulos curriculares (`curriculum-a1a2`, `curriculum-b1b2`, `curriculum-c1`).
+- [x] **PWA Service Worker Offline (`vite-plugin-pwa`) + `ErrorBoundary` Global (`ErrorBoundary.tsx`)**: cache offline automático para Web/PWA e proteção global contra falhas de renderização.
+- [x] **Suíte Automatizada `Vitest` (`src/utils/__tests__/`)**: testes cobrindo hashing/normalização (`storage.test.ts`), merge granular e tombstones (`cloudSync.test.ts`), pontuação de pronúncia (`speech.test.ts`), algoritmo SM-2 (`srsEngine.test.ts`) e Streak Freeze (`streakEngine.test.ts`), integrados ao GitHub Actions.
+
+### Fase 7 — UI/UX Premium, SRS Científico (SM-2), Safe Area, Whisper STT & Notificações (`v1.3.0`) — CONCLUÍDA
+- [x] **Algoritmo Real de Repetição Espaçada (`SM-2` em `srsEngine.ts` + `VocabReview.tsx`)**: agendamento real com `nextReviewAt`, `intervalDays`, `easeFactor`, `repetitions` e `lapses`, fila *"Para hoje (SM-2)"* e 4 botões (*Errei · 10 min*, *Difícil*, *Bom*, *Fácil*).
+- [x] **Tema Escuro (`Claro / Escuro / Automático` em `theme.ts` + `index.css`) & Atalhos de Teclado**: alternância persistida por usuário e atalhos (`1–4`, `Enter`, `R`, `Espaço`, `Escape`).
+- [x] **Proteção de Ofensiva (`🧊 Streak Freeze` em `streakEngine.ts`) & Lembretes Diários (`notifications.ts`)**: 1 proteção automática a cada 7 dias seguidos (máx. 3) e agendamento nativo com `@capacitor/local-notifications` + fallback Web.
+- [x] **Safe Area Android/Web + Cloud Whisper STT (`/api/stt`)**: correção de invasão da barra de status/navegação em `MainActivity.java` + `env(safe-area-inset-*)` e transcrição automática em nuvem com `@cf/openai/whisper-large-v3-turbo` eliminando o erro `network` do microfone.
+
 ---
 
-## Roadmap Futuro — Rumo ao Potencial Máximo (`v1.2.0` → `v2.0.0`)
+## Roadmap Futuro — Rumo ao Potencial Máximo (`v1.4.0` → `v2.0.0`)
 
 Os detalhes técnicos completos de implementação de cada sprint estão em [`06 - Auditoria e Otimizações`](./06-AUDITORIA-OTIMIZACOES.md) e [`07 - Plano Técnico das Próximas Fases`](./07-PLANO-FASE-8-DIFERENCIAIS.md).
-
-### Fase 6 — Performance, Arquitetura Modular, Offline Web & Testes (`v1.2.0`) — PLANEJADA
-- [ ] **Code-Splitting real dos Níveis CEFR & Telas**: quebrar os `1.032 kB` do chunk único com `React.lazy` para módulos (`TeacherStudio`, `AITutor`, `VocabReview`, `TipsLibrary`) e carregamento sob demanda de `levelB1`, `levelB2`, `levelC1`, `grammarB1B2`, `grammarC1` — meta: chunk inicial `< 280 kB`.
-- [ ] **Refatoração Modular**: dividir `TeacherStudio.tsx` (`1.887` linhas), `LessonPlayer.tsx` (`1.788` linhas) e `App.tsx` (`1.148` linhas) em hooks e subcomponentes especializados (`useCloudSyncController`, `useAuthController`, steps individuais em `src/components/steps/`).
-- [ ] **PWA Service Worker Offline (`vite-plugin-pwa`) + `ErrorBoundary` Global**: garantir que `https://fluentbridge.pages.dev` abra mesmo sem internet no iPhone/navegador e proteja contra falhas inesperadas de renderização.
-- [ ] **Suíte Automatizada (`Vitest` + Testing Library)**: testes de regressão cobrindo Auth (Aluno vs. Professor), merge de nuvem, SRS, pontuação de pronúncia e fluxo completo de lição.
-
-### Fase 7 — UI/UX Premium, SRS Científico (SM-2) & Notificações Nativas (`v1.3.0`) — PLANEJADA
-- [ ] **Algoritmo Real de Repetição Espaçada (`SM-2 / FSRS`)**: substituir os 3 níveis estáticos (`weak`, `medium`, `mastered`) por agendamento com datas reais (`nextReviewAt`, `intervalDays`, `easeFactor`), fila de `"Revisões de Hoje"` e card com botão **"Não lembro / Difícil / Bom / Fácil"**.
-- [ ] **Tema Escuro (`Claro / Escuro / Sistema`) & Acessibilidade WCAG**: suporte completo a Dark Mode, zoom móvel liberado, fechamento de modais por `Escape`, `focus-trap` e atalhos de teclado (`1–4` para opções, `Enter` para avançar, `R` para repetir áudio).
-- [ ] **Trilha Serpenteada Busuu/Duolingo + *Streak Freeze* (`🧊`)**: visual mais engajante por módulos, marcos semanais, proteção automática de sequência (1 congelamento a cada 7 dias seguidos) e notificações push/locais diárias no Android (`@capacitor/local-notifications`).
-- [ ] **TTS Híbrido Neural em Nuvem (Fallback de Qualidade no Android/Web)**: opção de síntese de alta fidelidade via Edge Function (Google Cloud TTS / Gemini Audio cacheado em R2/Storage) quando o celular do aluno não tiver vozes neurais instaladas localmente.
 
 ### Fase 8 — Novos Modos Pedagógicos & Ecossistema Escolar (`v1.4.0`) — PLANEJADA
 - [ ] **Tarefas de Casa & Prazos (*Teacher Assignments*)**: Prof. Silas atribui unidades, redações ou desafios de speaking específicos para uma turma com data limite e acompanhamento de entregas pendentes/atrasadas.

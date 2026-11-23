@@ -1,19 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   BrainCircuit,
   CheckCircle2,
+  Clock,
   List,
   RotateCw,
   Search,
   Sparkles,
 } from 'lucide-react';
 import type { CEFRLevel, Topic, VocabCard } from '../types/learning';
+import {
+  isCardDue,
+  previewNextIntervalLabel,
+  sortCardsForReview,
+  type SrsRating,
+} from '../utils/srsEngine';
 import { DualAudioButtons } from './DualAudioButtons';
 
 interface VocabReviewProps {
   vocab: VocabCard[];
   topics: Topic[];
-  onRateCard: (cardId: string, nextStrength: VocabCard['strength']) => void;
+  onRateCard: (cardId: string, rating: SrsRating) => void;
 }
 
 const STRENGTH_META: Record<
@@ -40,7 +47,7 @@ export function VocabReview({
   onRateCard,
 }: VocabReviewProps) {
   const [mode, setMode] = useState<'flashcards' | 'list'>('flashcards');
-  const [filterStrength, setFilterStrength] = useState<'all' | VocabCard['strength']>('all');
+  const [filterStrength, setFilterStrength] = useState<'all' | 'due' | VocabCard['strength']>('all');
   const [filterLevel, setFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [search, setSearch] = useState('');
   const [cardIndex, setCardIndex] = useState(0);
@@ -68,6 +75,7 @@ export function VocabReview({
         ? vocab
         : vocab.filter((v) => topicLevelMap.get(v.topicId) === filterLevel);
     return {
+      due: levelScoped.filter((v) => isCardDue(v)).length,
       weak: levelScoped.filter((v) => v.strength === 'weak').length,
       medium: levelScoped.filter((v) => v.strength === 'medium').length,
       mastered: levelScoped.filter((v) => v.strength === 'mastered').length,
@@ -75,16 +83,15 @@ export function VocabReview({
   }, [vocab, filterLevel, topicLevelMap]);
 
   const deck = useMemo(() => {
-    const order: Record<VocabCard['strength'], number> = {
-      weak: 0,
-      medium: 1,
-      mastered: 2,
-    };
-    return [...vocab]
+    const filtered = vocab
       .filter((v) =>
         filterLevel === 'ALL' ? true : topicLevelMap.get(v.topicId) === filterLevel,
       )
-      .filter((v) => (filterStrength === 'all' ? true : v.strength === filterStrength))
+      .filter((v) => {
+        if (filterStrength === 'all') return true;
+        if (filterStrength === 'due') return isCardDue(v);
+        return v.strength === filterStrength;
+      })
       .filter((v) => {
         if (!search.trim()) return true;
         const q = search.toLowerCase();
@@ -93,19 +100,45 @@ export function VocabReview({
           v.translation.toLowerCase().includes(q) ||
           v.category.toLowerCase().includes(q)
         );
-      })
-      .sort((a, b) => order[a.strength] - order[b.strength]);
+      });
+    return sortCardsForReview(filtered);
   }, [vocab, filterLevel, filterStrength, search, topicLevelMap]);
 
   const safeIdx = deck.length === 0 ? 0 : cardIndex % deck.length;
   const activeCard = deck[safeIdx];
 
-  const handleRate = (nextStrength: VocabCard['strength']) => {
+  const handleRate = (rating: SrsRating) => {
     if (!activeCard) return;
-    onRateCard(activeCard.id, nextStrength);
+    onRateCard(activeCard.id, rating);
     setFlipped(false);
     setCardIndex((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (mode !== 'flashcards' || !activeCard) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT')
+      ) {
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setFlipped((f) => !f);
+      } else if (flipped) {
+        if (e.key === '1') handleRate('again');
+        else if (e.key === '2') handleRate('hard');
+        else if (e.key === '3') handleRate('good');
+        else if (e.key === '4') handleRate('easy');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -172,7 +205,25 @@ export function VocabReview({
       </div>
 
       {/* Strength Summary Pills */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <button
+          type="button"
+          onClick={() =>
+            setFilterStrength((f) => (f === 'due' ? 'all' : 'due'))
+          }
+          className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
+            filterStrength === 'due'
+              ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-100'
+              : 'border-slate-200 bg-white hover:border-blue-200'
+          }`}
+        >
+          <p className="flex items-center gap-1.5 font-mono text-2xl font-extrabold text-blue-600">
+            <Clock className="h-5 w-5" />
+            <span>{counts.due}</span>
+          </p>
+          <p className="text-xs font-semibold text-slate-600">Para hoje (SM-2)</p>
+        </button>
+
         <button
           type="button"
           onClick={() =>
@@ -324,29 +375,48 @@ export function VocabReview({
 
                     <div className="space-y-2">
                       <p className="text-center text-xs font-semibold text-slate-500">
-                        Como você foi nessa palavra? (+5 XP)
+                        Como você foi nessa palavra? (+5 XP · SM-2 · Atalhos 1–4)
                       </p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         <button
                           type="button"
-                          onClick={() => handleRate('weak')}
+                          onClick={() => handleRate('again')}
                           className="rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100 cursor-pointer"
                         >
-                          Preciso rever
+                          <span>Errei</span>
+                          <span className="mt-0.5 block font-mono text-[10px] opacity-80">
+                            {previewNextIntervalLabel(activeCard, 'again')}
+                          </span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleRate('medium')}
+                          onClick={() => handleRate('hard')}
                           className="rounded-xl border border-amber-200 bg-amber-50 py-2.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 cursor-pointer"
                         >
-                          Lembrei
+                          <span>Difícil</span>
+                          <span className="mt-0.5 block font-mono text-[10px] opacity-80">
+                            {previewNextIntervalLabel(activeCard, 'hard')}
+                          </span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleRate('mastered')}
+                          onClick={() => handleRate('good')}
+                          className="rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100 cursor-pointer"
+                        >
+                          <span>Bom</span>
+                          <span className="mt-0.5 block font-mono text-[10px] opacity-80">
+                            {previewNextIntervalLabel(activeCard, 'good')}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRate('easy')}
                           className="rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100 cursor-pointer"
                         >
-                          Domino!
+                          <span>Fácil</span>
+                          <span className="mt-0.5 block font-mono text-[10px] opacity-80">
+                            {previewNextIntervalLabel(activeCard, 'easy')}
+                          </span>
                         </button>
                       </div>
                     </div>

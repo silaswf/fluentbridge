@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   Award,
@@ -170,6 +170,14 @@ export function PlacementTestModal({
   const [picked, setPicked] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
   const q = QUESTIONS[idx];
 
   const handleConfirm = () => {
@@ -195,7 +203,7 @@ export function PlacementTestModal({
   const recommended = computeRecommendedLevel(correctCount);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-xs">
+    <div className="safe-top safe-bottom fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-xs">
       <div className="animate-fade-up flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
         <header className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-2">

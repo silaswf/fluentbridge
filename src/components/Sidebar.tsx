@@ -7,11 +7,16 @@ import {
   GraduationCap,
   Lightbulb,
   LogOut,
+  Monitor,
+  Moon,
+  Snowflake,
   Sparkles,
+  Sun,
   Zap,
 } from 'lucide-react';
 import { LANGUAGE_COURSES } from '../data/languages';
 import type { LanguageCode, LanguageCourse, UserProfile } from '../types/learning';
+import type { ThemeMode } from '../utils/theme';
 
 export type NavView =
   | 'learn'
@@ -36,6 +41,8 @@ interface SidebarProps {
   onChangeDialect: (dialectCode: string) => void;
   dueVocabCount: number;
   pendingSubmissionsCount: number;
+  themeMode: ThemeMode;
+  onCycleTheme: () => void;
   onLogout: () => void;
 }
 
@@ -54,8 +61,14 @@ export function Sidebar({
   onChangeDialect,
   dueVocabCount,
   pendingSubmissionsCount,
+  themeMode,
+  onCycleTheme,
   onLogout,
 }: SidebarProps) {
+  const ThemeIcon =
+    themeMode === 'dark' ? Moon : themeMode === 'system' ? Monitor : Sun;
+  const themeLabel =
+    themeMode === 'dark' ? 'Escuro' : themeMode === 'system' ? 'Auto' : 'Claro';
   const navItems: {
     id: NavView;
     label: string;
@@ -213,7 +226,13 @@ export function Sidebar({
               <p className="font-mono text-sm font-bold text-slate-900">
                 {user.streakDays}d
               </p>
-              <p className="text-[11px] text-slate-500">Ofensiva</p>
+              <p className="flex items-center gap-1 text-[11px] text-slate-500">
+                <span>Ofensiva</span>
+                <span title="Proteções de Ofensiva (Streak Freeze)" className="inline-flex items-center gap-0.5 text-sky-600 font-semibold">
+                  <Snowflake className="h-2.5 w-2.5" />
+                  {user.streakFreezes ?? 1}
+                </span>
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2">
@@ -264,32 +283,48 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Dynamic Dialect Selector */}
-        <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">
-          <p className="text-xs font-semibold text-slate-700">
-            Sotaque ({activeCourse.namePt})
-          </p>
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            {activeCourse.dialects.map((dial) => (
-              <button
-                key={dial.code}
-                type="button"
-                onClick={() => onChangeDialect(dial.code)}
-                className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                  activeDialect === dial.code
-                    ? 'bg-white text-blue-700 shadow-xs ring-1 ring-blue-200'
-                    : 'text-slate-600 hover:bg-white/60'
-                }`}
-              >
-                {dial.flag} {dial.label}
-              </button>
-            ))}
+        {/* Dynamic Dialect & Theme Selector */}
+        <div className="space-y-2.5">
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">
+            <p className="text-xs font-semibold text-slate-700">
+              Sotaque ({activeCourse.namePt})
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {activeCourse.dialects.map((dial) => (
+                <button
+                  key={dial.code}
+                  type="button"
+                  onClick={() => onChangeDialect(dial.code)}
+                  className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                    activeDialect === dial.code
+                      ? 'bg-white text-blue-700 shadow-xs ring-1 ring-blue-200'
+                      : 'text-slate-600 hover:bg-white/60'
+                  }`}
+                >
+                  {dial.flag} {dial.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={onCycleTheme}
+            className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <ThemeIcon className="h-3.5 w-3.5 text-blue-600" />
+              <span>Tema da interface</span>
+            </span>
+            <span className="rounded-md bg-white px-2 py-0.5 font-mono text-[11px] text-slate-600 ring-1 ring-slate-200">
+              {themeLabel}
+            </span>
+          </button>
         </div>
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 py-2.5 backdrop-blur-sm lg:hidden">
+      <header className="safe-pt-3 sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 pb-2.5 backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-2">
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold text-white"
@@ -331,6 +366,15 @@ export function Sidebar({
           </span>
           <button
             type="button"
+            onClick={onCycleTheme}
+            className="rounded-lg border border-slate-200 p-1.5 text-slate-500"
+            title={`Tema: ${themeLabel}`}
+            aria-label="Alternar tema"
+          >
+            <ThemeIcon className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
             onClick={onLogout}
             className="rounded-lg border border-slate-200 p-1.5 text-slate-500"
             aria-label="Sair"
@@ -342,7 +386,7 @@ export function Sidebar({
 
       {/* Mobile Bottom Tab Bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-slate-200 bg-white/95 px-1 py-1.5 backdrop-blur-sm lg:hidden"
+        className="safe-pb-nav fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-slate-200 bg-white/95 px-1 pt-1.5 backdrop-blur-sm lg:hidden"
         aria-label="Navegação mobile"
       >
         {navItems.map(({ id, shortLabel, Icon, badge }) => {

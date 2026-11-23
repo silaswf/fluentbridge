@@ -48,6 +48,7 @@ import {
   speakText,
   startSpeechRecognition,
   stopSpeaking,
+  transcribeAudioBlob,
 } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
 import { SkillBadge, TIP_CATEGORY_META } from './SkillBadge';
@@ -71,6 +72,7 @@ interface LessonPlayerProps {
     targetSentence: string;
     responseText: string;
     audioId: string;
+    audioBlob?: Blob;
     audioDurationSec: number;
     autoPronunciationScore?: number;
   }) => void;
@@ -217,6 +219,7 @@ export function LessonPlayer({
 
   // Speaking speech recognition state
   const [isRecordingSpeech, setIsRecordingSpeech] = useState(false);
+  const [speechStatus, setSpeechStatus] = useState('');
   const [spokenText, setSpokenText] = useState('');
   const [speechError, setSpeechError] = useState('');
   const [manualSpeakDone, setManualSpeakDone] = useState(false);
@@ -442,6 +445,7 @@ export function LessonPlayer({
     }
 
     setSpeechError('');
+    setSpeechStatus('');
     setSpokenText('');
     setIsRecordingSpeech(true);
 
@@ -453,11 +457,13 @@ export function LessonPlayer({
           registerCorrect(20);
         }
       },
+      onStatus: (msg) => setSpeechStatus(msg),
       onError: (msg) => {
         setSpeechError(msg);
       },
       onEnd: () => {
         setIsRecordingSpeech(false);
+        setSpeechStatus('');
       },
     });
   };
@@ -507,8 +513,17 @@ export function LessonPlayer({
     const audioId = `audio-${Date.now()}`;
     await saveAudioClip(audioId, recordedBlob);
 
-    const autoScore = spokenText
-      ? evaluatePronunciation(currentStep.targetSentence, spokenText).score
+    let effectiveSpoken = spokenText;
+    if (!effectiveSpoken) {
+      const stt = await transcribeAudioBlob(recordedBlob, dialectCode);
+      if (stt.ok && stt.text) {
+        effectiveSpoken = stt.text;
+        setSpokenText(stt.text);
+      }
+    }
+
+    const autoScore = effectiveSpoken
+      ? evaluatePronunciation(currentStep.targetSentence, effectiveSpoken).score
       : undefined;
 
     onSubmitSpeaking({
@@ -516,8 +531,9 @@ export function LessonPlayer({
       topicTitle: topic.titlePt,
       promptPt: currentStep.promptPt,
       targetSentence: currentStep.targetSentence,
-      responseText: spokenText || currentStep.targetSentence,
+      responseText: effectiveSpoken || currentStep.targetSentence,
       audioId,
+      audioBlob: recordedBlob,
       audioDurationSec: recordedDuration,
       autoPronunciationScore: autoScore,
     });
@@ -581,7 +597,7 @@ export function LessonPlayer({
 
   if (isCompletedScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
+      <div className="safe-top safe-bottom fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
         <div className="animate-fade-up w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-2xl">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
             <Award className="h-9 w-9" />
@@ -669,11 +685,87 @@ export function LessonPlayer({
       ? freeText.trim().split(/\s+/).filter(Boolean).length
       : 0;
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT')
+      ) {
+        if (e.key === 'Escape') target.blur();
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (showHeartRecovery) {
+          setShowHeartRecovery(false);
+        } else if (showHint) {
+          setShowHint(false);
+        } else {
+          stopSpeaking();
+          onClose();
+        }
+        return;
+      }
+
+      if (!currentStep) return;
+
+      if (
+        (currentStep.type === 'listening' ||
+          currentStep.type === 'reading' ||
+          currentStep.type === 'fill_blank') &&
+        checkedStatus === 'idle' &&
+        ['1', '2', '3', '4'].includes(e.key)
+      ) {
+        const idx = Number(e.key) - 1;
+        if (idx < currentStep.options.length) {
+          setSelectedOption(idx);
+        }
+        return;
+      }
+
+      if ((e.key === 'r' || e.key === 'R') && (currentStep.type === 'listening' || currentStep.type === 'speaking')) {
+        const text =
+          currentStep.type === 'listening'
+            ? currentStep.audioText
+            : currentStep.targetSentence;
+        speakText(text, { langCode: dialectCode });
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        if (currentStep.type === 'tip' || checkedStatus !== 'idle') {
+          e.preventDefault();
+          handleNext();
+        } else if (
+          (currentStep.type === 'listening' ||
+            currentStep.type === 'reading' ||
+            currentStep.type === 'fill_blank') &&
+          selectedOption !== null
+        ) {
+          e.preventDefault();
+          handleCheck();
+        } else if (
+          currentStep.type === 'writing_builder' &&
+          pickedIndices.length > 0
+        ) {
+          e.preventDefault();
+          handleCheck();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F9FC]">
       {/* Heart Recovery Modal */}
       {showHeartRecovery && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+        <div className="safe-top safe-bottom fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
           <div className="animate-fade-up w-full max-w-md rounded-3xl border border-rose-200 bg-white p-6 text-center shadow-2xl">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
               <Heart className="h-7 w-7 fill-rose-600" />
@@ -712,7 +804,7 @@ export function LessonPlayer({
       )}
 
       {/* Top Bar */}
-      <header className="border-b border-slate-200/80 bg-white px-4 py-3 sm:px-6">
+      <header className="safe-pt-3 border-b border-slate-200/80 bg-white px-4 pb-3 sm:px-6">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-2.5">
           <button
             type="button"
@@ -1340,7 +1432,7 @@ export function LessonPlayer({
                   </button>
                   <p className="text-[11px] text-slate-500">
                     {isRecordingSpeech
-                      ? 'Ouvindo...'
+                      ? speechStatus || 'Ouvindo... toque novamente para finalizar'
                       : isSpeechRecognitionSupported()
                         ? 'Clique e fale para ver precisão %'
                         : 'Reconhecimento automático indisponível'}
@@ -1643,7 +1735,7 @@ export function LessonPlayer({
 
       {/* Bottom Persistent Feedback / Action Footer */}
       <footer
-        className={`border-t px-4 py-4 transition-colors sm:px-6 ${
+        className={`safe-pb-4 border-t px-4 pt-4 transition-colors sm:px-6 ${
           checkedStatus === 'correct'
             ? 'border-emerald-200 bg-emerald-50'
             : checkedStatus === 'incorrect'

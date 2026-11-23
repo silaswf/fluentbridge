@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   Activity,
   Award,
+  Bell,
+  BellOff,
   BookOpenCheck,
   Briefcase,
   Calendar,
@@ -34,6 +36,7 @@ import {
   RotateCcw,
   ShieldCheck,
   ShoppingBag,
+  Snowflake,
   Sparkle,
   Sparkles,
   Target,
@@ -64,6 +67,7 @@ interface LearningPathProps {
   onOpenPlacementTest: () => void;
   onClaimDailyQuest: (questId: string, bonusXp: number) => void;
   onChangeDailyGoal: (minutes: number) => void;
+  onToggleReminder?: () => void;
   onStartTopic: (topic: Topic) => void;
   reviewedSubmissions: StudentSubmission[];
   onGoToTeacher?: () => void;
@@ -72,6 +76,8 @@ interface LearningPathProps {
 const TOPIC_ICONS = {
   Activity,
   Award,
+  Bell,
+  BellOff,
   BookOpenCheck,
   Briefcase,
   Calendar,
@@ -97,6 +103,7 @@ const TOPIC_ICONS = {
   Presentation,
   ShieldCheck,
   ShoppingBag,
+  Snowflake,
   Sparkle,
   Sparkles,
   Target,
@@ -155,6 +162,7 @@ export function LearningPath({
   onOpenPlacementTest,
   onClaimDailyQuest,
   onChangeDailyGoal,
+  onToggleReminder,
   onStartTopic,
   reviewedSubmissions,
   onGoToTeacher,
@@ -286,6 +294,32 @@ export function LearningPath({
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-white/15 pt-2.5 text-[11px]">
+              <span className="inline-flex items-center gap-1 text-blue-100" title="Proteção automática de sequência (Streak Freeze)">
+                <Snowflake className="h-3.5 w-3.5 text-sky-200" />
+                <span>{currentUser.streakFreezes ?? 1} proteção(ões)</span>
+              </span>
+              {onToggleReminder && (
+                <button
+                  type="button"
+                  onClick={onToggleReminder}
+                  className="inline-flex items-center gap-1 rounded-md bg-white/15 px-2 py-0.5 font-semibold text-white hover:bg-white/25 cursor-pointer"
+                >
+                  {currentUser.reminderEnabled ? (
+                    <>
+                      <Bell className="h-3 w-3 text-emerald-300" />
+                      <span>Lembrete ON</span>
+                    </>
+                  ) : (
+                    <>
+                      <BellOff className="h-3 w-3 text-blue-200" />
+                      <span>Lembrete</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

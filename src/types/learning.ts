@@ -192,6 +192,11 @@ export interface VocabCard {
   category: string;
   strength: 'weak' | 'medium' | 'mastered';
   reviewCount: number;
+  nextReviewAt?: string;
+  intervalDays?: number;
+  easeFactor?: number;
+  repetitions?: number;
+  lapses?: number;
 }
 
 export interface PronunciationRubric {
@@ -279,6 +284,11 @@ export interface UserProfile {
   vocab: VocabCard[];
   issuedCertificates: CertificateRecord[];
   dailyQuests: DailyQuestsProgress;
+  streakFreezes?: number;
+  lastStudyDate?: string;
+  themeMode?: 'light' | 'dark' | 'system';
+  reminderEnabled?: boolean;
+  reminderTime?: string;
   createdAt: string;
 }
 
