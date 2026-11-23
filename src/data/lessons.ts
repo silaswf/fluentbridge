@@ -11,6 +11,10 @@ import {
   ENGLISH_ALL_VOCAB,
   FRENCH_ALL_TOPICS,
   FRENCH_ALL_VOCAB,
+  GERMAN_ALL_TOPICS,
+  GERMAN_ALL_VOCAB,
+  ITALIAN_ALL_TOPICS,
+  ITALIAN_ALL_VOCAB,
   SPANISH_ALL_TOPICS,
   SPANISH_ALL_VOCAB,
 } from './languages';
@@ -21,6 +25,8 @@ export const ALL_BUILTIN_TOPICS: Topic[] = [
   ...ENGLISH_ALL_TOPICS,
   ...SPANISH_ALL_TOPICS,
   ...FRENCH_ALL_TOPICS,
+  ...ITALIAN_ALL_TOPICS,
+  ...GERMAN_ALL_TOPICS,
 ];
 
 export const INITIAL_VOCABULARY: VocabCard[] = ENGLISH_ALL_VOCAB;
@@ -29,6 +35,8 @@ export const ALL_INITIAL_VOCABULARY: VocabCard[] = [
   ...ENGLISH_ALL_VOCAB,
   ...SPANISH_ALL_VOCAB,
   ...FRENCH_ALL_VOCAB,
+  ...ITALIAN_ALL_VOCAB,
+  ...GERMAN_ALL_VOCAB,
 ];
 
 export function cloneInitialVocab(): VocabCard[] {
@@ -85,7 +93,13 @@ export const INITIAL_USERS: UserProfile[] = [
     isMasterAdmin: true,
     avatarColor: '#0F172A',
     activeLanguage: 'en',
-    dialectByLanguage: { en: 'en-US', es: 'es-ES', fr: 'fr-FR' },
+    dialectByLanguage: {
+      en: 'en-US',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      it: 'it-IT',
+      de: 'de-DE',
+    },
     accent: 'en-US',
     recommendedLevel: 'C1',
     dailyGoalMinutes: 20,

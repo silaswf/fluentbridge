@@ -283,6 +283,138 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
       'Quelles sont les priorités de votre équipe pour les six prochains mois ?',
     ],
   },
+  {
+    id: 'it-bar-a1',
+    languageCode: 'it',
+    titlePt: 'Café & Cornetto em Milão',
+    titleEn: 'Al Bar a Milano',
+    level: 'A1',
+    personaName: 'Barista Giulia',
+    personaRole: 'Barista em Milão',
+    settingPt: 'Peça espresso no balcão, cornetto e a conta usando "Vorrei..." com cortesia.',
+    goalsPt: [
+      'Usar "Vorrei..." / "Al banco"',
+      'Evitar falsos amigos ("caldo", "burro")',
+      'Pedir a conta ("Il conto, per favore")',
+    ],
+    openingEn: 'Buongiorno! Prende qualcosa al banco o preferisce sedersi al tavolo?',
+    openingPt: 'Bom dia! Vai tomar algo no balcão ou prefere sentar à mesa?',
+    initialSuggestions: [
+      'Buongiorno! Al banco, grazie. Vorrei un caffè macchiato e un cornetto caldo.',
+      'Prendo anche un bicchiere d’acqua naturale, per favore.',
+      'Quanto viene tutto? Pago con la carta.',
+    ],
+  },
+  {
+    id: 'it-treno-a2',
+    languageCode: 'it',
+    titlePt: 'Estação de Trem em Roma',
+    titleEn: 'Alla Stazione Termini',
+    level: 'A2',
+    personaName: 'Operatore Marco',
+    personaRole: 'Atendente da Trenitalia',
+    settingPt: 'Compre passagem para Florença e confirme plataforma ("binario") e horário.',
+    goalsPt: [
+      'Pedir "andata e ritorno"',
+      'Perguntar "Da quale binario parte?"',
+      'Usar Passato Prossimo com naturalidade',
+    ],
+    openingEn: 'Buongiorno! Come posso aiutarla per il suo viaggio in treno oggi?',
+    openingPt: 'Bom dia! Como posso ajudá-lo(a) na sua viagem de trem hoje?',
+    initialSuggestions: [
+      'Buongiorno! Vorrei un biglietto di andata e ritorno per Firenze, per favore.',
+      'Da quale binario parte il prossimo Frecciarossa?',
+      'Devo convalidare questo biglietto prima di salire?',
+    ],
+  },
+  {
+    id: 'it-lavoro-b1',
+    languageCode: 'it',
+    titlePt: 'Entrevista & Design em Lugano',
+    titleEn: 'Colloquio di Lavoro a Lugano',
+    level: 'B1',
+    personaName: 'Direttrice Elena',
+    personaRole: 'Gestora de Projetos na Suíça IT',
+    settingPt: 'Apresente sua experiência usando "da + tempo" e o Condizionale de cortesia.',
+    goalsPt: [
+      'Usar "Lavoro nel settore da..."',
+      'Empregar Condizionale ("Mi piacerebbe", "Potrei")',
+      'Responder perguntas de trabalho em equipe',
+    ],
+    openingEn: 'Buongiorno e benvenuto! Mi racconti brevemente la sua esperienza professionale.',
+    openingPt: 'Bom dia e bem-vindo! Conte-me brevemente sua experiência profissional.',
+    initialSuggestions: [
+      'Buongiorno! Lavoro nel settore digitale da quattro anni e parlo portoghese, inglese e italiano.',
+      'Mi piacerebbe molto contribuire ai vostri progetti internazionali.',
+      'Quali sono le competenze principali che cercate per questo ruolo?',
+    ],
+  },
+  {
+    id: 'de-baeckerei-a1',
+    languageCode: 'de',
+    titlePt: 'Padaria & Café em Berlim',
+    titleEn: 'In der Bäckerei in Berlin',
+    level: 'A1',
+    personaName: 'Bäckerin Hannah',
+    personaRole: 'Atendente em Berlim',
+    settingPt: 'Peça pães e café usando "Ich hätte gern..." e Akkusativ (einen / eine / ein).',
+    goalsPt: [
+      'Usar "Ich hätte gern einen Kaffee"',
+      'Aplicar Akkusativ no masculino',
+      'Pedir a conta ("Die Rechnung, bitte")',
+    ],
+    openingEn: 'Guten Morgen! Was darf es heute zum Frühstück sein?',
+    openingPt: 'Bom dia! O que vai querer hoje no café da manhã?',
+    initialSuggestions: [
+      'Guten Morgen! Ich hätte gern einen schwarzen Kaffee und zwei Brötchen, bitte.',
+      'Ich nehme auch eine Brezel und ein Glas Wasser.',
+      'Können wir bitte mit Karte zahlen?',
+    ],
+  },
+  {
+    id: 'de-bahn-a2',
+    languageCode: 'de',
+    titlePt: 'Viagem de Trem & Direções em Viena',
+    titleEn: 'Am Hauptbahnhof Wien',
+    level: 'A2',
+    personaName: 'Berater Felix',
+    personaRole: 'Atendente ferroviário em Viena',
+    settingPt: 'Pergunte horários, plataforma ("Gleis") e baldeação usando Dativ ("mit dem Zug").',
+    goalsPt: [
+      'Usar preposição "mit + Dativ"',
+      'Perguntar plataforma e baldeação',
+      'Aplicar ordem V2 e modalverben',
+    ],
+    openingEn: 'Grüß Gott! Wohin möchten Sie heute fahren und wie kann ich Ihnen helfen?',
+    openingPt: 'Olá! Para onde gostaria de viajar hoje e como posso ajudar?',
+    initialSuggestions: [
+      'Guten Tag! Wann fährt der nächste Zug nach München und von welchem Gleis?',
+      'Muss ich unterwegs umsteigen oder fährt der Zug direkt?',
+      'Ich möchte bitte eine Hin- und Rückfahrt buchen.',
+    ],
+  },
+  {
+    id: 'de-job-b1',
+    languageCode: 'de',
+    titlePt: 'Entrevista Tech em Munique',
+    titleEn: 'Vorstellungsgespräch in München',
+    level: 'B1',
+    personaName: 'Teamleiter Lukas',
+    personaRole: 'Líder de Engenharia em Munique',
+    settingPt: 'Fale sobre sua experiência ("seit + Dativ"), pontos fortes e use "weil / dass" com verbo no fim.',
+    goalsPt: [
+      'Usar "seit + Dativ + Presente"',
+      'Enviar o verbo ao fim após "weil / dass"',
+      'Aplicar Konjunktiv II ("Ich würde mich freuen")',
+    ],
+    openingEn: 'Guten Tag und herzlich willkommen! Warum interessieren Sie sich für unser Team in München?',
+    openingPt: 'Bom dia e muito bem-vindo! Por que você se interessa pela nossa equipe em Munique?',
+    initialSuggestions: [
+      'Guten Tag! Ich arbeite seit vier Jahren in der IT und interessiere mich sehr für Ihre Projekte.',
+      'Ich möchte bei Ihnen arbeiten, weil mir Teamarbeit und Qualität wichtig sind.',
+      'Könnten Sie mir mehr über die Aufgaben im ersten Monat erzählen?',
+    ],
+  },
 ];
 
 export interface TutorReplyResult {
@@ -632,7 +764,11 @@ async function generateGeminiReply(
       ? 'Spanish'
       : scenario.languageCode === 'fr'
         ? 'French'
-        : 'English';
+        : scenario.languageCode === 'it'
+          ? 'Italian'
+          : scenario.languageCode === 'de'
+            ? 'German'
+            : 'English';
 
   try {
     const recentHistory = history

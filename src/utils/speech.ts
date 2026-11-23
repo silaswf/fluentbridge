@@ -168,6 +168,10 @@ function normalizeTtsLocale(locale: string): string {
   if (lower.startsWith('es')) return 'es-MX';
   if (lower === 'fr-ca') return 'fr-CA';
   if (lower.startsWith('fr')) return 'fr-FR';
+  if (lower === 'it-ch') return 'it-CH';
+  if (lower.startsWith('it')) return 'it-IT';
+  if (lower === 'de-at') return 'de-AT';
+  if (lower.startsWith('de')) return 'de-DE';
   if (lower.startsWith('pt')) return 'pt-BR';
   return 'en-US';
 }
@@ -257,6 +261,10 @@ export function getAllVoiceProviderLabels() {
     esMx: 'Deepgram Aura-2 · Estrella / Javier (MX)',
     frFr: 'Gemini 2.5 Neural TTS · Aoede / Charon (Paris)',
     frCa: 'Gemini 2.5 Neural TTS · Kore / Puck (Canadá)',
+    itIt: 'Gemini 2.5 Neural TTS · Aoede / Charon (Itália)',
+    itCh: 'Gemini 2.5 Neural TTS · Kore / Puck (Suíça IT)',
+    deDe: 'Gemini 2.5 Neural TTS · Aoede / Charon (Alemanha)',
+    deAt: 'Gemini 2.5 Neural TTS · Kore / Puck (Áustria)',
   };
 }
 

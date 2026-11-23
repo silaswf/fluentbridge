@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v2.0.0`)
+# FluentBridge Academy (`v2.1.0`)
 
-Plataforma completa de ensino de idiomas (**Inglês, Espanhol e Francês**) de **A1 a C1** nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos e Histórias Multi-Voz*) com dicas contextuais voltadas para brasileiros, Tutor de Conversação IA (texto e **Chamada ao Vivo**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Painel Admin Mestre**, Estúdio do Professor com **Tarefas** e **Gerador IA**, e emissão de certificados CEFR, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*) com dicas contextuais voltadas para brasileiros, Tutor de Conversação IA (texto e **Chamada ao Vivo**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Painel Admin Mestre**, Estúdio do Professor com **Tarefas** e **Gerador IA**, e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
 
 ---
 
@@ -10,16 +10,16 @@ Plataforma completa de ensino de idiomas (**Inglês, Espanhol e Francês**) de *
 - **Edge API (Cloudflare Workers AI + STT + Gemini)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
 - **Windows Desktop**: [`release/FluentBridge-win32-x64/FluentBridge.exe`](./release/FluentBridge-win32-x64/FluentBridge.exe) (Electron 34)
-- **Android APK Assinado**: [`release/FluentBridge-v2.0.0.apk`](./release/FluentBridge-v2.0.0.apk) (e [`FluentBridge-latest.apk`](./release/FluentBridge-latest.apk))
-- **Google Play Store Bundle**: [`release/FluentBridge-v2.0.0-playstore.aab`](./release/FluentBridge-v2.0.0-playstore.aab)
+- **Android APK Assinado**: [`release/FluentBridge-v2.1.0.apk`](./release/FluentBridge-v2.1.0.apk) (e [`FluentBridge-latest.apk`](./release/FluentBridge-latest.apk))
+- **Google Play Store Bundle**: [`release/FluentBridge-v2.1.0-playstore.aab`](./release/FluentBridge-v2.1.0-playstore.aab)
 
 ---
 
-## Números Atuais (`v2.0.0`)
+## Números Atuais (`v2.1.0`)
 
-- **92 Unidades CEFR (A1–C1)**: **50** em Inglês + **22** em Espanhol + **20** em Francês
-- **730 Passos Interativos** em **11 formatos** (`tip`, `listening`, `reading`, `matching`, `fill_blank`, `dictation`, `minimal_pairs`, `story`, `speaking`, `writing_builder`, `writing_free`)
-- **278 Flashcards SM-2** + **126 Dicas Contextuais** + **56 Tabelas no Guia Gramatical** (`32` EN, `12` ES, `12` FR)
+- **194 Unidades CEFR (A1–C1)**: **50** em Inglês + **36** em Espanhol + **36** em Francês + **36** em Italiano + **36** em Alemão
+- **1.834 Passos Interativos** em **11 formatos** (`tip`, `listening`, `reading`, `matching`, `fill_blank`, `dictation`, `minimal_pairs`, `story`, `speaking`, `writing_builder`, `writing_free`)
+- **584 Flashcards SM-2** + **372 Dicas Contextuais** + **144 Tabelas no Guia Gramatical** (`32` EN, `28` ES, `28` FR, `28` IT, `28` DE)
 - **Qualidade Garantida**: `17/17` testes **Vitest** aprovados · `0` erros TypeScript · `0` erros estruturais em `verify_curriculum.mjs`
 
 ---

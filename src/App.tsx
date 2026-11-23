@@ -273,7 +273,13 @@ export function App() {
         isMasterAdmin: master,
         avatarColor: AVATAR_COLORS[prev.users.length % AVATAR_COLORS.length],
         activeLanguage: 'en',
-        dialectByLanguage: { en: 'en-US', es: 'es-ES', fr: 'fr-FR' },
+        dialectByLanguage: {
+          en: 'en-US',
+          es: 'es-ES',
+          fr: 'fr-FR',
+          it: 'it-IT',
+          de: 'de-DE',
+        },
         accent: 'en-US',
         dailyGoalMinutes: 15,
         todayMinutes: 0,
@@ -435,7 +441,13 @@ export function App() {
       classId: master ? undefined : payload.classId,
       avatarColor: AVATAR_COLORS[state.users.length % AVATAR_COLORS.length],
       activeLanguage: 'en',
-      dialectByLanguage: { en: 'en-US', es: 'es-ES', fr: 'fr-FR' },
+      dialectByLanguage: {
+        en: 'en-US',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        it: 'it-IT',
+        de: 'de-DE',
+      },
       accent: 'en-US',
       dailyGoalMinutes: 15,
       todayMinutes: 0,
@@ -894,13 +906,26 @@ export function App() {
 
   const handleUnlockCertificate = (level: CEFRLevel) => {
     if (!currentUser) return;
-    if (currentUser.issuedCertificates.some((c) => c.level === level)) return;
-    const cert = buildCertificate(currentUser, level, state.teacherName, 'en');
+    if (
+      currentUser.issuedCertificates.some(
+        (c) =>
+          c.level === level &&
+          (c.languageCode ?? 'en') === activeLanguage,
+      )
+    ) {
+      return;
+    }
+    const cert = buildCertificate(
+      currentUser,
+      level,
+      state.teacherName,
+      activeLanguage,
+    );
     updateCurrentUser((u) => ({
       ...u,
       issuedCertificates: [...u.issuedCertificates, cert],
     }));
-    showToast(`Certificado CEFR ${level} emitido com sucesso!`);
+    showToast(`Certificado CEFR ${level} (${activeCourse.namePt}) emitido com sucesso!`);
   };
 
   const handleGradeSubmission = (
@@ -1278,7 +1303,7 @@ export function App() {
           {activeView === 'certificates' && (
             <CertificatesView
               user={currentUser}
-              topics={BUILTIN_TOPICS}
+              topics={courseTopics}
               schoolName={state.schoolName}
               teacherName={state.teacherName}
               className={userClassName}

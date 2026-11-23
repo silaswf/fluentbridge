@@ -1,5 +1,15 @@
 import type { CEFRLevel, Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
+import {
+  buildLanguageVocab,
+  buildRichLanguageTopic,
+} from './courseBuilder';
+import {
+  FRENCH_EXTRA_GRAMMAR_GUIDE,
+  FRENCH_EXTRA_TOPICS,
+  FRENCH_EXTRA_VOCAB,
+  FRENCH_META,
+} from './frenchExtra';
 
 interface FrBlueprint {
   id: string;
@@ -1119,149 +1129,34 @@ const FR_BLUEPRINTS: FrBlueprint[] = [
   },
 ];
 
-function buildFrTopic(b: FrBlueprint): Topic {
-  return {
-    id: b.id,
-    languageCode: 'fr',
-    titlePt: b.titlePt,
-    titleEn: b.titleFr,
-    subtitle: b.subtitle,
-    level: b.level,
-    estimatedMinutes: b.minutes,
-    icon: b.icon,
-    color: b.color,
-    topicTipsSummary: [b.tipTitle, b.tipSummary],
-    steps: [
+export const FRENCH_ALL_TOPICS: Topic[] = [
+  ...FR_BLUEPRINTS.map((b, idx) =>
+    buildRichLanguageTopic(
       {
-        id: `${b.id}-tip`,
-        type: 'tip',
-        tip: {
-          id: `tip-${b.id}`,
-          category: 'grammar',
-          title: b.tipTitle,
-          summary: b.tipSummary,
-          details: b.tipDetails,
-          grammarFormula: {
-            aff: `[+] ${b.aff}`,
-            neg: `[-] ${b.neg}`,
-            int: `[?] ${b.int}`,
-          },
-          examples: [{ en: b.exampleFr, pt: b.examplePt }],
-        },
+        ...b,
+        titleTarget: b.titleFr,
+        exampleTarget: b.exampleFr,
+        dictationTarget: b.dictationFr,
       },
-      {
-        id: `${b.id}-listen`,
-        type: 'listening',
-        speakerLabel: `Áudio em Francês · ${b.level}`,
-        contextPt: 'Ouça o áudio com voz neural francesa (1.0x ou 0.75x) e responda:',
-        audioText: b.audioText,
-        question: b.listenQ,
-        options: [b.listenRight, b.listenWrong],
-        correctIndex: 0,
-        explanation: `O áudio informa: "${b.audioText}".`,
-        hintTip: 'Use 0.75x se precisar captar as ligações (liaisons).',
-      },
-      {
-        id: `${b.id}-read`,
-        type: 'reading',
-        title: b.readTitle,
-        format: 'article',
-        text: b.readText,
-        glossary: [],
-        question: b.readQ,
-        options: [b.readRight, b.readWrong],
-        correctIndex: 0,
-        explanation: 'A resposta está confirmada diretamente no texto acima.',
-        hintTip: 'Releia a frase-chave do texto.',
-      },
-      {
-        id: `${b.id}-dict`,
-        type: 'dictation',
-        promptPt: 'Ditado Auditivo em Francês: ouça e escreva a frase:',
-        audioText: b.dictationFr,
-        translationPt: b.dictationPt,
-        hintTip: 'Pressione R para ouvir novamente.',
-      },
-      {
-        id: `${b.id}-fill`,
-        type: 'fill_blank',
-        promptPt: 'Complete a frase em francês:',
-        sentenceBefore: b.fillBefore,
-        sentenceAfter: b.fillAfter,
-        verbHint: b.fillHint,
-        options: b.fillOptions,
-        correctIndex: 0,
-        explanation: `Forma correta: "${b.fillOptions[0]}".`,
-        hintTip: 'Confira a regra na dica inicial.',
-      },
-      {
-        id: `${b.id}-story`,
-        type: 'story',
-        title: b.storyTitle,
-        settingPt: 'Ouça o diálogo entre Paris (FR) e Montreal (CA):',
-        lines: [
-          {
-            speaker: 'Camille (Paris)',
-            voice: 'female',
-            dialectCode: 'fr-FR',
-            text: b.storyLine1,
-            translationPt: b.storyLine1Pt,
-          },
-          {
-            speaker: 'Luc (Montréal)',
-            voice: 'male',
-            dialectCode: 'fr-CA',
-            text: b.storyLine2,
-            translationPt: b.storyLine2Pt,
-          },
-        ],
-        question: b.storyQ,
-        options: [b.storyRight, b.storyWrong],
-        correctIndex: 0,
-        explanation: `Confirmado na fala: "${b.storyLine2}".`,
-        hintTip: 'Clique em "Ouvir diálogo completo".',
-      },
-      {
-        id: `${b.id}-speak`,
-        type: 'speaking',
-        promptPt: 'Pratique sua pronúncia em francês em voz alta:',
-        targetSentence: b.speakTarget,
-        translationPt: b.speakPt,
-        ipa: b.speakIpa,
-        brPhoneticHint: b.speakBr,
-        focusTip: b.speakFocus,
-      },
-      {
-        id: `${b.id}-write`,
-        type: 'writing_free',
-        promptPt: b.writePrompt,
-        scenarioPt: 'Escreva sua resposta em francês (ou envie ao Prof. Silas).',
-        minWords: 6,
-        checklist: [{ label: 'Pelo menos 6 palavras em francês', keywords: [' '] }],
-        modelAnswer: b.writeModel,
-        hintTip: 'Use a estrutura da dica inicial.',
-      },
-    ],
-  };
-}
+      idx,
+      FRENCH_META,
+    ),
+  ),
+  ...FRENCH_EXTRA_TOPICS,
+];
 
-export const FRENCH_ALL_TOPICS: Topic[] = FR_BLUEPRINTS.map(buildFrTopic);
-
-export const FRENCH_ALL_VOCAB: VocabCard[] = FR_BLUEPRINTS.flatMap((b) =>
-  b.vocab.map((v, vIdx) => ({
-    id: `voc-${b.id}-${vIdx + 1}`,
-    topicId: b.id,
-    languageCode: 'fr',
-    word: v.word,
-    translation: v.pt,
-    ipa: v.ipa,
-    exampleEn: b.exampleFr,
-    examplePt: b.examplePt,
-    category: v.cat,
-    strength: 'weak',
-    reviewCount: 0,
-  })),
-);
+export const FRENCH_ALL_VOCAB: VocabCard[] = [
+  ...buildLanguageVocab(
+    FR_BLUEPRINTS.map((b) => ({
+      ...b,
+      titleTarget: b.titleFr,
+      exampleTarget: b.exampleFr,
+      dictationTarget: b.dictationFr,
+    })),
+    'fr',
+  ),
+  ...FRENCH_EXTRA_VOCAB,
+];
 
 export const FRENCH_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   {
@@ -1432,4 +1327,5 @@ export const FRENCH_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
     exampleEn: 'Je vous entends bien et j’attends votre message.',
     examplePt: 'Ouço você bem e aguardo sua mensagem.',
   },
+  ...FRENCH_EXTRA_GRAMMAR_GUIDE,
 ];

@@ -1121,6 +1121,8 @@ export function TeacherStudio({
                   <option value="en">Inglês</option>
                   <option value="es">Espanhol</option>
                   <option value="fr">Francês</option>
+                  <option value="it">Italiano</option>
+                  <option value="de">Alemão</option>
                 </select>
                 <input
                   type="date"

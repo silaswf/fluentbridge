@@ -384,7 +384,7 @@ export function AITutor({
                   <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2">
                     <DualAudioButtons
                       text={msg.textEn}
-                      languageCode="en"
+                      languageCode={selectedScenario?.languageCode ?? languageCode}
                       showSlow
                       size="xs"
                     />

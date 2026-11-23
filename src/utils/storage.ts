@@ -99,6 +99,8 @@ export function normalizePlatformState(
             en: u.accent ?? 'en-US',
             es: 'es-ES',
             fr: 'fr-FR',
+            it: 'it-IT',
+            de: 'de-DE',
             ...(u.dialectByLanguage ?? {}),
           },
           completedTopicIds: Array.isArray(u.completedTopicIds)

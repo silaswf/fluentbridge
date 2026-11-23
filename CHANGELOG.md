@@ -4,6 +4,22 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v2.1.0`] — 2026-11-23
+### 5 Idiomas Completos (EN/ES/FR/IT/DE), 194 Unidades CEFR, 144 Tabelas & Vozes Neurais Gemini
+- **Expansão Completa de Espanhol & Francês (`36` unidades + `28` tabelas cada):**
+  - Criado o construtor compartilhado `src/data/curriculum/courseBuilder.ts` com **10 passos pedagógicos** por unidade (`2` dicas sendo 1 de gramática + 1 de pronúncia/cultura BR, `listening`, `reading` com glossário automático, `matching`, `dictation`, `fill_blank`, `story` multi-vozes, `speaking` e `writing_free`).
+  - Adicionadas `14` unidades extras em `src/data/curriculum/spanishExtra.ts` (`36` unidades A1–C1, `108` cards SM-2, `28` tabelas) e `16` unidades extras em `src/data/curriculum/frenchExtra.ts` (`36` unidades A1–C1, `108` cards SM-2, `28` tabelas).
+- **Novos Cursos Completos de Italiano (`it`) & Alemão (`de`) (`36` unidades + `28` tabelas cada):**
+  - **Italiano** (`italianCourse.ts` + `italianExtra.ts`): `36` unidades A1–C1 (Roma, Milão, Veneza, Florença & Ticino/Suíça, *Falsi Amici*, *Congiuntivo*, *Passato Remoto*, negócios e cultura), `108` cards SM-2 e `28` tabelas gramaticais.
+  - **Alemão** (`germanCourse.ts` + `germanExtra.ts`): `36` unidades A1–C1 (Berlim, Munique, Viena/DACH, *Der/Die/Das*, *Akkusativ/Dativ/Genitiv*, *TeKaMoLo*, *Wechselpräpositionen*, *Konjunktiv I/II*, *Compostos* e engenharia), `108` cards SM-2 e `28` tabelas gramaticais.
+- **Vozes Neurais Gemini 2.5 + Whisper STT para Italiano e Alemão (`worker.js`, `speech.ts`):**
+  - Adicionados ao Worker `fluentbridge-api`: `it-IT` (`Aoede`/`Charon`), `it-CH` (`Kore`/`Puck`), `de-DE` (`Aoede`/`Charon`) e `de-AT` (`Kore`/`Puck`) via **Gemini 2.5 Neural TTS** (`200 audio/wav`) + transcrição **Whisper** para `it` e `de` em `/api/stt`.
+- **Integração Total nos 5 Idiomas (`App.tsx`, `Sidebar.tsx`, `AITutor.tsx`, `aiTutorEngine.ts`, `TeacherStudio.tsx`, `AdminPanel.tsx`, `vite.config.ts`):**
+  - Seletor de **5 idiomas** em grade balanceada na Sidebar, cenários de Tutor IA para **Italiano e Alemão**, emissão de **Certificados CEFR por idioma**, novos chunks (`curriculum-it`, `curriculum-de`, `grammar-guide`) mantendo `index.js` em `124,05 kB`.
+- **Totais Validados (`v2.1.0`):** **`194` unidades**, **`1.834` passos**, **`372` dicas**, **`584` flashcards SM-2** e **`144` tabelas** no Guia Gramatical (`0` erros).
+
+---
+
 ## [`v2.0.0`] — 2026-11-23
 ### Fases 8 & 9 Concluídas + Painel Admin Mestre + Vozes Neurais EN/ES/FR + Correções Dark Mode/UI
 - **Correções de Interface, Dark Mode, Sidebar & Legibilidade (`src/index.css`, `src/components/Sidebar.tsx`, `src/components/LearningPath.tsx`, `index.html`):**

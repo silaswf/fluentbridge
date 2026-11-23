@@ -51,11 +51,32 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/enSpecialTracks')) {
             return 'curriculum-en-special';
           }
-          if (id.includes('/curriculum/spanishCourse')) {
+          if (
+            id.includes('/curriculum/spanishCourse') ||
+            id.includes('/curriculum/spanishExtra')
+          ) {
             return 'curriculum-es';
           }
-          if (id.includes('/curriculum/frenchCourse')) {
+          if (
+            id.includes('/curriculum/frenchCourse') ||
+            id.includes('/curriculum/frenchExtra')
+          ) {
             return 'curriculum-fr';
+          }
+          if (
+            id.includes('/curriculum/italianCourse') ||
+            id.includes('/curriculum/italianExtra')
+          ) {
+            return 'curriculum-it';
+          }
+          if (
+            id.includes('/curriculum/germanCourse') ||
+            id.includes('/curriculum/germanExtra')
+          ) {
+            return 'curriculum-de';
+          }
+          if (id.includes('/data/grammarGuide')) {
+            return 'grammar-guide';
           }
           return undefined;
         },

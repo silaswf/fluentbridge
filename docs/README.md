@@ -1,6 +1,6 @@
-# Documentação de Desenvolvimento — FluentBridge (`v2.0.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v2.1.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma multi-idiomas — **Inglês, Espanhol e Francês** de `A1` a `C1` — com dicas contextuais para brasileiros, Tutor IA com modo Chamada, vocabulário SM-2, **Painel Admin Mestre**, Estúdio do **Prof. Silas**, emissão de certificados CEFR e sincronização multiplataforma em **Windows**, **Android** e **Web**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de otimizações e roadmap completo do **FluentBridge Academy** (plataforma em **5 idiomas** — **Inglês, Espanhol, Francês, Italiano e Alemão** de `A1` a `C1` — com dicas contextuais para brasileiros, Tutor IA com modo Chamada, vocabulário SM-2, **Painel Admin Mestre**, Estúdio do **Prof. Silas**, emissão de certificados CEFR por idioma e sincronização multiplataforma em **Windows**, **Android** e **Web**).
 
 ---
 
@@ -18,13 +18,13 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria de ot
 
 ---
 
-## Resumo do Estado Atual (`v2.0.0`)
+## Resumo do Estado Atual (`v2.1.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
 | **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (Safe Area `WindowInsetsCompat`, `.apk` + `.aab`) + **Windows Desktop** (`FluentBridge.exe`) |
 | **Autenticação, Admin & Nuvem** | **Supabase Auth** (E-mail/Senha + Google OAuth Web/Android), **Painel Admin Mestre (`AdminPanel.tsx`)** com código docente visível/editável (`SILAS-PROF-2026`), bloqueio/liberação de acesso em tempo real, hash `fbh1:` e **merge granular** com tombstones |
-| **Currículo & Conteúdo (`Fase 9`)** | **`92` unidades totais** (`50` EN + `22` ES + `20` FR de A1 a C1), **`730` passos interativos** em **`11` formatos**, **`126` dicas contextuais**, **`278` flashcards SM-2** e **`56` tabelas** no Guia Gramatical (`32` EN, `12` ES, `12` FR) |
-| **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** com **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`, vozes feminina/masculina) + **Gemini 2.5 Neural TTS** (`fr-FR`, `fr-CA` em WAV) + cache `tts-v3` + **Whisper Cloud STT (`/api/stt`)** |
-| **Pedagogia & UX (`Fases 6–8`)** | **Ditado**, **Minimal Pairs**, **Histórias Multi-Voz**, **Tarefas com Prazo**, **Analytics da Escola**, **Gerador IA de Unidades**, **Tutor IA com Chamada ao Vivo**, **Tema Escuro corrigido**, **Sidebar & Painel recolhíveis**, **SM-2**, **Streak Freeze** |
+| **Currículo & Conteúdo (`5 Idiomas`)** | **`194` unidades totais** (`50` EN + `36` ES + `36` FR + `36` IT + `36` DE de A1 a C1), **`1.834` passos interativos** em **`11` formatos**, **`372` dicas contextuais**, **`584` flashcards SM-2** e **`144` tabelas** no Guia Gramatical (`32` EN, `28` ES, `28` FR, `28` IT, `28` DE) |
+| **Áudio Neural, STT & Pronúncia** | **`DualAudioButtons`** com **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`) + **Gemini 2.5 Neural TTS** (`fr-FR`, `fr-CA`, `it-IT`, `it-CH`, `de-DE`, `de-AT` em WAV) + cache `tts-v3` + **Whisper Cloud STT (`/api/stt`)** nos 5 idiomas |
+| **Pedagogia & UX (`Fases 6–9+`)** | **Ditado**, **Minimal Pairs**, **Histórias Multi-Voz**, **Tarefas com Prazo**, **Analytics da Escola**, **Gerador IA de Unidades**, **Tutor IA com Chamada ao Vivo**, **Tema Escuro corrigido**, **Sidebar & Painel recolhíveis**, **SM-2**, **Streak Freeze** |
 | **Verificação & CI/CD** | `npm test` (`6` arquivos / `17` testes OK) · `npx tsc --noEmit` (`0` erros) · `verify_curriculum.mjs` (`0` erros) · `DIST_LEAK=CLEAN` · GitHub Actions `.apk` + `.aab` |

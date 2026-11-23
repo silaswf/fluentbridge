@@ -10,6 +10,8 @@ import { TOPICS_C1, VOCAB_C1 } from './curriculum/levelC1';
 import { TOPICS_EN_SPECIAL, VOCAB_EN_SPECIAL } from './curriculum/enSpecialTracks';
 import { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB } from './curriculum/spanishCourse';
 import { FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB } from './curriculum/frenchCourse';
+import { ITALIAN_ALL_TOPICS, ITALIAN_ALL_VOCAB } from './curriculum/italianExtra';
+import { GERMAN_ALL_TOPICS, GERMAN_ALL_VOCAB } from './curriculum/germanExtra';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -32,7 +34,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇪🇸',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 22 unidades, vozes neurais (ES/MX), guia gramatical e combate ao portunhol.',
+      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais (ES/MX) e combate ao portunhol.',
     dialects: [
       { code: 'es-ES', label: 'Espanha', flag: '🇪🇸' },
       { code: 'es-MX', label: 'México', flag: '🇲🇽' },
@@ -45,10 +47,36 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇫🇷',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 20 unidades, vozes neurais Gemini (FR/CA), ligações fonéticas e guia gramatical.',
+      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (FR/CA) e ligações fonéticas.',
     dialects: [
       { code: 'fr-FR', label: 'França', flag: '🇫🇷' },
       { code: 'fr-CA', label: 'Canadá', flag: '🇨🇦' },
+    ],
+  },
+  {
+    code: 'it',
+    namePt: 'Italiano',
+    nativeName: 'Italiano',
+    flag: '🇮🇹',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (IT/CH) e falsos amigos BR.',
+    dialects: [
+      { code: 'it-IT', label: 'Itália', flag: '🇮🇹' },
+      { code: 'it-CH', label: 'Suíça (IT)', flag: '🇨🇭' },
+    ],
+  },
+  {
+    code: 'de',
+    namePt: 'Alemão',
+    nativeName: 'Deutsch',
+    flag: '🇩🇪',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (DE/AT) e casos/TeKaMoLo.',
+    dialects: [
+      { code: 'de-DE', label: 'Alemanha', flag: '🇩🇪' },
+      { code: 'de-AT', label: 'Áustria', flag: '🇦🇹' },
     ],
   },
 ];
@@ -299,7 +327,16 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = [
   ...VOCAB_EN_SPECIAL,
 ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) }));
 
-export { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB, FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB };
+export {
+  SPANISH_ALL_TOPICS,
+  SPANISH_ALL_VOCAB,
+  FRENCH_ALL_TOPICS,
+  FRENCH_ALL_VOCAB,
+  ITALIAN_ALL_TOPICS,
+  ITALIAN_ALL_VOCAB,
+  GERMAN_ALL_TOPICS,
+  GERMAN_ALL_VOCAB,
+};
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
   return (
@@ -318,7 +355,11 @@ export function getCourseTopics(
         ? SPANISH_ALL_TOPICS
         : languageCode === 'fr'
           ? FRENCH_ALL_TOPICS
-          : [];
+          : languageCode === 'it'
+            ? ITALIAN_ALL_TOPICS
+            : languageCode === 'de'
+              ? GERMAN_ALL_TOPICS
+              : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

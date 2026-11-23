@@ -1,17 +1,17 @@
-# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v2.0.0`)
+# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v2.1.0`)
 
-Relatório técnico da **segunda auditoria completa pós-`v2.0.0`** do **FluentBridge Academy**, comparando a evolução desde a `v1.0.3`, medindo o bundle real, validando segurança, Dark Mode/responsividade, qualidade de voz EN/ES/FR e listando os próximos pontos de otimização para `v2.1` → `v3.0`.
+Relatório técnico da auditoria pós-`v2.1.0` do **FluentBridge Academy**, medindo o bundle real após a expansão para **5 idiomas completos (`194` unidades e `144` tabelas)**, validando segurança, Dark Mode/responsividade, qualidade de voz EN/ES/FR/IT/DE e listando os próximos pontos de otimização.
 
 ---
 
-## 1. Resumo da Auditoria Pós-`v2.0.0` (Status de Cada Pilar)
+## 1. Resumo da Auditoria Pós-`v2.1.0` (Status de Cada Pilar)
 
-| Pilar | Nota `v1.0.3` | Nota `v2.0.0` | Evidência Verificada |
+| Pilar | Nota `v1.0.3` | Nota `v2.1.0` | Evidência Verificada |
 | --- | --- | --- | --- |
-| **Bundle Inicial & Lazy Loading** | `1.032,37 kB` (monolítico) | **`122,94 kB`** (`36,30 kB` gzip) | `index.js` caiu **88,1%**; módulos pesados e 6 chunks curriculares separados (`a1a2`, `b1b2`, `c1`, `en-special`, `es`, `fr`). |
+| **Bundle Inicial & Lazy Loading** | `1.032,37 kB` (monolítico) | **`124,05 kB`** (`36,62 kB` gzip) | `index.js` caiu **88,0%**; módulos pesados, `grammar-guide` e 8 chunks curriculares separados (`a1a2`, `b1b2`, `c1`, `en-special`, `es`, `fr`, `it`, `de`). |
 | **Segurança & Credenciais** | Chave Gemini no JS + senha texto plano | **`DIST_LEAK=CLEAN`** + `fbh1:` + Admin Block | Chave Gemini isolada no Worker `/api/gemini-tutor`, senhas com hash `fbh1:`, bloqueio imediato de usuários no login/OAuth. |
-| **Currículo & Multi-Idiomas** | `35` unidades (`34` EN + `1` ES) | **`92` unidades** (`50` EN + `22` ES + `20` FR) | `730` passos em `11` formatos, `126` dicas, `278` cards SM-2, `56` tabelas gramaticais, **`0` erros** em `verify_curriculum.mjs`. |
-| **Vozes Neurais & STT** | Deepgram Aura-2 apenas EN/ES | **Aura-2 (EN/ES) + Gemini 2.5 TTS (FR) + Whisper STT** | `fr-FR` (`Aoede`/`Charon`) e `fr-CA` (`Kore`/`Puck`) retornando `200 audio/wav`; Whisper `/api/stt` em EN/ES/FR. |
+| **Currículo & 5 Idiomas** | `35` unidades (`34` EN + `1` ES) | **`194` unidades** (`50` EN + `36` ES + `36` FR + `36` IT + `36` DE) | `1.834` passos em `11` formatos, `372` dicas, `584` cards SM-2, `144` tabelas gramaticais (`32` EN + `28` cada ES/FR/IT/DE), **`0` erros** em `verify_curriculum.mjs`. |
+| **Vozes Neurais & STT** | Deepgram Aura-2 apenas EN/ES | **Aura-2 (EN/ES) + Gemini 2.5 TTS (FR/IT/DE) + Whisper STT** | `fr-FR/CA`, `it-IT/CH`, `de-DE/AT` retornando `200 audio/wav`; Whisper `/api/stt` em EN/ES/FR/IT/DE. |
 | **UI/UX, Dark Mode & Mobile** | Bugs de contraste e invasão de barra | **Corrigido e Responsivo** | Seletores Tailwind v4 (`lg:bg-white`, `text-amber-950/85`, `.topic-tips-box`), `WindowInsetsCompat`, Sidebar e painel recolhíveis. |
 | **Testes Automatizados** | Sem testes unitários | **`6` suítes / `17` testes OK** | Vitest validando `srsEngine`, `speech`, `curriculum`, `storage`, `streakEngine` e `cloudSync` + `tsc --noEmit` (`0` erros). |
 

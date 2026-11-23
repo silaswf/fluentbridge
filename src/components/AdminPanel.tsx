@@ -273,7 +273,7 @@ export function AdminPanel({
                 {DEFAULT_BACKEND_API_URL}
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 pt-1">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 pt-1">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                 <p className="font-bold text-slate-800">🇺🇸 / 🇬🇧 Inglês</p>
                 <p className="mt-0.5 text-[11px] text-slate-600">{voices.enUs}</p>
@@ -285,6 +285,14 @@ export function AdminPanel({
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                 <p className="font-bold text-slate-800">🇫🇷 / 🇨🇦 Francês</p>
                 <p className="mt-0.5 text-[11px] text-slate-600">{voices.frFr}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                <p className="font-bold text-slate-800">🇮🇹 / 🇨🇭 Italiano</p>
+                <p className="mt-0.5 text-[11px] text-slate-600">{voices.itIt}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                <p className="font-bold text-slate-800">🇩🇪 / 🇦🇹 Alemão</p>
+                <p className="mt-0.5 text-[11px] text-slate-600">{voices.deDe}</p>
               </div>
             </div>
           </div>

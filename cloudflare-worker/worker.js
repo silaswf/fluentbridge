@@ -76,6 +76,46 @@ function resolveTtsConfig(rawLang, rawVoice) {
       googleLang: 'fr',
     };
   }
+  if (lower === 'it-ch') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'it-CH',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Swiss Italian text clearly and naturally, without adding any commentary:',
+      googleLang: 'it',
+    };
+  }
+  if (lower.startsWith('it')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'it-IT',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Italian text clearly and naturally, without adding any commentary:',
+      googleLang: 'it',
+    };
+  }
+  if (lower === 'de-at') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'de-AT',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Austrian German text clearly and naturally, without adding any commentary:',
+      googleLang: 'de',
+    };
+  }
+  if (lower.startsWith('de')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'de-DE',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard High German (Hochdeutsch) text clearly and naturally, without adding any commentary:',
+      googleLang: 'de',
+    };
+  }
   if (lower.startsWith('pt')) {
     return {
       engine: 'gemini-tts',
@@ -445,6 +485,8 @@ function resolveSttLanguage(rawLang) {
   const lower = (rawLang || 'en').trim().toLowerCase();
   if (lower.startsWith('es')) return 'es';
   if (lower.startsWith('fr')) return 'fr';
+  if (lower.startsWith('it')) return 'it';
+  if (lower.startsWith('de')) return 'de';
   if (lower.startsWith('pt')) return 'pt';
   return 'en';
 }

@@ -1,5 +1,7 @@
 import type { LanguageCode } from '../types/learning';
 import { FRENCH_GRAMMAR_GUIDE } from './curriculum/frenchCourse';
+import { GERMAN_ALL_GRAMMAR_GUIDE } from './curriculum/germanExtra';
+import { ITALIAN_ALL_GRAMMAR_GUIDE } from './curriculum/italianExtra';
 import { SPANISH_GRAMMAR_GUIDE } from './curriculum/spanishCourse';
 
 export interface GrammarReferenceEntry {
@@ -448,6 +450,8 @@ export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...SWJ_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'en' as LanguageCode })),
   ...SPANISH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'es' as LanguageCode })),
   ...FRENCH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'fr' as LanguageCode })),
+  ...ITALIAN_ALL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'it' as LanguageCode })),
+  ...GERMAN_ALL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

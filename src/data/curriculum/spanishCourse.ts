@@ -1,5 +1,15 @@
 import type { CEFRLevel, Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
+import {
+  buildLanguageVocab,
+  buildRichLanguageTopic,
+} from './courseBuilder';
+import {
+  SPANISH_EXTRA_GRAMMAR_GUIDE,
+  SPANISH_EXTRA_TOPICS,
+  SPANISH_EXTRA_VOCAB,
+  SPANISH_META,
+} from './spanishExtra';
 
 interface EsBlueprint {
   id: string;
@@ -1224,149 +1234,34 @@ const ES_BLUEPRINTS: EsBlueprint[] = [
   },
 ];
 
-function buildEsTopic(b: EsBlueprint): Topic {
-  return {
-    id: b.id,
-    languageCode: 'es',
-    titlePt: b.titlePt,
-    titleEn: b.titleEs,
-    subtitle: b.subtitle,
-    level: b.level,
-    estimatedMinutes: b.minutes,
-    icon: b.icon,
-    color: b.color,
-    topicTipsSummary: [b.tipTitle, b.tipSummary],
-    steps: [
+export const SPANISH_ALL_TOPICS: Topic[] = [
+  ...ES_BLUEPRINTS.map((b, idx) =>
+    buildRichLanguageTopic(
       {
-        id: `${b.id}-tip`,
-        type: 'tip',
-        tip: {
-          id: `tip-${b.id}`,
-          category: 'grammar',
-          title: b.tipTitle,
-          summary: b.tipSummary,
-          details: b.tipDetails,
-          grammarFormula: {
-            aff: `[+] ${b.aff}`,
-            neg: `[-] ${b.neg}`,
-            int: `[?] ${b.int}`,
-          },
-          examples: [{ en: b.exampleEs, pt: b.examplePt }],
-        },
+        ...b,
+        titleTarget: b.titleEs,
+        exampleTarget: b.exampleEs,
+        dictationTarget: b.dictationEs,
       },
-      {
-        id: `${b.id}-listen`,
-        type: 'listening',
-        speakerLabel: `Áudio em Espanhol · ${b.level}`,
-        contextPt: 'Ouça o áudio com atenção (1.0x ou 0.75x) e responda:',
-        audioText: b.audioText,
-        question: b.listenQ,
-        options: [b.listenRight, b.listenWrong],
-        correctIndex: 0,
-        explanation: `O áudio diz: "${b.audioText}".`,
-        hintTip: 'Use a velocidade 0.75x para captar cada palavra.',
-      },
-      {
-        id: `${b.id}-read`,
-        type: 'reading',
-        title: b.readTitle,
-        format: 'article',
-        text: b.readText,
-        glossary: [],
-        question: b.readQ,
-        options: [b.readRight, b.readWrong],
-        correctIndex: 0,
-        explanation: 'A resposta está diretamente no texto acima.',
-        hintTip: 'Releia a ideia principal do texto.',
-      },
-      {
-        id: `${b.id}-dict`,
-        type: 'dictation',
-        promptPt: 'Ditado Auditivo em Espanhol: ouça e escreva a frase:',
-        audioText: b.dictationEs,
-        translationPt: b.dictationPt,
-        hintTip: 'Pressione R para ouvir novamente.',
-      },
-      {
-        id: `${b.id}-fill`,
-        type: 'fill_blank',
-        promptPt: 'Complete a frase em espanhol:',
-        sentenceBefore: b.fillBefore,
-        sentenceAfter: b.fillAfter,
-        verbHint: b.fillHint,
-        options: b.fillOptions,
-        correctIndex: 0,
-        explanation: `Forma correta: "${b.fillOptions[0]}".`,
-        hintTip: 'Confira a dica gramatical do início da unidade.',
-      },
-      {
-        id: `${b.id}-story`,
-        type: 'story',
-        title: b.storyTitle,
-        settingPt: 'Ouça o diálogo entre Madri (ES) e Cidade do México (MX):',
-        lines: [
-          {
-            speaker: 'Mateo (ES)',
-            voice: 'male',
-            dialectCode: 'es-ES',
-            text: b.storyLine1,
-            translationPt: b.storyLine1Pt,
-          },
-          {
-            speaker: 'Estrella (MX)',
-            voice: 'female',
-            dialectCode: 'es-MX',
-            text: b.storyLine2,
-            translationPt: b.storyLine2Pt,
-          },
-        ],
-        question: b.storyQ,
-        options: [b.storyRight, b.storyWrong],
-        correctIndex: 0,
-        explanation: `Confirmado na fala: "${b.storyLine2}".`,
-        hintTip: 'Clique em "Ouvir diálogo completo".',
-      },
-      {
-        id: `${b.id}-speak`,
-        type: 'speaking',
-        promptPt: 'Pratique em voz alta em espanhol:',
-        targetSentence: b.speakTarget,
-        translationPt: b.speakPt,
-        ipa: b.speakIpa,
-        brPhoneticHint: b.speakBr,
-        focusTip: b.speakFocus,
-      },
-      {
-        id: `${b.id}-write`,
-        type: 'writing_free',
-        promptPt: b.writePrompt,
-        scenarioPt: 'Escreva sua resposta em espanhol para praticar (ou envie ao Prof. Silas).',
-        minWords: 6,
-        checklist: [{ label: 'Pelo menos 6 palavras em espanhol', keywords: [' '] }],
-        modelAnswer: b.writeModel,
-        hintTip: 'Use a estrutura da dica inicial.',
-      },
-    ],
-  };
-}
+      idx,
+      SPANISH_META,
+    ),
+  ),
+  ...SPANISH_EXTRA_TOPICS,
+];
 
-export const SPANISH_ALL_TOPICS: Topic[] = ES_BLUEPRINTS.map(buildEsTopic);
-
-export const SPANISH_ALL_VOCAB: VocabCard[] = ES_BLUEPRINTS.flatMap((b) =>
-  b.vocab.map((v, vIdx) => ({
-    id: `voc-${b.id}-${vIdx + 1}`,
-    topicId: b.id,
-    languageCode: 'es',
-    word: v.word,
-    translation: v.pt,
-    ipa: v.ipa,
-    exampleEn: b.exampleEs,
-    examplePt: b.examplePt,
-    category: v.cat,
-    strength: 'weak',
-    reviewCount: 0,
-  })),
-);
+export const SPANISH_ALL_VOCAB: VocabCard[] = [
+  ...buildLanguageVocab(
+    ES_BLUEPRINTS.map((b) => ({
+      ...b,
+      titleTarget: b.titleEs,
+      exampleTarget: b.exampleEs,
+      dictationTarget: b.dictationEs,
+    })),
+    'es',
+  ),
+  ...SPANISH_EXTRA_VOCAB,
+];
 
 export const SPANISH_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   {
@@ -1537,4 +1432,5 @@ export const SPANISH_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
     exampleEn: 'La comida estuvo exquisita y pedimos un vaso de agua.',
     examplePt: 'A comida estava deliciosa e pedimos um copo de água.',
   },
+  ...SPANISH_EXTRA_GRAMMAR_GUIDE,
 ];

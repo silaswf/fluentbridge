@@ -220,7 +220,7 @@ export function Sidebar({
             <p className="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Idioma em estudo
             </p>
-            <div className="mt-1.5 grid grid-cols-3 gap-1">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {LANGUAGE_COURSES.map((course) => {
                 const selected = course.code === activeCourse.code;
                 return (
@@ -228,7 +228,7 @@ export function Sidebar({
                     key={course.code}
                     type="button"
                     onClick={() => onChangeLanguage(course.code)}
-                    className={`flex flex-col items-center rounded-xl py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                    className={`flex min-w-[30%] flex-1 flex-col items-center rounded-xl py-1.5 text-[11px] font-bold transition cursor-pointer ${
                       selected
                         ? 'bg-white text-blue-700 shadow-2xs ring-1 ring-blue-200'
                         : 'text-slate-600 hover:bg-white/60'

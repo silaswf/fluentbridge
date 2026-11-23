@@ -9,18 +9,22 @@ import {
   BUILTIN_TOPICS,
 } from '../../data/lessons';
 
-describe('Phase 9 multi-language curriculum integrity', () => {
-  it('ships 92 units across EN (50), ES (22), and FR (20) with valid steps and vocab', () => {
+describe('Multi-language curriculum integrity (EN, ES, FR, IT, DE)', () => {
+  it('ships 194 units across EN (50), ES (36), FR (36), IT (36), and DE (36) with valid steps and vocab', () => {
     expect(BUILTIN_TOPICS.length).toBe(50);
-    expect(ALL_BUILTIN_TOPICS.length).toBe(92);
+    expect(ALL_BUILTIN_TOPICS.length).toBe(194);
 
     const esTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'es');
     const frTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'fr');
-    expect(esTopics.length).toBe(22);
-    expect(frTopics.length).toBe(20);
+    const itTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'it');
+    const deTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'de');
+    expect(esTopics.length).toBe(36);
+    expect(frTopics.length).toBe(36);
+    expect(itTopics.length).toBe(36);
+    expect(deTopics.length).toBe(36);
 
     const topicIds = new Set(ALL_BUILTIN_TOPICS.map((t) => t.id));
-    expect(topicIds.size).toBe(92);
+    expect(topicIds.size).toBe(194);
 
     for (const v of ALL_INITIAL_VOCABULARY) {
       expect(topicIds.has(v.topicId)).toBe(true);
@@ -40,10 +44,12 @@ describe('Phase 9 multi-language curriculum integrity', () => {
     }
   });
 
-  it('ships 56 grammar reference tables across EN (32), ES (12), and FR (12)', () => {
-    expect(ALL_GRAMMAR_GUIDE.length).toBe(56);
+  it('ships 144 grammar reference tables across EN (32), ES (28), FR (28), IT (28), and DE (28)', () => {
+    expect(ALL_GRAMMAR_GUIDE.length).toBe(144);
     expect(getGrammarGuideByLanguage('en').length).toBe(32);
-    expect(getGrammarGuideByLanguage('es').length).toBe(12);
-    expect(getGrammarGuideByLanguage('fr').length).toBe(12);
+    expect(getGrammarGuideByLanguage('es').length).toBe(28);
+    expect(getGrammarGuideByLanguage('fr').length).toBe(28);
+    expect(getGrammarGuideByLanguage('it').length).toBe(28);
+    expect(getGrammarGuideByLanguage('de').length).toBe(28);
   });
 });

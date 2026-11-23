@@ -1,6 +1,6 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v2.0.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v2.1.0`)
 
-Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.0.0`** após a entrega completa das **Fases 5, 6, 7, 8 e 9**, do **Painel Admin Mestre (`AdminPanel.tsx`)**, das correções de **Dark Mode / Sidebar / Legibilidade** e do motor multi-idiomas de **Vozes Neurais** (`Deepgram Aura-2 + Gemini 2.5 Neural TTS`).
+Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.1.0`** com **5 idiomas completos (Inglês, Espanhol, Francês, Italiano e Alemão)**, **`194` unidades**, **`144` tabelas gramaticais**, **Painel Admin Mestre (`AdminPanel.tsx`)**, correções de **Dark Mode / Sidebar / Legibilidade** e motor de **Vozes Neurais** (`Deepgram Aura-2 + Gemini 2.5 Neural TTS`).
 
 ---
 
@@ -10,8 +10,8 @@ Este documento apresenta o diagnóstico técnico real do código-fonte do **Flue
 - **Alvos de Execução**:
   - **Web / PWA**: hospedado em `https://fluentbridge.pages.dev` (Cloudflare Pages, com `vite-plugin-pwa` offline Workbox, `public/_redirects` e `public/manifest.webmanifest`).
   - **Edge API (`cloudflare-worker/worker.js`)**: Cloudflare Worker **`fluentbridge-api`** (`https://fluentbridge-api.silaswf.workers.dev`) provendo:
-    - `/api/tts`: síntese neural **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`, vozes feminina e masculina) + **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`, PCM16 → WAV)** para **Francês (`fr-FR`, `fr-CA`)** e fallback, com cache Edge `/v3/`.
-    - `/api/stt`: transcrição em nuvem via **Whisper Large v3 Turbo** (`@cf/openai/whisper-large-v3-turbo` + fallback `@cf/openai/whisper`) para EN, ES e FR.
+    - `/api/tts`: síntese neural **Deepgram Aura-2** (`en-US`, `en-GB`, `es-ES`, `es-MX`, vozes feminina e masculina) + **Gemini 2.5 Neural TTS (`gemini-2.5-flash-preview-tts`, PCM16 → WAV)** para **Francês (`fr-FR`, `fr-CA`)**, **Italiano (`it-IT`, `it-CH`)** e **Alemão (`de-DE`, `de-AT`)**, com cache Edge `/v3/`.
+    - `/api/stt`: transcrição em nuvem via **Whisper Large v3 Turbo** (`@cf/openai/whisper-large-v3-turbo` + fallback `@cf/openai/whisper`) para EN, ES, FR, IT e DE.
     - `/api/gemini-tutor`: proxy seguro server-side com `GEMINI_API_KEY` protegida em `secret_text` (para o Tutor IA e Gerador de Unidades).
   - **Android Nativo (`android/`)**: `Capacitor 7.0.1` com `@capacitor/app`, `@capacitor/browser`, `@capacitor/local-notifications`, `WindowInsetsCompat` Safe Area no `MainActivity.java`, deep link `com.fluentbridge.app://auth-callback`, keystore Release PKCS12 e geração de `.apk` assinado + `.aab` da Play Store.
   - **Windows Desktop (`electron/main.cjs`)**: `Electron 34.2.0` empacotado com `@electron/packager 18.3.6` gerando `release/FluentBridge-win32-x64/FluentBridge.exe`.
