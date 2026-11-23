@@ -19,11 +19,13 @@ import type {
 } from '../types/learning';
 import { DualAudioButtons } from './DualAudioButtons';
 import { TIP_CATEGORY_META } from './SkillBadge';
+import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 
 interface TipsLibraryProps {
   topics: Topic[];
   languageCode?: LanguageCode;
   onPracticeTopic: (topic: Topic) => void;
+  onPracticeTopicWithAI?: (topic: Topic) => void;
 }
 
 interface TipEntry {
@@ -43,6 +45,7 @@ export function TipsLibrary({
   topics,
   languageCode = 'en',
   onPracticeTopic,
+  onPracticeTopicWithAI,
 }: TipsLibraryProps) {
   const [viewMode, setViewMode] = useState<'tips' | 'guide'>('tips');
   const [search, setSearch] = useState('');
@@ -319,15 +322,24 @@ export function TipsLibrary({
                     )}
                   </div>
 
-                  <div className="mt-4 border-t border-slate-100 pt-3">
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
                     <button
                       type="button"
                       onClick={() => onPracticeTopic(topic)}
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
                     >
-                      <span>Praticar no tópico: {topic.titlePt}</span>
+                      <span>Praticar no tópico: {isImmersionLevel(topic.level) ? topic.titleEn : topic.titlePt}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
+                    {onPracticeTopicWithAI && (
+                      <button
+                        type="button"
+                        onClick={() => onPracticeTopicWithAI(topic)}
+                        className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100 cursor-pointer"
+                      >
+                        {getImmersionStrings(languageCode, topic.level).practiceWithAiBtn}
+                      </button>
+                    )}
                   </div>
                 </article>
               );
@@ -348,9 +360,16 @@ export function TipsLibrary({
                   <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">
                     {entry.section}
                   </span>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-slate-600">
-                    {entry.level}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {isImmersionLevel(entry.level) && (
+                      <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                        {getImmersionStrings(languageCode, entry.level).badgeLabel}
+                      </span>
+                    )}
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-slate-600">
+                      {entry.level}
+                    </span>
+                  </div>
                 </div>
 
                 <h2 className="mt-2.5 font-display text-lg font-extrabold text-slate-900">

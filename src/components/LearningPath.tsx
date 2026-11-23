@@ -61,6 +61,7 @@ import type {
 import { ConfirmDialog } from './ConfirmDialog';
 import { SkillBadge } from './SkillBadge';
 import { SkillRadar } from './SkillRadar';
+import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 
 interface LearningPathProps {
   currentUser: UserProfile;
@@ -76,6 +77,7 @@ interface LearningPathProps {
   onChangeDailyGoal: (minutes: number) => void;
   onToggleReminder?: () => void;
   onStartTopic: (topic: Topic) => void;
+  onPracticeTopicWithAI?: (topic: Topic) => void;
   reviewedSubmissions: StudentSubmission[];
   assignments?: TeacherAssignment[];
   onGoToTeacher?: () => void;
@@ -177,6 +179,7 @@ export function LearningPath({
   onChangeDailyGoal,
   onToggleReminder,
   onStartTopic,
+  onPracticeTopicWithAI,
   reviewedSubmissions,
   assignments = [],
   onGoToTeacher,
@@ -560,6 +563,11 @@ export function LearningPath({
                               <Clock className="h-3.5 w-3.5" />
                               {topic.estimatedMinutes} min
                             </span>
+                            {isImmersionLevel(topic.level) && (
+                              <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200">
+                                🌐 {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).badgeLabel}
+                              </span>
+                            )}
                             {topic.isCustom && (
                               <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
                                 Criado pelo Professor
@@ -574,34 +582,46 @@ export function LearningPath({
                           </div>
 
                           <h3 className="font-display text-lg font-bold text-slate-900">
-                            {topic.titlePt}
+                            {isImmersionLevel(topic.level) ? topic.titleEn : topic.titlePt}
                           </h3>
                           <p className="text-xs font-medium text-slate-400">
-                            {topic.titleEn}
+                            {isImmersionLevel(topic.level) ? topic.titlePt : topic.titleEn}
                           </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => onStartTopic(topic)}
-                          className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                            isCompleted
-                              ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                              : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
-                          }`}
-                        >
-                          {isCompleted ? (
-                            <>
-                              <RotateCcw className="h-3.5 w-3.5" />
-                              <span>Refazer</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="h-3.5 w-3.5 fill-white" />
-                              <span>Começar</span>
-                            </>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {onPracticeTopicWithAI && (
+                            <button
+                              type="button"
+                              onClick={() => onPracticeTopicWithAI(topic)}
+                              className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 cursor-pointer"
+                            >
+                              <Sparkles className="h-3.5 w-3.5" />
+                              <span>{getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).practiceWithAiBtn}</span>
+                            </button>
                           )}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => onStartTopic(topic)}
+                            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                              isCompleted
+                                ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <>
+                                <RotateCcw className="h-3.5 w-3.5" />
+                                <span>Refazer</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="h-3.5 w-3.5 fill-white" />
+                                <span>Começar</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       <p className="mt-2 text-sm text-slate-600">{topic.subtitle}</p>
@@ -610,7 +630,9 @@ export function LearningPath({
                         <div className="topic-tips-box mt-3.5 rounded-xl border p-3">
                           <p className="topic-tips-title flex items-center gap-1.5 text-xs font-bold">
                             <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-                            <span>Dicas neste tópico:</span>
+                            <span>
+                              {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).tipsInTopicHeading}:
+                            </span>
                           </p>
                           <ul className="mt-1.5 space-y-1">
                             {topic.topicTipsSummary.map((tipItem, tipIdx) => (

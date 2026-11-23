@@ -8,6 +8,7 @@ import { TOPICS_B1, VOCAB_B1 } from './curriculum/levelB1';
 import { TOPICS_B2, VOCAB_B2 } from './curriculum/levelB2';
 import { TOPICS_C1, VOCAB_C1 } from './curriculum/levelC1';
 import { TOPICS_EN_SPECIAL, VOCAB_EN_SPECIAL } from './curriculum/enSpecialTracks';
+import { TOPICS_EN_EXPANSION, VOCAB_EN_EXPANSION } from './curriculum/enExpansion';
 import { SPANISH_ALL_TOPICS, SPANISH_ALL_VOCAB } from './curriculum/spanishCourse';
 import { FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB } from './curriculum/frenchCourse';
 import { ITALIAN_ALL_TOPICS, ITALIAN_ALL_VOCAB } from './curriculum/italianExtra';
@@ -21,7 +22,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇬🇧',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 50 unidades, trilhas Business/Tech/Viagens, ditado, pares mínimos, histórias e 4+ habilidades.',
+      'Curso completo CEFR A1–C1 com 60 unidades (imersão B2/C1 em inglês), 100+ guias gramaticais, ditado, pares mínimos, histórias e Tutor IA.',
     dialects: [
       { code: 'en-US', label: 'Americano', flag: '🇺🇸' },
       { code: 'en-GB', label: 'Britânico', flag: '🇬🇧' },
@@ -34,7 +35,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇪🇸',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais (ES/MX) e combate ao portunhol.',
+      'Curso completo CEFR A1–C1 com 50 unidades (imersão B2/C1 em espanhol), 100 guias gramaticais, vozes neurais (ES/MX) e combate ao portunhol.',
     dialects: [
       { code: 'es-ES', label: 'Espanha', flag: '🇪🇸' },
       { code: 'es-MX', label: 'México', flag: '🇲🇽' },
@@ -47,7 +48,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇫🇷',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (FR/CA) e ligações fonéticas.',
+      'Curso completo CEFR A1–C1 com 50 unidades (imersão B2/C1 em francês), 100 guias gramaticais, vozes neurais Gemini (FR/CA) e ligações fonéticas.',
     dialects: [
       { code: 'fr-FR', label: 'França', flag: '🇫🇷' },
       { code: 'fr-CA', label: 'Canadá', flag: '🇨🇦' },
@@ -60,7 +61,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇮🇹',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (IT/CH) e falsos amigos BR.',
+      'Curso completo CEFR A1–C1 com 50 unidades (imersão B2/C1 em italiano), 100 guias gramaticais, vozes neurais Gemini (IT/CH) e falsos amigos BR.',
     dialects: [
       { code: 'it-IT', label: 'Itália', flag: '🇮🇹' },
       { code: 'it-CH', label: 'Suíça (IT)', flag: '🇨🇭' },
@@ -73,7 +74,7 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     flag: '🇩🇪',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 36 unidades, 28 tabelas gramaticais, vozes neurais Gemini (DE/AT) e casos/TeKaMoLo.',
+      'Curso completo CEFR A1–C1 com 50 unidades (imersão B2/C1 em alemão), 100 guias gramaticais, vozes neurais Gemini (DE/AT) e casos/TeKaMoLo.',
     dialects: [
       { code: 'de-DE', label: 'Alemanha', flag: '🇩🇪' },
       { code: 'de-AT', label: 'Áustria', flag: '🇦🇹' },
@@ -311,6 +312,7 @@ export const ENGLISH_ALL_TOPICS: Topic[] = [
   ...TOPICS_C1,
   ...GRAMMAR_TOPICS_C1,
   ...TOPICS_EN_SPECIAL,
+  ...TOPICS_EN_EXPANSION,
 ]
   .map((t) => ({ ...t, languageCode: t.languageCode ?? ('en' as LanguageCode) }))
   .sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
@@ -325,6 +327,7 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = [
   ...GRAMMAR_VOCAB_B1_B2,
   ...GRAMMAR_VOCAB_C1,
   ...VOCAB_EN_SPECIAL,
+  ...VOCAB_EN_EXPANSION,
 ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) }));
 
 export {

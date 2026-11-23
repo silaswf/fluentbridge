@@ -8,23 +8,31 @@ import {
   ALL_INITIAL_VOCABULARY,
   BUILTIN_TOPICS,
 } from '../../data/lessons';
+import {
+  AI_TUTOR_SCENARIOS,
+  UNIT_ROLEPLAY_ANGLES,
+} from '../../data/tutorScenarios';
 
-describe('Multi-language curriculum integrity (EN, ES, FR, IT, DE)', () => {
-  it('ships 194 units across EN (50), ES (36), FR (36), IT (36), and DE (36) with valid steps and vocab', () => {
-    expect(BUILTIN_TOPICS.length).toBe(50);
-    expect(ALL_BUILTIN_TOPICS.length).toBe(194);
+describe('Multi-language curriculum, immersion & AI tutor integrity (v2.3.0)', () => {
+  it('ships 260 units across EN (60), ES (50), FR (50), IT (50), and DE (50) with >= 100 tips each', () => {
+    expect(BUILTIN_TOPICS.length).toBe(60);
+    expect(ALL_BUILTIN_TOPICS.length).toBe(260);
 
-    const esTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'es');
-    const frTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'fr');
-    const itTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'it');
-    const deTopics = ALL_BUILTIN_TOPICS.filter((t) => t.languageCode === 'de');
-    expect(esTopics.length).toBe(36);
-    expect(frTopics.length).toBe(36);
-    expect(itTopics.length).toBe(36);
-    expect(deTopics.length).toBe(36);
+    for (const lang of ['en', 'es', 'fr', 'it', 'de'] as const) {
+      const langTopics = ALL_BUILTIN_TOPICS.filter(
+        (t) => (t.languageCode ?? 'en') === lang,
+      );
+      expect(langTopics.length).toBe(lang === 'en' ? 60 : 50);
+
+      const tipCount = langTopics.reduce(
+        (acc, t) => acc + t.steps.filter((s) => s.type === 'tip').length,
+        0,
+      );
+      expect(tipCount).toBeGreaterThanOrEqual(100);
+    }
 
     const topicIds = new Set(ALL_BUILTIN_TOPICS.map((t) => t.id));
-    expect(topicIds.size).toBe(194);
+    expect(topicIds.size).toBe(260);
 
     for (const v of ALL_INITIAL_VOCABULARY) {
       expect(topicIds.has(v.topicId)).toBe(true);
@@ -44,12 +52,43 @@ describe('Multi-language curriculum integrity (EN, ES, FR, IT, DE)', () => {
     }
   });
 
-  it('ships 144 grammar reference tables across EN (32), ES (28), FR (28), IT (28), and DE (28)', () => {
-    expect(ALL_GRAMMAR_GUIDE.length).toBe(144);
-    expect(getGrammarGuideByLanguage('en').length).toBe(32);
-    expect(getGrammarGuideByLanguage('es').length).toBe(28);
-    expect(getGrammarGuideByLanguage('fr').length).toBe(28);
-    expect(getGrammarGuideByLanguage('it').length).toBe(28);
-    expect(getGrammarGuideByLanguage('de').length).toBe(28);
+  it('enforces target-language immersion on B2/C1 units (no Portuguese boilerplate)', () => {
+    const b2c1Topics = ALL_BUILTIN_TOPICS.filter(
+      (t) => t.level === 'B2' || t.level === 'C1',
+    );
+    expect(b2c1Topics.length).toBeGreaterThanOrEqual(100);
+
+    const ptBoilerplate = [
+      'Ouça o áudio com atenção',
+      'Pratique em voz alta em',
+      'Ditado Auditivo em',
+      'A resposta está diretamente no texto',
+    ];
+
+    for (const t of b2c1Topics) {
+      const serialized = JSON.stringify(t.steps);
+      for (const phrase of ptBoilerplate) {
+        expect(serialized).not.toContain(phrase);
+      }
+    }
+  });
+
+  it('ships 500 grammar reference entries (100 per language)', () => {
+    expect(ALL_GRAMMAR_GUIDE.length).toBe(500);
+    expect(getGrammarGuideByLanguage('en').length).toBe(100);
+    expect(getGrammarGuideByLanguage('es').length).toBe(100);
+    expect(getGrammarGuideByLanguage('fr').length).toBe(100);
+    expect(getGrammarGuideByLanguage('it').length).toBe(100);
+    expect(getGrammarGuideByLanguage('de').length).toBe(100);
+  });
+
+  it('ships 100 AI tutor scenarios (20 per language) and 10 unit roleplay angles', () => {
+    expect(AI_TUTOR_SCENARIOS.length).toBe(100);
+    for (const lang of ['en', 'es', 'fr', 'it', 'de'] as const) {
+      expect(
+        AI_TUTOR_SCENARIOS.filter((s) => s.languageCode === lang).length,
+      ).toBe(20);
+    }
+    expect(UNIT_ROLEPLAY_ANGLES.length).toBe(10);
   });
 });

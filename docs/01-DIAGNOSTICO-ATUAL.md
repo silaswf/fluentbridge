@@ -1,6 +1,6 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v2.2.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v2.3.0`)
 
-Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.2.0`** com **5 idiomas completos (Inglês, Espanhol, Francês, Italiano e Alemão)**, **`194` unidades**, **`144` tabelas gramaticais**, **Sistema de Alunos Individuais (VIP) com Confirmações Obrigatórias**, **Fase 10** (Sync Relacional Supabase + Modularização + Rate-Limit Edge) e motor de **Vozes Neurais** (`Deepgram Aura-2 + Gemini 2.5 Neural TTS`).
+Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v2.3.0`** com **5 idiomas completos (`260` unidades: `60` EN + `50` cada ES/FR/IT/DE)**, **imersão total no idioma estudado em B2/C1**, **`500` tabelas gramaticais (`100` por idioma)**, **Tutor IA dinâmico (`20` situações/idioma + `10` modos/unidade)**, **Alunos Individuais (VIP)** e motor de **Vozes Neurais** (`Deepgram Aura-2 + Gemini 2.5 Neural TTS`).
 
 ---
 

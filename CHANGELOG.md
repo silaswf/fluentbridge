@@ -4,6 +4,23 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v2.3.0`] — 2026-11-23
+### 260 Unidades CEFR, Imersão Total B2/C1, 500 Guias Gramaticais & Tutor IA Dinâmico
+- **Expansão Curricular para 260 Unidades (`60` EN + `50` ES + `50` FR + `50` IT + `50` DE):**
+  - **Inglês (`60` unidades, `110+` dicas)**: criadas `10` novas unidades (`src/data/curriculum/enExpansion.ts`) + segunda dica de pronúncia/uso real adicionada às `16` trilhas de `enSpecialTracks.ts`.
+  - **Espanhol, Francês, Italiano e Alemão (`50` unidades e `100` dicas cada)**: `14` novas unidades por idioma (`spanishExpansion.ts`, `frenchExpansion.ts`, `italianExpansion.ts`, `germanExpansion.ts`), totalizando **`10` unidades por nível CEFR (A1–C1)** em cada um dos 4 idiomas.
+- **Imersão Total no Idioma Estudado a partir do Nível B2 (`src/utils/immersion.ts` + `courseBuilder.ts` + UI):**
+  - Todas as unidades, dicas, perguntas, explicações, botões do player (`LessonPlayer.tsx`, `Phase8StepsView.tsx`, `LearningPath.tsx`), entradas B2/C1 do Guia Gramatical e feedbacks do Tutor IA passam a ser exibidos **100% no idioma estudado** nos níveis **B2 e C1** (`EN` em Inglês, `ES` em Espanhol, `FR` em Francês, `IT` em Italiano, `DE` em Alemão).
+- **Central de Dicas & Guia Gramatical (`100+` Dicas + `100` Tabelas por Idioma = `500` Tabelas Totais):**
+  - Criados `enGrammarExtra.ts`, `esGrammarExtra.ts`, `frGrammarExtra.ts`, `itGrammarExtra.ts` e `deGrammarExtra.ts` em `src/data/grammar/`, com entradas B2/C1 em imersão e separação em chunks por idioma no `vite.config.ts`.
+- **Tutor de Conversação IA Dinâmico (`src/data/tutorScenarios.ts`, `aiTutorEngine.ts`, `AITutor.tsx`):**
+  - **100 situações reais** (`20` por idioma, 4 por nível A1–C1) com botão **"Variação IA"** para gerar aberturas e reviravoltas inéditas ao vivo.
+  - **10 Modos Dinâmicos por Unidade (`UNIT_ROLEPLAY_ANGLES`)**: qualquer uma das `260` unidades pode ser praticada em `10` ângulos distintos (`2.600` combinações) gerados ao vivo via Gemini (`generateDynamicUnitScenario`).
+  - **Cenário Livre / "Surpreenda-me com IA"** (`generateCustomAIScenario`) + fallback offline multilíngue (`EN/ES/FR/IT/DE`).
+- **Qualidade Validada (`v2.3.0`):** **`6` suítes / `21` testes Vitest aprovados**, **`0` erros TypeScript**, **`DIST_LEAK=CLEAN`**.
+
+---
+
 ## [`v2.2.0`] — 2026-11-23
 ### Vinculação Individual / VIP (Aluno ↔ Professor), Confirmações Obrigatórias & Fase 10
 - **Sistema Completo de Alunos Individuais (VIP) & Vinculação Docente (`AuthScreen.tsx`, `TeacherLinkModal.tsx`, `VipStudentsPanel.tsx`, `AdminPanel.tsx`, `App.tsx`):**

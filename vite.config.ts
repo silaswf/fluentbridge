@@ -48,33 +48,45 @@ export default defineConfig(({ command }) => ({
           ) {
             return 'curriculum-c1';
           }
-          if (id.includes('/curriculum/enSpecialTracks')) {
+          if (
+            id.includes('/curriculum/enSpecialTracks') ||
+            id.includes('/curriculum/enExpansion')
+          ) {
             return 'curriculum-en-special';
           }
           if (
             id.includes('/curriculum/spanishCourse') ||
-            id.includes('/curriculum/spanishExtra')
+            id.includes('/curriculum/spanishExtra') ||
+            id.includes('/curriculum/spanishExpansion')
           ) {
             return 'curriculum-es';
           }
           if (
             id.includes('/curriculum/frenchCourse') ||
-            id.includes('/curriculum/frenchExtra')
+            id.includes('/curriculum/frenchExtra') ||
+            id.includes('/curriculum/frenchExpansion')
           ) {
             return 'curriculum-fr';
           }
           if (
             id.includes('/curriculum/italianCourse') ||
-            id.includes('/curriculum/italianExtra')
+            id.includes('/curriculum/italianExtra') ||
+            id.includes('/curriculum/italianExpansion')
           ) {
             return 'curriculum-it';
           }
           if (
             id.includes('/curriculum/germanCourse') ||
-            id.includes('/curriculum/germanExtra')
+            id.includes('/curriculum/germanExtra') ||
+            id.includes('/curriculum/germanExpansion')
           ) {
             return 'curriculum-de';
           }
+          if (id.includes('/grammar/enGrammarExtra')) return 'grammar-en';
+          if (id.includes('/grammar/esGrammarExtra')) return 'grammar-es';
+          if (id.includes('/grammar/frGrammarExtra')) return 'grammar-fr';
+          if (id.includes('/grammar/itGrammarExtra')) return 'grammar-it';
+          if (id.includes('/grammar/deGrammarExtra')) return 'grammar-de';
           if (id.includes('/data/grammarGuide')) {
             return 'grammar-guide';
           }

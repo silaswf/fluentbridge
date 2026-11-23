@@ -3,6 +3,11 @@ import { FRENCH_GRAMMAR_GUIDE } from './curriculum/frenchCourse';
 import { GERMAN_ALL_GRAMMAR_GUIDE } from './curriculum/germanExtra';
 import { ITALIAN_ALL_GRAMMAR_GUIDE } from './curriculum/italianExtra';
 import { SPANISH_GRAMMAR_GUIDE } from './curriculum/spanishCourse';
+import { EN_GRAMMAR_EXTRA } from './grammar/enGrammarExtra';
+import { ES_GRAMMAR_EXTRA } from './grammar/esGrammarExtra';
+import { FR_GRAMMAR_EXTRA } from './grammar/frGrammarExtra';
+import { IT_GRAMMAR_EXTRA } from './grammar/itGrammarExtra';
+import { DE_GRAMMAR_EXTRA } from './grammar/deGrammarExtra';
 
 export interface GrammarReferenceEntry {
   id: string;
@@ -448,10 +453,15 @@ export const SWJ_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
 
 export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...SWJ_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'en' as LanguageCode })),
+  ...EN_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'en' as LanguageCode })),
   ...SPANISH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'es' as LanguageCode })),
+  ...ES_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'es' as LanguageCode })),
   ...FRENCH_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'fr' as LanguageCode })),
+  ...FR_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'fr' as LanguageCode })),
   ...ITALIAN_ALL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'it' as LanguageCode })),
+  ...IT_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'it' as LanguageCode })),
   ...GERMAN_ALL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
+  ...DE_GRAMMAR_EXTRA.map((e) => ({ ...e, languageCode: 'de' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

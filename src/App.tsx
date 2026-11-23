@@ -139,6 +139,7 @@ export function App() {
   const [teacherInitialTab, setTeacherInitialTab] =
     useState<TeacherTab>('corrections');
   const [activeTopic, setActiveTopic] = useState<Topic | null>(null);
+  const [tutorTargetTopic, setTutorTargetTopic] = useState<Topic | null>(null);
   const [showPlacementModal, setShowPlacementModal] = useState(false);
   const [showTeacherLinkModal, setShowTeacherLinkModal] = useState(false);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
@@ -1334,6 +1335,11 @@ export function App() {
             }
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
+            onPracticeTopicWithAI={(topic) => {
+              setTutorTargetTopic(topic);
+              setActiveTopic(null);
+              setActiveView('tutor');
+            }}
             reviewedSubmissions={reviewedForUser}
             assignments={state.assignments}
             onGoToTeacher={
@@ -1360,6 +1366,9 @@ export function App() {
               languageCode={activeLanguage}
               activeDialect={activeDialect}
               geminiApiKey={effectiveGeminiKey}
+              topics={courseTopics}
+              initialTopic={tutorTargetTopic}
+              onClearInitialTopic={() => setTutorTargetTopic(null)}
               onCompleteSession={handleTutorSessionComplete}
             />
           )}
@@ -1377,6 +1386,11 @@ export function App() {
               topics={courseTopics}
               languageCode={activeLanguage}
               onPracticeTopic={(topic) => setActiveTopic(topic)}
+              onPracticeTopicWithAI={(topic) => {
+                setTutorTargetTopic(topic);
+                setActiveTopic(null);
+                setActiveView('tutor');
+              }}
             />
           )}
 
@@ -1524,6 +1538,11 @@ export function App() {
             onSubmitSpeaking={handleSubmitSpeaking}
             onCompleteLesson={handleCompleteLesson}
             onGoToReview={() => setActiveView('review')}
+            onPracticeWithAI={(topic) => {
+              setTutorTargetTopic(topic);
+              setActiveTopic(null);
+              setActiveView('tutor');
+            }}
             onClose={() => setActiveTopic(null)}
           />
         )}

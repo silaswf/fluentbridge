@@ -53,6 +53,7 @@ import {
 import { DualAudioButtons } from './DualAudioButtons';
 import { SkillBadge, TIP_CATEGORY_META } from './SkillBadge';
 import { Phase8StepsView } from './steps/Phase8StepsView';
+import { getImmersionStrings } from '../utils/immersion';
 
 interface LessonPlayerProps {
   topic: Topic;
@@ -86,6 +87,7 @@ interface LessonPlayerProps {
     minutesSpent: number;
   }) => void;
   onGoToReview: () => void;
+  onPracticeWithAI?: (topic: Topic) => void;
   onClose: () => void;
 }
 
@@ -195,6 +197,7 @@ export function LessonPlayer({
   onSubmitSpeaking,
   onCompleteLesson,
   onGoToReview,
+  onPracticeWithAI,
   onClose,
 }: LessonPlayerProps) {
   const [stepIdx, setStepIdx] = useState(0);
@@ -706,6 +709,18 @@ export function LessonPlayer({
             >
               Revisar vocabulário (SRS)
             </button>
+            {onPracticeWithAI && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onPracticeWithAI(topic);
+                }}
+                className="flex-1 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 cursor-pointer"
+              >
+                Conversar com IA (10 modos)
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -720,6 +735,8 @@ export function LessonPlayer({
   }
 
   if (!currentStep) return null;
+
+  const imm = getImmersionStrings(topic.languageCode ?? 'en', topic.level);
 
   const badgeKind =
     currentStep.type === 'tip'
@@ -977,9 +994,16 @@ export function LessonPlayer({
         <div className="mx-auto max-w-2xl space-y-5">
           <div className="flex items-center justify-between">
             <SkillBadge kind={badgeKind} />
-            <span className="font-mono text-xs font-semibold text-slate-400">
-              Nível {topic.level}
-            </span>
+            <div className="flex items-center gap-2">
+              {imm.isImmersion && (
+                <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 ring-1 ring-indigo-200">
+                  {imm.badgeLabel}
+                </span>
+              )}
+              <span className="font-mono text-xs font-semibold text-slate-400">
+                {imm.isImmersion ? topic.level : `Nível ${topic.level}`}
+              </span>
+            </div>
           </div>
 
           {showHint && activeHint && (
@@ -1849,6 +1873,7 @@ export function LessonPlayer({
             <Phase8StepsView
               currentStep={currentStep}
               languageCode={topic.languageCode}
+              level={topic.level}
               checkedStatus={checkedStatus}
               dictationText={dictationText}
               setDictationText={setDictationText}
@@ -1959,7 +1984,7 @@ export function LessonPlayer({
                 onClick={handleNext}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 sm:w-auto cursor-pointer"
               >
-                <span>Entendi, continuar</span>
+                <span>{imm.gotItContinue}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             ) : checkedStatus === 'idle' ? (
@@ -1982,7 +2007,7 @@ export function LessonPlayer({
                   onClick={handleCheck}
                   className="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 sm:w-auto cursor-pointer"
                 >
-                  Verificar resposta
+                  {imm.checkAnswer}
                 </button>
               ) : currentStep.type === 'writing_free' ? (
                 <button

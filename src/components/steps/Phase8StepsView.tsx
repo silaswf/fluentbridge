@@ -5,12 +5,14 @@ import type {
   MinimalPairsStep,
   StoryStep,
 } from '../../types/learning';
+import { getImmersionStrings } from '../../utils/immersion';
 import { evaluatePronunciation } from '../../utils/speech';
 import { DualAudioButtons } from '../DualAudioButtons';
 
 interface Phase8StepsViewProps {
   currentStep: DictationStep | MinimalPairsStep | StoryStep;
   languageCode?: LanguageCode;
+  level?: 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
   checkedStatus: 'idle' | 'correct' | 'incorrect';
   dictationText: string;
   setDictationText: (text: string) => void;
@@ -25,6 +27,7 @@ interface Phase8StepsViewProps {
 export function Phase8StepsView({
   currentStep,
   languageCode,
+  level,
   checkedStatus,
   dictationText,
   setDictationText,
@@ -35,6 +38,7 @@ export function Phase8StepsView({
   storyActiveLine,
   playStoryLineAt,
 }: Phase8StepsViewProps) {
+  const imm = getImmersionStrings(languageCode ?? 'en', level);
   if (currentStep.type === 'dictation') {
     return (
       <div className="animate-fade-up space-y-5 rounded-3xl border border-indigo-200/80 bg-white p-6 shadow-xs sm:p-7">
@@ -64,7 +68,7 @@ export function Phase8StepsView({
           disabled={checkedStatus !== 'idle'}
           value={dictationText}
           onChange={(e) => setDictationText(e.target.value)}
-          placeholder="Digite aqui exatamente a frase ouvida..."
+          placeholder={imm.dictationPlaceholder}
           className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
         />
 

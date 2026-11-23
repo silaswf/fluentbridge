@@ -3,11 +3,14 @@ import {
   ArrowLeft,
   Bot,
   CheckCircle2,
+  Dices,
   Languages,
   Lightbulb,
+  Loader2,
   Mic,
   MicOff,
   PhoneCall,
+  Search,
   Send,
   Sparkles,
   Volume2,
@@ -17,13 +20,21 @@ import {
 import type {
   AITutorScenario,
   Accent,
+  CEFRLevel,
   LanguageCode,
+  Topic,
   TutorMessage,
 } from '../types/learning';
 import {
   AI_TUTOR_SCENARIOS,
+  UNIT_ROLEPLAY_ANGLES,
+  generateCustomAIScenario,
+  generateDynamicOpeningVariation,
+  generateDynamicUnitScenario,
   generateTutorReply,
+  type UnitRoleplayAngle,
 } from '../utils/aiTutorEngine';
+import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import {
   isSpeechRecognitionSupported,
   speakText,
@@ -37,6 +48,9 @@ interface AITutorProps {
   languageCode?: LanguageCode;
   activeDialect?: string;
   geminiApiKey?: string;
+  topics?: Topic[];
+  initialTopic?: Topic | null;
+  onClearInitialTopic?: () => void;
   onCompleteSession: (xpEarned: number) => void;
 }
 
@@ -45,6 +59,9 @@ export function AITutor({
   languageCode = 'en',
   activeDialect,
   geminiApiKey,
+  topics = [],
+  initialTopic,
+  onClearInitialTopic,
   onCompleteSession,
 }: AITutorProps) {
   const effectiveDialect = activeDialect || accent;
@@ -53,6 +70,18 @@ export function AITutor({
   );
   const visibleScenarios =
     scopedScenarios.length > 0 ? scopedScenarios : AI_TUTOR_SCENARIOS;
+
+  const [hubTab, setHubTab] = useState<'scenarios' | 'by_unit' | 'custom'>(
+    initialTopic ? 'by_unit' : 'scenarios',
+  );
+  const [scenarioLevelFilter, setScenarioLevelFilter] = useState<'ALL' | CEFRLevel>('ALL');
+  const [scenarioSearch, setScenarioSearch] = useState('');
+  const [selectedUnitId, setSelectedUnitId] = useState<string>(
+    initialTopic?.id ?? topics[0]?.id ?? '',
+  );
+  const [customIdea, setCustomIdea] = useState('');
+  const [customLevel, setCustomLevel] = useState<CEFRLevel>('B1');
+  const [isGeneratingScenario, setIsGeneratingScenario] = useState(false);
 
   const [selectedScenario, setSelectedScenario] = useState<AITutorScenario | null>(
     null,
@@ -84,6 +113,17 @@ export function AITutor({
       stopRecRef.current?.();
     };
   }, []);
+
+  useEffect(() => {
+    if (initialTopic) {
+      setHubTab('by_unit');
+      setSelectedUnitId(initialTopic.id);
+      setSelectedScenario(null);
+      onClearInitialTopic?.();
+    } else if (topics.length > 0 && !topics.some((t) => t.id === selectedUnitId)) {
+      setSelectedUnitId(topics[0].id);
+    }
+  }, [initialTopic, topics, selectedUnitId, onClearInitialTopic]);
 
   const startScenario = (scenario: AITutorScenario) => {
     stopSpeaking();
@@ -199,20 +239,67 @@ export function AITutor({
     });
   };
 
+  const handleStartWithVariation = async (sc: AITutorScenario) => {
+    setIsGeneratingScenario(true);
+    const varied = await generateDynamicOpeningVariation(sc, geminiApiKey);
+    setIsGeneratingScenario(false);
+    startScenario(varied);
+  };
+
+  const handleStartUnitAngle = async (topic: Topic, angle: UnitRoleplayAngle) => {
+    setIsGeneratingScenario(true);
+    const { scenario } = await generateDynamicUnitScenario(
+      topic,
+      angle,
+      geminiApiKey,
+    );
+    setIsGeneratingScenario(false);
+    startScenario(scenario);
+  };
+
+  const handleStartCustomScenario = async (surprise = false) => {
+    setIsGeneratingScenario(true);
+    const { scenario } = await generateCustomAIScenario(
+      surprise ? '' : customIdea,
+      languageCode,
+      customLevel,
+      geminiApiKey,
+    );
+    setIsGeneratingScenario(false);
+    startScenario(scenario);
+  };
+
   if (!selectedScenario) {
+    const filteredScenarios = visibleScenarios.filter((sc) => {
+      if (scenarioLevelFilter !== 'ALL' && sc.level !== scenarioLevelFilter) {
+        return false;
+      }
+      if (!scenarioSearch.trim()) return true;
+      const q = scenarioSearch.toLowerCase();
+      return (
+        sc.titlePt.toLowerCase().includes(q) ||
+        sc.titleEn.toLowerCase().includes(q) ||
+        sc.settingPt.toLowerCase().includes(q) ||
+        sc.personaName.toLowerCase().includes(q)
+      );
+    });
+
+    const activeUnit =
+      topics.find((t) => t.id === selectedUnitId) ?? topics[0] ?? null;
+
     return (
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
               <Bot className="h-3.5 w-3.5" />
-              Roleplay Guiado com Correção Instantânea
+              Roleplay Dinâmico com IA · {visibleScenarios.length} situações + 10 modos/unidade
             </span>
             <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900">
               Tutor de Conversação IA
             </h1>
             <p className="mt-0.5 text-sm text-slate-600">
-              Pratique diálogos reais por voz ou texto com feedback imediato sobre erros comuns de brasileiros.
+              Diálogos não-roteirizados gerados ao vivo pela IA: escolha 1 das {visibleScenarios.length} situações, pratique qualquer unidade em 10 ângulos ou crie um tema livre.
             </p>
           </div>
 
@@ -230,53 +317,274 @@ export function AITutor({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visibleScenarios.map((sc) => (
-            <article
-              key={sc.id}
-              className="flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-blue-300 hover:shadow-sm"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-mono text-xs font-bold text-blue-700">
-                    {sc.level}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-400">
-                    {sc.personaName}
-                  </span>
-                </div>
-                <h2 className="mt-3 font-display text-lg font-bold text-slate-900">
-                  {sc.titlePt}
-                </h2>
-                <p className="text-xs font-medium text-slate-400">{sc.titleEn}</p>
-                <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
-                  {sc.settingPt}
-                </p>
+        {/* 3 Mode Tabs */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setHubTab('scenarios')}
+            className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+              hubTab === 'scenarios'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            {visibleScenarios.length} Situações Reais
+          </button>
+          <button
+            type="button"
+            onClick={() => setHubTab('by_unit')}
+            className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+              hubTab === 'by_unit'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            10 Modos por Unidade ({topics.length} unid.)
+          </button>
+          <button
+            type="button"
+            onClick={() => setHubTab('custom')}
+            className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+              hubTab === 'custom'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Cenário Livre / Surpreenda-me
+          </button>
+        </div>
 
-                <ul className="mt-3 space-y-1">
-                  {sc.goalsPt.map((goal, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-1.5 text-[11px] text-slate-600"
-                    >
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                      <span>{goal}</span>
-                    </li>
-                  ))}
-                </ul>
+        {isGeneratingScenario && (
+          <div className="flex items-center gap-2.5 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-xs font-bold text-indigo-800">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Criando cenário vivo e inédito com a IA...</span>
+          </div>
+        )}
+
+        {hubTab === 'scenarios' && (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="relative min-w-[240px] flex-1">
+                <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={scenarioSearch}
+                  onChange={(e) => setScenarioSearch(e.target.value)}
+                  placeholder="Filtrar situações (ex: aeroporto, entrevista, café, B2)..."
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+                />
               </div>
+              <div className="flex flex-wrap gap-1">
+                {(['ALL', 'A1', 'A2', 'B1', 'B2', 'C1'] as const).map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setScenarioLevelFilter(lvl)}
+                    className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold transition cursor-pointer ${
+                      scenarioLevelFilter === lvl
+                        ? 'bg-slate-900 text-white'
+                        : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {lvl === 'ALL' ? 'Todos' : lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {filteredScenarios.map((sc) => (
+                <article
+                  key={sc.id}
+                  className="flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 shadow-2xs transition hover:border-blue-300 hover:shadow-sm"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-mono text-xs font-bold text-blue-700">
+                          {sc.level}
+                        </span>
+                        {isImmersionLevel(sc.level) && (
+                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                            {getImmersionStrings(languageCode, sc.level).badgeLabel}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold text-slate-400">
+                        {sc.personaName}
+                      </span>
+                    </div>
+                    <h2 className="mt-3 font-display text-lg font-bold text-slate-900">
+                      {sc.titlePt}
+                    </h2>
+                    <p className="text-xs font-medium text-slate-400">{sc.titleEn}</p>
+                    <p className="mt-2.5 text-xs leading-relaxed text-slate-600">
+                      {sc.settingPt}
+                    </p>
+
+                    <ul className="mt-3 space-y-1">
+                      {sc.goalsPt.map((goal, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-1.5 text-[11px] text-slate-600"
+                        >
+                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                          <span>{goal}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={isGeneratingScenario}
+                      onClick={() => startScenario(sc)}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>Iniciar</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isGeneratingScenario}
+                      onClick={() => void handleStartWithVariation(sc)}
+                      title="Gerar uma variação inédita com a IA"
+                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-60 cursor-pointer"
+                    >
+                      <Dices className="h-3.5 w-3.5" />
+                      <span>Variação IA</span>
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
+
+        {hubTab === 'by_unit' && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="min-w-[260px] flex-1">
+                <label className="text-xs font-bold text-slate-700">
+                  Selecione qualquer unidade ({topics.length} disponíveis):
+                </label>
+                <select
+                  value={activeUnit?.id ?? ''}
+                  onChange={(e) => setSelectedUnitId(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-900"
+                >
+                  {topics.map((t, i) => (
+                    <option key={t.id} value={t.id}>
+                      {i + 1}. [{t.level}] {isImmersionLevel(t.level) ? t.titleEn : t.titlePt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {activeUnit && (
+                <button
+                  type="button"
+                  disabled={isGeneratingScenario}
+                  onClick={() => {
+                    const rand =
+                      UNIT_ROLEPLAY_ANGLES[
+                        Math.floor(Math.random() * UNIT_ROLEPLAY_ANGLES.length)
+                      ];
+                    void handleStartUnitAngle(activeUnit, rand);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-60 cursor-pointer"
+                >
+                  <Dices className="h-4 w-4" />
+                  <span>Sortear Modo ao Vivo</span>
+                </button>
+              )}
+            </div>
+
+            {activeUnit && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {UNIT_ROLEPLAY_ANGLES.map((angle, idx) => (
+                  <button
+                    key={angle.id}
+                    type="button"
+                    disabled={isGeneratingScenario}
+                    onClick={() => void handleStartUnitAngle(activeUnit, angle)}
+                    className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-indigo-400 hover:bg-indigo-50/30 disabled:opacity-60 cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-700">
+                          Modo {idx + 1}/10 · {activeUnit.level}
+                        </span>
+                        <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+                      </div>
+                      <h3 className="mt-2 font-display text-sm font-bold text-slate-900">
+                        {isImmersionLevel(activeUnit.level)
+                          ? angle.labelEn
+                          : angle.labelPt}
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-600">
+                        {angle.descriptionPt}
+                      </p>
+                    </div>
+                    <span className="mt-3 text-[11px] font-bold text-indigo-700">
+                      Gerar diálogo ao vivo →
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {hubTab === 'custom' && (
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+            <h2 className="font-display text-lg font-bold text-slate-900">
+              Crie qualquer situação real para conversar com a IA
+            </h2>
+            <p className="text-xs text-slate-600">
+              Nada pré-gravado: descreva a situação que você quer treinar hoje ou clique em <strong>Surpreenda-me</strong> para a IA inventar um desafio na hora.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+              <input
+                value={customIdea}
+                onChange={(e) => setCustomIdea(e.target.value)}
+                placeholder="Ex: Explicar meu projeto de engenharia para um cliente, negociar diária de hotel..."
+                className="sm:col-span-3 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900"
+              />
+              <select
+                value={customLevel}
+                onChange={(e) => setCustomLevel(e.target.value as CEFRLevel)}
+                className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-800"
+              >
+                {(['A1', 'A2', 'B1', 'B2', 'C1'] as CEFRLevel[]).map((l) => (
+                  <option key={l} value={l}>
+                    Nível {l} {isImmersionLevel(l) ? '(Imersão)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-wrap gap-2.5">
               <button
                 type="button"
-                onClick={() => startScenario(sc)}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-2xs transition hover:bg-blue-700 cursor-pointer"
+                disabled={isGeneratingScenario || !customIdea.trim()}
+                onClick={() => void handleStartCustomScenario(false)}
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
               >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Iniciar diálogo neste cenário</span>
+                <Sparkles className="h-4 w-4" />
+                <span>Criar Roleplay Personalizado</span>
               </button>
-            </article>
-          ))}
-        </div>
+              <button
+                type="button"
+                disabled={isGeneratingScenario}
+                onClick={() => void handleStartCustomScenario(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 cursor-pointer"
+              >
+                <Dices className="h-4 w-4" />
+                <span>Surpreenda-me com IA</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

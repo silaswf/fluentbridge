@@ -6,6 +6,7 @@ import type {
   Topic,
   VocabCard,
 } from '../../types/learning';
+import { getImmersionStrings, isImmersionLevel } from '../../utils/immersion';
 
 export interface RichLanguageBlueprint {
   id: string;
@@ -138,29 +139,41 @@ export function buildRichLanguageTopic(
     pt: v.pt,
   }));
 
+  const imm = getImmersionStrings(meta.languageCode, b.level);
+  const immersion = isImmersionLevel(b.level);
+
   const leadVocab = b.vocab[0];
   const tip2Category: TipCategory = b.tip2Category ?? 'pronunciation';
   const tip2Title =
-    b.tip2Title ?? `Pronúncia & Uso Real: "${leadVocab?.word ?? b.titleTarget}"`;
+    b.tip2Title ??
+    `${imm.tip2TitlePrefix}: "${leadVocab?.word ?? b.titleTarget}"`;
   const tip2Summary = b.tip2Summary ?? b.speakFocus;
   const tip2Details =
     b.tip2Details ??
-    `Treine o ritmo da frase-chave "${b.speakTarget}" (${b.speakIpa}). Aproximação fonética para brasileiros: ${b.speakBr}.`;
+    imm.tip2DetailsTemplate(b.speakTarget, b.speakIpa, b.speakBr);
   const tip2Warning =
     b.tip2Warning ??
-    `Atenção ao vocabulário-chave: "${leadVocab?.word ?? ''}" (${leadVocab?.ipa ?? ''}) significa "${leadVocab?.pt ?? ''}".`;
+    imm.keyVocabWarning(
+      leadVocab?.word ?? '',
+      leadVocab?.ipa ?? '',
+      leadVocab?.pt ?? '',
+    );
 
   return {
     id: b.id,
     languageCode: meta.languageCode,
-    titlePt: b.titlePt,
+    titlePt: immersion ? b.titleTarget : b.titlePt,
     titleEn: b.titleTarget,
     subtitle: b.subtitle,
     level: b.level,
     estimatedMinutes: b.minutes,
     icon: b.icon,
     color: b.color,
-    topicTipsSummary: [b.tipTitle, b.tipSummary, `Pronúncia: ${b.speakFocus}`],
+    topicTipsSummary: [
+      b.tipTitle,
+      b.tipSummary,
+      `${imm.pronunciationPrefix}: ${b.speakFocus}`,
+    ],
     steps: [
       {
         id: `${b.id}-tip`,
@@ -195,14 +208,16 @@ export function buildRichLanguageTopic(
       {
         id: `${b.id}-listen`,
         type: 'listening',
-        speakerLabel: `Áudio em ${meta.languageNamePt} · ${b.level}`,
-        contextPt: 'Ouça o áudio com atenção (1.0x ou 0.75x) e responda:',
+        speakerLabel: immersion
+          ? `${imm.speakerAudioLabel} · ${b.level}`
+          : `Áudio em ${meta.languageNamePt} · ${b.level}`,
+        contextPt: imm.listeningContext,
         audioText: b.audioText,
         question: b.listenQ,
         options: listenOptions,
         correctIndex: listenOdd ? 1 : 0,
-        explanation: `O áudio diz: "${b.audioText}".`,
-        hintTip: 'Use a velocidade 0.75x para captar cada palavra.',
+        explanation: `${imm.audioSaysPrefix}: "${b.audioText}".`,
+        hintTip: imm.listeningHint,
       },
       {
         id: `${b.id}-read`,
@@ -214,41 +229,47 @@ export function buildRichLanguageTopic(
         question: b.readQ,
         options: readOptions,
         correctIndex: readOdd ? 1 : 0,
-        explanation: 'A resposta está diretamente no texto acima.',
-        hintTip: 'Clique nas palavras destacadas do glossário se precisar de ajuda.',
+        explanation: imm.answerInText,
+        hintTip: imm.readingHint,
       },
       {
         id: `${b.id}-match`,
         type: 'matching',
-        promptPt: `Associe as expressões em ${meta.languageNamePt} ao seu significado:`,
+        promptPt: immersion
+          ? imm.matchingPrompt
+          : `Associe as expressões em ${meta.languageNamePt} ao seu significado:`,
         pairs: matchingPairs,
-        hintTip: 'Observe a pronúncia e os falsos amigos antes de conectar.',
+        hintTip: imm.matchingHint,
       },
       {
         id: `${b.id}-dict`,
         type: 'dictation',
-        promptPt: `Ditado Auditivo em ${meta.languageNamePt}: ouça e escreva a frase:`,
+        promptPt: immersion
+          ? imm.dictationPrompt
+          : `Ditado Auditivo em ${meta.languageNamePt}: ouça e escreva a frase:`,
         audioText: b.dictationTarget,
         translationPt: b.dictationPt,
-        hintTip: 'Pressione R para ouvir novamente quantas vezes precisar.',
+        hintTip: imm.dictationHint,
       },
       {
         id: `${b.id}-fill`,
         type: 'fill_blank',
-        promptPt: `Complete a frase em ${meta.languageNamePt}:`,
+        promptPt: immersion
+          ? imm.fillBlankPrompt
+          : `Complete a frase em ${meta.languageNamePt}:`,
         sentenceBefore: b.fillBefore,
         sentenceAfter: b.fillAfter,
         verbHint: b.fillHint,
         options: fillRotated.options,
         correctIndex: fillRotated.correctIndex,
-        explanation: `Forma correta: "${b.fillOptions[0]}".`,
-        hintTip: 'Confira a fórmula da dica inicial.',
+        explanation: `${imm.correctFormPrefix}: "${b.fillOptions[0]}".`,
+        hintTip: imm.fillBlankHint,
       },
       {
         id: `${b.id}-story`,
         type: 'story',
         title: b.storyTitle,
-        settingPt: meta.settingPt,
+        settingPt: immersion ? b.subtitle : meta.settingPt,
         lines: [
           {
             speaker: meta.speaker1,
@@ -268,13 +289,15 @@ export function buildRichLanguageTopic(
         question: b.storyQ,
         options: storyOptions,
         correctIndex: storyOdd ? 1 : 0,
-        explanation: `Confirmado na fala: "${b.storyLine2}".`,
-        hintTip: 'Clique em "Ouvir diálogo completo" para ouvir as duas vozes em sequência.',
+        explanation: `${imm.confirmedInLinePrefix}: "${b.storyLine2}".`,
+        hintTip: imm.storyHint,
       },
       {
         id: `${b.id}-speak`,
         type: 'speaking',
-        promptPt: `Pratique em voz alta em ${meta.languageNamePt}:`,
+        promptPt: immersion
+          ? imm.speakingPrompt
+          : `Pratique em voz alta em ${meta.languageNamePt}:`,
         targetSentence: b.speakTarget,
         translationPt: b.speakPt,
         ipa: b.speakIpa,
@@ -285,13 +308,20 @@ export function buildRichLanguageTopic(
         id: `${b.id}-write`,
         type: 'writing_free',
         promptPt: b.writePrompt,
-        scenarioPt: `Escreva sua resposta em ${meta.languageNamePt} para praticar (ou envie ao Prof. Silas).`,
+        scenarioPt: immersion
+          ? imm.writingScenario
+          : `Escreva sua resposta em ${meta.languageNamePt} para praticar (ou envie ao Prof. Silas).`,
         minWords: 6,
         checklist: [
-          { label: `Pelo menos 6 palavras em ${meta.languageNamePt}`, keywords: [' '] },
+          {
+            label: immersion
+              ? imm.writingMinWordsLabel
+              : `Pelo menos 6 palavras em ${meta.languageNamePt}`,
+            keywords: [' '],
+          },
         ],
         modelAnswer: b.writeModel,
-        hintTip: 'Use a estrutura da dica inicial.',
+        hintTip: imm.writingHint,
       },
     ],
   };

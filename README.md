@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v2.2.0`)
+# FluentBridge Academy (`v2.3.0`)
 
-Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*) com dicas contextuais voltadas para brasileiros, Tutor de Conversação IA (texto e **Chamada ao Vivo**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor com **Tarefas Individuais e de Turma** e **Gerador IA**, e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Italiano e Alemão)** de **A1 a C1** (com **imersão total no idioma estudado a partir do B2**) nas habilidades (*Listening, Reading, Speaking, Writing, Ditado, Pares Mínimos, Matching e Histórias Multi-Voz*), Tutor de Conversação IA dinâmico (**20 situações/idioma + 10 modos por unidade + cenário livre**), vocabulário com revisão científica **SM-2**, vozes neurais humanas (**Deepgram Aura-2 + Gemini 2.5 Neural TTS**), **Vinculação de Alunos VIP**, **Painel Admin Mestre**, Estúdio do Professor e emissão de certificados CEFR por idioma, desenvolvida para o **Prof. Silas**.
 
 ---
 
@@ -15,12 +15,12 @@ Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Itali
 
 ---
 
-## Números Atuais (`v2.2.0`)
+## Números Atuais (`v2.3.0`)
 
-- **194 Unidades CEFR (A1–C1)**: **50** em Inglês + **36** em Espanhol + **36** em Francês + **36** em Italiano + **36** em Alemão
-- **1.834 Passos Interativos** em **11 formatos** (`tip`, `listening`, `reading`, `matching`, `fill_blank`, `dictation`, `minimal_pairs`, `story`, `speaking`, `writing_builder`, `writing_free`)
-- **584 Flashcards SM-2** + **372 Dicas Contextuais** + **144 Tabelas no Guia Gramatical** (`32` EN, `28` ES, `28` FR, `28` IT, `28` DE)
-- **Qualidade Garantida**: `19/19` testes **Vitest** aprovados · `0` erros TypeScript · `DIST_LEAK=CLEAN` · Worker `v2.2.0` com Rate-Limit por IP
+- **260 Unidades CEFR (A1–C1)**: **60** em Inglês + **50** em Espanhol + **50** em Francês + **50** em Italiano + **50** em Alemão (B2/C1 em **imersão total no idioma estudado**)
+- **Central & Guia Gramatical**: **`100+` Dicas** E **`100` Tabelas Gramaticais** por idioma (**`500` tabelas** no total)
+- **Tutor IA Dinâmico**: **`20` Situações Reais por idioma (`100` total)** + **`10` Modos Dinâmicos por Unidade (`2.600` combinações)** + **Cenário Livre / Surpreenda-me**
+- **Qualidade Garantida**: `21/21` testes **Vitest** aprovados · `0` erros TypeScript · `DIST_LEAK=CLEAN` · Worker `v2.2.0` com Rate-Limit por IP
 
 ---
 
