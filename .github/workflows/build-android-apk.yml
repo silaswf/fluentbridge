@@ -81,14 +81,14 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab "FluentBridge-playstore.aab"
 
       - name: Upload FluentBridge APK & Play Store AAB artifacts
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: FluentBridge-Android-Release
+          retention-days: 5
           path: |
             FluentBridge-${{ env.VERSION_LABEL }}.apk
-            FluentBridge.apk
             FluentBridge-${{ env.VERSION_LABEL }}-playstore.aab
-            FluentBridge-playstore.aab
 
       - name: Create or update GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
