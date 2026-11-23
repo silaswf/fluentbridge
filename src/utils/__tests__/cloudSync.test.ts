@@ -142,4 +142,55 @@ describe('cloudSync granular mergePlatformStates', () => {
     expect(merged.assignments?.some((a) => a.id === 'assign-1')).toBe(true);
     expect(merged.assignments?.some((a) => a.id === 'assign-old')).toBe(false);
   });
+
+  it('preserves VIP teacher linking, unlink notice, and individual studentId assignments across merges', () => {
+    const local: PlatformState = {
+      ...DEFAULT_PLATFORM_STATE,
+      users: [
+        DEFAULT_PLATFORM_STATE.users[0],
+        makeStudent({
+          id: 'stu-vip',
+          email: 'vip@teste.com',
+          assignedTeacherId: 'user-teacher-silas',
+          enrollmentType: 'vip',
+          unlinkedNoticePending: true,
+          unlinkedByTeacherName: 'Prof. Silas',
+        }),
+      ],
+      assignments: [
+        {
+          id: 'assign-vip-1',
+          title: 'Praticar Speaking VIP',
+          description: 'Enviar áudio da unidade A2-1',
+          studentId: 'stu-vip',
+          teacherId: 'user-teacher-silas',
+          languageCode: 'it',
+          dueDate: '2026-12-10',
+          createdAt: '2026-11-23',
+          createdBy: 'Prof. Silas',
+        },
+      ],
+    };
+
+    const remote: Partial<PlatformState> = {
+      users: [
+        makeStudent({
+          id: 'stu-vip',
+          email: 'vip@teste.com',
+          enrollmentType: 'independent',
+          unlinkedNoticePending: false,
+        }),
+      ],
+    };
+
+    const merged = mergePlatformStates(local, remote, 'local');
+    const vip = merged.users.find((u) => u.id === 'stu-vip');
+    expect(vip?.assignedTeacherId).toBe('user-teacher-silas');
+    expect(vip?.enrollmentType).toBe('vip');
+    expect(vip?.unlinkedNoticePending).toBe(true);
+    expect(vip?.unlinkedByTeacherName).toBe('Prof. Silas');
+    expect(merged.assignments?.find((a) => a.id === 'assign-vip-1')?.studentId).toBe(
+      'stu-vip',
+    );
+  });
 });

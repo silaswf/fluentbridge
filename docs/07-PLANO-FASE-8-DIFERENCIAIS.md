@@ -8,7 +8,7 @@ Com a conclusão integral das **Fases 5 a 9** na release **`v2.0.0`** (incluindo
 
 | Fase / Sprint | Versão Alvo | Foco Principal | Resultado Estratégico |
 | --- | --- | --- | --- |
-| **Fase 10 (Sprints 10.1 & 10.2)** | `v2.1.0` | **Sync Relacional JWT/RLS + Modularização de UI + Rate-Limit Worker** | Escalabilidade para centenas de alunos simultâneos e arquivos `< 400` linhas |
+| **Fase 10 (Sprints 10.1 & 10.2)** | `v2.2.0` | **CONCLUÍDA — Sync Relacional + Alunos VIP + Modularização + Rate-Limit Worker** | Vinculação VIP, schema 5 idiomas, hooks/subcomponentes extraídos e cotas por IP |
 | **Fase 11 (Sprints 11.1 & 11.2)** | `v2.5.0` | **Lazy Loading Dinâmico por Idioma + Simulados + Diagnóstico Fonético** | Boot ainda mais leve, simulados IELTS/DELE/DELF e mapa de erros por turma |
 | **Fase 12 (Sprints 12.1 & 12.2)** | `v3.0.0` | **Play Store / App Store + Pacote Offline de Áudio + E2E Playwright** | Distribuição oficial nas lojas móveis, estudo offline com áudio neural e QA visual |
 

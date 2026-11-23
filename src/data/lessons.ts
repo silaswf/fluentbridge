@@ -91,6 +91,7 @@ export const INITIAL_USERS: UserProfile[] = [
     password: 'admin123',
     role: 'teacher',
     isMasterAdmin: true,
+    teacherInviteCode: 'PROF-SILAS',
     avatarColor: '#0F172A',
     activeLanguage: 'en',
     dialectByLanguage: {

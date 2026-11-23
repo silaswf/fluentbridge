@@ -10,6 +10,8 @@ export type LanguageCode = 'en' | 'es' | 'fr' | 'de' | 'it';
 
 export type UserRole = 'teacher' | 'student';
 
+export type StudentEnrollmentType = 'class' | 'vip' | 'independent';
+
 export interface LanguageDialect {
   code: string;
   label: string;
@@ -265,6 +267,7 @@ export interface StudentSubmission {
   studentId: string;
   studentName: string;
   classId?: string;
+  teacherId?: string;
   topicId: string;
   topicTitle: string;
   promptPt: string;
@@ -286,6 +289,7 @@ export interface StudentSubmission {
 export interface ClassGroup {
   id: string;
   languageCode?: LanguageCode;
+  teacherId?: string;
   name: string;
   code: string;
   level: CEFRLevel;
@@ -320,6 +324,8 @@ export interface TeacherAssignment {
   title: string;
   description: string;
   classId?: string;
+  studentId?: string;
+  teacherId?: string;
   languageCode: LanguageCode;
   topicId?: string;
   dueDate: string;
@@ -337,6 +343,11 @@ export interface UserProfile {
   blocked?: boolean;
   blockedReason?: string;
   classId?: string;
+  assignedTeacherId?: string;
+  enrollmentType?: StudentEnrollmentType;
+  teacherInviteCode?: string;
+  unlinkedNoticePending?: boolean;
+  unlinkedByTeacherName?: string;
   avatarColor: string;
   activeLanguage: LanguageCode;
   dialectByLanguage: Record<string, string>;

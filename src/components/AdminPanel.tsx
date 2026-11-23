@@ -23,6 +23,7 @@ import {
 } from '../config/appConfig';
 import type { PlatformState, UserProfile } from '../types/learning';
 import { getAllVoiceProviderLabels } from '../utils/speech';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface AdminPanelProps {
   state: PlatformState;
@@ -34,6 +35,12 @@ interface AdminPanelProps {
     updatedAt?: string;
   };
   onUpdateTeacherAccessCode: (nextCode: string) => void;
+  onUpdateTeacherInviteCode: (teacherId: string, nextCode: string) => void;
+  onLinkStudentToTeacher: (studentId: string, teacherId: string, mode: 'vip' | 'class') => void;
+  onUnlinkStudentFromTeacher: (
+    studentId: string,
+    initiatedBy: 'teacher' | 'admin' | 'student',
+  ) => void;
   onToggleBlockUser: (userId: string, reason?: string) => void;
   onToggleUserRole: (userId: string) => void;
   onMoveUserClass: (userId: string, classId?: string) => void;
@@ -48,6 +55,9 @@ export function AdminPanel({
   totalBuiltinTopicsCount,
   autoSyncStatus,
   onUpdateTeacherAccessCode,
+  onUpdateTeacherInviteCode,
+  onLinkStudentToTeacher,
+  onUnlinkStudentFromTeacher,
   onToggleBlockUser,
   onToggleUserRole,
   onMoveUserClass,
@@ -69,6 +79,15 @@ export function AdminPanel({
     'all',
   );
   const [pwDraftByUser, setPwDraftByUser] = useState<Record<string, string>>({});
+  const [inviteDraftByTeacher, setInviteDraftByTeacher] = useState<Record<string, string>>({});
+  const [pendingConfirm, setPendingConfirm] = useState<{
+    title: string;
+    description: string;
+    warningBox?: string;
+    confirmLabel: string;
+    tone: 'danger' | 'warning' | 'primary';
+    action: () => void;
+  } | null>(null);
 
   if (!isMaster) {
     return (
@@ -401,6 +420,82 @@ export function AdminPanel({
 
                 {!isSelfMaster ? (
                   <div className="flex flex-wrap items-center gap-2">
+                    {u.role === 'student' && (
+                      <select
+                        value={u.assignedTeacherId ?? ''}
+                        onChange={(e) => {
+                          const nextTeacherId = e.target.value;
+                          const nextTeacherName = state.users.find(
+                            (t) => t.id === nextTeacherId,
+                          )?.name;
+                          setPendingConfirm({
+                            tone: nextTeacherId ? 'primary' : 'warning',
+                            title: nextTeacherId
+                              ? `Vincular ${u.name} a ${nextTeacherName ?? 'professor'}?`
+                              : `Remover professor de ${u.name}?`,
+                            description: nextTeacherId
+                              ? `O aluno passará a ser acompanhado por ${nextTeacherName ?? 'este professor'} (modo VIP).`
+                              : 'O aluno ficará sem professor vinculado e receberá aviso no próximo login.',
+                            warningBox: nextTeacherId
+                              ? undefined
+                              : 'Sem professor vinculado, atividades com validação docente (Speaking/Writing para professor e tarefas VIP) ficarão restritas até nova vinculação.',
+                            confirmLabel: nextTeacherId
+                              ? 'Confirmar vinculação'
+                              : 'Confirmar desvinculação',
+                            action: () => {
+                              if (nextTeacherId) {
+                                onLinkStudentToTeacher(u.id, nextTeacherId, 'vip');
+                              } else {
+                                onUnlinkStudentFromTeacher(u.id, 'admin');
+                              }
+                            },
+                          });
+                        }}
+                        className="rounded-xl border border-indigo-200 bg-indigo-50/70 px-2.5 py-1.5 text-xs font-semibold text-indigo-900"
+                        aria-label={`Professor responsável de ${u.name}`}
+                      >
+                        <option value="">Sem professor (VIP)</option>
+                        {state.users
+                          .filter((t) => t.role === 'teacher')
+                          .map((t) => (
+                            <option key={t.id} value={t.id}>
+                              Prof. {t.name}
+                            </option>
+                          ))}
+                      </select>
+                    )}
+
+                    {u.role === 'teacher' && (
+                      <div className="flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50/70 px-2 py-1">
+                        <span className="text-[10px] font-bold text-purple-800">VIP:</span>
+                        <input
+                          type="text"
+                          value={inviteDraftByTeacher[u.id] ?? u.teacherInviteCode ?? ''}
+                          onChange={(e) =>
+                            setInviteDraftByTeacher((prev) => ({
+                              ...prev,
+                              [u.id]: e.target.value.toUpperCase(),
+                            }))
+                          }
+                          className="w-24 rounded-lg border border-purple-200 bg-white px-1.5 py-0.5 font-mono text-[11px] uppercase"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextCode = (
+                              inviteDraftByTeacher[u.id] ??
+                              u.teacherInviteCode ??
+                              ''
+                            ).trim();
+                            if (nextCode) onUpdateTeacherInviteCode(u.id, nextCode);
+                          }}
+                          className="rounded-lg bg-purple-700 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-purple-800 cursor-pointer"
+                        >
+                          OK
+                        </button>
+                      </div>
+                    )}
+
                     <select
                       value={u.classId ?? ''}
                       onChange={(e) =>
@@ -419,7 +514,18 @@ export function AdminPanel({
 
                     <button
                       type="button"
-                      onClick={() => onToggleUserRole(u.id)}
+                      onClick={() =>
+                        setPendingConfirm({
+                          tone: 'warning',
+                          title: `Alterar papel de ${u.name}?`,
+                          description:
+                            u.role === 'teacher'
+                              ? 'O usuário passará a ter perfil de Aluno.'
+                              : 'O usuário passará a ter acesso ao Estúdio do Professor.',
+                          confirmLabel: 'Confirmar alteração',
+                          action: () => onToggleUserRole(u.id),
+                        })
+                      }
                       className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
                     >
                       {u.role === 'teacher' ? 'Tornar Aluno' : 'Promover Professor'}
@@ -428,10 +534,21 @@ export function AdminPanel({
                     <button
                       type="button"
                       onClick={() =>
-                        onToggleBlockUser(
-                          u.id,
-                          u.blocked ? undefined : 'Suspenso pelo administrador',
-                        )
+                        setPendingConfirm({
+                          tone: u.blocked ? 'primary' : 'danger',
+                          title: u.blocked
+                            ? `Liberar acesso de ${u.name}?`
+                            : `Bloquear acesso de ${u.name}?`,
+                          description: u.blocked
+                            ? 'O usuário poderá fazer login normalmente novamente.'
+                            : 'O usuário será impedido de entrar na plataforma até ser liberado.',
+                          confirmLabel: u.blocked ? 'Sim, liberar' : 'Sim, bloquear',
+                          action: () =>
+                            onToggleBlockUser(
+                              u.id,
+                              u.blocked ? undefined : 'Suspenso pelo administrador',
+                            ),
+                        })
                       }
                       className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-bold cursor-pointer ${
                         u.blocked
@@ -482,7 +599,17 @@ export function AdminPanel({
 
                     <button
                       type="button"
-                      onClick={() => onDeleteUser(u.id)}
+                      onClick={() =>
+                        setPendingConfirm({
+                          title: `Excluir conta de ${u.name}?`,
+                          description: `Esta ação removerá permanentemente o usuário ${u.email} da lista local.`,
+                          warningBox:
+                            'A exclusão não pode ser desfeita localmente. Caso o usuário esteja vinculado a uma turma ou professor, o vínculo será removido.',
+                          confirmLabel: 'Excluir usuário',
+                          tone: 'danger',
+                          action: () => onDeleteUser(u.id),
+                        })
+                      }
                       className="rounded-xl border border-rose-200 bg-white p-1.5 text-rose-600 hover:bg-rose-50 cursor-pointer"
                       title="Excluir usuário"
                       aria-label={`Excluir ${u.name}`}
@@ -501,6 +628,20 @@ export function AdminPanel({
           })}
         </div>
       </section>
+
+      <ConfirmDialog
+        open={Boolean(pendingConfirm)}
+        title={pendingConfirm?.title ?? ''}
+        description={pendingConfirm?.description ?? ''}
+        warningBox={pendingConfirm?.warningBox}
+        confirmLabel={pendingConfirm?.confirmLabel ?? 'Confirmar'}
+        tone={pendingConfirm?.tone ?? 'warning'}
+        onConfirm={() => {
+          pendingConfirm?.action();
+          setPendingConfirm(null);
+        }}
+        onCancel={() => setPendingConfirm(null)}
+      />
     </div>
   );
 }

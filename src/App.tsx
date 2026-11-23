@@ -7,10 +7,6 @@ import {
 } from './config/appConfig';
 import { getAudioClip } from './utils/audioDb';
 import {
-  fetchCurrentSupabaseUser,
-  mergePlatformStates,
-  pullStateFromCloud,
-  pushStateToCloud,
   registerNativeOAuthListener,
   signInWithSupabaseEmail,
   signInWithSupabaseGoogle,
@@ -23,7 +19,9 @@ import {
 import { AuthScreen } from './components/AuthScreen';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
+import { TeacherLinkModal } from './components/TeacherLinkModal';
 import type { TeacherTab } from './components/TeacherStudio';
+import { useCloudSyncController } from './hooks/useCloudSyncController';
 import { scheduleDailyStudyReminder } from './utils/notifications';
 import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
 import { recordStudyActivity } from './utils/streakEngine';
@@ -86,6 +84,7 @@ import type {
   PlatformState,
   PronunciationRubric,
   SkillType,
+  StudentEnrollmentType,
   Topic,
   UserProfile,
   UserRole,
@@ -93,6 +92,7 @@ import type {
 import { playSound } from './utils/soundFx';
 import {
   clearPlatformState,
+  generateTeacherInviteCode,
   hashPassword,
   loadPlatformState,
   normalizePlatformState,
@@ -140,16 +140,10 @@ export function App() {
     useState<TeacherTab>('corrections');
   const [activeTopic, setActiveTopic] = useState<Topic | null>(null);
   const [showPlacementModal, setShowPlacementModal] = useState(false);
+  const [showTeacherLinkModal, setShowTeacherLinkModal] = useState(false);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
-  const [autoSyncStatus, setAutoSyncStatus] = useState<{
-    state: 'idle' | 'syncing' | 'synced' | 'error';
-    message?: string;
-    updatedAt?: string;
-  }>({ state: 'idle' });
-  const hasBootstrappedCloudRef = useRef(false);
-  const skipNextCloudPushRef = useRef(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
 
   const effectiveSupabase = useMemo(
@@ -161,6 +155,17 @@ export function App() {
     [state.cloudConfig.geminiApiKey],
   );
   const isCloudConfigured = Boolean(effectiveSupabase.url && effectiveSupabase.anonKey);
+
+  const { autoSyncStatus, skipNextCloudPushRef } = useCloudSyncController({
+    state,
+    setState,
+    isCloudConfigured,
+    supabaseUrl: effectiveSupabase.url,
+    supabaseAnonKey: effectiveSupabase.anonKey,
+    defaultState: DEFAULT_PLATFORM_STATE,
+    masterVocab: ALL_INITIAL_VOCABULARY,
+    onSupabaseUserHydrated: (authUser) => applySupabaseAuthUser(authUser, false),
+  });
 
   useEffect(() => {
     savePlatformState(state);
@@ -177,50 +182,6 @@ export function App() {
     mq.addEventListener?.('change', onChange);
     return () => mq.removeEventListener?.('change', onChange);
   }, [themeMode]);
-
-  // Bootstrap from Supabase & hydrate Supabase OAuth / Auth user on startup
-  useEffect(() => {
-    if (!isCloudConfigured || hasBootstrappedCloudRef.current) return;
-    hasBootstrappedCloudRef.current = true;
-
-    let cancelled = false;
-    void (async () => {
-      const pullRes = await pullStateFromCloud(
-        effectiveSupabase.url,
-        effectiveSupabase.anonKey,
-      );
-      if (!cancelled && pullRes.ok && pullRes.state) {
-        skipNextCloudPushRef.current = true;
-        setState((prev) => {
-          const merged = mergePlatformStates(prev, pullRes.state, 'remote');
-          return normalizePlatformState(
-            merged,
-            DEFAULT_PLATFORM_STATE,
-            ALL_INITIAL_VOCABULARY,
-          );
-        });
-        setAutoSyncStatus({
-          state: 'synced',
-          message: 'Dados sincronizados ao iniciar.',
-          updatedAt: new Date().toISOString(),
-        });
-      }
-
-      const authUser = await fetchCurrentSupabaseUser(state.cloudConfig);
-      if (!cancelled && authUser?.email) {
-        applySupabaseAuthUser(authUser, false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    isCloudConfigured,
-    effectiveSupabase.url,
-    effectiveSupabase.anonKey,
-    state.cloudConfig,
-  ]);
 
   const applySupabaseAuthUser = (
     authUser: SupabaseAuthUserInfo,
@@ -339,35 +300,6 @@ export function App() {
     });
   }, [isCloudConfigured, effectiveSupabase.url, effectiveSupabase.anonKey]);
 
-  // Background debounced sync to Supabase when state changes
-  useEffect(() => {
-    if (!isCloudConfigured) return;
-    if (skipNextCloudPushRef.current) {
-      skipNextCloudPushRef.current = false;
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setAutoSyncStatus((prev) => ({ ...prev, state: 'syncing' }));
-      void pushStateToCloud(state).then((res) => {
-        if (res.ok) {
-          setAutoSyncStatus({
-            state: 'synced',
-            message: 'Sincronizado automaticamente com a nuvem.',
-            updatedAt: res.syncedAt ?? new Date().toISOString(),
-          });
-        } else {
-          setAutoSyncStatus({
-            state: 'error',
-            message: res.message,
-          });
-        }
-      });
-    }, 2500);
-
-    return () => window.clearTimeout(timer);
-  }, [state, isCloudConfigured]);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
     window.setTimeout(() => {
@@ -429,16 +361,36 @@ export function App() {
     password: string;
     role: UserRole;
     classId?: string;
+    assignedTeacherId?: string;
+    enrollmentType?: StudentEnrollmentType;
   }): UserProfile => {
     const master = isMasterAdminEmail(payload.email);
+    const effectiveRole: UserRole = master ? 'teacher' : payload.role;
+    const id = `user-${Date.now()}`;
     return {
-      id: `user-${Date.now()}`,
+      id,
       name: payload.name,
       email: payload.email,
       password: hashPassword(payload.password),
-      role: master ? 'teacher' : payload.role,
+      role: effectiveRole,
       isMasterAdmin: master,
       classId: master ? undefined : payload.classId,
+      assignedTeacherId:
+        effectiveRole === 'student' ? payload.assignedTeacherId : undefined,
+      enrollmentType:
+        effectiveRole === 'student'
+          ? payload.enrollmentType ??
+            (payload.assignedTeacherId
+              ? 'vip'
+              : payload.classId
+                ? 'class'
+                : 'independent')
+          : undefined,
+      teacherInviteCode:
+        effectiveRole === 'teacher'
+          ? generateTeacherInviteCode(payload.name, id, payload.email)
+          : undefined,
+      unlinkedNoticePending: false,
       avatarColor: AVATAR_COLORS[state.users.length % AVATAR_COLORS.length],
       activeLanguage: 'en',
       dialectByLanguage: {
@@ -473,6 +425,8 @@ export function App() {
     password: string;
     role: UserRole;
     classId?: string;
+    assignedTeacherId?: string;
+    enrollmentType?: StudentEnrollmentType;
   }): Promise<{ ok: boolean; error?: string }> => {
     const master = isMasterAdminEmail(payload.email);
     const existing = state.users.find(
@@ -738,6 +692,17 @@ export function App() {
     responseText: string;
   }) => {
     if (!currentUser) return;
+    const linked =
+      currentUser.role === 'teacher' ||
+      Boolean(currentUser.assignedTeacherId || currentUser.classId);
+    if (!linked) {
+      showToast('Vincule-se a um professor para enviar redações para correção.');
+      setShowTeacherLinkModal(true);
+      return;
+    }
+    const targetTeacherId =
+      currentUser.assignedTeacherId ||
+      state.classes.find((c) => c.id === currentUser.classId)?.teacherId;
     const timestamp = new Date().toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -754,6 +719,7 @@ export function App() {
           studentId: currentUser.id,
           studentName: currentUser.name,
           classId: currentUser.classId,
+          teacherId: targetTeacherId,
           topicId: payload.topicId,
           topicTitle: payload.topicTitle,
           promptPt: payload.promptPt,
@@ -779,6 +745,17 @@ export function App() {
     autoPronunciationScore?: number;
   }) => {
     if (!currentUser) return;
+    const linked =
+      currentUser.role === 'teacher' ||
+      Boolean(currentUser.assignedTeacherId || currentUser.classId);
+    if (!linked) {
+      showToast('Vincule-se a um professor para enviar áudios para correção.');
+      setShowTeacherLinkModal(true);
+      return;
+    }
+    const targetTeacherId =
+      currentUser.assignedTeacherId ||
+      state.classes.find((c) => c.id === currentUser.classId)?.teacherId;
     const submissionId = `sub-s-${Date.now()}`;
     const cloudConfigSnapshot = state.cloudConfig;
     const timestamp = new Date().toLocaleString('pt-BR', {
@@ -798,6 +775,7 @@ export function App() {
           studentId: currentUser.id,
           studentName: currentUser.name,
           classId: currentUser.classId,
+          teacherId: targetTeacherId,
           topicId: payload.topicId,
           topicTitle: payload.topicTitle,
           promptPt: payload.promptPt,
@@ -973,6 +951,7 @@ export function App() {
           id: `class-${Date.now()}`,
           languageCode: 'en',
           name: payload.name,
+          teacherId: currentUser?.id,
           code,
           level: payload.level,
           schedule: payload.schedule,
@@ -1125,6 +1104,7 @@ export function App() {
     title: string;
     description: string;
     classId?: string;
+    studentId?: string;
     languageCode: LanguageCode;
     topicId?: string;
     dueDate: string;
@@ -1134,6 +1114,8 @@ export function App() {
       title: payload.title.trim(),
       description: payload.description.trim(),
       classId: payload.classId || undefined,
+      studentId: payload.studentId || undefined,
+      teacherId: currentUser?.id,
       languageCode: payload.languageCode,
       topicId: payload.topicId || undefined,
       dueDate: payload.dueDate,
@@ -1145,6 +1127,91 @@ export function App() {
       assignments: [newAssignment, ...(prev.assignments ?? [])],
     }));
     showToast(`Tarefa "${newAssignment.title}" enviada!`);
+  };
+
+  const handleLinkStudentToTeacher = (studentId: string, teacherId: string) => {
+    const teacher = state.users.find(
+      (u) => u.id === teacherId && u.role === 'teacher',
+    );
+    if (!teacher) return;
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === studentId
+          ? {
+              ...u,
+              assignedTeacherId: teacherId,
+              enrollmentType: 'vip',
+              unlinkedNoticePending: false,
+              unlinkedByTeacherName: undefined,
+            }
+          : u,
+      ),
+    }));
+    setShowTeacherLinkModal(false);
+    showToast(`Aluno vinculado ao(à) Prof. ${teacher.name}!`);
+  };
+
+  const handleUnlinkStudentFromTeacher = (studentId: string, bySelf = false) => {
+    const target = state.users.find((u) => u.id === studentId);
+    if (!target) return;
+    const unlinkedBy = currentUser?.name ?? state.teacherName;
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === studentId
+          ? {
+              ...u,
+              assignedTeacherId: undefined,
+              classId: undefined,
+              enrollmentType: 'independent',
+              unlinkedNoticePending: !bySelf,
+              unlinkedByTeacherName: bySelf ? undefined : unlinkedBy,
+            }
+          : u,
+      ),
+    }));
+    showToast(
+      bySelf
+        ? 'Você agora está no modo autônomo (sem vínculo docente).'
+        : `${target.name} foi desvinculado(a). O aluno será avisado no próximo login.`,
+    );
+  };
+
+  const handleConfirmIndependentMode = () => {
+    if (!currentUser) return;
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === currentUser.id
+          ? {
+              ...u,
+              assignedTeacherId: undefined,
+              classId: undefined,
+              enrollmentType: 'independent',
+              unlinkedNoticePending: false,
+              unlinkedByTeacherName: undefined,
+            }
+          : u,
+      ),
+    }));
+    setShowTeacherLinkModal(false);
+    showToast('Modo autônomo confirmado. Você pode se vincular quando quiser.');
+  };
+
+  const handleUpdateTeacherInviteCode = (teacherId: string, code: string) => {
+    const clean = code
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9-]/g, '');
+    if (clean.length < 4) return;
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === teacherId ? { ...u, teacherInviteCode: clean } : u,
+      ),
+    }));
+    showToast(`Código VIP atualizado para ${clean}!`);
   };
 
   const handleDeleteAssignment = (assignmentId: string) => {
@@ -1213,6 +1280,14 @@ export function App() {
     (c) => c.id === currentUser.classId,
   )?.name;
 
+  const teachersList = state.users.filter((u) => u.role === 'teacher');
+  const assignedTeacher = currentUser.assignedTeacherId
+    ? teachersList.find((t) => t.id === currentUser.assignedTeacherId)
+    : undefined;
+  const hasLinkedTeacher =
+    currentUser.role === 'teacher' ||
+    Boolean(currentUser.assignedTeacherId || currentUser.classId);
+
   const classmates = state.users.filter((u) => u.role === 'student');
 
   return (
@@ -1242,12 +1317,17 @@ export function App() {
           <LearningPath
             currentUser={currentUser}
             teacherName={state.teacherName}
+            assignedTeacherName={assignedTeacher?.name}
             activeCourse={activeCourse}
             classNameLabel={userClassName}
             topics={courseTopics}
             classmates={classmates}
             initialFilterLevel={pathFilterLevel}
             onOpenPlacementTest={() => setShowPlacementModal(true)}
+            onOpenTeacherLink={() => setShowTeacherLinkModal(true)}
+            onSelfUnlinkTeacher={() =>
+              handleUnlinkStudentFromTeacher(currentUser.id, true)
+            }
             onClaimDailyQuest={handleClaimDailyQuest}
             onChangeDailyGoal={(dailyGoalMinutes) =>
               updateCurrentUser((u) => ({ ...u, dailyGoalMinutes }))
@@ -1376,6 +1456,10 @@ export function App() {
               onToggleUserRole={handleToggleUserRole}
               onMoveUserClass={handleMoveUserClass}
               onDeleteUser={handleDeleteUser}
+              onLinkStudentToTeacher={handleLinkStudentToTeacher}
+              onUnlinkStudentFromTeacher={(studentId) =>
+                handleUnlinkStudentFromTeacher(studentId, false)
+              }
               onCreateAssignment={handleCreateAssignment}
               onDeleteAssignment={handleDeleteAssignment}
             />
@@ -1390,9 +1474,14 @@ export function App() {
                 totalBuiltinTopicsCount={ALL_BUILTIN_TOPICS.length}
                 autoSyncStatus={autoSyncStatus}
                 onUpdateTeacherAccessCode={handleUpdateTeacherAccessCode}
+                onUpdateTeacherInviteCode={handleUpdateTeacherInviteCode}
                 onToggleBlockUser={handleToggleBlockUser}
                 onToggleUserRole={handleToggleUserRole}
                 onMoveUserClass={handleMoveUserClass}
+                onLinkStudentToTeacher={handleLinkStudentToTeacher}
+                onUnlinkStudentFromTeacher={(studentId) =>
+                  handleUnlinkStudentFromTeacher(studentId, false)
+                }
                 onResetUserLocalPassword={handleResetUserLocalPassword}
                 onDeleteUser={handleDeleteUser}
                 onGoToTeacherStudio={() => setActiveView('teacher')}
@@ -1425,6 +1514,11 @@ export function App() {
               getLanguageCourse(activeTopic.languageCode ?? activeLanguage).dialects
             }
             studentName={currentUser.name}
+            hasLinkedTeacher={hasLinkedTeacher}
+            onRequestTeacherLink={() => {
+              setActiveTopic(null);
+              setShowTeacherLinkModal(true);
+            }}
             onChangeDialect={handleChangeDialect}
             onSubmitWriting={handleSubmitWriting}
             onSubmitSpeaking={handleSubmitSpeaking}
@@ -1434,6 +1528,21 @@ export function App() {
           />
         )}
       </Suspense>
+
+      <TeacherLinkModal
+        open={
+          currentUser.role === 'student' &&
+          (Boolean(currentUser.unlinkedNoticePending) || showTeacherLinkModal)
+        }
+        student={currentUser}
+        teachers={teachersList}
+        mandatoryPrompt={Boolean(currentUser.unlinkedNoticePending)}
+        onLinkToTeacher={(teacherId) =>
+          handleLinkStudentToTeacher(currentUser.id, teacherId)
+        }
+        onConfirmIndependent={handleConfirmIndependentMode}
+        onClose={() => setShowTeacherLinkModal(false)}
+      />
 
       {toastMessage && (
         <div className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6">

@@ -58,12 +58,14 @@ import type {
   Topic,
   UserProfile,
 } from '../types/learning';
+import { ConfirmDialog } from './ConfirmDialog';
 import { SkillBadge } from './SkillBadge';
 import { SkillRadar } from './SkillRadar';
 
 interface LearningPathProps {
   currentUser: UserProfile;
   teacherName: string;
+  assignedTeacherName?: string;
   activeCourse: LanguageCourse;
   classNameLabel?: string;
   topics: Topic[];
@@ -77,6 +79,8 @@ interface LearningPathProps {
   reviewedSubmissions: StudentSubmission[];
   assignments?: TeacherAssignment[];
   onGoToTeacher?: () => void;
+  onOpenTeacherLink?: () => void;
+  onSelfUnlinkTeacher?: () => void;
 }
 
 const TOPIC_ICONS = {
@@ -162,6 +166,7 @@ function buildDailyQuests(q: DailyQuestsProgress) {
 export function LearningPath({
   currentUser,
   teacherName,
+  assignedTeacherName,
   activeCourse,
   classNameLabel,
   topics,
@@ -175,7 +180,10 @@ export function LearningPath({
   reviewedSubmissions,
   assignments = [],
   onGoToTeacher,
+  onOpenTeacherLink,
+  onSelfUnlinkTeacher,
 }: LearningPathProps) {
+  const [confirmUnlinkOpen, setConfirmUnlinkOpen] = useState(false);
   const [selectedLevel, setSelectedLevel] =
     useState<'ALL' | CEFRLevel>(initialFilterLevel);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(() => {
@@ -236,6 +244,32 @@ export function LearningPath({
                 <span className="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-bold text-emerald-100">
                   {classNameLabel}
                 </span>
+              )}
+              {currentUser.role === 'student' && assignedTeacherName && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/25 px-3 py-1 text-xs font-bold text-amber-100">
+                  <span>
+                    {currentUser.enrollmentType === 'vip' ? '⭐ VIP · ' : 'Prof. '}
+                    {assignedTeacherName}
+                  </span>
+                  {onSelfUnlinkTeacher && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmUnlinkOpen(true)}
+                      className="ml-1 underline opacity-85 hover:opacity-100 cursor-pointer"
+                    >
+                      Desvincular
+                    </button>
+                  )}
+                </span>
+              )}
+              {currentUser.role === 'student' && !assignedTeacherName && !currentUser.classId && onOpenTeacherLink && (
+                <button
+                  type="button"
+                  onClick={onOpenTeacherLink}
+                  className="rounded-full bg-amber-300 px-3 py-1 text-xs font-extrabold text-amber-950 hover:bg-amber-200 cursor-pointer"
+                >
+                  Sem professor · Vincular agora
+                </button>
               )}
               {currentUser.recommendedLevel && activeCourse.code === 'en' && (
                 <span className="rounded-full bg-amber-300 px-2.5 py-0.5 font-mono text-[11px] font-extrabold text-amber-950">
@@ -382,6 +416,36 @@ export function LearningPath({
           </div>
         )}
       </section>
+
+      {/* Unlinked / Independent student restriction banner */}
+      {currentUser.role === 'student' &&
+        !assignedTeacherName &&
+        !currentUser.classId && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+              <div>
+                <p className="font-bold">
+                  Modo autônomo ativo — sem professor ou turma vinculada
+                </p>
+                <p className="mt-0.5 text-[11px] text-amber-900">
+                  Você tem acesso livre às unidades, Tutor IA e Revisão SM-2, mas
+                  envios de Speaking, Writing e tarefas VIP que exigem validação
+                  docente ficam restritos até vincular-se a um professor.
+                </p>
+              </div>
+            </div>
+            {onOpenTeacherLink && (
+              <button
+                type="button"
+                onClick={onOpenTeacherLink}
+                className="rounded-xl bg-amber-700 px-3.5 py-2 text-xs font-bold text-white hover:bg-amber-800 cursor-pointer"
+              >
+                Vincular a um professor
+              </button>
+            )}
+          </div>
+        )}
 
       {/* Main 2-column grid */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
@@ -582,7 +646,10 @@ export function LearningPath({
           {assignments.filter(
             (a) =>
               a.languageCode === activeCourse.code &&
-              (!a.classId || a.classId === currentUser.classId || currentUser.role === 'teacher'),
+              ((!a.classId && !a.studentId) ||
+                (a.classId && a.classId === currentUser.classId) ||
+                (a.studentId && a.studentId === currentUser.id) ||
+                currentUser.role === 'teacher'),
           ).length > 0 && (
             <div className="rounded-2xl border border-blue-200/80 bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
@@ -596,7 +663,10 @@ export function LearningPath({
                   .filter(
                     (a) =>
                       a.languageCode === activeCourse.code &&
-                      (!a.classId || a.classId === currentUser.classId || currentUser.role === 'teacher'),
+                      ((!a.classId && !a.studentId) ||
+                        (a.classId && a.classId === currentUser.classId) ||
+                        (a.studentId && a.studentId === currentUser.id) ||
+                        currentUser.role === 'teacher'),
                   )
                   .slice(0, 4)
                   .map((task) => {
@@ -830,6 +900,20 @@ export function LearningPath({
         </aside>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmUnlinkOpen}
+        title="Desvincular-se do professor atual?"
+        description={`Você deixará de estar vinculado(a) a ${assignedTeacherName ?? 'seu professor atual'}.`}
+        warningBox="Sem vínculo com um professor ou turma, atividades que exigem validação docente (envio de áudio Speaking para correção, Writing avaliado e tarefas VIP) ficarão bloqueadas até você se vincular novamente."
+        confirmLabel="Confirmar desvinculação"
+        tone="warning"
+        onConfirm={() => {
+          setConfirmUnlinkOpen(false);
+          onSelfUnlinkTeacher?.();
+        }}
+        onCancel={() => setConfirmUnlinkOpen(false)}
+      />
     </div>
   );
 }

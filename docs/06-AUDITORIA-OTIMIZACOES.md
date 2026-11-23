@@ -1,6 +1,6 @@
-# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v2.1.0`)
+# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v2.2.0`)
 
-Relatório técnico da auditoria pós-`v2.1.0` do **FluentBridge Academy**, medindo o bundle real após a expansão para **5 idiomas completos (`194` unidades e `144` tabelas)**, validando segurança, Dark Mode/responsividade, qualidade de voz EN/ES/FR/IT/DE e listando os próximos pontos de otimização.
+Relatório técnico da auditoria pós-`v2.2.0` do **FluentBridge Academy**, validando o sistema de **Alunos Individuais (VIP)**, **Fase 10** (Rate-Limit Edge, modularização e schema relacional), bundle em **5 idiomas (`194` unidades e `144` tabelas)** e segurança (`DIST_LEAK=CLEAN` + `19/19` testes Vitest).
 
 ---
 

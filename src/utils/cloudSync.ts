@@ -34,8 +34,15 @@ create table if not exists public.profiles (
   full_name text not null,
   email text not null,
   role text not null check (role in ('teacher', 'student')) default 'student',
-  active_language text not null default 'en',
-  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR"}'::jsonb,
+  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de')),
+  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE"}'::jsonb,
+  assigned_teacher_id uuid references public.profiles(id) on delete set null,
+  enrollment_type text not null default 'independent' check (enrollment_type in ('class','vip','independent')),
+  teacher_invite_code text unique,
+  unlinked_notice_pending boolean not null default false,
+  unlinked_by_teacher_name text,
+  blocked boolean not null default false,
+  blocked_reason text,
   avatar_color text not null default '#116DFF',
   created_at timestamptz not null default now()
 );
@@ -418,6 +425,11 @@ function mergeUserProfiles(
     reminderTime: primary.reminderTime ?? secondary.reminderTime,
     blocked: primary.isMasterAdmin ? false : (primary.blocked ?? secondary.blocked),
     blockedReason: primary.isMasterAdmin ? undefined : (primary.blockedReason ?? secondary.blockedReason),
+    assignedTeacherId: primary.assignedTeacherId,
+    enrollmentType: primary.enrollmentType ?? secondary.enrollmentType,
+    teacherInviteCode: primary.teacherInviteCode ?? secondary.teacherInviteCode,
+    unlinkedNoticePending: primary.unlinkedNoticePending,
+    unlinkedByTeacherName: primary.unlinkedByTeacherName,
     todayMinutes: Math.max(localUser.todayMinutes ?? 0, remoteUser.todayMinutes ?? 0),
     skillScores: {
       listening: Math.max(
@@ -1101,5 +1113,71 @@ export async function signOutSupabase(cloudConfig?: CloudConfig): Promise<void> 
     await client.auth.signOut();
   } catch {
     // Ignore sign-out errors offline
+  }
+}
+
+/**
+ * Fase 10: Sincroniza progressivamente tabelas relacionais (profiles & student_progress)
+ * quando há sessão JWT autenticada no Supabase, sem quebrar o fallback offline/JSONB.
+ */
+export async function syncRelationalTablesBestEffort(
+  state: PlatformState,
+  supabaseUrl?: string,
+  supabaseAnonKey?: string,
+): Promise<void> {
+  const cfg = getEffectiveSupabaseConfig({
+    supabaseUrl: supabaseUrl ?? '',
+    supabaseAnonKey: supabaseAnonKey ?? '',
+    geminiApiKey: '',
+  });
+  if (!cfg.url || !cfg.anonKey) return;
+
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data: sessionData } = await client.auth.getSession();
+    const authUser = sessionData.session?.user;
+    if (!authUser?.id || !authUser.email) return;
+
+    const localUser = state.users.find(
+      (u) => u.email.toLowerCase() === authUser.email?.toLowerCase(),
+    );
+    if (!localUser) return;
+
+    await client.from('profiles').upsert({
+      id: authUser.id,
+      full_name: localUser.name,
+      email: localUser.email,
+      role: localUser.role,
+      active_language: localUser.activeLanguage ?? 'en',
+      dialect_by_language: localUser.dialectByLanguage ?? {
+        en: 'en-US',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        it: 'it-IT',
+        de: 'de-DE',
+      },
+      enrollment_type: localUser.enrollmentType ?? 'independent',
+      teacher_invite_code: localUser.teacherInviteCode ?? null,
+      unlinked_notice_pending: Boolean(localUser.unlinkedNoticePending),
+      unlinked_by_teacher_name: localUser.unlinkedByTeacherName ?? null,
+      blocked: Boolean(localUser.blocked),
+      blocked_reason: localUser.blockedReason ?? null,
+    });
+
+    await client.from('student_progress').upsert({
+      user_id: authUser.id,
+      language_code: localUser.activeLanguage ?? 'en',
+      xp: localUser.xp ?? 0,
+      streak_days: localUser.streakDays ?? 1,
+      daily_goal_minutes: localUser.dailyGoalMinutes ?? 15,
+      today_minutes: localUser.todayMinutes ?? 0,
+      recommended_level: localUser.recommendedLevel ?? null,
+      completed_topic_ids: localUser.completedTopicIds ?? [],
+      skill_scores: localUser.skillScores,
+      daily_quests: localUser.dailyQuests,
+      updated_at: new Date().toISOString(),
+    });
+  } catch {
+    // Non-blocking best-effort relational sync
   }
 }

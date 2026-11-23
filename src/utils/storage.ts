@@ -32,6 +32,18 @@ export function verifyPassword(input: string, stored: string): boolean {
   return input === cleanStored;
 }
 
+export function generateTeacherInviteCode(name: string, id: string, email?: string): string {
+  if (email && isMasterAdminEmail(email)) return 'PROF-SILAS';
+  const cleanFirst = (name || 'PROF')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .slice(0, 6) || 'PROF';
+  const suffix = (id || '01').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-4) || '01';
+  return `PROF-${cleanFirst}-${suffix}`;
+}
+
 const LEGACY_DEMO_USER_IDS = new Set([
   'user-teacher-1',
   'user-student-mariana',
@@ -84,17 +96,33 @@ export function normalizePlatformState(
 
   const rawMergedUsers: UserProfile[] =
     cleanedRawUsers.length > 0
-      ? cleanedRawUsers.map((u) => ({
-          ...u,
-          name:
-            isMasterAdminEmail(u.email) &&
-            (u.name === 'Silas (Admin Mestre)' || !u.name.trim())
-              ? 'Prof. Silas'
-              : u.name,
-          password: hashPassword(u.password),
-          isMasterAdmin: u.isMasterAdmin || isMasterAdminEmail(u.email),
-          role: isMasterAdminEmail(u.email) ? 'teacher' : u.role,
-          activeLanguage: u.activeLanguage ?? 'en',
+      ? cleanedRawUsers.map((u) => {
+          const resolvedRole = isMasterAdminEmail(u.email) ? 'teacher' : u.role;
+          const resolvedEnrollment =
+            resolvedRole === 'student'
+              ? u.enrollmentType ??
+                (u.classId
+                  ? 'class'
+                  : u.assignedTeacherId
+                    ? 'vip'
+                    : 'independent')
+              : undefined;
+          return {
+            ...u,
+            name:
+              isMasterAdminEmail(u.email) &&
+              (u.name === 'Silas (Admin Mestre)' || !u.name.trim())
+                ? 'Prof. Silas'
+                : u.name,
+            password: hashPassword(u.password),
+            isMasterAdmin: u.isMasterAdmin || isMasterAdminEmail(u.email),
+            role: resolvedRole,
+            teacherInviteCode:
+              resolvedRole === 'teacher'
+                ? (u.teacherInviteCode?.trim() || generateTeacherInviteCode(u.name, u.id, u.email))
+                : u.teacherInviteCode,
+            enrollmentType: resolvedEnrollment,
+            activeLanguage: u.activeLanguage ?? 'en',
           dialectByLanguage: {
             en: u.accent ?? 'en-US',
             es: 'es-ES',
@@ -124,7 +152,8 @@ export function normalizePlatformState(
               ? u.dailyQuests.claimedQuestIds
               : [],
           },
-        }))
+          };
+        })
       : defaults.users.map((u) => ({
           ...u,
           password: hashPassword(u.password),

@@ -68,12 +68,13 @@ Este roadmap registra todas as entregas já concluídas do **FluentBridge Academ
 
 ---
 
-## Próximo Roadmap (`v2.1.0` → `v3.0.0`)
+## Próximo Roadmap (`v2.2.0` → `v3.0.0`)
 
-### Fase 10 — Arquitetura Relacional Pura, Segurança Server-Side & Modularização (`v2.1.0`)
-- [ ] **Migração Completa para Tabelas Relacionais Supabase (`supabase_schema.sql`)**: substituir o snapshot único `fb_school_state` por leituras/escritas autenticadas por JWT em `profiles`, `classes`, `student_progress`, `submissions`, `assignments` e `certificates` com RLS estrito.
-- [ ] **Modularização de `LessonPlayer.tsx` (`2.174` linhas) e `TeacherStudio.tsx` (`2.133` linhas)**: dividir em subcomponentes (`src/components/steps/*` e `src/components/teacher/*`) e hooks dedicados (`useCloudSyncController`), mantendo cada arquivo abaixo de 400 linhas.
-- [ ] **Rate-Limit & Telemetria no Cloudflare Worker**: cotas diárias por usuário autenticado em `/api/gemini-tutor`, `/api/tts` e `/api/stt` usando Workers KV / Durable Objects e headers de observabilidade.
+### Fase 10 — Arquitetura Relacional, Alunos VIP, Modularização & Rate-Limit (`v2.2.0`) — CONCLUÍDA
+- [x] **Schema & Sync Relacional Supabase (`supabase_schema.sql`, `cloudSync.ts`)**: suporte aos **5 idiomas (`en, es, fr, it, de`)**, colunas VIP/desvinculação em `public.profiles`, tabela `public.assignments` com políticas RLS e `syncRelationalTablesBestEffort`.
+- [x] **Sistema Completo de Alunos VIP & Confirmações (`TeacherLinkModal.tsx`, `VipStudentsPanel.tsx`, `ConfirmDialog.tsx`)**: vinculação por `teacherInviteCode` (`PROF-SILAS`), tarefas individuais (`studentId`), fila de correções filtrada por professor, controle global pelo Admin Mestre e prompt obrigatório no próximo login caso o aluno seja desvinculado.
+- [x] **Modularização de Hooks & Componentes**: extração de `useCloudSyncController.ts`, `Phase8StepsView.tsx` e `VipStudentsPanel.tsx`.
+- [x] **Rate-Limit & Telemetria Multi-Idioma no Cloudflare Worker (`worker.js`)**: cotas por IP (`120/min` `/api/tts`, `30/min` `/api/stt` e `/api/gemini-tutor`) e `/health` reportando `version: "2.2.0"` + `supportedLanguages`.
 
 ### Fase 11 — Inteligência Pedagógica, Lazy Curricular Real & Engajamento Social (`v2.5.0`)
 - [ ] **Importação Dinâmica Real dos Cursos por Idioma**: carregar `spanishCourse.ts` e `frenchCourse.ts` via `import()` apenas quando o aluno selecionar ES/FR, zerando o download de outros idiomas no boot inicial.

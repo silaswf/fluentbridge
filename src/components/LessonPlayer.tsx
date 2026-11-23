@@ -52,12 +52,15 @@ import {
 } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
 import { SkillBadge, TIP_CATEGORY_META } from './SkillBadge';
+import { Phase8StepsView } from './steps/Phase8StepsView';
 
 interface LessonPlayerProps {
   topic: Topic;
   dialectCode: string;
   dialects: LanguageDialect[];
   studentName: string;
+  hasLinkedTeacher?: boolean;
+  onRequestTeacherLink?: () => void;
   onChangeDialect: (dialectCode: string) => void;
   onSubmitWriting: (payload: {
     topicId: string;
@@ -185,6 +188,8 @@ export function LessonPlayer({
   dialectCode,
   dialects,
   studentName,
+  hasLinkedTeacher = true,
+  onRequestTeacherLink,
   onChangeDialect,
   onSubmitWriting,
   onSubmitSpeaking,
@@ -1594,19 +1599,39 @@ export function LessonPlayer({
                     </button>
                   </div>
                   <audio controls src={recordedAudioUrl} className="h-10 w-full" />
-                  <button
-                    type="button"
-                    disabled={sentClipToTeacher}
-                    onClick={() => void handleSendAudioClipToTeacher()}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:bg-emerald-600 cursor-pointer"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    <span>
-                      {sentClipToTeacher
-                        ? 'Áudio enviado para o Professor corrigir!'
-                        : 'Enviar áudio para o Professor avaliar'}
-                    </span>
-                  </button>
+                  {hasLinkedTeacher ? (
+                    <button
+                      type="button"
+                      disabled={sentClipToTeacher}
+                      onClick={() => void handleSendAudioClipToTeacher()}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:bg-emerald-600 cursor-pointer"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      <span>
+                        {sentClipToTeacher
+                          ? 'Áudio enviado para o Professor corrigir!'
+                          : 'Enviar áudio para o Professor avaliar'}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
+                      <p className="font-bold">
+                        Envio ao professor restrito (sem professor vinculado).
+                      </p>
+                      <p className="mt-0.5 text-[11px]">
+                        Sua gravação e nota automática funcionam normalmente, mas para enviar ao professor é necessário se vincular.
+                      </p>
+                      {onRequestTeacherLink && (
+                        <button
+                          type="button"
+                          onClick={onRequestTeacherLink}
+                          className="mt-2 rounded-lg bg-amber-600 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-amber-700 cursor-pointer"
+                        >
+                          Vincular a um professor
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1756,19 +1781,36 @@ export function LessonPlayer({
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <button
-                  type="button"
-                  disabled={freeWordCount < 3}
-                  onClick={() => handleSendFreeWriting(true)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  <span>
-                    {submittedToTeacher
-                      ? 'Enviado para o Professor!'
-                      : 'Enviar resposta para o Professor corrigir'}
-                  </span>
-                </button>
+                {hasLinkedTeacher ? (
+                  <button
+                    type="button"
+                    disabled={freeWordCount < 3}
+                    onClick={() => handleSendFreeWriting(true)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    <span>
+                      {submittedToTeacher
+                        ? 'Enviado para o Professor!'
+                        : 'Enviar resposta para o Professor corrigir'}
+                    </span>
+                  </button>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] text-amber-950">
+                    <span className="font-semibold">
+                      Correção docente restrita sem professor vinculado.
+                    </span>
+                    {onRequestTeacherLink && (
+                      <button
+                        type="button"
+                        onClick={onRequestTeacherLink}
+                        className="rounded-lg bg-amber-600 px-2.5 py-1 font-bold text-white hover:bg-amber-700 cursor-pointer"
+                      >
+                        Vincular professor
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -1800,212 +1842,23 @@ export function LessonPlayer({
             </div>
           )}
 
-          {/* PHASE 8: DICTATION STEP */}
-          {currentStep.type === 'dictation' && (
-            <div className="animate-fade-up space-y-5 rounded-3xl border border-indigo-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <div>
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {currentStep.promptPt}
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Ouça em velocidade normal ou 0.75x e digite exatamente o que foi dito.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
-                <DualAudioButtons
-                  text={currentStep.audioText}
-                  languageCode={topic.languageCode}
-                  showSlow
-                  size="md"
-                />
-                <span className="text-xs font-semibold text-indigo-800">
-                  Atalho: pressione R para repetir
-                </span>
-              </div>
-
-              <textarea
-                rows={3}
-                disabled={checkedStatus !== 'idle'}
-                value={dictationText}
-                onChange={(e) => setDictationText(e.target.value)}
-                placeholder="Digite aqui exatamente a frase ouvida..."
-                className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              />
-
-              {checkedStatus !== 'idle' && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
-                  <p className="font-bold text-slate-800">
-                    Frase exata ({evaluatePronunciation(currentStep.audioText, dictationText).score}% precisão):
-                  </p>
-                  <p className="font-display text-sm font-extrabold text-slate-900">
-                    “{currentStep.audioText}”
-                  </p>
-                  <p className="text-slate-600">{currentStep.translationPt}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* PHASE 8: MINIMAL PAIRS STEP */}
-          {currentStep.type === 'minimal_pairs' && (
-            <div className="animate-fade-up space-y-5 rounded-3xl border border-rose-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <div>
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {currentStep.promptPt}
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Ouça a palavra com atenção e identifique qual som foi pronunciado (contraste fonético).
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50/70 p-4">
-                <DualAudioButtons
-                  text={currentStep.targetWord}
-                  languageCode={topic.languageCode}
-                  showSlow
-                  size="md"
-                />
-                <span className="font-mono text-xs font-bold text-rose-800">
-                  {currentStep.targetIpa} vs {currentStep.contrastIpa}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {currentStep.options.map((opt, idx) => {
-                  const isPicked = selectedOption === idx;
-                  const isRight = idx === currentStep.correctIndex;
-                  let style =
-                    'border-slate-200 bg-white hover:border-rose-400 hover:bg-rose-50/50';
-                  if (checkedStatus === 'idle' && isPicked) {
-                    style = 'border-rose-600 bg-rose-50 text-rose-950 ring-2 ring-rose-200';
-                  } else if (checkedStatus !== 'idle') {
-                    if (isRight) {
-                      style = 'border-emerald-500 bg-emerald-50 text-emerald-950';
-                    } else if (isPicked && !isRight) {
-                      style = 'border-rose-400 bg-rose-50 text-rose-900 animate-shake';
-                    }
-                  }
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      disabled={checkedStatus !== 'idle'}
-                      onClick={() => setSelectedOption(idx)}
-                      className={`rounded-2xl border p-4 text-left transition cursor-pointer disabled:cursor-default ${style}`}
-                    >
-                      <p className="font-display text-base font-extrabold text-slate-900">
-                        {opt.word}
-                      </p>
-                      <p className="mt-0.5 font-mono text-xs text-slate-500">{opt.ipa}</p>
-                      <p className="mt-1 text-xs font-semibold text-slate-600">
-                        {opt.meaningPt}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* PHASE 8: MULTI-VOICE STORY STEP */}
-          {currentStep.type === 'story' && (
-            <div className="animate-fade-up space-y-5 rounded-3xl border border-sky-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-lg font-extrabold text-slate-900">
-                    {currentStep.title}
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-600">{currentStep.settingPt}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => playStoryLineAt(currentStep.lines, 0, true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
-                  >
-                    <Volume2 className="h-3.5 w-3.5" />
-                    <span>Ouvir diálogo completo</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStoryShowTranslations((v) => !v)}
-                    className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
-                  >
-                    {storyShowTranslations ? (
-                      <EyeOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <Eye className="h-3.5 w-3.5" />
-                    )}
-                    <span>{storyShowTranslations ? 'Ocultar PT' : 'Traduzir PT'}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                {currentStep.lines.map((line, lIdx) => {
-                  const isActive = storyActiveLine === lIdx;
-                  return (
-                    <div
-                      key={lIdx}
-                      onClick={() => playStoryLineAt(currentStep.lines, lIdx, false)}
-                      className={`rounded-xl border p-3 transition cursor-pointer ${
-                        isActive
-                          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                          : 'border-slate-200 bg-white hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-extrabold text-blue-700 uppercase">
-                          {line.speaker} · {line.voice === 'male' ? 'Voz Masculina' : 'Voz Feminina'}
-                        </span>
-                        <Volume2 className="h-3.5 w-3.5 text-blue-600" />
-                      </div>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">
-                        {line.text}
-                      </p>
-                      {storyShowTranslations && (
-                        <p className="mt-1 text-xs text-slate-600">
-                          {line.translationPt}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="space-y-2.5">
-                <p className="text-sm font-bold text-slate-900">{currentStep.question}</p>
-                <div className="space-y-2">
-                  {currentStep.options.map((opt, idx) => {
-                    const isPicked = selectedOption === idx;
-                    const isRight = idx === currentStep.correctIndex;
-                    let style =
-                      'border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/50';
-                    if (checkedStatus === 'idle' && isPicked) {
-                      style = 'border-blue-600 bg-blue-50 text-blue-900 ring-2 ring-blue-200';
-                    } else if (checkedStatus !== 'idle') {
-                      if (isRight) {
-                        style = 'border-emerald-500 bg-emerald-50 text-emerald-950';
-                      } else if (isPicked && !isRight) {
-                        style = 'border-rose-400 bg-rose-50 text-rose-900 animate-shake';
-                      }
-                    }
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        disabled={checkedStatus !== 'idle'}
-                        onClick={() => setSelectedOption(idx)}
-                        className={`w-full rounded-2xl border p-3.5 text-left text-xs font-semibold transition sm:text-sm cursor-pointer disabled:cursor-default ${style}`}
-                      >
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+          {/* PHASE 8: DICTATION, MINIMAL PAIRS & MULTI-VOICE STORY */}
+          {(currentStep.type === 'dictation' ||
+            currentStep.type === 'minimal_pairs' ||
+            currentStep.type === 'story') && (
+            <Phase8StepsView
+              currentStep={currentStep}
+              languageCode={topic.languageCode}
+              checkedStatus={checkedStatus}
+              dictationText={dictationText}
+              setDictationText={setDictationText}
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              storyShowTranslations={storyShowTranslations}
+              setStoryShowTranslations={setStoryShowTranslations}
+              storyActiveLine={storyActiveLine}
+              playStoryLineAt={playStoryLineAt}
+            />
           )}
         </div>
       </main>

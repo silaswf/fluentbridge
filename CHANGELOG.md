@@ -4,6 +4,22 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v2.2.0`] — 2026-11-23
+### Vinculação Individual / VIP (Aluno ↔ Professor), Confirmações Obrigatórias & Fase 10
+- **Sistema Completo de Alunos Individuais (VIP) & Vinculação Docente (`AuthScreen.tsx`, `TeacherLinkModal.tsx`, `VipStudentsPanel.tsx`, `AdminPanel.tsx`, `App.tsx`):**
+  - **Cadastro em 3 modos para Alunos (`AuthScreen.tsx`)**: entrar por **Turma (`classId`)**, vincular-se como **Aluno VIP (`assignedTeacherId`)** usando o código individual do professor (ex.: `PROF-SILAS`), ou seguir no **Modo Autônomo (`independent`)** mediante leitura e confirmação explícita do aviso de restrição.
+  - **Gestão Docente VIP (`src/components/teacher/VipStudentsPanel.tsx`)**: professores visualizam/copiam seu `teacherInviteCode`, filtram alunos (`Meus vinculados`, `Sem professor`, `Todos`), vinculam/desvinculam alunos VIP e enviam tarefas individuais (`studentId`) nos 5 idiomas (`EN/ES/FR/IT/DE`). A fila de correções (`TeacherStudio.tsx`) filtra os envios por professor responsável (enquanto o Admin Mestre visualiza tudo).
+  - **Controle Global no Admin Mestre (`AdminPanel.tsx`)**: `silaswf@gmail.com` pode editar o código VIP de qualquer professor e vincular, transferir ou desvincular qualquer aluno de um professor.
+  - **Desvinculação com Aviso no Próximo Login (`TeacherLinkModal.tsx`, `LearningPath.tsx`, `LessonPlayer.tsx`)**: quando um professor ou admin desvincula um aluno (`unlinkedNoticePending: true`), no próximo login o aluno é automaticamente convidado a escolher/digitar o código de um novo professor ou confirmar que deseja seguir sem professor — com aviso explícito de que envios de Speaking, Writing avaliado e tarefas VIP ficam restritos até nova vinculação.
+  - **Confirmações Explícitas (`ConfirmDialog.tsx`)**: caixas de confirmação padronizadas para todas as ações sensíveis (vincular/desvincular aluno VIP, auto-desvinculação na trilha, alteração de cargo, bloqueio/liberação, exclusão de usuário, exclusão de turma e exclusão de tarefa).
+- **Fase 10 Concluída (Arquitetura Relacional, Modularização & Rate-Limit Edge):**
+  - **Schema & Sync Relacional (`supabase_schema.sql`, `cloudSync.ts`)**: suporte aos **5 idiomas (`en, es, fr, it, de`)**, colunas VIP (`assigned_teacher_id`, `enrollment_type`, `teacher_invite_code`, `unlinked_notice_pending`, `unlinked_by_teacher_name`), tabela `public.assignments` com RLS e `syncRelationalTablesBestEffort`.
+  - **Modularização de Hooks & Componentes**: extração de `src/hooks/useCloudSyncController.ts`, `src/components/steps/Phase8StepsView.tsx` e `src/components/teacher/VipStudentsPanel.tsx`.
+  - **Rate-Limit & Telemetria no Worker (`cloudflare-worker/worker.js`)**: janelas por IP (`120/min` em `/api/tts`, `30/min` em `/api/stt` e `/api/gemini-tutor`) e `/health` reportando `version: "2.2.0"` e `supportedLanguages`.
+- **Qualidade Validada (`v2.2.0`):** **`19/19` testes Vitest** aprovados (`6` suítes), **`0` erros TypeScript** e **`DIST_LEAK=CLEAN`**.
+
+---
+
 ## [`v2.1.0`] — 2026-11-23
 ### 5 Idiomas Completos (EN/ES/FR/IT/DE), 194 Unidades CEFR, 144 Tabelas & Vozes Neurais Gemini
 - **Expansão Completa de Espanhol & Francês (`36` unidades + `28` tabelas cada):**

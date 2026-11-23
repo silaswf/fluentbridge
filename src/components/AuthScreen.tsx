@@ -15,7 +15,12 @@ import {
   MASTER_ADMIN_EMAIL,
 } from '../config/appConfig';
 import { verifyPassword } from '../utils/storage';
-import type { ClassGroup, UserProfile, UserRole } from '../types/learning';
+import type {
+  ClassGroup,
+  StudentEnrollmentType,
+  UserProfile,
+  UserRole,
+} from '../types/learning';
 
 interface AuthScreenProps {
   schoolName: string;
@@ -36,6 +41,8 @@ interface AuthScreenProps {
     password: string;
     role: UserRole;
     classId?: string;
+    assignedTeacherId?: string;
+    enrollmentType?: StudentEnrollmentType;
   }) => Promise<{ ok: boolean; error?: string }> | { ok: boolean; error?: string };
 }
 
@@ -58,6 +65,9 @@ export function AuthScreen({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [classCode, setClassCode] = useState(classes[0]?.code ?? '');
+  const [studentLinkMode, setStudentLinkMode] = useState<StudentEnrollmentType>('class');
+  const [vipTeacherCode, setVipTeacherCode] = useState('');
+  const [confirmNoTeacher, setConfirmNoTeacher] = useState(false);
   const [teacherCode, setTeacherCode] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -147,19 +157,53 @@ export function AuthScreen({
     }
 
     let matchedClassId: string | undefined;
-    if (normalizedRole === 'student' && classCode.trim()) {
-      const matched = classes.find(
-        (c) => c.code.toLowerCase() === classCode.trim().toLowerCase(),
-      );
-      if (!matched) {
+    let matchedTeacherId: string | undefined;
+    let resolvedEnrollmentType: StudentEnrollmentType | undefined;
+
+    if (normalizedRole === 'student') {
+      resolvedEnrollmentType = studentLinkMode;
+      if (studentLinkMode === 'class') {
+        if (!classCode.trim()) {
+          setError('Informe o código da turma ou selecione "Aluno VIP" / "Sem vínculo".');
+          return;
+        }
+        const matched = classes.find(
+          (c) => c.code.toLowerCase() === classCode.trim().toLowerCase(),
+        );
+        if (!matched) {
+          setError(
+            `Código de turma "${classCode}" não encontrado. Use um código válido (ex: ${classes
+              .map((c) => c.code)
+              .join(', ')}) ou escolha outra opção.`,
+          );
+          return;
+        }
+        matchedClassId = matched.id;
+        matchedTeacherId = matched.teacherId ?? users.find((u) => u.role === 'teacher')?.id;
+      } else if (studentLinkMode === 'vip') {
+        const cleanVip = vipTeacherCode.trim().toUpperCase();
+        if (!cleanVip) {
+          setError('Informe o código de vinculação do professor (ex: PROF-SILAS).');
+          return;
+        }
+        const matchedTeacher = users.find(
+          (u) =>
+            u.role === 'teacher' &&
+            (u.teacherInviteCode ?? '').toUpperCase() === cleanVip,
+        );
+        if (!matchedTeacher) {
+          setError(
+            `Código de professor "${cleanVip}" não encontrado. Peça o código ao seu professor ou selecione uma turma.`,
+          );
+          return;
+        }
+        matchedTeacherId = matchedTeacher.id;
+      } else if (!confirmNoTeacher) {
         setError(
-          `Código de turma "${classCode}" não encontrado. Use um código válido (ex: ${classes
-            .map((c) => c.code)
-            .join(', ')}) ou deixe em branco.`,
+          'Confirme na caixa de seleção que entende as restrições de estudar sem professor vinculado.',
         );
         return;
       }
-      matchedClassId = matched.id;
     }
 
     setIsSubmitting(true);
@@ -169,6 +213,8 @@ export function AuthScreen({
       password,
       role: normalizedRole,
       classId: matchedClassId,
+      assignedTeacherId: matchedTeacherId,
+      enrollmentType: resolvedEnrollmentType,
     });
     setIsSubmitting(false);
     if (!res.ok && res.error) {
@@ -469,28 +515,94 @@ export function AuthScreen({
               </div>
 
               {role === 'student' && !isMasterAdminEmail(email) && (
-                <div>
+                <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5">
                   <label className="text-xs font-bold text-slate-700">
-                    Código da Turma (opcional)
+                    Vínculo de Acompanhamento Docente
                   </label>
-                  <input
-                    value={classCode}
-                    onChange={(e) => setClassCode(e.target.value.toUpperCase())}
-                    placeholder="Ex: TURMA-A1, TURMA-B1, VIP-2026"
-                    className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2 font-mono text-sm uppercase focus:border-blue-500 focus:outline-none"
-                  />
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {classes.map((c) => (
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(
+                      [
+                        { id: 'class', label: 'Turma' },
+                        { id: 'vip', label: 'Aluno VIP' },
+                        { id: 'independent', label: 'Sem vínculo' },
+                      ] as const
+                    ).map((opt) => (
                       <button
-                        key={c.id}
+                        key={opt.id}
                         type="button"
-                        onClick={() => setClassCode(c.code)}
-                        className="rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
+                        onClick={() => {
+                          setStudentLinkMode(opt.id);
+                          setError('');
+                        }}
+                        className={`rounded-xl py-2 text-[11px] font-bold transition cursor-pointer ${
+                          studentLinkMode === opt.id
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+                        }`}
                       >
-                        {c.code}
+                        {opt.label}
                       </button>
                     ))}
                   </div>
+
+                  {studentLinkMode === 'class' && (
+                    <div>
+                      <input
+                        value={classCode}
+                        onChange={(e) => setClassCode(e.target.value.toUpperCase())}
+                        placeholder="Ex: TURMA-A1, TURMA-B1, VIP-2026"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 font-mono text-sm uppercase focus:border-blue-500 focus:outline-none"
+                      />
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {classes.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setClassCode(c.code)}
+                            className="rounded-lg bg-white border border-slate-200 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
+                          >
+                            {c.code}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {studentLinkMode === 'vip' && (
+                    <div>
+                      <input
+                        value={vipTeacherCode}
+                        onChange={(e) => setVipTeacherCode(e.target.value.toUpperCase())}
+                        placeholder="Código do Professor (ex: PROF-SILAS)"
+                        className="w-full rounded-xl border border-indigo-200 bg-white px-3.5 py-2 font-mono text-sm uppercase focus:border-indigo-500 focus:outline-none"
+                      />
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        Para alunos individuais / VIP vinculados diretamente a um professor.
+                      </p>
+                    </div>
+                  )}
+
+                  {studentLinkMode === 'independent' && (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-950">
+                      <p className="font-bold">
+                        Aviso de restrição sem professor vinculado:
+                      </p>
+                      <p className="mt-0.5">
+                        Você terá acesso completo às 194 unidades e ao Tutor IA, porém o envio de Speaking/Writing para correção docente e tarefas VIP ficarão bloqueados até você se vincular.
+                      </p>
+                      <label className="mt-2 flex items-start gap-2 font-semibold cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={confirmNoTeacher}
+                          onChange={(e) => setConfirmNoTeacher(e.target.checked)}
+                          className="mt-0.5 rounded"
+                        />
+                        <span>
+                          Confirmo que desejo continuar sem atribuição a um professor.
+                        </span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               )}
 

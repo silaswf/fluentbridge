@@ -35,7 +35,36 @@ describe('storage password hashing & normalization', () => {
     expect(master).toBeDefined();
     expect(master?.role).toBe('teacher');
     expect(master?.isMasterAdmin).toBe(true);
+    expect(master?.teacherInviteCode).toBe('PROF-SILAS');
     expect(master?.password.startsWith('fbh1:')).toBe(true);
     expect(verifyPassword('admin123', master?.password ?? '')).toBe(true);
+  });
+
+  it('preserves VIP linking and unlink notice fields when normalizing users', () => {
+    const normalized = normalizePlatformState(
+      {
+        users: [
+          {
+            ...DEFAULT_PLATFORM_STATE.users[0],
+            id: 'stu-vip-norm',
+            name: 'Aluno VIP',
+            email: 'vip.norm@teste.com',
+            role: 'student',
+            isMasterAdmin: false,
+            assignedTeacherId: 'user-teacher-silas',
+            enrollmentType: 'vip',
+            unlinkedNoticePending: true,
+            unlinkedByTeacherName: 'Prof. Silas',
+          },
+        ],
+      },
+      DEFAULT_PLATFORM_STATE,
+      [],
+    );
+    const vip = normalized.users.find((u) => u.id === 'stu-vip-norm');
+    expect(vip?.assignedTeacherId).toBe('user-teacher-silas');
+    expect(vip?.enrollmentType).toBe('vip');
+    expect(vip?.unlinkedNoticePending).toBe(true);
+    expect(vip?.unlinkedByTeacherName).toBe('Prof. Silas');
   });
 });

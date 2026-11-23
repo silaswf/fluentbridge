@@ -45,7 +45,9 @@ import {
   testSupabaseConnection,
 } from '../utils/cloudSync';
 import { getSelectedVoiceLabels } from '../utils/speech';
+import { ConfirmDialog } from './ConfirmDialog';
 import { DualAudioButtons } from './DualAudioButtons';
+import { VipStudentsPanel } from './teacher/VipStudentsPanel';
 import {
   DEFAULT_BACKEND_API_URL,
   DEFAULT_TEACHER_ACCESS_CODE,
@@ -98,10 +100,13 @@ interface TeacherStudioProps {
   onToggleUserRole: (userId: string) => void;
   onMoveUserClass: (userId: string, classId?: string) => void;
   onDeleteUser: (userId: string) => void;
+  onLinkStudentToTeacher?: (studentId: string, teacherId: string) => void;
+  onUnlinkStudentFromTeacher?: (studentId: string) => void;
   onCreateAssignment?: (payload: {
     title: string;
     description: string;
     classId?: string;
+    studentId?: string;
     languageCode: LanguageCode;
     topicId?: string;
     dueDate: string;
@@ -143,9 +148,21 @@ export function TeacherStudio({
   onToggleUserRole,
   onMoveUserClass,
   onDeleteUser,
+  onLinkStudentToTeacher,
+  onUnlinkStudentFromTeacher,
   onCreateAssignment,
   onDeleteAssignment,
 }: TeacherStudioProps) {
+  const isMaster =
+    Boolean(currentUser.isMasterAdmin) || isMasterAdminEmail(currentUser.email);
+  const [pendingConfirm, setPendingConfirm] = useState<{
+    title: string;
+    description: string;
+    warningBox?: string;
+    confirmLabel: string;
+    tone: 'danger' | 'warning' | 'primary';
+    action: () => void;
+  } | null>(null);
   const [tab, setTab] = useState<TeacherTab>(initialTab);
   const [voiceLabels, setVoiceLabels] = useState(() => getSelectedVoiceLabels());
 
@@ -176,6 +193,18 @@ export function TeacherStudio({
   );
 
   const filteredSubs = state.submissions.filter((sub) => {
+    if (!isMaster) {
+      const subStu = state.users.find((u) => u.id === sub.studentId);
+      const subCls = state.classes.find((c) => c.id === sub.classId);
+      const hasExplicitOwner = Boolean(
+        sub.teacherId || subStu?.assignedTeacherId || subCls?.teacherId,
+      );
+      const belongsToMe =
+        sub.teacherId === currentUser.id ||
+        subStu?.assignedTeacherId === currentUser.id ||
+        subCls?.teacherId === currentUser.id;
+      if (hasExplicitOwner && !belongsToMe) return false;
+    }
     if (filterType !== 'all' && sub.type !== filterType) return false;
     if (filterClassId !== 'ALL' && sub.classId !== filterClassId) return false;
     return true;
@@ -1175,7 +1204,16 @@ export function TeacherStudio({
                       {onDeleteAssignment && (
                         <button
                           type="button"
-                          onClick={() => onDeleteAssignment(a.id)}
+                          onClick={() =>
+                            setPendingConfirm({
+                              title: `Remover tarefa "${a.title}"?`,
+                              description:
+                                'A tarefa deixará de aparecer na trilha dos alunos.',
+                              confirmLabel: 'Remover tarefa',
+                              tone: 'danger',
+                              action: () => onDeleteAssignment(a.id),
+                            })
+                          }
                           className="text-rose-600 hover:underline cursor-pointer"
                         >
                           Remover
@@ -1224,7 +1262,17 @@ export function TeacherStudio({
                       {state.classes.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => onDeleteClass(cls.id)}
+                          onClick={() =>
+                            setPendingConfirm({
+                              title: `Excluir turma "${cls.name}"?`,
+                              description: `Os alunos matriculados em ${cls.name} ficarão sem turma vinculada.`,
+                              warningBox:
+                                'Esta ação remove o código da turma. Alunos que não tiverem professor VIP vinculado passarão para o modo autônomo.',
+                              confirmLabel: 'Excluir turma',
+                              tone: 'danger',
+                              action: () => onDeleteClass(cls.id),
+                            })
+                          }
                           className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
                           aria-label={`Excluir turma ${cls.name}`}
                         >
@@ -1324,6 +1372,19 @@ export function TeacherStudio({
               );
             })}
           </div>
+
+          {onLinkStudentToTeacher && onUnlinkStudentFromTeacher && (
+            <div className="lg:col-span-12">
+              <VipStudentsPanel
+                currentUser={currentUser}
+                users={state.users}
+                isMaster={isMaster}
+                onLinkStudentToTeacher={onLinkStudentToTeacher}
+                onUnlinkStudentFromTeacher={onUnlinkStudentFromTeacher}
+                onCreateVipAssignment={onCreateAssignment}
+              />
+            </div>
+          )}
 
           {/* Master Admin: Gestão Global de Usuários & Permissões */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs lg:col-span-12">
@@ -2130,6 +2191,20 @@ export function TeacherStudio({
         </div>
         );
       })()}
+
+      <ConfirmDialog
+        open={Boolean(pendingConfirm)}
+        title={pendingConfirm?.title ?? ''}
+        description={pendingConfirm?.description ?? ''}
+        warningBox={pendingConfirm?.warningBox}
+        confirmLabel={pendingConfirm?.confirmLabel ?? 'Confirmar'}
+        tone={pendingConfirm?.tone ?? 'warning'}
+        onConfirm={() => {
+          pendingConfirm?.action();
+          setPendingConfirm(null);
+        }}
+        onCancel={() => setPendingConfirm(null)}
+      />
     </div>
   );
 }

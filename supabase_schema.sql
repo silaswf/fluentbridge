@@ -28,8 +28,15 @@ create table if not exists public.profiles (
   full_name text not null,
   email text not null,
   role text not null check (role in ('teacher', 'student')) default 'student',
-  active_language text not null default 'en',
-  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR"}'::jsonb,
+  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de')),
+  dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE"}'::jsonb,
+  assigned_teacher_id uuid references public.profiles(id) on delete set null,
+  enrollment_type text not null default 'independent' check (enrollment_type in ('class','vip','independent')),
+  teacher_invite_code text unique,
+  unlinked_notice_pending boolean not null default false,
+  unlinked_by_teacher_name text,
+  blocked boolean not null default false,
+  blocked_reason text,
   avatar_color text not null default '#116DFF',
   created_at timestamptz not null default now()
 );
@@ -296,3 +303,34 @@ grant all on all tables in schema public to anon, authenticated;
 grant all on all sequences in schema public to anon, authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema public grant all on sequences to anon, authenticated;
+
+-- ============================================================================
+-- 7. Migração Idempotente Fase 10 (5 Idiomas EN/ES/FR/IT/DE + Alunos VIP)
+-- ============================================================================
+
+alter table public.profiles add column if not exists assigned_teacher_id uuid references public.profiles(id) on delete set null;
+alter table public.profiles add column if not exists enrollment_type text not null default 'independent';
+alter table public.profiles add column if not exists teacher_invite_code text;
+alter table public.profiles add column if not exists unlinked_notice_pending boolean not null default false;
+alter table public.profiles add column if not exists unlinked_by_teacher_name text;
+alter table public.profiles add column if not exists blocked boolean not null default false;
+alter table public.profiles add column if not exists blocked_reason text;
+alter table public.submissions add column if not exists teacher_id uuid references public.profiles(id) on delete set null;
+
+create table if not exists public.assignments (
+  id text primary key,
+  teacher_id uuid references public.profiles(id) on delete set null,
+  class_id uuid references public.classes(id) on delete cascade,
+  student_id uuid references public.profiles(id) on delete cascade,
+  language_code text not null default 'en' check (language_code in ('en','es','fr','it','de')),
+  topic_id text,
+  title text not null,
+  description text not null default '',
+  due_date text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.assignments enable row level security;
+drop policy if exists "assignments_select_all" on public.assignments;
+create policy "assignments_select_all" on public.assignments for select to authenticated using (true);
+drop policy if exists "assignments_teacher_manage" on public.assignments;
+create policy "assignments_teacher_manage" on public.assignments for all to authenticated using (public.is_teacher()) with check (public.is_teacher());

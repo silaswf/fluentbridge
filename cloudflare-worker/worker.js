@@ -14,13 +14,45 @@ const CORS_HEADERS = {
 
 const GEMINI_FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
 const MAX_TTS_CHARS = 800;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const rateLimitBuckets = new Map();
 
-function jsonResponse(payload, status = 200) {
+function checkRateLimit(request, routeKey, maxPerMinute) {
+  const ip =
+    request.headers.get('CF-Connecting-IP') ||
+    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+    'unknown';
+  const now = Date.now();
+  const bucketKey = `${routeKey}:${ip}`;
+  if (rateLimitBuckets.size > 500) {
+    for (const [k, v] of rateLimitBuckets.entries()) {
+      if (v.resetAt <= now) rateLimitBuckets.delete(k);
+    }
+  }
+  const existing = rateLimitBuckets.get(bucketKey);
+  if (!existing || existing.resetAt <= now) {
+    rateLimitBuckets.set(bucketKey, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: maxPerMinute - 1, resetSec: 60 };
+  }
+  existing.count += 1;
+  const resetSec = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
+  if (existing.count > maxPerMinute) {
+    return { allowed: false, remaining: 0, resetSec };
+  }
+  return {
+    allowed: true,
+    remaining: Math.max(0, maxPerMinute - existing.count),
+    resetSec,
+  };
+}
+
+function jsonResponse(payload, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       ...CORS_HEADERS,
+      ...extraHeaders,
     },
   });
 }
@@ -588,21 +620,64 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
+        version: '2.2.0',
+        supportedLanguages: ['en', 'es', 'fr', 'it', 'de'],
         endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
+        rateLimits: {
+          ttsPerMin: 120,
+          sttPerMin: 30,
+          geminiTutorPerMin: 30,
+        },
         hasAiBinding: Boolean(env.AI),
         hasGeminiSecret: Boolean(env.GEMINI_API_KEY),
       });
     }
 
     if (path === '/api/tts') {
+      const rl = checkRateLimit(request, 'tts', 120);
+      if (!rl.allowed) {
+        return jsonResponse(
+          { ok: false, error: 'Rate limit exceeded for /api/tts', retryAfterSec: rl.resetSec },
+          429,
+          {
+            'Retry-After': String(rl.resetSec),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetSec),
+          },
+        );
+      }
       return handleTtsRequest(request, env, ctx);
     }
 
     if (path === '/api/stt') {
+      const rl = checkRateLimit(request, 'stt', 30);
+      if (!rl.allowed) {
+        return jsonResponse(
+          { ok: false, error: 'Rate limit exceeded for /api/stt', retryAfterSec: rl.resetSec },
+          429,
+          {
+            'Retry-After': String(rl.resetSec),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetSec),
+          },
+        );
+      }
       return handleSttRequest(request, env);
     }
 
     if (path === '/api/gemini-tutor') {
+      const rl = checkRateLimit(request, 'gemini', 30);
+      if (!rl.allowed) {
+        return jsonResponse(
+          { ok: false, error: 'Rate limit exceeded for /api/gemini-tutor', retryAfterSec: rl.resetSec },
+          429,
+          {
+            'Retry-After': String(rl.resetSec),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rl.resetSec),
+          },
+        );
+      }
       return handleGeminiTutorRequest(request, env);
     }
 
