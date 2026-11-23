@@ -13,6 +13,8 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 - **Banco de 200 Questões 100% no Idioma Estudado (`src/data/placement/*`):**
   - **`40` questões por idioma** (`8` por nível CEFR `A1, A2, B1, B2, C1` em [`placementEn.ts`](./src/data/placement/placementEn.ts), [`placementEs.ts`](./src/data/placement/placementEs.ts), [`placementFr.ts`](./src/data/placement/placementFr.ts), [`placementIt.ts`](./src/data/placement/placementIt.ts) e [`placementDe.ts`](./src/data/placement/placementDe.ts)), com enunciados, alternativas, explicações gramaticais e interface do modal escritos **100% no idioma que o aluno está estudando**.
   - Separado em chunk dedicado `placement-bank` no `vite.config.ts`, carregado sob demanda apenas ao abrir o nivelamento.
+- **Instalador Windows Setup (NSIS) (`package.json`, `scripts/make-icons.mjs`):**
+  - Configurado `electron-builder` (`npm run installer:build`) com geração automática do ícone 512×512 (`build/icon.png`), gerando o instalador oficial **`release/FluentBridge-Setup-2.4.0.exe`** (`91,9 MB`, com assistente de instalação, escolha de pasta, atalhos na Área de Trabalho / Menu Iniciar e desinstalador no Painel de Controle do Windows).
 - **Qualidade Validada (`v2.4.0`):** **`7` suítes / `24` testes Vitest aprovados** (incluindo `placementEngine.test.ts`), **`0` erros TypeScript**, **`DIST_LEAK=CLEAN`**.
 
 ---

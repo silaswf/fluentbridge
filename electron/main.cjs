@@ -9,6 +9,7 @@ function createWindow() {
     minHeight: 680,
     autoHideMenuBar: true,
     title: 'FluentBridge',
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

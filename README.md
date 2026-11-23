@@ -9,9 +9,10 @@ Plataforma completa de ensino em **5 idiomas (Inglês, Espanhol, Francês, Itali
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
 - **Edge API (Cloudflare Workers AI + STT + Gemini)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
-- **Windows Desktop**: [`release/FluentBridge-win32-x64/FluentBridge.exe`](./release/FluentBridge-win32-x64/FluentBridge.exe) (Electron 34)
-- **Android APK Assinado**: [`release/FluentBridge-v2.1.0.apk`](./release/FluentBridge-v2.1.0.apk) (e [`FluentBridge-latest.apk`](./release/FluentBridge-latest.apk))
-- **Google Play Store Bundle**: [`release/FluentBridge-v2.1.0-playstore.aab`](./release/FluentBridge-v2.1.0-playstore.aab)
+- **Windows Instalador Setup (NSIS)**: [`release/FluentBridge-Setup-2.4.0.exe`](./release/FluentBridge-Setup-2.4.0.exe) (assistente de instalação com escolha de pasta, atalhos na Área de Trabalho / Menu Iniciar e desinstalador no Windows)
+- **Windows Executável Direto**: [`release/FluentBridge-win32-x64/FluentBridge.exe`](./release/FluentBridge-win32-x64/FluentBridge.exe) (e [`release/win-unpacked/FluentBridge.exe`](./release/win-unpacked/FluentBridge.exe))
+- **Android APK Assinado**: [`release/FluentBridge-v2.4.0.apk`](./release/FluentBridge-v2.4.0.apk) (e [`FluentBridge-latest.apk`](./release/FluentBridge-latest.apk))
+- **Google Play Store Bundle**: [`release/FluentBridge-v2.4.0-playstore.aab`](./release/FluentBridge-v2.4.0-playstore.aab)
 
 ---
 
