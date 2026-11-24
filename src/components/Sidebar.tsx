@@ -4,10 +4,13 @@ import {
   Bot,
   BrainCircuit,
   Compass,
+  Download,
+  FileCheck2,
   Flame,
   GraduationCap,
   Lightbulb,
   LogOut,
+  Menu,
   Monitor,
   Moon,
   PanelLeftClose,
@@ -16,6 +19,8 @@ import {
   Snowflake,
   Sparkles,
   Sun,
+  Users,
+  X,
   Zap,
 } from 'lucide-react';
 import { isMasterAdminEmail } from '../config/appConfig';
@@ -27,6 +32,8 @@ export type NavView =
   | 'learn'
   | 'tutor'
   | 'review'
+  | 'exams'
+  | 'community'
   | 'tips'
   | 'certificates'
   | 'teacher'
@@ -49,6 +56,7 @@ interface SidebarProps {
   pendingSubmissionsCount: number;
   themeMode: ThemeMode;
   onCycleTheme: () => void;
+  onOpenDownloadModal?: () => void;
   onLogout: () => void;
 }
 
@@ -69,8 +77,10 @@ export function Sidebar({
   pendingSubmissionsCount,
   themeMode,
   onCycleTheme,
+  onOpenDownloadModal,
   onLogout,
 }: SidebarProps) {
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const ThemeIcon =
     themeMode === 'dark' ? Moon : themeMode === 'system' ? Monitor : Sun;
   const themeLabel =
@@ -121,6 +131,18 @@ export function Sidebar({
       Icon: BrainCircuit,
       badge: dueVocabCount > 0 ? dueVocabCount : undefined,
       badgeColor: 'bg-indigo-100 text-indigo-700',
+    },
+    {
+      id: 'exams',
+      label: 'Simulados Oficiais',
+      shortLabel: 'Simulados',
+      Icon: FileCheck2,
+    },
+    {
+      id: 'community',
+      label: 'Comunidade & Ligas',
+      shortLabel: 'Comunidade',
+      Icon: Users,
     },
     {
       id: 'tips',
@@ -392,6 +414,20 @@ export function Sidebar({
                 {themeLabel}
               </span>
             </button>
+
+            {onOpenDownloadModal && (
+              <button
+                type="button"
+                data-testid="sidebar-download-app-btn"
+                onClick={onOpenDownloadModal}
+                className="flex w-full items-center justify-between rounded-xl border border-blue-200/80 bg-blue-50/70 px-3.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100/70 cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Baixar App (Win/Android)</span>
+                </span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="mt-4 flex flex-col items-center gap-2 border-t border-slate-200/70 pt-4">
@@ -484,33 +520,115 @@ export function Sidebar({
         </div>
       </header>
 
-      {/* Mobile Bottom Tab Bar */}
+      {/* Mobile Bottom Tab Bar (5 slots limpos + Menu Mais) */}
       <nav
         className="safe-pb-nav fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-slate-200 bg-white/95 px-1 pt-1.5 backdrop-blur-sm lg:hidden"
         aria-label="Navegação mobile"
       >
-        {navItems.map(({ id, shortLabel, Icon, badge }) => {
-          const active = activeView === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onChangeView(id)}
-              className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-semibold ${
-                active ? 'text-blue-600' : 'text-slate-500'
-              }`}
-            >
-              <Icon className="h-4.5 w-4.5" />
-              <span className="truncate">{shortLabel}</span>
-              {badge !== undefined && (
-                <span className="absolute top-0.5 right-2 rounded-full bg-amber-500 px-1 text-[9px] font-bold text-white">
-                  {badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
+        {navItems
+          .filter((item) => ['learn', 'tutor', 'exams', 'community'].includes(item.id))
+          .map(({ id, shortLabel, Icon, badge }) => {
+            const active = activeView === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setMobileMoreOpen(false);
+                  onChangeView(id);
+                }}
+                className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-semibold ${
+                  active ? 'text-blue-600' : 'text-slate-500'
+                }`}
+              >
+                <Icon className="h-4.5 w-4.5" />
+                <span className="truncate">{shortLabel}</span>
+                {badge !== undefined && (
+                  <span className="absolute top-0.5 right-2 rounded-full bg-amber-500 px-1 text-[9px] font-bold text-white">
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        <button
+          type="button"
+          onClick={() => setMobileMoreOpen((v) => !v)}
+          className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-semibold ${
+            mobileMoreOpen || ['review', 'tips', 'certificates', 'teacher', 'admin'].includes(activeView)
+              ? 'text-blue-600'
+              : 'text-slate-500'
+          }`}
+        >
+          {mobileMoreOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
+          <span className="truncate">Mais</span>
+        </button>
       </nav>
+
+      {mobileMoreOpen && (
+        <div
+          className="fixed inset-0 z-40 flex items-end bg-slate-950/40 backdrop-blur-2xs lg:hidden"
+          onClick={() => setMobileMoreOpen(false)}
+        >
+          <div
+            className="safe-bottom w-full rounded-t-3xl border-t border-slate-200 bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-display text-sm font-bold text-slate-900">Mais Módulos</p>
+              <button
+                type="button"
+                onClick={() => setMobileMoreOpen(false)}
+                className="rounded-lg p-1 text-slate-500"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {navItems
+                .filter((item) => !['learn', 'tutor', 'exams', 'community'].includes(item.id))
+                .map(({ id, label, Icon, badge }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      onChangeView(id);
+                      setMobileMoreOpen(false);
+                    }}
+                    className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-xs font-bold ${
+                      activeView === id
+                        ? 'border-blue-300 bg-blue-50 text-blue-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" />
+                      <span>{label}</span>
+                    </span>
+                    {badge !== undefined && (
+                      <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] text-white">
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              {onOpenDownloadModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMoreOpen(false);
+                    onOpenDownloadModal();
+                  }}
+                  className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Baixar App</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

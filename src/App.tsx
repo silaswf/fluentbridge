@@ -16,6 +16,7 @@ import {
   uploadSpeakingAudioToCloud,
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
+import { AppDownloadGateway } from './components/AppDownloadGateway';
 import { AuthScreen } from './components/AuthScreen';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
@@ -23,8 +24,10 @@ import { TeacherLinkModal } from './components/TeacherLinkModal';
 import type { TeacherTab } from './components/TeacherStudio';
 import { useCloudSyncController } from './hooks/useCloudSyncController';
 import { purgeExpiredSpeakingAudios } from './utils/audioRetention';
+import { getCurrentWeekKey } from './utils/communityEngine';
 import { addMistakeEntry, markMistakeResolved } from './utils/mistakeBank';
 import { scheduleDailyStudyReminder } from './utils/notifications';
+import { isRtlLanguage, isWebPlatform } from './utils/platform';
 import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
 import { recordStudyActivity } from './utils/streakEngine';
 import { getUnlockedVocabCards } from './utils/vocabUnlock';
@@ -66,6 +69,12 @@ const TipsLibrary = lazy(() =>
 const VocabReview = lazy(() =>
   import('./components/VocabReview').then((m) => ({ default: m.VocabReview })),
 );
+const MockExamHub = lazy(() =>
+  import('./components/MockExamHub').then((m) => ({ default: m.MockExamHub })),
+);
+const CommunityHub = lazy(() =>
+  import('./components/CommunityHub').then((m) => ({ default: m.CommunityHub })),
+);
 import {
   getActiveDialect,
   getCourseTopics,
@@ -82,6 +91,8 @@ import type {
   CEFRLevel,
   CertificateRecord,
   CloudConfig,
+  CommunityPost,
+  ExamAttemptRecord,
   LanguageCode,
   PlatformState,
   PronunciationRubric,
@@ -144,6 +155,12 @@ export function App() {
   const [tutorTargetTopic, setTutorTargetTopic] = useState<Topic | null>(null);
   const [showPlacementModal, setShowPlacementModal] = useState(false);
   const [showTeacherLinkModal, setShowTeacherLinkModal] = useState(false);
+  const [dismissedWebGateway, setDismissedWebGateway] = useState<boolean>(() => {
+    if (!isWebPlatform()) return true;
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('fluentbridge_prefer_web') === '1';
+  });
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
@@ -243,6 +260,13 @@ export function App() {
           fr: 'fr-FR',
           it: 'it-IT',
           de: 'de-DE',
+          ru: 'ru-RU',
+          ja: 'ja-JP',
+          zh: 'zh-CN',
+          ar: 'ar-SA',
+          nl: 'nl-NL',
+          af: 'af-ZA',
+          sv: 'sv-SE',
         },
         accent: 'en-US',
         dailyGoalMinutes: 15,
@@ -340,6 +364,12 @@ export function App() {
       (v) => (v.languageCode ?? 'en') === activeLanguage,
     );
   }, [currentUser, activeLanguage]);
+
+  const unlockedCourseVocab = useMemo(
+    () => (currentUser ? getUnlockedVocabCards(courseVocab, currentUser) : []),
+    [courseVocab, currentUser],
+  );
+  const dueVocabCount = unlockedCourseVocab.filter((v) => isCardDue(v)).length;
 
   const updateCurrentUser = (updater: (u: UserProfile) => UserProfile) => {
     if (!state.currentUserId) return;
@@ -672,10 +702,22 @@ export function App() {
 
         const nextStepProgress = { ...(baseUser.topicStepProgress ?? {}) };
         delete nextStepProgress[result.topicId];
+        const lessonLang = completedTopicObj?.languageCode ?? baseUser.activeLanguage ?? 'en';
+        const wk = getCurrentWeekKey();
+        const prevWeekly = baseUser.weeklyXpWeekKey === wk ? baseUser.weeklyXpByLanguage?.[lessonLang] ?? 0 : 0;
 
         return {
           ...baseUser,
           xp: baseUser.xp + result.xpEarned,
+          xpByLanguage: {
+            ...(baseUser.xpByLanguage ?? {}),
+            [lessonLang]: (baseUser.xpByLanguage?.[lessonLang] ?? 0) + result.xpEarned,
+          },
+          weeklyXpWeekKey: wk,
+          weeklyXpByLanguage: {
+            ...(baseUser.weeklyXpWeekKey === wk ? baseUser.weeklyXpByLanguage ?? {} : {}),
+            [lessonLang]: prevWeekly + result.xpEarned,
+          },
           todayMinutes: baseUser.todayMinutes + result.minutesSpent,
           completedTopicIds: nextCompleted,
           topicStepProgress: nextStepProgress,
@@ -1249,19 +1291,44 @@ export function App() {
   };
 
   if (!currentUser) {
+    if (!dismissedWebGateway && isWebPlatform()) {
+      return (
+        <AppDownloadGateway
+          mode="landing"
+          schoolName={state.schoolName}
+          onContinueWeb={(remember) => {
+            if (remember && typeof window !== 'undefined') {
+              window.localStorage.setItem('fluentbridge_prefer_web', '1');
+            }
+            setDismissedWebGateway(true);
+          }}
+        />
+      );
+    }
     return (
-      <AuthScreen
-        schoolName={state.schoolName}
-        teacherName={state.teacherName}
-        teacherAccessCode={state.teacherAccessCode}
-        users={state.users}
-        classes={state.classes}
-        cloudConfigured={isCloudConfigured}
-        onLogin={handleLogin}
-        onEmailAuthLogin={handleEmailAuthLogin}
-        onGoogleLogin={handleGoogleLogin}
-        onRegister={handleRegister}
-      />
+      <>
+        <AuthScreen
+          schoolName={state.schoolName}
+          teacherName={state.teacherName}
+          teacherAccessCode={state.teacherAccessCode}
+          users={state.users}
+          classes={state.classes}
+          cloudConfigured={isCloudConfigured}
+          onOpenDownloadModal={() => setShowDownloadModal(true)}
+          onLogin={handleLogin}
+          onEmailAuthLogin={handleEmailAuthLogin}
+          onGoogleLogin={handleGoogleLogin}
+          onRegister={handleRegister}
+        />
+        {showDownloadModal && (
+          <AppDownloadGateway
+            mode="modal"
+            schoolName={state.schoolName}
+            onContinueWeb={() => setShowDownloadModal(false)}
+            onClose={() => setShowDownloadModal(false)}
+          />
+        )}
+      </>
     );
   }
 
@@ -1287,12 +1354,6 @@ export function App() {
     }
     showToast(res.message);
   };
-
-  const unlockedCourseVocab = useMemo(
-    () => getUnlockedVocabCards(courseVocab, currentUser),
-    [courseVocab, currentUser],
-  );
-  const dueVocabCount = unlockedCourseVocab.filter((v) => isCardDue(v)).length;
 
   const handleSaveTopicProgress = (
     topicId: string,
@@ -1345,6 +1406,156 @@ export function App() {
     if (resolved) {
       showToast('Erro marcado como dominado! +10 XP');
     }
+  };
+
+  const handleRecordPronunciation = (payload: {
+    languageCode: LanguageCode;
+    topicId: string;
+    score: number;
+    weakWords: string[];
+  }) => {
+    updateCurrentUser((u) => ({
+      ...u,
+      pronunciationHistory: [
+        ...(u.pronunciationHistory ?? []).slice(-119),
+        {
+          id: `pron-${Date.now()}`,
+          languageCode: payload.languageCode,
+          topicId: payload.topicId,
+          score: payload.score,
+          weakWords: payload.weakWords,
+          createdAt: new Date().toISOString().slice(0, 10),
+        },
+      ],
+    }));
+  };
+
+  const handleCompleteMockExam = (attempt: ExamAttemptRecord) => {
+    const earnedXp = attempt.passed ? 60 : 35;
+    const wk = getCurrentWeekKey();
+    updateCurrentUser((u) => {
+      const prevWeekly = u.weeklyXpWeekKey === wk ? u.weeklyXpByLanguage?.[attempt.languageCode] ?? 0 : 0;
+      return {
+        ...u,
+        xp: u.xp + earnedXp,
+        xpByLanguage: {
+          ...(u.xpByLanguage ?? {}),
+          [attempt.languageCode]: (u.xpByLanguage?.[attempt.languageCode] ?? 0) + earnedXp,
+        },
+        weeklyXpWeekKey: wk,
+        weeklyXpByLanguage: {
+          ...(u.weeklyXpWeekKey === wk ? u.weeklyXpByLanguage ?? {} : {}),
+          [attempt.languageCode]: prevWeekly + earnedXp,
+        },
+        examAttempts: [...(u.examAttempts ?? []).slice(-99), attempt],
+      };
+    });
+    showToast(`Simulado concluído (${attempt.officialScoreLabel})! +${earnedXp} XP`);
+  };
+
+  const handleCreateCommunityPost = (payload: {
+    languageCode: LanguageCode;
+    level: CEFRLevel;
+    category: CommunityPost['category'];
+    title: string;
+    body: string;
+    targetSnippet?: string;
+  }) => {
+    const newPost: CommunityPost = {
+      id: `post-${Date.now()}`,
+      languageCode: payload.languageCode,
+      authorId: currentUser.id,
+      authorName: currentUser.name,
+      authorAvatarColor: currentUser.avatarColor,
+      authorRole: currentUser.role,
+      level: payload.level,
+      category: payload.category,
+      title: payload.title,
+      body: payload.body,
+      targetSnippet: payload.targetSnippet,
+      likes: [],
+      replies: [],
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+    setState((prev) => ({
+      ...prev,
+      communityPosts: [newPost, ...(prev.communityPosts ?? [])],
+    }));
+    showToast('Publicação enviada para o fórum!');
+  };
+
+  const handleReplyCommunityPost = (
+    postId: string,
+    content: string,
+    correctionSuggestion?: string,
+  ) => {
+    const wk = getCurrentWeekKey();
+    setState((prev) => ({
+      ...prev,
+      communityPosts: (prev.communityPosts ?? []).map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              replies: [
+                ...p.replies,
+                {
+                  id: `rep-${Date.now()}`,
+                  authorId: currentUser.id,
+                  authorName: currentUser.name,
+                  authorAvatarColor: currentUser.avatarColor,
+                  authorRole: currentUser.role,
+                  content,
+                  correctionSuggestion,
+                  likes: [],
+                  createdAt: new Date().toISOString().slice(0, 10),
+                },
+              ],
+            }
+          : p,
+      ),
+    }));
+    updateCurrentUser((u) => {
+      const prevWeekly = u.weeklyXpWeekKey === wk ? u.weeklyXpByLanguage?.[activeLanguage] ?? 0 : 0;
+      return {
+        ...u,
+        xp: u.xp + 5,
+        xpByLanguage: {
+          ...(u.xpByLanguage ?? {}),
+          [activeLanguage]: (u.xpByLanguage?.[activeLanguage] ?? 0) + 5,
+        },
+        weeklyXpWeekKey: wk,
+        weeklyXpByLanguage: {
+          ...(u.weeklyXpWeekKey === wk ? u.weeklyXpByLanguage ?? {} : {}),
+          [activeLanguage]: prevWeekly + 5,
+        },
+      };
+    });
+    showToast('Resposta enviada! +5 XP na comunidade');
+  };
+
+  const handleToggleLikePost = (postId: string) => {
+    setState((prev) => ({
+      ...prev,
+      communityPosts: (prev.communityPosts ?? []).map((p) => {
+        if (p.id !== postId) return p;
+        const has = p.likes.includes(currentUser.id);
+        return {
+          ...p,
+          likes: has ? p.likes.filter((id) => id !== currentUser.id) : [...p.likes, currentUser.id],
+        };
+      }),
+    }));
+  };
+
+  const handleDeleteCommunityPost = (postId: string) => {
+    setState((prev) => ({
+      ...prev,
+      communityPosts: (prev.communityPosts ?? []).filter((p) => p.id !== postId),
+      deletedCommunityPostIds: Array.from(
+        new Set([...(prev.deletedCommunityPostIds ?? []), postId]),
+      ),
+    }));
+    showToast('Publicação removida.');
   };
 
   const handleRunAudioRetentionCleanup = async (): Promise<string> => {
@@ -1407,10 +1618,14 @@ export function App() {
         pendingSubmissionsCount={pendingSubmissionsCount}
         themeMode={themeMode}
         onCycleTheme={handleCycleTheme}
+        onOpenDownloadModal={() => setShowDownloadModal(true)}
         onLogout={handleLogout}
       />
 
-      <main className="safe-main-pb flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 lg:pb-10">
+      <main
+        dir={isRtlLanguage(activeLanguage) ? 'rtl' : 'ltr'}
+        className="safe-main-pb flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 lg:pb-10"
+      >
         {activeView === 'learn' && (
           <LearningPath
             currentUser={currentUser}
@@ -1477,9 +1692,31 @@ export function App() {
               topics={courseTopics}
               languageCode={activeLanguage}
               mistakes={currentUser.mistakeBank ?? []}
+              pronunciationHistory={currentUser.pronunciationHistory ?? []}
               onResolveMistake={handleResolveMistake}
               onRateCard={handleRateVocab}
               onGoToLearn={() => setActiveView('learn')}
+            />
+          )}
+
+          {activeView === 'exams' && (
+            <MockExamHub
+              activeCourse={activeCourse}
+              pastAttempts={currentUser.examAttempts ?? []}
+              onCompleteExam={handleCompleteMockExam}
+            />
+          )}
+
+          {activeView === 'community' && (
+            <CommunityHub
+              currentUser={currentUser}
+              users={state.users}
+              activeCourse={activeCourse}
+              posts={state.communityPosts ?? []}
+              onCreatePost={handleCreateCommunityPost}
+              onReplyPost={handleReplyCommunityPost}
+              onToggleLikePost={handleToggleLikePost}
+              onDeletePost={handleDeleteCommunityPost}
             />
           )}
 
@@ -1653,6 +1890,7 @@ export function App() {
             onSaveProgress={handleSaveTopicProgress}
             onUnlockVocab={handleUnlockVocab}
             onRecordMistake={handleRecordMistake}
+            onRecordPronunciation={handleRecordPronunciation}
             onSubmitWriting={handleSubmitWriting}
             onSubmitSpeaking={handleSubmitSpeaking}
             onCompleteLesson={handleCompleteLesson}
@@ -1681,6 +1919,15 @@ export function App() {
         onConfirmIndependent={handleConfirmIndependentMode}
         onClose={() => setShowTeacherLinkModal(false)}
       />
+
+      {showDownloadModal && (
+        <AppDownloadGateway
+          mode="modal"
+          schoolName={state.schoolName}
+          onContinueWeb={() => setShowDownloadModal(false)}
+          onClose={() => setShowDownloadModal(false)}
+        />
+      )}
 
       {toastMessage && (
         <div className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6">

@@ -76,12 +76,15 @@ Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** 
 - [x] **Modularização de Hooks & Componentes**: extração de `useCloudSyncController.ts`, `Phase8StepsView.tsx` e `VipStudentsPanel.tsx`.
 - [x] **Rate-Limit & Telemetria Multi-Idioma no Cloudflare Worker (`worker.js`)**: cotas por IP (`120/min` `/api/tts`, `30/min` `/api/stt` e `/api/gemini-tutor`) e `/health` reportando `version: "2.2.0"` + `supportedLanguages`.
 
-### Fase 11 — Inteligência Pedagógica, Lazy Curricular Real & Engajamento Social (`v2.5.0`)
-- [ ] **Importação Dinâmica Real dos Cursos por Idioma**: carregar `spanishCourse.ts` e `frenchCourse.ts` via `import()` apenas quando o aluno selecionar ES/FR, zerando o download de outros idiomas no boot inicial.
-- [ ] **Diagnóstico de Fonemas & Histórico de Pronúncia**: salvar evolução temporal da nota de Speaking e palavras com maior taxa de erro por aluno.
-- [ ] **Simulados Cronometrados (IELTS / TOEFL / DELE / DELF)** e **Ligas Semanais / Desafios entre Turmas** com notificações push e resumo semanal para o Prof. Silas.
+### Fase 11 — Simulados Cronometrados Oficiais, Comunidade, Alfabetos Completos, 12 Idiomas & Suíte E2E (`v5.0.0`) — CONCLUÍDA
+- [x] **Gateway de Download (`AppDownloadGateway.tsx`) + Botão In-App**: tela inicial na Web para baixar Windows (`.exe`) ou Android (`.apk`) ou continuar na Web, além de modal acessível em `AuthScreen` e `Sidebar`.
+- [x] **4 Novos Idiomas Completos (`ar` Árabe RTL, `nl` Holandês, `af` Africâner, `sv` Sueco)**: paridade 100% (`100` unidades, `200` tabelas gramaticais, `40` cenários IA, `40` questões CAT, `5` podcasts e TTS/STT no Worker `v5.0.0`).
+- [x] **Alfabetos 100% Completos (`scriptTrainerData.ts`)**: `46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico Russo, `28` Letras Árabes (4 formas contextuais + RTL) e `40` Hanzi + 4 Tons.
+- [x] **72 Simulados Cronometrados Oficiais (`MockExamHub.tsx`, `examScoring.ts`, `examCatalog.ts`)**: 4 simulados por exame em todos os 12 idiomas (18 exames oficiais), com timer, limite de áudio, cálculo na escala real e tabela de equivalência CEFR.
+- [x] **Comunidade por Idioma (`CommunityHub.tsx`, `communityEngine.ts`)**: Ligas Semanais (Bronze → Diamante) e Fórum com dúvidas, pedidos de correção (`+5 XP`) e moderação docente.
+- [x] **Histórico de Pronúncia & Resumo Semanal Docente** + **Suíte E2E Playwright (`7/7` passando)**.
 
-### Fase 12 — Ecossistema Mobile/iOS & Lojas Oficiais (`v3.0.0`)
+### Fase 12 — Ecossistema Mobile/iOS, Tempo Real & Lojas Oficiais (`v5.1+`)
 - [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** com Apple Sign-In e notificações push FCM/APNs.
-- [ ] **Pacotes Offline Seletivos de Áudio**: botão *"Baixar áudios do nível A1/A2"* pré-populando `IndexedDB` (`tts-v3:*`) para estudo em viagens sem internet.
-- [ ] **Suíte E2E Automatizada (`Playwright`)**: testes visuais automatizados de Light/Dark Mode, responsividade mobile/desktop, login e fluxo completo de lição no CI.
+- [ ] **Modo Chamada IA WebRTC / Baixa Latência Contínua** com VAD automático e relatórios de prosódia/entonação.
+- [ ] **Aulas ao Vivo 1:1 & Turmas com Agenda Integrada** + **Desafios Ao Vivo em Tempo Real entre Turmas** na Comunidade.

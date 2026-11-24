@@ -49,13 +49,13 @@ function simulateAdaptiveTestForStudent(
   return computeAdaptivePlacementResult(records);
 }
 
-describe('Adaptive multi-language placement engine & 320-question bank', () => {
-  it('ships 320 target-language placement questions (40 per language across 8 languages, 8 per CEFR level)', () => {
-    expect(ALL_PLACEMENT_QUESTIONS.length).toBe(320);
+describe('Adaptive multi-language placement engine & 480-question bank', () => {
+  it('ships 480 target-language placement questions (40 per language across 12 languages, 8 per CEFR level)', () => {
+    expect(ALL_PLACEMENT_QUESTIONS.length).toBe(480);
     const uniqueIds = new Set(ALL_PLACEMENT_QUESTIONS.map((q) => q.id));
-    expect(uniqueIds.size).toBe(320);
+    expect(uniqueIds.size).toBe(480);
 
-    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'] as const) {
+    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'] as const) {
       const bank = getPlacementBankByLanguage(lang);
       expect(bank.length).toBe(40);
 
@@ -85,8 +85,8 @@ describe('Adaptive multi-language placement engine & 320-question bank', () => {
     expect(getNextAdaptiveLevel('A1', false)).toBe('A1');
   });
 
-  it('accurately diagnoses A1, A2, B1, B2, and C1 students after 15 adaptive questions across all 8 languages', () => {
-    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'] as const) {
+  it('accurately diagnoses A1, A2, B1, B2, and C1 students after 15 adaptive questions across all 12 languages', () => {
+    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'] as const) {
       for (const targetLevel of ADAPTIVE_LEVELS) {
         const summary = simulateAdaptiveTestForStudent(lang, targetLevel);
         expect(summary.totalQuestions).toBe(15);

@@ -1,6 +1,6 @@
-# 01 — Diagnóstico Atual do FluentBridge (`v4.0.0`)
+# 01 — Diagnóstico Atual do FluentBridge (`v5.0.0`)
 
-Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v4.0.0`** com **8 idiomas completos (`800` unidades: `100` por idioma, `20` por nível CEFR A1–C1)**, **Treinador de Escrita & Ordem de Traços** (`JA/ZH/RU`), **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno Inteligente de Erros**, **`40` Podcasts Curtos Multi-Voz**, **botão Traduzir PT em B2/C1**, **Teste de Nivelamento Adaptativo CAT (`320` questões)**, **`1.600` tabelas gramaticais (`200`/idioma)**, **Tutor IA dinâmico (`40` situações/idioma + `10` modos/unidade)**, **Compactação Esparsa de Vocabulário** e **Migração Definitiva de Segurança (RLS Relacional Estrito)**.
+Este documento apresenta o diagnóstico técnico real do código-fonte do **FluentBridge Academy** na versão **`v5.0.0`** com **12 idiomas completos (`1.200` unidades: `100` por idioma, `20` por nível CEFR A1–C1, incluindo Árabe RTL, Holandês, Africâner e Sueco)**, **Gateway de Download Web/Win/Android**, **72 Simulados Cronometrados Oficiais**, **Comunidade por Idioma (Ligas + Fórum)**, **Alfabetos 100% Completos no Treinador de Escrita (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe RTL, `40` Hanzi)**, **Histórico de Pronúncia**, **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno de Erros**, **`60` Podcasts Curtos**, **Nivelamento CAT (`480` questões)**, **`2.400` tabelas gramaticais**, **Tutor IA (`480` cenários)** e **Suíte E2E Playwright (`7/7` passando)**.
 
 ---
 

@@ -12,6 +12,7 @@ import type {
   CEFRLevel,
   LanguageCode,
   MistakeEntry,
+  PronunciationHistoryEntry,
   Topic,
   VocabCard,
 } from '../types/learning';
@@ -30,6 +31,7 @@ interface VocabReviewProps {
   topics: Topic[];
   languageCode?: LanguageCode;
   mistakes?: MistakeEntry[];
+  pronunciationHistory?: PronunciationHistoryEntry[];
   onResolveMistake?: (mistakeId: string, resolved: boolean) => void;
   onRateCard: (cardId: string, rating: SrsRating) => void;
   onGoToLearn?: () => void;
@@ -59,11 +61,12 @@ export function VocabReview({
   topics,
   languageCode = 'en',
   mistakes = [],
+  pronunciationHistory = [],
   onResolveMistake,
   onRateCard,
   onGoToLearn,
 }: VocabReviewProps) {
-  const [sectionTab, setSectionTab] = useState<'vocab' | 'mistakes'>('vocab');
+  const [sectionTab, setSectionTab] = useState<'vocab' | 'mistakes' | 'pronunciation'>('vocab');
   const [scope, setScope] = useState<'learned' | 'catalog'>('learned');
   const [mode, setMode] = useState<'flashcards' | 'list'>('flashcards');
   const [filterStrength, setFilterStrength] = useState<'all' | 'due' | VocabCard['strength']>('all');
@@ -214,6 +217,19 @@ export function VocabReview({
               {mistakes.filter((m) => m.languageCode === languageCode && !m.resolved).length}
               )
             </button>
+            <button
+              type="button"
+              onClick={() => setSectionTab('pronunciation')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                sectionTab === 'pronunciation'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              Pronúncia (
+              {pronunciationHistory.filter((p) => p.languageCode === languageCode).length}
+              )
+            </button>
           </div>
 
           {allCourseVocab && allCourseVocab.length > vocab.length && (
@@ -287,6 +303,76 @@ export function VocabReview({
           languageCode={languageCode}
           onResolveMistake={onResolveMistake}
         />
+      ) : sectionTab === 'pronunciation' ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4">
+          <div>
+            <h2 className="font-display text-lg font-extrabold text-slate-900">
+              Histórico &amp; Evolução de Pronúncia
+            </h2>
+            <p className="text-xs text-slate-600">
+              Acompanhe suas últimas notas de Speaking/Shadowing e palavras que pedem mais treino.
+            </p>
+          </div>
+          {(() => {
+            const entries = pronunciationHistory
+              .filter((p) => p.languageCode === languageCode)
+              .slice()
+              .reverse();
+            if (entries.length === 0) {
+              return (
+                <p className="rounded-2xl bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+                  Pratique uma atividade de Speaking ou Modo Shadowing nas lições para registrar sua evolução fonética aqui.
+                </p>
+              );
+            }
+            const avg = Math.round(
+              entries.reduce((acc, e) => acc + e.score, 0) / entries.length,
+            );
+            return (
+              <>
+                <div className="flex flex-wrap gap-3">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
+                    <p className="text-[11px] font-bold text-emerald-700">Média Geral</p>
+                    <p className="font-mono text-xl font-extrabold text-emerald-900">{avg}%</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5">
+                    <p className="text-[11px] font-bold text-slate-500">Treinos Registrados</p>
+                    <p className="font-mono text-xl font-extrabold text-slate-900">{entries.length}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {entries.slice(0, 15).map((e) => (
+                    <div
+                      key={e.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-xs"
+                    >
+                      <div>
+                        <p className="font-bold text-slate-800">{e.topicId}</p>
+                        <p className="text-[11px] text-slate-500">
+                          {e.createdAt}
+                          {e.weakWords.length > 0
+                            ? ` · Reforçar: ${e.weakWords.slice(0, 4).join(', ')}`
+                            : ' · Pronúncia limpa!'}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2.5 py-1 font-mono text-xs font-extrabold ${
+                          e.score >= 85
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : e.score >= 65
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'bg-rose-100 text-rose-800'
+                        }`}
+                      >
+                        {e.score}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+        </div>
       ) : (
         <>
       {/* CEFR Level Pills */}

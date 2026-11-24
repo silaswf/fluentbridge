@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v4.0.0`)
+# FluentBridge Academy (`v5.0.0`)
 
-Plataforma completa de ensino em **8 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês e Chinês Mandarim)** de **A1 a C1** (**`800` unidades = `100` por idioma, `20` por nível CEFR**), com **imersão B2/C1 e botão opcional de tradução PT**, **Treinador de Escrita & Ordem de Traços** (Japonês/Chinês/Russo), **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno Inteligente de Erros**, **Podcasts Curtos Multi-Voz**, **Subunidades estilo Busuu com progresso salvo**, **Vocabulário SM-2 progressivo** com compactação esparsa, **Nivelamento Adaptativo CAT (`320` questões)**, **Autolimpeza de áudios (60d)**, **RLS Relacional Estrito** e **Estúdio do Professor + Admin Mestre**, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco)** de **A1 a C1** (**`1.200` unidades = `100` por idioma, `20` por nível CEFR**), com **Gateway de Download Multiplataforma na Web**, **72 Simulados Cronometrados Oficiais** com escalas e tabelas reais, **Comunidade por Idioma (Ligas Semanais + Fórum com Correções)**, **Treinador de Escrita & Traços com Alfabetos 100% Completos** (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe com 4 formas RTL, `40` Hanzi + 4 Tons), **Histórico de Pronúncia**, **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno de Erros**, **60 Podcasts Curtos**, **Suíte E2E Playwright** e **Estúdio do Professor + Admin Mestre**, desenvolvida para o **Prof. Silas**.
 
 ---
 
@@ -9,19 +9,21 @@ Plataforma completa de ensino em **8 idiomas (Inglês, Espanhol, Francês, Itali
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
 - **Edge API (Cloudflare Workers AI + STT + Gemini)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
-- **Windows Instalador Setup (NSIS)**: [`release/FluentBridge-Setup-4.0.0.exe`](./release/FluentBridge-Setup-4.0.0.exe)
-- **Android APK Assinado**: [`release/FluentBridge-v4.0.0.apk`](./release/FluentBridge-v4.0.0.apk)
-- **Google Play Store Bundle**: [`release/FluentBridge-v4.0.0-playstore.aab`](./release/FluentBridge-v4.0.0-playstore.aab)
+- **Windows Instalador Setup (NSIS)**: [`release/FluentBridge-Setup-5.0.0.exe`](./release/FluentBridge-Setup-5.0.0.exe)
+- **Android APK Assinado**: [`release/FluentBridge-v5.0.0.apk`](./release/FluentBridge-v5.0.0.apk)
+- **Google Play Store Bundle**: [`release/FluentBridge-v5.0.0-playstore.aab`](./release/FluentBridge-v5.0.0-playstore.aab)
 
 ---
 
-## Números Atuais (`v4.0.0`)
+## Números Atuais (`v5.0.0`)
 
-- **800 Unidades CEFR (A1–C1) em 8 Idiomas**: **100 unidades por idioma** (`20` por nível A1–C1 em `EN, ES, FR, IT, DE, RU, JA, ZH`) com etapas Busuu, progresso salvo e vocabulário de sobrevivência/viagens/carreira
-- **Central, Guia, Escrita & Podcasts**: **`200+` Dicas**, **`200` Tabelas Gramaticais por idioma (`1.600` total)**, **Treinador de Escrita/Traços** e **`40` Podcasts Curtos Multi-Voz**
-- **Nivelamento Adaptativo (CAT) nos 8 Idiomas**: **`320` questões 100% no idioma-alvo** (`40` por idioma · `8` por nível A1–C1)
-- **Tutor IA Dinâmico**: **`40` Situações Reais por idioma (`320` total)** + **`10` Modos Dinâmicos por Unidade (`8.000` combinações)** + **Cenário Livre / Surpreenda-me**
-- **Qualidade Garantida**: `33/33` testes **Vitest** aprovados (`12` suítes) · `0` erros TypeScript · Compactação esparsa (~95%) · RLS Relacional v4.0
+- **1.200 Unidades CEFR (A1–C1) em 12 Idiomas**: **100 unidades por idioma** (`20` por nível A1–C1 em `EN, ES, FR, IT, DE, RU, JA, ZH, AR, NL, AF, SV`) com imersão B2/C1 e botão `🌐 Traduzir PT`
+- **72 Simulados Cronometrados Oficiais (Fase 11)**: **4 simulados por exame** (IELTS, TOEFL, Cambridge, DELE, SIELE, DELF, TCF, CILS, CELI, Goethe, TestDaF, TORFL, JLPT, HSK, ALPT, NT2, Taaltoets, Swedex) com cálculo na escala oficial e tabela de equivalência CEFR
+- **Comunidade por Idioma**: Ligas Semanais (Bronze → Diamante) + Fórum com dúvidas, pedidos de correção e sugestões entre alunos/professores (`+5 XP`)
+- **Central, Guia, Escrita Completa & Podcasts**: **`2.400` Tabelas Gramaticais (`200`/idioma)**, **Alfabetos Completos (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe RTL, `40` Hanzi)** e **`60` Podcasts Curtos Multi-Voz**
+- **Nivelamento Adaptativo (CAT) nos 12 Idiomas**: **`480` questões 100% no idioma-alvo** (`40` por idioma · `8` por nível A1–C1)
+- **Tutor IA Dinâmico**: **`480` Situações Reais (`40`/idioma)** + **`12.000` Combinações Dinâmicas por Unidade**
+- **Qualidade Garantida**: `38/38` testes **Vitest** (`14` suítes) + **`7/7` testes E2E Playwright** aprovados · `0` erros TypeScript · Compactação esparsa (~95%) · RLS Relacional v5.0
 
 ---
 

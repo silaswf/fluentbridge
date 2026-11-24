@@ -1122,6 +1122,26 @@ export function TeacherStudio({
                   </div>
                 );
               })}
+              <div className="mt-3 grid grid-cols-3 gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-3 text-center">
+                <div>
+                  <p className="font-mono text-base font-extrabold text-indigo-800">
+                    {students.reduce((acc, s) => acc + (s.completedTopicIds?.length ?? 0), 0)}
+                  </p>
+                  <p className="text-[10px] font-bold text-indigo-700">Unid. Concluídas</p>
+                </div>
+                <div>
+                  <p className="font-mono text-base font-extrabold text-emerald-700">
+                    {students.reduce((acc, s) => acc + (s.examAttempts?.length ?? 0), 0)}
+                  </p>
+                  <p className="text-[10px] font-bold text-emerald-700">Simulados Feitos</p>
+                </div>
+                <div>
+                  <p className="font-mono text-base font-extrabold text-amber-700">
+                    {students.filter((s) => (s.streakDays ?? 0) >= 3).length}/{students.length}
+                  </p>
+                  <p className="text-[10px] font-bold text-amber-700">Ativos (3d+)</p>
+                </div>
+              </div>
             </div>
           )}
 

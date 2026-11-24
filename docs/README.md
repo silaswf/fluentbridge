@@ -1,6 +1,6 @@
-# Documentação de Desenvolvimento — FluentBridge (`v4.0.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v5.0.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **8 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês e Chinês Mandarim** de `A1` a `C1`, com **`800` unidades**, **`1.600` guias gramaticais**, **`320` cenários IA**, **Treinador de Escrita/Traços**, **Feedback Fonético**, **Modo Shadowing**, **Caderno de Erros**, **Podcasts Curtos**, **RLS Relacional Estrito** e **Compactação Esparsa**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **12 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco** de `A1` a `C1`, com **`1.200` unidades**, **`2.400` guias gramaticais**, **`480` cenários IA**, **`72` Simulados Cronometrados Oficiais**, **Comunidade com Ligas & Fórum**, **Alfabetos Completos no Treinador de Escrita**, **Gateway de Download Web/Win/Android** e **Suíte E2E Playwright**).
 
 ---
 
@@ -19,12 +19,12 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°
 
 ---
 
-## Resumo do Estado Atual (`v4.0.0`)
+## Resumo do Estado Atual (`v5.0.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **Edge API `v3.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Nativo Assinado** (`.apk` + `.aab`) + **Windows Setup** (`FluentBridge-Setup-4.0.0.exe`) |
-| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito (`v4.0` Seção 9)**, `syncRelationalFullState`, **compactação esparsa (~95% menor no JSONB/localStorage)**, **autolimpeza de áudios > 60 dias** preservando feedbacks escritos e **Painel Admin Mestre** |
-| **Currículo, Escrita & Nivelamento CAT** | **`800` unidades** (`100`/idioma, `20`/nível A1–C1), **Treinador de Escrita & Traços** (`JA/ZH/RU`), **botão Traduzir PT em B2/C1**, **`1.600` tabelas gramaticais**, **`320` questões CAT** |
-| **Voz, Fonética, Shadowing, Erros & Podcasts** | **Feedback Fonético Silábico**, **Modo Shadowing** (`0.75x–1.15x`), **Caderno Inteligente de Erros**, **`40` Podcasts Curtos Multi-Voz**, **Tutor IA (`320` cenários + `8.000` modos)** |
-| **Verificação & CI/CD** | `npm test` (`12` arquivos / `33` testes OK) · `npx tsc --noEmit` (`0` erros) · GitHub Actions `.apk` + `.aab` |
+| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) com **Gateway de Download** + **Edge API `v5.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`FluentBridge-Setup-5.0.0.exe`) |
+| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito (`Seções 9 e 10`)**, `syncRelationalFullState`, **compactação esparsa (~95%)**, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
+| **Currículo, Escrita Completa & CAT** | **`1.200` unidades** (`12` idiomas × `100`/idioma, RTL nativo em Árabe), **Alfabetos 100% Completos (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe 4 formas, `40` Hanzi)**, **`2.400` tabelas gramaticais**, **`480` questões CAT** |
+| **Simulados, Comunidade & Voz/IA** | **`72` Simulados Cronometrados Oficiais** (18 exames, escalas e tabelas reais), **Comunidade por Idioma (Ligas + Fórum)**, **Histórico de Pronúncia**, **Shadowing**, **Caderno de Erros**, **`60` Podcasts**, **Tutor IA (`480` cenários + `12.000` modos)** |
+| **Verificação & CI/CD** | `npm test` (`14` arquivos / `38` testes OK) · `npm run test:e2e` (`7/7` Playwright OK) · `npx tsc --noEmit` (`0` erros) · GitHub Actions `.apk` + `.aab` |

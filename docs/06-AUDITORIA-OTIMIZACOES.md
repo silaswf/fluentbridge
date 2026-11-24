@@ -1,6 +1,6 @@
-# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v4.0.0`)
+# 06 — Auditoria Completa do Sistema & Plano de Otimizações (`v5.0.0`)
 
-Relatório técnico da auditoria pós-`v4.0.0` do **FluentBridge Academy**, validando **`800` unidades** (`100`/idioma), **`1.600` guias gramaticais**, **`320` cenários IA**, **Treinador de Escrita/Traços**, **Feedback Fonético**, **Modo Shadowing**, **Caderno de Erros**, **Podcasts Curtos**, **Compactação Esparsa (~95%)**, **RLS Relacional Estrito (`Seção 9`)** e **`33/33` testes Vitest** com `0` erros TypeScript.
+Relatório técnico da auditoria pós-`v5.0.0` do **FluentBridge Academy**, validando **`1.200` unidades (`12` idiomas)**, **`2.400` guias gramaticais**, **`480` cenários IA**, **`72` Simulados Cronometrados Oficiais**, **Comunidade (Ligas + Fórum)**, **Alfabetos 100% Completos**, **Gateway de Download Web/Win/Android**, **`38/38` testes Vitest (`14` suítes)** e **`7/7` testes E2E Playwright** com `0` erros TypeScript.
 
 ---
 

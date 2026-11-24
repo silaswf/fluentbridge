@@ -10,6 +10,10 @@ import { DE_TUTOR_SCENARIOS_V4 } from './tutorScenariosDeV4';
 import { RU_TUTOR_SCENARIOS_V4 } from './tutorScenariosRuV4';
 import { JA_TUTOR_SCENARIOS_V4 } from './tutorScenariosJaV4';
 import { ZH_TUTOR_SCENARIOS_V4 } from './tutorScenariosZhV4';
+import { AR_TUTOR_SCENARIOS } from './tutorScenariosAr';
+import { NL_TUTOR_SCENARIOS } from './tutorScenariosNl';
+import { AF_TUTOR_SCENARIOS } from './tutorScenariosAf';
+import { SV_TUTOR_SCENARIOS } from './tutorScenariosSv';
 
 export interface UnitRoleplayAngle {
   id: string;
@@ -1430,4 +1434,8 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
   ...RU_TUTOR_SCENARIOS_V4,
   ...JA_TUTOR_SCENARIOS_V4,
   ...ZH_TUTOR_SCENARIOS_V4,
+  ...AR_TUTOR_SCENARIOS,
+  ...NL_TUTOR_SCENARIOS,
+  ...AF_TUTOR_SCENARIOS,
+  ...SV_TUTOR_SCENARIOS,
 ];

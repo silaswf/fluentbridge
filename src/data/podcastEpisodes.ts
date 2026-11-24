@@ -493,6 +493,218 @@ const SEEDS: EpSeed[] = [
     ],
     q: '建立信任离不开什么？', opts: ['对文化语境的深入理解', '只依赖机器翻译', '减少沟通'], ans: 0,
   },
+  // AR (A1-C1)
+  {
+    lang: 'ar', d1: 'ar-SA', s1: 'ليلى', d2: 'ar-EG', s2: 'كريم', lvl: 'A1',
+    titlePt: 'Café Árabe & Boas-vindas', titleTarget: 'في المقهى',
+    themePt: 'Pedidos educados em árabe.',
+    videoTipPt: 'Busque: "Arabic coffee shop conversation for beginners".',
+    lines: [
+      [1, "صباح الخير! أريد قهوة عربية من فضلك.", "Bom dia! Quero um café árabe, por favor."],
+      [2, "أهلاً وسهلاً! تفضلي، هل تريدينها بسكر؟", "Bem-vinda! Aqui está, gostaria com açúcar?"],
+    ],
+    q: 'ماذا طلبت ليلى في المقهى؟', opts: ['قهوة عربية', 'شاي أخضر', 'عصير برتقال'], ans: 0,
+  },
+  {
+    lang: 'ar', d1: 'ar-SA', s1: 'ليلى', d2: 'ar-EG', s2: 'كريم', lvl: 'A2',
+    titlePt: 'Check-in no Hotel no Cairo', titleTarget: 'في الفندق',
+    themePt: 'Reservas e horários.',
+    videoTipPt: 'Busque: "Hotel check-in Arabic dialogue".',
+    lines: [
+      [2, "مرحباً، عندي حجز باسم كريم لمدة ثلاث ليالٍ.", "Olá, tenho uma reserva em nome de Karim por três noites."],
+      [1, "تم تأكيد الحجز، الفطور يبدأ الساعة السابعة صباحاً.", "Reserva confirmada, o café da manhã começa às sete da manhã."],
+    ],
+    q: 'كم ليلة سيقيم كريم في الفندق؟', opts: ['ثلاث ليالٍ', 'ليلة واحدة', 'أسبوع كامل'], ans: 0,
+  },
+  {
+    lang: 'ar', d1: 'ar-SA', s1: 'ليلى', d2: 'ar-EG', s2: 'كريم', lvl: 'B1',
+    titlePt: 'Na Farmácia & Saúde', titleTarget: 'في الصيدلية',
+    themePt: 'Sintomas e recomendações.',
+    videoTipPt: 'Busque: "Arabic at the pharmacy phrases".',
+    lines: [
+      [1, "أشعر بصداع خفيف منذ الصباح، ما الدواء المناسب؟", "Sinto uma leve dor de cabeça desde manhã, qual remédio é adequado?"],
+      [2, "تناولي هذه الأقراص بعد الأكل واشربي الكثير من الماء.", "Tome estes comprimidos após comer e beba bastante água."],
+    ],
+    q: 'متى يجب تناول الأقراص؟', opts: ['بعد الأكل', 'قبل النوم فقط', 'بدون ماء'], ans: 0,
+  },
+  {
+    lang: 'ar', d1: 'ar-SA', s1: 'ليلى', d2: 'ar-EG', s2: 'كريم', lvl: 'B2',
+    titlePt: 'العمل عن بُعد والتوازن الرقمي', titleTarget: 'العمل المرن',
+    themePt: 'Imersão B2 em árabe padrão.',
+    videoTipPt: 'Ouça podcasts curtos da BBC Arabic ou Al Jazeera Podcasts.',
+    lines: [
+      [2, "ساهمت الاجتماعات المكتوبة غير المتزامنة في تقليل الإرهاق اليومي وزيادة الإنتاجية.", "Reuniões escritas assíncronas ajudaram a reduzir a fadiga diária e aumentar a produtividade."],
+    ],
+    q: 'ما نتيجة الاجتماعات غير المتزامنة؟', opts: ['تقليل الإرهاق وزيادة الإنتاجية', 'إلغاء الإنترنت', 'زيادة ساعات السفر'], ans: 0,
+  },
+  {
+    lang: 'ar', d1: 'ar-SA', s1: 'ليلى', d2: 'ar-EG', s2: 'كريم', lvl: 'C1',
+    titlePt: 'الذكاء الاصطناعي واللغة العربية', titleTarget: 'مستقبل التقنية',
+    themePt: 'Análise C1 em árabe.',
+    videoTipPt: 'Ouça episódios curtos de "ثمانية" (Thmanyah).',
+    lines: [
+      [1, "رغم تطور النماذج اللغوية، يظل فهم السياق الثقافي والبلاغي أساساً للتواصل الحقيقي.", "Apesar do avanço dos modelos de linguagem, entender o contexto cultural e retórico segue essencial."],
+    ],
+    q: 'ما أساس التواصل الحقيقي حسب المتحدثة؟', opts: ['فهم السياق الثقافي والبلاغي', 'الترجمة الحرفية فقط', 'تجاهل القواعد'], ans: 0,
+  },
+  // NL (A1-C1)
+  {
+    lang: 'nl', d1: 'nl-NL', s1: 'Sanne', d2: 'nl-BE', s2: 'Bram', lvl: 'A1',
+    titlePt: 'Café & Stroopwafel em Amsterdã', titleTarget: 'Op het terras',
+    themePt: 'Pedidos educados em holandês.',
+    videoTipPt: 'Busque: "Dutch café ordering A1 listening".',
+    lines: [
+      [1, "Goedemorgen! Mag ik een koffie verkeerd en een stroopwafel, alstublieft?", "Bom dia! Posso pedir um café com leite e um stroopwafel, por favor?"],
+      [2, "Natuurlijk! Wilt u er ook een glaasje water bij?", "Claro! Gostaria também de um copinho de água?"],
+    ],
+    q: 'Wat bestelt Sanne naast de koffie?', opts: ['Een stroopwafel', 'Een broodje kaas', 'Een kopje thee'], ans: 0,
+  },
+  {
+    lang: 'nl', d1: 'nl-NL', s1: 'Sanne', d2: 'nl-BE', s2: 'Bram', lvl: 'A2',
+    titlePt: 'De Trem para Utrecht', titleTarget: 'Op het station',
+    themePt: 'Transporte ferroviário na Holanda.',
+    videoTipPt: 'Busque: "NS train announcements Dutch A2".',
+    lines: [
+      [2, "Pardon, vanaf welk spoor vertrekt de intercity naar Utrecht Centraal?", "Com licença, de qual plataforma parte o trem intercity para Utrecht?"],
+      [1, "Vanaf spoor 5, over vier minuten. Vergeet niet in te checken met uw OV-chipkaart.", "Da plataforma 5, em quatro minutos. Não esqueça de validar seu cartão OV."],
+    ],
+    q: 'Vanaf welk spoor vertrekt de trein?', opts: ['Spoor 5', 'Spoor 2', 'Spoor 9'], ans: 0,
+  },
+  {
+    lang: 'nl', d1: 'nl-NL', s1: 'Sanne', d2: 'nl-BE', s2: 'Bram', lvl: 'B1',
+    titlePt: 'Bicicleta no Dia a Dia', titleTarget: 'Fietsen in de regen',
+    themePt: 'Cultura prática nos Países Baixos.',
+    videoTipPt: 'Busque: "Easy Dutch cycling in Amsterdam".',
+    lines: [
+      [1, "In Nederland fietsen we bijna overal naartoe, zolang we een goed regenpak hebben.", "Na Holanda pedalamos para quase todo lugar, desde que tenhamos uma boa capa de chuva."],
+    ],
+    q: 'Wat is belangrijk bij regenachtig fietsen?', opts: ['Een goed regenpak', 'Een auto huren', 'Thuisblijven'], ans: 0,
+  },
+  {
+    lang: 'nl', d1: 'nl-NL', s1: 'Sanne', d2: 'nl-BE', s2: 'Bram', lvl: 'B2',
+    titlePt: 'Werk-privébalans in Nederland', titleTarget: 'Deeltijd en overleg',
+    themePt: 'Imersão B2 em holandês.',
+    videoTipPt: 'Ouça "NOS Journaal in Makkelijke Taal".',
+    lines: [
+      [2, "Veel bedrijven stimuleren flexibel werken, mits teams duidelijke afspraken maken over bereikbaarheid.", "Muitas empresas incentivam trabalho flexível, desde que equipes façam acordos claros de disponibilidade."],
+    ],
+    q: 'Wat is de voorwaarde voor flexibel werken?', opts: ['Duidelijke afspraken over bereikbaarheid', 'Geen communicatie meer', 'Alleen nachtdiensten'], ans: 0,
+  },
+  {
+    lang: 'nl', d1: 'nl-NL', s1: 'Sanne', d2: 'nl-BE', s2: 'Bram', lvl: 'C1',
+    titlePt: 'Duurzame Stedenbouw', titleTarget: 'Klimaatbestendige steden',
+    themePt: 'Análise C1 em holandês.',
+    videoTipPt: 'Ouça podcasts da NPO Radio 1.',
+    lines: [
+      [1, "Hoewel waterbeheer eeuwenoude kennis vereist, vragen hedendaagse hittegolven om meer stedelijk groen.", "Embora gestão hídrica exija saber secular, ondas de calor atuais pedem mais verde urbano."],
+    ],
+    q: 'Waarom pleit de spreker voor meer stedelijk groen?', opts: ['Vanwege hedendaagse hittegolven', 'Om wegen te verbreden', 'Voor minder parken'], ans: 0,
+  },
+  // AF (A1-C1)
+  {
+    lang: 'af', d1: 'af-ZA', s1: 'Annelize', d2: 'af-NA', s2: 'Pieter', lvl: 'A1',
+    titlePt: 'Koffie & Beskuit na Cidade do Cabo', titleTarget: 'By die koffiewinkel',
+    themePt: 'Pedidos cotidianos em africâner.',
+    videoTipPt: 'Busque: "Afrikaans greetings and café phrases".',
+    lines: [
+      [1, "Goeiemôre! Ek wil graag ’n rooibostee en ’n stuk beskuit bestel, asseblief.", "Bom dia! Gostaria de pedir um chá rooibos e um pedaço de beskuit, por favor."],
+      [2, "Met plesier! Dit kom dadelik.", "Com prazer! Já vem logo."],
+    ],
+    q: 'Wat bestel Annelize om te drinken?', opts: ['Rooibostee', 'Koffie', 'Lemoensap'], ans: 0,
+  },
+  {
+    lang: 'af', d1: 'af-ZA', s1: 'Annelize', d2: 'af-NA', s2: 'Pieter', lvl: 'A2',
+    titlePt: 'Planejando um Braai de Fim de Semana', titleTarget: 'Naweekplanne',
+    themePt: 'Cultura sul-africana e dupla negação.',
+    videoTipPt: 'Busque: "South African braai culture Afrikaans".',
+    lines: [
+      [2, "Ons gaan Saterdagmiddag braai, maar dit gaan gelukkig nie reën nie.", "Vamos fazer um churrasco sábado à tarde, mas felizmente não vai chover."],
+    ],
+    q: 'Wanneer vind die braai plaas?', opts: ['Saterdagmiddag', 'Maandagoggend', 'Vrydagnag'], ans: 0,
+  },
+  {
+    lang: 'af', d1: 'af-ZA', s1: 'Annelize', d2: 'af-NA', s2: 'Pieter', lvl: 'B1',
+    titlePt: 'Viajando pela Garden Route', titleTarget: 'Op pad na Knysna',
+    themePt: 'Direções e hospedagem.',
+    videoTipPt: 'Busque: "Garden Route travel Afrikaans vlog".',
+    lines: [
+      [1, "As ons vroeg vertrek, sal ons voor sonsondergang by die gastehuis aankom.", "Se partirmos cedo, chegaremos à pousada antes do pôr do sol."],
+    ],
+    q: 'Wanneer wil hulle by die gastehuis aankom?', opts: ['Voor sonsondergang', 'Middernag', 'Die volgende dag'], ans: 0,
+  },
+  {
+    lang: 'af', d1: 'af-ZA', s1: 'Annelize', d2: 'af-NA', s2: 'Pieter', lvl: 'B2',
+    titlePt: 'Afstandswerk & Samewerking', titleTarget: 'Moderne werkplekke',
+    themePt: 'Imersão B2 em africâner.',
+    videoTipPt: 'Ouça RSG (Radio Sonder Grense) podcasts.',
+    lines: [
+      [2, "Duidelike skriftelike terugvoer voorkom misverstande wanneer spanne oor verskillende tydsones werk.", "Feedback escrito claro evita mal-entendidos quando equipes atuam em fusos distintos."],
+    ],
+    q: 'Wat help om misverstande te voorkom?', opts: ['Duidelike skriftelike terugvoer', 'Geen vergaderings ooit', 'Langer pendeltye'], ans: 0,
+  },
+  {
+    lang: 'af', d1: 'af-ZA', s1: 'Annelize', d2: 'af-NA', s2: 'Pieter', lvl: 'C1',
+    titlePt: 'Bewaring & Ekotoerisme', titleTarget: 'Volhoubare toerisme',
+    themePt: 'Análise C1 em africâner.',
+    videoTipPt: 'Ouça documentários curtos da kykNET ou RSG.',
+    lines: [
+      [1, "Alhoewel ekotoerisme werk skep, vereis langtermyn-bewaring streng wetenskaplike monitering.", "Embora o ecoturismo gere empregos, a preservação de longo prazo exige monitoramento científico rigoroso."],
+    ],
+    q: 'Wat vereis langtermyn-bewaring volgens die spreker?', opts: ['Streng wetenskaplike monitering', 'Minder navorsing', 'Onbeperkte verkeer'], ans: 0,
+  },
+  // SV (A1-C1)
+  {
+    lang: 'sv', d1: 'sv-SE', s1: 'Freja', d2: 'sv-FI', s2: 'Mikkel', lvl: 'A1',
+    titlePt: 'Fika em Estocolmo', titleTarget: 'På kaféet',
+    themePt: 'Pedidos educados e cultura da fika.',
+    videoTipPt: 'Busque: "Swedish fika café ordering A1".',
+    lines: [
+      [1, "Hej! Jag skulle vilja ha en bryggkaffe och en kanelbulle, tack.", "Oi! Eu gostaria de um café coado e um pãozinho de canela, obrigado."],
+      [2, "Varsågod! Det blir sextiofem kronor.", "Aqui está! Ficam sessenta e cinco coroas."],
+    ],
+    q: 'Vad beställer Freja till sitt kaffe?', opts: ['En kanelbulle', 'En smörgås', 'En glass'], ans: 0,
+  },
+  {
+    lang: 'sv', d1: 'sv-SE', s1: 'Freja', d2: 'sv-FI', s2: 'Mikkel', lvl: 'A2',
+    titlePt: 'Pegando o Tunnelbana (Metrô)', titleTarget: 'I tunnelbanan',
+    themePt: 'Transporte público em sueco.',
+    videoTipPt: 'Busque: "Stockholm metro Swedish listening".',
+    lines: [
+      [2, "Ursäkta, vilket tåg går mot T-Centralen?", "Com licença, qual trem vai em direção a T-Centralen?"],
+      [1, "Ta den röda linjen från spår två, den kommer om tre minuter.", "Pegue a linha vermelha da plataforma dois, chega em três minutos."],
+    ],
+    q: 'Vilken linje ska Mikkel ta?', opts: ['Den röda linjen', 'Den blå linjen', 'Buss 4'], ans: 0,
+  },
+  {
+    lang: 'sv', d1: 'sv-SE', s1: 'Freja', d2: 'sv-FI', s2: 'Mikkel', lvl: 'B1',
+    titlePt: 'Marcando Consulta no Vårdcentral', titleTarget: 'Hos läkaren',
+    themePt: 'Saúde e atendimento na Suécia.',
+    videoTipPt: 'Busque: "Swedish healthcare vocabulary B1".',
+    lines: [
+      [1, "Jag har haft ont i halsen i tre dagar och behöver boka en tid.", "Estou com dor de garganta há três dias e preciso marcar um horário."],
+    ],
+    q: 'Hur länge har Freja haft ont i halsen?', opts: ['I tre dagar', 'I två veckor', 'Sedan i morse'], ans: 0,
+  },
+  {
+    lang: 'sv', d1: 'sv-SE', s1: 'Freja', d2: 'sv-FI', s2: 'Mikkel', lvl: 'B2',
+    titlePt: 'Platt organisation och konsensus', titleTarget: 'Svensk arbetskultur',
+    themePt: 'Imersão B2 em sueco.',
+    videoTipPt: 'Ouça "Radio Sweden på lätt svenska".',
+    lines: [
+      [2, "På svenska arbetsplatser uppmuntras öppna diskussioner innan ett slutgiltigt beslut fattas.", "Em ambientes de trabalho suecos, incentivam-se discussões abertas antes da decisão final."],
+    ],
+    q: 'Vad uppmuntras innan ett beslut fattas?', opts: ['Öppna diskussioner', 'Hemliga möten', 'Snabba order utan dialog'], ans: 0,
+  },
+  {
+    lang: 'sv', d1: 'sv-SE', s1: 'Freja', d2: 'sv-FI', s2: 'Mikkel', lvl: 'C1',
+    titlePt: 'Grön omställning i Norden', titleTarget: 'Hållbar innovation',
+    themePt: 'Análise C1 em sueco.',
+    videoTipPt: 'Ouça episódios curtos da Sveriges Radio (Ekot / Vetenskapsradion).',
+    lines: [
+      [1, "Även om elektrifieringen går snabbt kräver framtidens elnät både smart styrning och långsiktiga investeringar.", "Embora a eletrificação avance rápido, a rede elétrica futura exige gestão inteligente e investimentos de longo prazo."],
+    ],
+    q: 'Vad kräver framtidens elnät enligt talaren?', opts: ['Smart styrning och långsiktiga investeringar', 'Mindre förnybar energi', 'Stoppad forskning'], ans: 0,
+  },
 ];
 
 export const PODCAST_EPISODES: PodcastEpisode[] = SEEDS.map((s) => ({

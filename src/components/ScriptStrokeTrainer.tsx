@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff, PenTool, RotateCcw, Sparkles } from 'lucide-react';
 import {
+  ARABIC_ALPHABET,
   CHINESE_HANZI,
   JAPANESE_HIRAGANA,
   JAPANESE_KANJI,
@@ -38,6 +39,7 @@ export function ScriptStrokeTrainer({
     }
     if (languageCode === 'zh') return CHINESE_HANZI;
     if (languageCode === 'ru') return RUSSIAN_CYRILLIC;
+    if (languageCode === 'ar') return ARABIC_ALPHABET;
     return JAPANESE_HIRAGANA;
   }, [initialChars, languageCode, jaSet]);
 
@@ -105,7 +107,7 @@ export function ScriptStrokeTrainer({
   };
 
   const effectiveAudioLang: LanguageCode =
-    languageCode === 'ja' || languageCode === 'zh' || languageCode === 'ru'
+    languageCode === 'ja' || languageCode === 'zh' || languageCode === 'ru' || languageCode === 'ar'
       ? languageCode
       : 'ja';
 
@@ -119,10 +121,12 @@ export function ScriptStrokeTrainer({
               <span>
                 Treinador de Escrita &amp; Ordem de Traços (
                 {effectiveAudioLang === 'ja'
-                  ? 'Hiragana / Katakana / Kanji'
+                  ? `Hiragana (${JAPANESE_HIRAGANA.length}) / Katakana (${JAPANESE_KATAKANA.length}) / Kanji (${JAPANESE_KANJI.length})`
                   : effectiveAudioLang === 'zh'
-                    ? 'Hanzi & 4 Tons do Mandarim'
-                    : 'Alfabeto Cirílico'}
+                    ? `Hanzi (${CHINESE_HANZI.length}) & 4 Tons`
+                    : effectiveAudioLang === 'ar'
+                      ? `Alfabeto Árabe Completo (${ARABIC_ALPHABET.length} letras · RTL)`
+                      : `Alfabeto Cirílico Completo (${RUSSIAN_CYRILLIC.length} letras)`}
                 )
               </span>
             </h2>
@@ -254,6 +258,11 @@ export function ScriptStrokeTrainer({
                 <p className="mt-0.5 text-sm font-semibold text-emerald-700">
                   {activeItem.meaningPt}
                 </p>
+                {activeItem.direction === 'rtl' && (
+                  <span className="mt-1 mr-1 inline-block rounded-lg bg-cyan-100 px-2 py-0.5 text-[11px] font-bold text-cyan-900">
+                    ← RTL · Direita para Esquerda
+                  </span>
+                )}
                 {activeItem.cursiveNote && (
                   <p className="mt-1 inline-block rounded-lg bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900">
                     ⚠️ {activeItem.cursiveNote}
@@ -267,6 +276,27 @@ export function ScriptStrokeTrainer({
                 size="xs"
               />
             </div>
+
+            {activeItem.forms && (
+              <div className="grid grid-cols-4 gap-2 rounded-xl border border-indigo-200/80 bg-indigo-50/50 p-2.5 text-center" dir="rtl">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500">Isolada</p>
+                  <p className="mt-0.5 font-display text-2xl font-bold text-slate-900">{activeItem.forms.isolated}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500">Inicial</p>
+                  <p className="mt-0.5 font-display text-2xl font-bold text-slate-900">{activeItem.forms.initial}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500">Medial</p>
+                  <p className="mt-0.5 font-display text-2xl font-bold text-slate-900">{activeItem.forms.medial}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500">Final</p>
+                  <p className="mt-0.5 font-display text-2xl font-bold text-slate-900">{activeItem.forms.final}</p>
+                </div>
+              </div>
+            )}
 
             <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-3">
               <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">

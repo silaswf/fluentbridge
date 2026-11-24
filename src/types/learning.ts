@@ -6,7 +6,19 @@ export type TipCategory = 'grammar' | 'pronunciation' | 'false_friend' | 'cultur
 
 export type Accent = 'en-US' | 'en-GB';
 
-export type LanguageCode = 'en' | 'es' | 'fr' | 'de' | 'it' | 'ru' | 'ja' | 'zh';
+export type LanguageCode =
+  | 'en'
+  | 'es'
+  | 'fr'
+  | 'de'
+  | 'it'
+  | 'ru'
+  | 'ja'
+  | 'zh'
+  | 'ar'
+  | 'nl'
+  | 'af'
+  | 'sv';
 
 export type UserRole = 'teacher' | 'student';
 
@@ -366,6 +378,57 @@ export interface MistakeEntry {
   resolved?: boolean;
 }
 
+export interface PronunciationHistoryEntry {
+  id: string;
+  languageCode: LanguageCode;
+  topicId: string;
+  score: number;
+  weakWords: string[];
+  createdAt: string;
+}
+
+export interface ExamAttemptRecord {
+  id: string;
+  examId: string;
+  examTypeId: string;
+  languageCode: LanguageCode;
+  officialScoreLabel: string;
+  rawPercent: number;
+  passed: boolean;
+  sectionScores: Record<string, number>;
+  completedAt: string;
+}
+
+export interface CommunityReply {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatarColor: string;
+  authorRole: UserRole;
+  content: string;
+  correctionSuggestion?: string;
+  likes: string[];
+  createdAt: string;
+}
+
+export interface CommunityPost {
+  id: string;
+  languageCode: LanguageCode;
+  authorId: string;
+  authorName: string;
+  authorAvatarColor: string;
+  authorRole: UserRole;
+  level: CEFRLevel;
+  category: 'question' | 'correction' | 'culture' | 'milestone';
+  title: string;
+  body: string;
+  targetSnippet?: string;
+  likes: string[];
+  replies: CommunityReply[];
+  pinned?: boolean;
+  createdAt: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -390,6 +453,11 @@ export interface UserProfile {
   dailyGoalMinutes: number;
   todayMinutes: number;
   xp: number;
+  xpByLanguage?: Partial<Record<LanguageCode, number>>;
+  weeklyXpByLanguage?: Partial<Record<LanguageCode, number>>;
+  weeklyXpWeekKey?: string;
+  pronunciationHistory?: PronunciationHistoryEntry[];
+  examAttempts?: ExamAttemptRecord[];
   streakDays: number;
   completedTopicIds: string[];
   topicStepProgress?: Record<string, TopicProgressRecord>;
@@ -424,11 +492,13 @@ export interface PlatformState {
   customTopics: Topic[];
   submissions: StudentSubmission[];
   assignments?: TeacherAssignment[];
+  communityPosts?: CommunityPost[];
   cloudConfig: CloudConfig;
   deletedUserIds?: string[];
   deletedClassIds?: string[];
   deletedTopicIds?: string[];
   deletedAssignmentIds?: string[];
+  deletedCommunityPostIds?: string[];
 }
 
 export interface AITutorScenario {

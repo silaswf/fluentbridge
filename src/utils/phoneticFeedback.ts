@@ -133,6 +133,30 @@ const PHONETIC_RULES: PhoneticRule[] = [
     ruleTitle: 'Contorno dos 4 Tons do Mandarim',
     tipPt: 'Mantenha cada tom nítido: 1º alto e plano (55), 2º subindo (35), 3º descendo e subindo (214), 4º caindo firme (51).',
   },
+  {
+    languages: ['ar'],
+    pattern: /[\u062d\u0639\u062e\u063a\u0642\u0635\u0636\u0637\u0638]/,
+    ruleTitle: 'Consoantes Faríngeas e Enfáticas do Árabe',
+    tipPt: 'Diferencie ح (/ħ/ sopro forte da faringe) de هـ (/h/ leve), e ق (/q/ úvula) de ك (/k/). Em ص/ض/ط/ظ, abaixe a parte posterior da língua.',
+  },
+  {
+    languages: ['nl'],
+    pattern: /(ui|ij|ei|eu|sch|g)/i,
+    ruleTitle: 'Ditongos UI/IJ/EU e G Gutural (Holandês)',
+    tipPt: 'O "ui" mistura lábios arredondados de "o" com "i"; "ij/ei" soam próximos a "êi" aberto; e o "g/ch" vibra suave na garganta (especialmente na Holanda).',
+  },
+  {
+    languages: ['af'],
+    pattern: /(g|ui|y|aa|ee|oo|uu)/i,
+    ruleTitle: 'Vogais Longas e G Gutural (Africâner)',
+    tipPt: 'Vogais duplas ("aa", "ee", "oo", "uu") são alongadas e puras. O "g" inicial ou medial tem som gutural vibrante, e "nie ... nie" fecha o ritmo da negativa.',
+  },
+  {
+    languages: ['sv'],
+    pattern: /(sj|sk|stj|tj|kj|å|ä|ö)/i,
+    ruleTitle: 'Sons SJ/TJ e Vogais Å/Ä/Ö (Sueco)',
+    tipPt: 'O som "sj/sk(+e,i,y,ä,ö)" é um sopro arredondado único do sueco (/ɧ/). "å" soa como "ô" fechado, "ä" como "é" aberto e "ö" como "ê" com lábios arredondados.',
+  },
 ];
 
 export function analyzePhoneticFeedback(

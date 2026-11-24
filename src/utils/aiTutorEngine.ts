@@ -101,6 +101,10 @@ const LANG_NAME_EN: Record<LanguageCode, string> = {
   ru: 'Russian',
   ja: 'Japanese',
   zh: 'Mandarin Chinese',
+  ar: 'Arabic',
+  nl: 'Dutch',
+  af: 'Afrikaans',
+  sv: 'Swedish',
 };
 
 function analyzeStudentInput(
@@ -145,6 +149,18 @@ function analyzeStudentInput(
       zh: wordCount <= 3
         ? '简短回答很自然！试着补充一个原因或反问句，让对话更深入。'
         : '表达非常地道流畅！继续保持准确的声调词序和关联词。',
+      ar: wordCount <= 3
+        ? 'إجابة قصيرة جيدة! حاول توسيعها بسبب أو سؤال متابعة.'
+        : 'أسلوب طبيعي جداً! واصل استخدام الروابط والتعبيرات الدقيقة.',
+      nl: wordCount <= 3
+        ? 'Goede korte reactie! Probeer uit te breiden met een reden of vervolgvraag.'
+        : 'Natuurlijke stijl! Blijf voegwoorden en nuance gebruiken.',
+      af: wordCount <= 3
+        ? 'Goeie kort antwoord! Probeer om dit uit te brei met ’n rede of opvolgvraag.'
+        : 'Baie natuurlik! Hou aan om goeie skakelwoorde te gebruik.',
+      sv: wordCount <= 3
+        ? 'Bra kort svar! Försök att utveckla med en orsak eller följdfråga.'
+        : 'Mycket naturligt flöde! Fortsätt använda tydliga sambandsord.',
     };
     return { feedbackPt: immersionFeedback[lang] };
   }
@@ -338,6 +354,58 @@ function buildMultiLangLocalFallbackTurn(
         '非常感谢您的帮助！',
       ],
     },
+    ar: {
+      askReply: 'سؤال ممتاز! نعم، يمكننا ترتيب ذلك بكل سرور. أي موعد يناسبك أكثر؟',
+      askReplyPt: 'Ótima pergunta! Sim, podemos organizar isso com prazer. Qual horário funciona melhor?',
+      followReply: 'فهمت تماماً. هل يمكنك توضيح تفصيل صغير حتى نؤكد كل شيء بدقة؟',
+      followReplyPt: 'Entendi perfeitamente. Poderia esclarecer um pequeno detalhe para confirmarmos tudo?',
+      closeReply: 'ممتاز، تم تأكيد كل شيء! شكراً جزيلاً على الممارسة وأتمنى لك يوماً سعيداً!',
+      closeReplyPt: 'Excelente, tudo confirmado! Muito obrigado pela prática e tenha um ótimo dia!',
+      suggestions: [
+        'هذا يناسبني تماماً! هل يمكننا تأكيد الوقت الدقيق؟',
+        'للتأكد فقط، هل أحتاج إلى تجهيز أي شيء آخر؟',
+        'شكراً جزيلاً على مساعدتك اليوم!',
+      ],
+    },
+    nl: {
+      askReply: 'Goede vraag! Ja, dat kunnen we zeker regelen. Welk tijdstip past u het best?',
+      askReplyPt: 'Boa pergunta! Sim, com certeza podemos organizar isso. Qual horário é melhor?',
+      followReply: 'Dat begrijp ik helemaal. Kunt u nog één klein detail verduidelijken zodat alles klopt?',
+      followReplyPt: 'Entendo perfeitamente. Poderia esclarecer mais um pequeno detalhe para ficar tudo certo?',
+      closeReply: 'Perfect, alles staat genoteerd en bevestigd! Hartelijk dank en een fijne dag verder!',
+      closeReplyPt: 'Perfeito, tudo anotado e confirmado! Muito obrigado e ótimo dia!',
+      suggestions: [
+        'Dat komt mij goed uit! Kunnen we de exacte tijd bevestigen?',
+        'Voor de zekerheid: moet ik nog iets meenemen?',
+        'Hartelijk dank voor uw hulp vandaag!',
+      ],
+    },
+    af: {
+      askReply: 'Goeie vraag! Ja, ons kan dit beslis so reël. Watter tyd pas jou die beste?',
+      askReplyPt: 'Boa pergunta! Sim, certamente podemos organizar assim. Qual horário é melhor?',
+      followReply: 'Ek verstaan heeltemal. Kan jy net een klein detail bevestig sodat alles reg is?',
+      followReplyPt: 'Entendo perfeitamente. Pode confirmar apenas um pequeno detalhe para ficar tudo certo?',
+      closeReply: 'Uitstekend, alles is bevestig! Baie dankie vir die gesprek en geniet jou dag!',
+      closeReplyPt: 'Excelente, tudo confirmado! Muito obrigado pela conversa e aproveite o dia!',
+      suggestions: [
+        'Dit werk goed vir my! Kan ons die presiese tyd bevestig?',
+        'Net om seker te maak: moet ek enigiets anders voorberei?',
+        'Baie dankie vir jou hulp vandag!',
+      ],
+    },
+    sv: {
+      askReply: 'Bra fråga! Ja, det kan vi absolut ordna. Vilken tid passar dig bäst?',
+      askReplyPt: 'Boa pergunta! Sim, podemos organizar isso com certeza. Qual horário é melhor?',
+      followReply: 'Jag förstår precis. Skulle du kunna förtydliga en liten detalj så att allt blir rätt?',
+      followReplyPt: 'Entendo perfeitamente. Poderia esclarecer um pequeno detalhe para ficar tudo certo?',
+      closeReply: 'Perfekt, då är allt bekräftat! Tack så mycket för samtalet och ha en fin dag!',
+      closeReplyPt: 'Perfeito, tudo confirmado! Muito obrigado pela conversa e tenha um ótimo dia!',
+      suggestions: [
+        'Det passar mig utmärkt! Kan vi bekräfta exakt tid?',
+        'Bara för säkerhets skull: behöver jag förbereda något mer?',
+        'Tack så mycket för hjälpen idag!',
+      ],
+    },
   };
 
   const entry = bank[lang] ?? bank.en;
@@ -519,6 +587,10 @@ Return ONLY valid JSON:
     ru: `Привет! Потренируем тему «${topic.titleEn}» (${angle.labelEn}). Как бы вы ответили в этой ситуации?`,
     ja: `こんにちは！「${topic.titleEn}」（${angle.labelEn}）のロールプレイを始めましょう。どう対応しますか？`,
     zh: `你好！我们来练习“${topic.titleEn}”（${angle.labelEn}）。在这种情境下你会怎么回应？`,
+    ar: `مرحباً! لنتدرب على "${topic.titleEn}" (${angle.labelEn}). كيف ستتصرف في هذا الموقف؟`,
+    nl: `Hallo! Laten we "${topic.titleEn}" (${angle.labelEn}) oefenen. Hoe zou je reageren?`,
+    af: `Hallo! Kom ons oefen "${topic.titleEn}" (${angle.labelEn}). Hoe sou jy reageer?`,
+    sv: `Hej! Låt oss öva på "${topic.titleEn}" (${angle.labelEn}). Hur skulle du reagera?`,
   };
   return {
     usedGemini: false,

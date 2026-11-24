@@ -7,8 +7,14 @@ import type {
   VocabCard,
 } from '../types/learning';
 import {
+  AFRIKAANS_100_TOPICS,
+  AFRIKAANS_100_VOCAB,
+  ARABIC_100_TOPICS,
+  ARABIC_100_VOCAB,
   CHINESE_100_TOPICS,
   CHINESE_100_VOCAB,
+  DUTCH_100_TOPICS,
+  DUTCH_100_VOCAB,
   ENGLISH_ALL_TOPICS,
   ENGLISH_ALL_VOCAB,
   FRENCH_100_TOPICS,
@@ -23,6 +29,8 @@ import {
   RUSSIAN_100_VOCAB,
   SPANISH_100_TOPICS,
   SPANISH_100_VOCAB,
+  SWEDISH_100_TOPICS,
+  SWEDISH_100_VOCAB,
 } from './languages';
 
 export const BUILTIN_TOPICS: Topic[] = ENGLISH_ALL_TOPICS;
@@ -36,6 +44,10 @@ export const ALL_BUILTIN_TOPICS: Topic[] = [
   ...RUSSIAN_100_TOPICS,
   ...JAPANESE_100_TOPICS,
   ...CHINESE_100_TOPICS,
+  ...ARABIC_100_TOPICS,
+  ...DUTCH_100_TOPICS,
+  ...AFRIKAANS_100_TOPICS,
+  ...SWEDISH_100_TOPICS,
 ];
 
 export const INITIAL_VOCABULARY: VocabCard[] = ENGLISH_ALL_VOCAB;
@@ -49,6 +61,10 @@ export const ALL_INITIAL_VOCABULARY: VocabCard[] = [
   ...RUSSIAN_100_VOCAB,
   ...JAPANESE_100_VOCAB,
   ...CHINESE_100_VOCAB,
+  ...ARABIC_100_VOCAB,
+  ...DUTCH_100_VOCAB,
+  ...AFRIKAANS_100_VOCAB,
+  ...SWEDISH_100_VOCAB,
 ];
 
 export function cloneInitialVocab(): VocabCard[] {
@@ -115,6 +131,10 @@ export const INITIAL_USERS: UserProfile[] = [
       ru: 'ru-RU',
       ja: 'ja-JP',
       zh: 'zh-CN',
+      ar: 'ar-SA',
+      nl: 'nl-NL',
+      af: 'af-ZA',
+      sv: 'sv-SE',
     },
     accent: 'en-US',
     recommendedLevel: 'C1',

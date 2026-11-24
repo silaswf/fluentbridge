@@ -446,3 +446,83 @@ create policy "submissions_teacher_grade" on public.submissions
 -- drop policy if exists "Allow anon read write school state" on public.fb_school_state;
 -- create policy "Authenticated read write school state" on public.fb_school_state
 --   for all to authenticated using (auth.uid() is not null) with check (auth.uid() is not null);
+
+-- ============================================================================
+-- 10. Migração v5.0.0: 12 Idiomas (AR/NL/AF/SV), Simulados Oficiais & Comunidade
+-- ============================================================================
+
+alter table public.profiles drop constraint if exists profiles_active_language_check;
+alter table public.profiles
+  add constraint profiles_active_language_check
+  check (active_language in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv'));
+
+alter table public.assignments drop constraint if exists assignments_language_code_check;
+alter table public.assignments
+  add constraint assignments_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv'));
+
+alter table public.student_progress add column if not exists pronunciation_history jsonb not null default '[]'::jsonb;
+alter table public.student_progress add column if not exists exam_attempts jsonb not null default '[]'::jsonb;
+
+create table if not exists public.exam_attempts (
+  id text primary key,
+  student_id uuid not null references public.profiles(id) on delete cascade,
+  exam_id text not null,
+  exam_type_id text not null,
+  language_code text not null check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv')),
+  official_score_label text not null,
+  raw_percent integer not null,
+  passed boolean not null default false,
+  section_scores jsonb not null default '{}'::jsonb,
+  completed_at timestamptz not null default now()
+);
+alter table public.exam_attempts enable row level security;
+drop policy if exists "exam_attempts_read" on public.exam_attempts;
+create policy "exam_attempts_read" on public.exam_attempts
+  for select to authenticated using (student_id = auth.uid() or public.teaches_student(student_id));
+drop policy if exists "exam_attempts_insert" on public.exam_attempts;
+create policy "exam_attempts_insert" on public.exam_attempts
+  for insert to authenticated with check (student_id = auth.uid());
+
+create table if not exists public.community_posts (
+  id text primary key,
+  language_code text not null check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv')),
+  author_id uuid references public.profiles(id) on delete set null,
+  author_name text not null,
+  level text not null check (level in ('A1','A2','B1','B2','C1')),
+  category text not null check (category in ('question','correction','culture','milestone')),
+  title text not null,
+  body text not null,
+  target_snippet text,
+  likes text[] not null default '{}',
+  pinned boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table public.community_posts enable row level security;
+drop policy if exists "community_posts_select" on public.community_posts;
+create policy "community_posts_select" on public.community_posts
+  for select to authenticated using (true);
+drop policy if exists "community_posts_insert" on public.community_posts;
+create policy "community_posts_insert" on public.community_posts
+  for insert to authenticated with check (auth.uid() is not null);
+drop policy if exists "community_posts_delete" on public.community_posts;
+create policy "community_posts_delete" on public.community_posts
+  for delete to authenticated using (author_id = auth.uid() or public.is_teacher());
+
+create table if not exists public.community_replies (
+  id text primary key,
+  post_id text not null references public.community_posts(id) on delete cascade,
+  author_id uuid references public.profiles(id) on delete set null,
+  author_name text not null,
+  content text not null,
+  correction_suggestion text,
+  likes text[] not null default '{}',
+  created_at timestamptz not null default now()
+);
+alter table public.community_replies enable row level security;
+drop policy if exists "community_replies_select" on public.community_replies;
+create policy "community_replies_select" on public.community_replies
+  for select to authenticated using (true);
+drop policy if exists "community_replies_insert" on public.community_replies;
+create policy "community_replies_insert" on public.community_replies
+  for insert to authenticated with check (auth.uid() is not null);

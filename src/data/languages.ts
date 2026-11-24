@@ -24,6 +24,10 @@ import { GERMAN_V4_TOPICS, GERMAN_V4_VOCAB } from './curriculum/germanExpansionV
 import { RUSSIAN_V4_TOPICS, RUSSIAN_V4_VOCAB } from './curriculum/russianExpansionV4';
 import { JAPANESE_V4_TOPICS, JAPANESE_V4_VOCAB } from './curriculum/japaneseExpansionV4';
 import { CHINESE_V4_TOPICS, CHINESE_V4_VOCAB } from './curriculum/chineseExpansionV4';
+import { ARABIC_100_TOPICS, ARABIC_100_VOCAB } from './curriculum/arabicExpansion';
+import { DUTCH_100_TOPICS, DUTCH_100_VOCAB } from './curriculum/dutchExpansion';
+import { AFRIKAANS_100_TOPICS, AFRIKAANS_100_VOCAB } from './curriculum/afrikaansExpansion';
+import { SWEDISH_100_TOPICS, SWEDISH_100_VOCAB } from './curriculum/swedishExpansion';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -128,6 +132,58 @@ export const LANGUAGE_COURSES: LanguageCourse[] = [
     dialects: [
       { code: 'zh-CN', label: 'Mandarim (CN)', flag: '🇨🇳' },
       { code: 'zh-TW', label: 'Taiwan (TW)', flag: '🇹🇼' },
+    ],
+  },
+  {
+    code: 'ar',
+    namePt: 'Árabe',
+    nativeName: 'العربية',
+    flag: '🇸🇦',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 100 unidades (imersão B2/C1 em árabe, escrita RTL), 200 guias gramaticais, alfabeto árabe completo e vozes neurais (SA/EG).',
+    dialects: [
+      { code: 'ar-SA', label: 'Padrão (MSA)', flag: '🇸🇦' },
+      { code: 'ar-EG', label: 'Egito (EG)', flag: '🇪🇬' },
+    ],
+  },
+  {
+    code: 'nl',
+    namePt: 'Holandês',
+    nativeName: 'Nederlands',
+    flag: '🇳🇱',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 100 unidades (imersão B2/C1 em holandês), 200 guias gramaticais, ordem V2, ditongos UI/IJ e vozes neurais (NL/BE).',
+    dialects: [
+      { code: 'nl-NL', label: 'Holanda (NL)', flag: '🇳🇱' },
+      { code: 'nl-BE', label: 'Bélgica (BE)', flag: '🇧🇪' },
+    ],
+  },
+  {
+    code: 'af',
+    namePt: 'Africâner',
+    nativeName: 'Afrikaans',
+    flag: '🇿🇦',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 100 unidades (imersão B2/C1 em africâner), 200 guias gramaticais, dupla negação (nie...nie), STOMPI e vozes neurais (ZA/NA).',
+    dialects: [
+      { code: 'af-ZA', label: 'África do Sul', flag: '🇿🇦' },
+      { code: 'af-NA', label: 'Namíbia (NA)', flag: '🇳🇦' },
+    ],
+  },
+  {
+    code: 'sv',
+    namePt: 'Sueco',
+    nativeName: 'Svenska',
+    flag: '🇸🇪',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 100 unidades (imersão B2/C1 em sueco), 200 guias gramaticais, regra V2/BIFF, fika e vozes neurais (SE/FI).',
+    dialects: [
+      { code: 'sv-SE', label: 'Suécia (SE)', flag: '🇸🇪' },
+      { code: 'sv-FI', label: 'Finlândia (FI)', flag: '🇫🇮' },
     ],
   },
 ];
@@ -415,6 +471,14 @@ export {
   JAPANESE_ALL_VOCAB,
   CHINESE_ALL_TOPICS,
   CHINESE_ALL_VOCAB,
+  ARABIC_100_TOPICS,
+  ARABIC_100_VOCAB,
+  DUTCH_100_TOPICS,
+  DUTCH_100_VOCAB,
+  AFRIKAANS_100_TOPICS,
+  AFRIKAANS_100_VOCAB,
+  SWEDISH_100_TOPICS,
+  SWEDISH_100_VOCAB,
 };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
@@ -444,7 +508,15 @@ export function getCourseTopics(
                   ? JAPANESE_100_TOPICS
                   : languageCode === 'zh'
                     ? CHINESE_100_TOPICS
-                    : [];
+                    : languageCode === 'ar'
+                      ? ARABIC_100_TOPICS
+                      : languageCode === 'nl'
+                        ? DUTCH_100_TOPICS
+                        : languageCode === 'af'
+                          ? AFRIKAANS_100_TOPICS
+                          : languageCode === 'sv'
+                            ? SWEDISH_100_TOPICS
+                            : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

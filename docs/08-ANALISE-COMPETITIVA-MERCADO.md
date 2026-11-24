@@ -1,7 +1,7 @@
-# 08 — Auditoria 360° (`v4.0.0`), Saúde da Arquitetura & Análise Competitiva de Mercado
+# 08 — Auditoria 360° (`v5.0.0`), Saúde da Arquitetura & Análise Competitiva de Mercado
 
-> **Data da auditoria:** 23/11/2026 · **Versão auditada:** `v4.0.0`  
-> **Escopo:** Arquitetura e Estrutura do Código, Bundle/PWA, UI/UX, Pedagogia (`800` unidades), Segurança (RLS Relacional + Compactação Esparsa), Retenção de Áudios (60d), Voz/Fonética/Shadowing/Escrita e Comparativo de Mercado.
+> **Data da auditoria:** 23/11/2026 · **Versão auditada:** `v5.0.0`  
+> **Escopo:** Arquitetura e Estrutura do Código, Bundle/PWA, UI/UX, Pedagogia (`1.200` unidades em `12` idiomas), `72` Simulados Cronometrados Oficiais, Comunidade (Ligas + Fórum), Alfabetos Completos, Gateway de Download, Segurança (RLS Relacional + Compactação Esparsa), Suíte E2E Playwright e Estratégia para Top 1 Mundial.
 
 ---
 
@@ -50,19 +50,16 @@
 
 ## 2. Comparativo Completo com o Mercado (2026)
 
-| Dimensão | **FluentBridge v3.0** | **Duolingo** | **Busuu** | **Babbel** | **Speak** | **Cambly / Preply** |
+| Dimensão | **FluentBridge v5.0** | **Duolingo** | **Busuu** | **Babbel** | **Speak** | **Cambly / Preply** |
 | --- | --- | --- | --- | --- | --- | --- |
-| **Modelo Pedagógico** | **Híbrido (App + Professor real + IA)** | 100% Autodidata gamificado | Autodidata + correções da comunidade | Cursos estruturados por diálogo | 100% Foco em Speaking com IA | Aulas 1:1 com tutores humanos |
+| **Modelo Pedagógico** | **Híbrido (App + Professor real + IA + Comunidade)** | 100% Autodidata gamificado | Autodidata + correções da comunidade | Cursos estruturados por diálogo | 100% Foco em Speaking com IA | Aulas 1:1 com tutores humanos |
 | **Professor Humano & Turmas/VIP** | **Sim (nativo: turmas, VIP, rubrica, selos, tarefas)** | Não | Não (apenas pares) | Não (ou Babbel Live caro) | Não | Sim (pago por hora/mês) |
-| **Quantidade de Idiomas** | **8 completos (EN, ES, FR, IT, DE, RU, JA, ZH)** | 40+ | 14 | 14 | ~10 | 50+ (Preply) |
-| **Profundidade CEFR (A1–C1)** | **A1–C1 (50–60 unid./idioma + imersão B2/C1)** | A1–B2 (C1 parcial em EN) | A1–C1 | A1–C1 | A1–C1 | Depende do tutor |
-| **Subunidades & Progresso Salvo** | **Sim (`Vocab → Dicas → 4 skills`)** | Unidades lineares | Sim (referência) | Sim | Lições curtas | N/A |
-| **Vocabulário Progressivo (SRS)** | **Sim (SM-2 + desbloqueio por unidade + frase)** | Sim (lista de palavras) | Sim (revisão progressiva) | Sim (SRS) | Básico | Depende do tutor |
-| **Tutor IA Roleplay Dinâmico** | **Sim (160 cenários + 4.100 modos por unidade)** | Max (pago caro) | Limitado | Limitado | Excelente (tempo real) | Não |
-| **Foco em Brasileiros (Falsos Amigos/Fonética)** | **Sim (nativo em A1–B1 + aproximação BR)** | Genérico | Genérico | Bom para PT-BR | Genérico | Depende do tutor |
-| **Nivelamento Adaptativo (CAT)** | **Sim (40 questões/idioma, 15 etapas)** | Sim | Sim | Sim | Inicial | Informal |
-| **Offline + Desktop Windows + Android** | **Sim (PWA + Setup `.exe` + `.apk`)** | Mobile/Web | Mobile/Web | Mobile/Web | Mobile | Web/Mobile |
-| **Paywall / Limite de Vidas** | **Zero (Modo Sem Pressão ∞ livre)** | Sim (corações/Super) | Sim (Premium) | Sim (Assinatura) | Sim (Assinatura alta) | Alto custo/hora |
+| **Quantidade de Idiomas** | **12 completos (EN, ES, FR, IT, DE, RU, JA, ZH, AR, NL, AF, SV)** | 40+ | 14 | 14 | ~10 | 50+ (Preply) |
+| **Profundidade CEFR (A1–C1)** | **100 unid./idioma (`1.200` total) + imersão B2/C1 + Traduzir PT** | A1–B2 (C1 parcial) | A1–C1 | A1–C1 | A1–C1 | Depende do tutor |
+| **Simulados Oficiais Cronometrados** | **Sim (`72` simulados em 18 exames reais + tabelas CEFR)** | Não (só DET pago à parte) | Não | Não | Não | Preparação informal |
+| **Comunidade, Ligas & Correções** | **Sim (Ligas Bronze→Diamante + Fórum por idioma + correções)** | Ligas apenas (sem fórum) | Correções sociais | Não | Não | Não |
+| **Treinador de Escrita Completa** | **Sim (46 Hiragana, 46 Katakana, 33 Cirílico, 28 Árabe 4 formas RTL, 40 Hanzi)** | Hiragana/Hangul/Árabe | Não | Não | Não | Não |
+| **Testes E2E & Confiabilidade** | **38 Vitest + 7 Playwright E2E no navegador** | Interno | Interno | Interno | Interno | Interno |
 
 ---
 
@@ -121,4 +118,17 @@ Para responder diretamente sobre a saúde estrutural do projeto: **sim, a arquit
 4. **Segurança & Multiplataforma:**
    - `GEMINI_API_KEY` fica isolado no Cloudflare Worker (`fluentbridge-api`), senhas locais usam hash `fbh1:`, e a Seção 9 do `supabase_schema.sql` + `relationalSync.ts` habilita o RLS estrito por `auth.uid()`.
 5. **Único ponto de atenção futuro (manutenibilidade, não é bug):**
-   - `TeacherStudio.tsx` (~2.212 linhas) e `LessonPlayer.tsx` (~2.350 linhas) cresceram naturalmente com tantas funcionalidades. Já iniciamos a modularização em subpastas (`src/components/steps/` e `src/components/teacher/`), e em ciclos futuros (`v4.1+`) vale continuar extraindo sub-etapas isoladas desses dois arquivos apenas para manter a leitura do código ainda mais leve.
+   - `TeacherStudio.tsx` (~2.230 linhas) e `LessonPlayer.tsx` (~2.440 linhas) cresceram naturalmente com tantas funcionalidades. Já iniciamos a modularização em subpastas (`src/components/steps/` e `src/components/teacher/`), e em ciclos futuros (`v5.1+`) vale continuar extraindo sub-etapas isoladas desses dois arquivos apenas para manter a leitura do código ainda mais leve.
+
+---
+
+## 5. Opções Estratégicas para Chegar ao Top 1 Mundial (`v5.1 → v6.0`)
+
+Com a entrega de **`12` idiomas (`1.200` unidades)**, **`72` Simulados Oficiais Cronometrados**, **Comunidade com Ligas + Fórum**, **Alfabetos Completos (`46/46/30/33/28/40`)**, **Gateway de Download Multiplataforma** e **Suíte E2E Playwright (`7/7` passando)**, o FluentBridge já supera Duolingo e Busuu em **profundidade pedagógica + mentoria docente + simulados reais**. Para consolidar liderança absoluta no mercado:
+
+1. **Chamada de Voz IA Full-Duplex em Tempo Real (WebRTC / VAD Contínuo)** — igualar e superar o *Speak* / *Duolingo Max* com conversação por voz de latência sub-segundo sem apertar botão a cada turno e análise de prosódia/entoação.
+2. **Agenda Integrada & Sala de Aula ao Vivo 1:1 / Turmas** — unir o modelo *Preply/Cambly* diretamente dentro da plataforma (agendamento VIP, vídeo WebRTC/Jitsi embutido e geração automática de plano de revisão pós-aula com IA a partir dos erros reais da sessão).
+3. **Publicação Oficial nas Lojas (Google Play Store + Apple App Store / iOS)** — distribuir o `.aab` assinado na Play Store e compilar o alvo Capacitor iOS com Sign-in com Apple e Push Notifications FCM/APNs.
+4. **Imersão por Vídeo Curto Interativo com Legendas Duplas Clicáveis** — clipes curtos estilo *FluentU / Lingopie* onde o aluno clica em qualquer palavra da legenda para ver tradução, IPA e enviar direto para o deck SM-2.
+5. **Simulados de Speaking Avaliados por IA + Professor (IELTS Speaking Part 1–3 / DELF Oral)** — adicionar etapa de entrevista oral cronometrada nos simulados oficiais com transcrição Whisper, pontuação nos critérios oficiais de fluência/coerência e revisão pelo professor.
+6. **Correção Automática de Redação Estilo Exame Oficial (Rubrica Analítica IA)** — detalhar a nota do Writing dos simulados por critério oficial (*Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range*) com reescrita banda C1/C2 gerada via `/api/gemini-tutor`.

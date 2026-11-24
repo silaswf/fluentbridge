@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Award,
   CheckCircle2,
+  Download,
   GraduationCap,
   LogIn,
   ShieldCheck,
@@ -29,6 +30,7 @@ interface AuthScreenProps {
   users: UserProfile[];
   classes: ClassGroup[];
   cloudConfigured: boolean;
+  onOpenDownloadModal?: () => void;
   onLogin: (userId: string) => void;
   onEmailAuthLogin?: (
     email: string,
@@ -53,6 +55,7 @@ export function AuthScreen({
   users,
   classes,
   cloudConfigured,
+  onOpenDownloadModal,
   onLogin,
   onEmailAuthLogin,
   onGoogleLogin,
@@ -251,22 +254,34 @@ export function AuthScreen({
             </div>
 
             <h1 className="mt-5 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Inglês nas 4 Habilidades com mentoria de {teacherName}
+              12 Idiomas nas 4 Habilidades com mentoria de {teacherName}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-blue-100">
-              34 unidades completas do A1 ao C1, dicas contextuais para brasileiros, envio de áudio e escrita para correção, tutor de conversação IA com vozes US/UK naturais e certificados CEFR.
+              1.200 unidades completas do A1 ao C1, 72 simulados oficiais cronometrados, comunidade com ligas semanais, tutor de conversação IA e certificados CEFR.
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
               <div className="rounded-2xl bg-white/10 p-3.5 backdrop-blur-xs">
-                <p className="font-mono text-lg font-extrabold">34 Unidades</p>
-                <p className="text-blue-100">Listening, Reading, Speaking & Writing</p>
+                <p className="font-mono text-lg font-extrabold">1.200 Unidades</p>
+                <p className="text-blue-100">12 idiomas · A1–C1 completo</p>
               </div>
               <div className="rounded-2xl bg-white/10 p-3.5 backdrop-blur-xs">
-                <p className="font-mono text-lg font-extrabold">Tutor IA + Voz</p>
-                <p className="text-blue-100">Roleplay ao vivo e correção individual</p>
+                <p className="font-mono text-lg font-extrabold">72 Simulados</p>
+                <p className="text-blue-100">IELTS, TOEFL, DELE, DELF, JLPT+</p>
               </div>
             </div>
+
+            {onOpenDownloadModal && (
+              <button
+                type="button"
+                data-testid="auth-download-app-btn"
+                onClick={onOpenDownloadModal}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/15 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/25 cursor-pointer"
+              >
+                <Download className="h-4 w-4" />
+                <span>Baixar Aplicativo (Windows .exe / Android .apk)</span>
+              </button>
+            )}
           </div>
 
           <div className="mt-8 space-y-3 border-t border-white/15 pt-6">

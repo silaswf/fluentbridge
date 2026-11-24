@@ -208,6 +208,86 @@ function resolveTtsConfig(rawLang, rawVoice) {
       googleLang: 'zh-CN',
     };
   }
+  if (lower === 'ar-eg') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ar-EG',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following natural Egyptian Arabic text clearly, without adding any commentary:',
+      googleLang: 'ar',
+    };
+  }
+  if (lower.startsWith('ar')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'ar-SA',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following Modern Standard Arabic text clearly and naturally, without adding any commentary:',
+      googleLang: 'ar',
+    };
+  }
+  if (lower === 'nl-be') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'nl-BE',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Flemish Belgian Dutch text clearly and naturally, without adding any commentary:',
+      googleLang: 'nl',
+    };
+  }
+  if (lower.startsWith('nl')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'nl-NL',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Netherlands Dutch text clearly and naturally, without adding any commentary:',
+      googleLang: 'nl',
+    };
+  }
+  if (lower === 'af-na') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'af-NA',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Namibian Afrikaans text clearly and naturally, without adding any commentary:',
+      googleLang: 'af',
+    };
+  }
+  if (lower.startsWith('af')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'af-ZA',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard South African Afrikaans text clearly and naturally, without adding any commentary:',
+      googleLang: 'af',
+    };
+  }
+  if (lower === 'sv-fi') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'sv-FI',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: 'Read aloud the following Finland Swedish text clearly and naturally, without adding any commentary:',
+      googleLang: 'sv',
+    };
+  }
+  if (lower.startsWith('sv')) {
+    return {
+      engine: 'gemini-tts',
+      locale: 'sv-SE',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read aloud the following standard Stockholm Swedish text clearly and naturally, without adding any commentary:',
+      googleLang: 'sv',
+    };
+  }
   if (lower.startsWith('pt')) {
     return {
       engine: 'gemini-tts',
@@ -582,6 +662,10 @@ function resolveSttLanguage(rawLang) {
   if (lower.startsWith('ru')) return 'ru';
   if (lower.startsWith('ja')) return 'ja';
   if (lower.startsWith('zh')) return 'zh';
+  if (lower.startsWith('ar')) return 'ar';
+  if (lower.startsWith('nl')) return 'nl';
+  if (lower.startsWith('af')) return 'af';
+  if (lower.startsWith('sv')) return 'sv';
   if (lower.startsWith('pt')) return 'pt';
   return 'en';
 }
@@ -683,8 +767,8 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '3.0.0',
-        supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh'],
+        version: '5.0.0',
+        supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
         endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
         rateLimits: {
           ttsPerMin: 120,

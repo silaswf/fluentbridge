@@ -172,6 +172,20 @@ function normalizeTtsLocale(locale: string): string {
   if (lower.startsWith('it')) return 'it-IT';
   if (lower === 'de-at') return 'de-AT';
   if (lower.startsWith('de')) return 'de-DE';
+  if (lower === 'ru-spb') return 'ru-SPB';
+  if (lower.startsWith('ru')) return 'ru-RU';
+  if (lower === 'ja-kansai') return 'ja-KANSAI';
+  if (lower.startsWith('ja')) return 'ja-JP';
+  if (lower === 'zh-tw') return 'zh-TW';
+  if (lower.startsWith('zh')) return 'zh-CN';
+  if (lower === 'ar-eg') return 'ar-EG';
+  if (lower.startsWith('ar')) return 'ar-SA';
+  if (lower === 'nl-be') return 'nl-BE';
+  if (lower.startsWith('nl')) return 'nl-NL';
+  if (lower === 'af-na') return 'af-NA';
+  if (lower.startsWith('af')) return 'af-ZA';
+  if (lower === 'sv-fi') return 'sv-FI';
+  if (lower.startsWith('sv')) return 'sv-SE';
   if (lower.startsWith('pt')) return 'pt-BR';
   return 'en-US';
 }
@@ -271,6 +285,14 @@ export function getAllVoiceProviderLabels() {
     jaKansai: 'Gemini 2.5 Neural TTS · Kore / Puck (Kansai)',
     zhCn: 'Gemini 2.5 Neural TTS · Aoede / Charon (Mandarim CN)',
     zhTw: 'Gemini 2.5 Neural TTS · Kore / Puck (Taiwan TW)',
+    arSa: 'Gemini 2.5 Neural TTS · Aoede / Charon (Árabe Padrão)',
+    arEg: 'Gemini 2.5 Neural TTS · Kore / Puck (Árabe Egípcio)',
+    nlNl: 'Gemini 2.5 Neural TTS · Aoede / Charon (Holanda NL)',
+    nlBe: 'Gemini 2.5 Neural TTS · Kore / Puck (Bélgica/Flamengo)',
+    afZa: 'Gemini 2.5 Neural TTS · Aoede / Charon (África do Sul)',
+    afNa: 'Gemini 2.5 Neural TTS · Kore / Puck (Namíbia)',
+    svSe: 'Gemini 2.5 Neural TTS · Aoede / Charon (Suécia SE)',
+    svFi: 'Gemini 2.5 Neural TTS · Kore / Puck (Sueco Finlândia)',
   };
 }
 
@@ -703,7 +725,7 @@ function cleanToken(raw: string): string {
   return raw
     .normalize('NFKC')
     .toLowerCase()
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u0300-\u036f\u064B-\u065F\u0670]/g, '')
     .replace(/[’‘]/g, "'")
     .replace(/[^\p{L}\p{N}']/gu, '');
 }

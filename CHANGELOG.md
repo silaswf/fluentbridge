@@ -4,6 +4,31 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v5.0.0`] — 2026-11-23
+### Gateway de Download Web/Desktop/Android, Alfabetos 100% Completos, Fase 11 (72 Simulados Cronometrados Oficiais), 4 Novos Idiomas (`Árabe`, `Holandês`, `Africâner`, `Sueco` — 1.200 Unidades), Comunidade por Idioma & Suíte E2E Playwright
+- **Gateway de Download & Redirecionamento Multiplataforma (`AppDownloadGateway.tsx`, `AuthScreen.tsx`, `Sidebar.tsx`, `platform.ts`):**
+  - Tela inicial exclusiva na versão Web oferecendo download direto do **Aplicativo Windows (`FluentBridge-Setup-5.0.0.exe`)**, **APK Android (`FluentBridge-v5.0.0.apk`)** ou botão **"Continuar na Versão Web"** (com opção de lembrar escolha).
+  - Botão persistente **"Baixar App (Win/Android)"** disponível dentro da tela de login e no menu lateral/mobile.
+- **Treinador de Escrita & Traços com Alfabetos 100% Completos (`scriptTrainerData.ts`, `ScriptStrokeTrainer.tsx`):**
+  - **Japonês**: todos os **46 Hiragana** (Gojūon completo), todos os **46 Katakana** e **30 Kanji** essenciais.
+  - **Russo**: todas as **33 letras** do alfabeto cirílico (`А`–`Я`).
+  - **Árabe**: todas as **28 letras** (`ا`–`ي`) com as **4 formas contextuais** (*Isolada, Inicial, Medial, Final*) e direção **RTL (direita para esquerda)**.
+  - **Chinês Mandarim**: **40 Hanzi/radicais** + Guia Visual dos **4 Tons**.
+- **Fase 11 Completa — 72 Simulados Cronometrados Oficiais (`MockExamHub.tsx`, `examCatalog.ts`, `examScoring.ts`, `exams/*.ts`):**
+  - **4 simulados completos por tipo de exame** nos **12 idiomas** (`18` exames oficiais = `72` simulados): **IELTS Academic, TOEFL iBT, Cambridge First/Advanced, DELE, SIELE, DELF/DALF, TCF, CILS, CELI, Goethe-Zertifikat, TestDaF, TORFL/ТРКИ, JLPT, HSK, ALPT, NT2/CNaVT, Taaltoets Afrikaans e Swedex/TISUS**.
+  - Cronômetro regressivo ao vivo, limite de 2 reproduções no Listening, Writing com rubrica e cálculo na **escala oficial real** com **Tabela Oficial de Referência CEFR** explicando cada faixa.
+  - **Histórico de Pronúncia** (aba `Pronúncia` em `VocabReview.tsx`) e **Resumo Semanal da Escola** (`TeacherStudio.tsx`).
+- **4 Novos Idiomas Completos com Paridade Total (`Árabe · ar` RTL, `Holandês · nl`, `Africâner · af`, `Sueco · sv`):**
+  - Total da plataforma agora em **12 idiomas**: **`1.200` unidades (`100`/idioma)**, **`2.400` tabelas gramaticais (`200`/idioma)**, **`480` cenários IA (`40`/idioma)**, **`480` questões CAT (`40`/idioma)**, **`60` podcasts curtos (`5`/idioma)** e suporte nativo de voz/STT no Cloudflare Worker `v5.0.0`.
+- **Comunidade por Idioma (`CommunityHub.tsx`, `communityEngine.ts`, `supabase_schema.sql` Seção 10):**
+  - **Ligas Semanais** (Bronze → Diamante) ranqueadas por XP semanal no idioma ativo + **Fórum por Idioma** com categorias, pedidos de correção de frases pelos colegas (`+5 XP` por ajuda), curtidas e moderação docente.
+- **Suíte E2E Automatizada (`Playwright` em `e2e/fluentbridge.spec.ts`):**
+  - `7` testes E2E reais no Chromium validando Gateway de Download, login + modal in-app, troca de idioma (`ar` RTL, `nl`, `af`, `sv`), alfabetos completos, abertura de lição, simulado cronometrado e comunidade/fórum.
+  - A própria suíte E2E detectou e levou à correção preventiva de um bug de ordem de hooks (`React #310`) em `App.tsx`.
+- **Qualidade Validada (`v5.0.0`):** **`14` suítes / `38` testes Vitest aprovados** + **`7/7` testes Playwright E2E aprovados** + **`0` erros TypeScript**.
+
+---
+
 ## [`v4.0.0`] — 2026-11-23
 ### 800 Unidades CEFR (`100`/Idioma), 1.600 Tabelas Gramaticais, 320 Cenários IA, Treinador de Escrita & Traços, Feedback Fonético, Shadowing, Caderno de Erros, Podcasts Curtos & Migração RLS Definitiva
 - **Expansão Curricular Massiva para `800` Unidades (`100` por idioma × `8` idiomas, `20` por nível A1–C1 em todos os idiomas):**

@@ -6,8 +6,11 @@ import { getEffectiveSupabaseConfig } from '../config/appConfig';
 import type {
   ClassGroup,
   CloudConfig,
+  CommunityPost,
+  ExamAttemptRecord,
   MistakeEntry,
   PlatformState,
+  PronunciationHistoryEntry,
   StudentSubmission,
   TeacherAssignment,
   Topic,
@@ -450,6 +453,29 @@ function mergeUserProfiles(
       ...(primary.recommendedLevelByLanguage ?? {}),
     },
     xp: Math.max(localUser.xp ?? 0, remoteUser.xp ?? 0),
+    xpByLanguage: {
+      ...(secondary.xpByLanguage ?? {}),
+      ...(primary.xpByLanguage ?? {}),
+    },
+    weeklyXpByLanguage: {
+      ...(secondary.weeklyXpByLanguage ?? {}),
+      ...(primary.weeklyXpByLanguage ?? {}),
+    },
+    weeklyXpWeekKey: primary.weeklyXpWeekKey ?? secondary.weeklyXpWeekKey,
+    pronunciationHistory: (() => {
+      const map = new Map<string, PronunciationHistoryEntry>();
+      for (const h of [...(secondary.pronunciationHistory ?? []), ...(primary.pronunciationHistory ?? [])]) {
+        map.set(h.id, h);
+      }
+      return Array.from(map.values()).slice(-120);
+    })(),
+    examAttempts: (() => {
+      const map = new Map<string, ExamAttemptRecord>();
+      for (const a of [...(secondary.examAttempts ?? []), ...(primary.examAttempts ?? [])]) {
+        map.set(a.id, a);
+      }
+      return Array.from(map.values()).slice(-100);
+    })(),
     streakDays: Math.max(localUser.streakDays ?? 1, remoteUser.streakDays ?? 1),
     streakFreezes: primary.streakFreezes ?? secondary.streakFreezes ?? 1,
     lastStudyDate:
@@ -585,6 +611,10 @@ export function mergePlatformStates(
     ...(local.deletedAssignmentIds ?? []),
     ...(Array.isArray(remote.deletedAssignmentIds) ? remote.deletedAssignmentIds : []),
   ]);
+  const deletedCommunityPostIds = new Set<string>([
+    ...(local.deletedCommunityPostIds ?? []),
+    ...(Array.isArray(remote.deletedCommunityPostIds) ? remote.deletedCommunityPostIds : []),
+  ]);
 
   // Users by email (preserve master admin even if somehow listed)
   const localUsers = local.users ?? [];
@@ -655,6 +685,21 @@ export function mergePlatformStates(
     assignmentMap.set(a.id, a);
   }
 
+  // Community posts by id
+  const postMap = new Map<string, CommunityPost>();
+  const remotePosts = Array.isArray(remote.communityPosts) ? remote.communityPosts : [];
+  const orderedPosts =
+    preferSide === 'local'
+      ? [...remotePosts, ...(local.communityPosts ?? [])]
+      : [...(local.communityPosts ?? []), ...remotePosts];
+  for (const p of orderedPosts) {
+    if (!p?.id || deletedCommunityPostIds.has(p.id)) continue;
+    const prev = postMap.get(p.id);
+    if (!prev || p.replies.length >= prev.replies.length) {
+      postMap.set(p.id, p);
+    }
+  }
+
   return {
     schoolName:
       preferSide === 'remote' && remote.schoolName
@@ -674,10 +719,12 @@ export function mergePlatformStates(
     customTopics: Array.from(topicMap.values()),
     submissions: mergedSubs,
     assignments: Array.from(assignmentMap.values()),
+    communityPosts: Array.from(postMap.values()),
     deletedUserIds: Array.from(deletedUserIds),
     deletedClassIds: Array.from(deletedClassIds),
     deletedTopicIds: Array.from(deletedTopicIds),
     deletedAssignmentIds: Array.from(deletedAssignmentIds),
+    deletedCommunityPostIds: Array.from(deletedCommunityPostIds),
     cloudConfig: {
       ...(remote.cloudConfig ?? {}),
       ...local.cloudConfig,
