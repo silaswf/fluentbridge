@@ -1,7 +1,7 @@
 # 08 — Auditoria 360° (`v6.2.1`), Saúde da Arquitetura & Análise Competitiva de Mercado
 
-> **Data da auditoria:** 24/11/2026 · **Versão auditada:** `v6.2.1`  
-> **Escopo:** Estado real da plataforma (`12` idiomas, `1.236` unidades, `7.416` cards de vocabulário 100% validados, `2.400` guias gramaticais, `480` cenários de Tutor IA, `76` simulados oficiais, Chamada Full-Duplex VAD + Prosódia, Vídeos Interativos, Comunidade, Atualizador In-App via canal público `silaswf/fluentbridge-releases`), comparativo com o mercado global e plano estruturado de melhorias em todos os âmbitos (`v6.3 → v8.0`).
+> **Data da auditoria:** 24/11/2026 · **Versão atual:** `v8.1.0` (base histórica `v6.2.1`)  
+> **Atualização `v8.1.0`:** Todas as `1.236` unidades nos `12` idiomas agora entregam **`>= 10` cards de vocabulário coesos** (extraindo palavras usadas em Listening/Reading/Story/Dictation/Speaking + `inLessonLexicon.ts` + revisão em espiral), **Matching de 5 pares**, **Cloze coeso do vocabulário**, **faixa clicável "Vocabulário da unidade em uso"** em Listening/Reading/Story, **glossário Unicode no Reading** (CJK/Árabe/Cirílico), **4 simulados DET (`10–160`)**, **`60` podcasts e `36` vídeos com checkpoints**, **18 suítes / 55 testes Vitest** e **10/10 testes E2E Playwright**.
 
 ---
 

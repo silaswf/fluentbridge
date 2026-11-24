@@ -39,12 +39,11 @@ describe('FluentBridge v8.0.0 features', () => {
     }
   });
 
-  it('enrichCourseCohesion delivers cohesive 8-10 vocab cards, spiral links & script_phonics steps', async () => {
-    for (const lang of ['en', 'ja', 'ru', 'ar'] as LanguageCode[]) {
+  it('enrichCourseCohesion delivers >=10 cohesive vocab cards, 5-pair matching, cohesive cloze & script_phonics across all 12 languages', async () => {
+    for (const lang of ALL_LANGUAGES) {
       const bundle = await loadLanguageCourseData(lang);
       expect(bundle.topics.length).toBe(103);
 
-      // Every unit has >= 6 and <= 10 cohesive vocab cards, and valid examples
       const byTopic = new Map<string, typeof bundle.vocab>();
       for (const c of bundle.vocab) {
         const list = byTopic.get(c.topicId) ?? [];
@@ -58,20 +57,44 @@ describe('FluentBridge v8.0.0 features', () => {
 
       for (const t of bundle.topics) {
         const cards = byTopic.get(t.id) ?? [];
-        expect(cards.length).toBeGreaterThanOrEqual(6);
-        expect(cards.length).toBeLessThanOrEqual(10);
+        expect(
+          cards.length,
+          `Lang=${lang} Topic=${t.id} has ${cards.length} cards`,
+        ).toBeGreaterThanOrEqual(10);
         expect(t.moduleTitlePt).toBeTruthy();
+
+        const matchingStep = t.steps.find((s) => s.type === 'matching');
+        if (matchingStep && matchingStep.type === 'matching') {
+          expect(matchingStep.pairs.length).toBeGreaterThanOrEqual(5);
+        }
+
+        expect(
+          t.steps.some((s) => s.id === `${t.id}-cohesive-vocab-cloze`),
+          `Lang=${lang} Topic=${t.id} missing cohesive cloze`,
+        ).toBe(true);
+      }
+
+      if (lang === 'ja' || lang === 'it') {
+        const u0 = bundle.topics[0];
+        const readingStep = u0.steps.find((s) => s.type === 'reading');
+        expect(readingStep).toBeDefined();
+        if (readingStep && readingStep.type === 'reading') {
+          const matchedTerms = readingStep.glossary.filter((g) =>
+            readingStep.text.toLowerCase().includes(g.word.toLowerCase()),
+          );
+          expect(matchedTerms.length).toBeGreaterThanOrEqual(2);
+        }
       }
 
       // Non-Latin languages embed script_phonics steps inside units
-      if (lang !== 'en') {
+      if (lang === 'ru' || lang === 'ar' || lang === 'ja' || lang === 'zh') {
         const withScript = bundle.topics.filter((t) =>
           t.steps.some((s) => s.type === 'script_phonics'),
         );
         expect(withScript.length).toBeGreaterThanOrEqual(10);
       }
     }
-  });
+  }, 30000);
 
   it('provides 4 Duolingo English Test (DET) simulations scored on 10-160 scale', () => {
     const detMeta = EXAM_TYPES.find((e) => e.id === 'det');

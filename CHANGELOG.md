@@ -4,6 +4,18 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.1.0`] — 2026-11-24
+### >= 10 Palavras Coesas em Todas as 1.236 Unidades, Extração de Vocabulário das Atividades, Glossário Unicode no Reading & Alinhamento Profundo das Etapas
+- **Vocabulário Garantido (`>= 10` cards) em 100% das 1.236 Unidades (`inLessonLexicon.ts`, `courseCohesion.ts`):**
+  - Criado o léxico complementar `IN_LESSON_LEXICON` para todos os 12 idiomas (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`), com `100%` das frases de exemplo validadas por `exampleMatchesWord`.
+  - `enrichCourseCohesion` agora extrai palavras usadas em **Listening, Reading, Story, Dictation e Speaking** para a **Etapa 1 · Vocabulário da Unidade**, preserva revisão em espiral (`recycledLinks` + até 2 cards anteriores) e garante **no mínimo 10 cards** em todas as unidades (inclusive Unidade 0).
+- **Conexão Real Entre Vocabulário e Atividades (`courseCohesion.ts`, `LessonPlayer.tsx`):**
+  - **Matching** ampliado para `5` pares reais do vocabulário da unidade; inserção automática de um **Cloze coeso** (`Prática · Vocabulário da Unidade`) usando palavras recém-ensinadas; **Reading** com glossário expandido (até `12` termos); **Writing** com checklist cobrando uso do vocabulário da unidade; e faixa clicável **"Vocabulário da unidade em uso"** com áudio em `Listening`, `Reading` e `Story`.
+- **Destaque Unicode no Reading (`LessonPlayer.tsx`):**
+  - Substituído `\b` ASCII em `renderInteractivePassage` por delimitadores Unicode (`(?<![\p{L}\p{N}])` / correspondência direta CJK/Árabe com flags `giu`), habilitando destaque clicável em Japonês, Chinês, Árabe, Russo e idiomas acentuados.
+
+---
+
 ## [`v8.0.1`] — 2026-11-24
 ### Preservação Garantida da Etapa 1 (Vocabulário da Unidade) Após Cloud Sync
 - **Correção de hidratação (`storage.ts`, `useCloudSyncController.ts`, `App.tsx`):**

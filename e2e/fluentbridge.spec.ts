@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v8.0.1 E2E Suite', () => {
+test.describe('FluentBridge v8.1.0 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.1\/FluentBridge-Setup-8\.0\.1\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.1\.0\/FluentBridge-Setup-8\.1\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.1\/FluentBridge-v8\.0\.1\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.1\.0\/FluentBridge-v8\.1\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -121,7 +121,7 @@ test.describe('FluentBridge v8.0.1 E2E Suite', () => {
 
     await page.getByRole('button', { name: /Trilha \(/i }).click();
     await page.getByRole('button', { name: /Começar/i }).first().click();
-    await expect(page.getByText(/Etapa 1 · Vocabulário da Unidade/i)).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Etapa 1 · Vocabulário da Unidade \([1-9]\d+ palavras\)/i)).toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('button', { name: /Desbloquear palavras/i })).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -210,7 +210,7 @@ test.describe('FluentBridge v8.0.1 E2E Suite', () => {
     await page.getByRole('button', { name: /Tema da interface/i }).click();
     await page.getByRole('button', { name: /Começar/i }).first().click();
     await expect(page.locator('.fixed.inset-0.z-50')).toBeVisible({ timeout: 8000 });
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       if (await page.getByTestId('reading-passage-box').isVisible().catch(() => false)) break;
       const unlockBtn = page.getByRole('button', { name: /Desbloquear palavras/i });
       if (await unlockBtn.isVisible().catch(() => false)) {

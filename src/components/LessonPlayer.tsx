@@ -171,7 +171,19 @@ function renderInteractivePassage(
 
   const sortedGlossary = [...glossary].sort((a, b) => b.word.length - a.word.length);
   const pattern = sortedGlossary.map((g) => escapeRegExp(g.word)).join('|');
-  const regex = new RegExp(`(\\b(?:${pattern})\\b)`, 'gi');
+  const isCjkOrArabic = sortedGlossary.some((g) =>
+    /[\u3040-\u30ff\u4e00-\u9fff\u0600-\u06ff]/.test(g.word),
+  );
+  let regex: RegExp;
+  if (isCjkOrArabic) {
+    regex = new RegExp(`(${pattern})`, 'giu');
+  } else {
+    try {
+      regex = new RegExp(`(?<![\\p{L}\\p{N}])(${pattern})(?![\\p{L}\\p{N}])`, 'giu');
+    } catch {
+      regex = new RegExp(`(\\b(?:${pattern})\\b)`, 'gi');
+    }
+  }
 
   const lines = text.split('\n');
   return (
@@ -205,6 +217,48 @@ function renderInteractivePassage(
           </p>
         );
       })}
+    </div>
+  );
+}
+
+function renderUnitVocabInUseStrip(
+  text: string,
+  topicVocab: VocabCard[],
+  onPlayWord: (word: string) => void,
+) {
+  if (!text || topicVocab.length === 0) return null;
+  const lowerText = text.toLowerCase();
+  const usedCards = topicVocab
+    .filter((c) => c.word.trim().length > 0 && lowerText.includes(c.word.toLowerCase()))
+    .slice(0, 6);
+  if (usedCards.length === 0) return null;
+
+  return (
+    <div
+      data-testid="unit-vocab-in-use"
+      className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3"
+    >
+      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold tracking-wide text-slate-600 uppercase">
+        <BookOpen className="h-3.5 w-3.5 text-indigo-600" />
+        Vocabulário da unidade em uso
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {usedCards.map((card) => (
+          <button
+            key={card.id}
+            type="button"
+            onClick={() => onPlayWord(card.word)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 transition hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer"
+            title={`${card.word} — ${card.translation}`}
+          >
+            <Volume2 className="h-3 w-3 text-indigo-600" />
+            <span>{card.word}</span>
+            <span className="text-[11px] font-normal text-slate-500">
+              · {card.translation}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -1503,6 +1557,10 @@ export function LessonPlayer({
                   />
                 </div>
 
+                {renderUnitVocabInUseStrip(currentStep.audioText, topicVocab, (w) =>
+                  playAudio(w, 0.9),
+                )}
+
                 {checkedStatus !== 'idle' && (
                   <div className="mt-3">
                     <button
@@ -1639,6 +1697,12 @@ export function LessonPlayer({
                     )
                   )}
                 </div>
+
+                {renderUnitVocabInUseStrip(
+                  jaText(currentStep.text),
+                  topicVocab,
+                  (w) => playAudio(w, 0.9),
+                )}
               </div>
 
               <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
@@ -2283,20 +2347,28 @@ export function LessonPlayer({
           {(currentStep.type === 'dictation' ||
             currentStep.type === 'minimal_pairs' ||
             currentStep.type === 'story') && (
-              <Phase8StepsView
-                currentStep={currentStep}
-                languageCode={topic.languageCode}
-                level={topic.level}
-                checkedStatus={checkedStatus}
-                dictationText={dictationText}
-                setDictationText={setDictationText}
-                selectedOption={selectedOption}
-                setSelectedOption={setSelectedOption}
-                storyShowTranslations={storyShowTranslations}
-                setStoryShowTranslations={setStoryShowTranslations}
-                storyActiveLine={storyActiveLine}
-                playStoryLineAt={playStoryLineAt}
-              />
+              <>
+                <Phase8StepsView
+                  currentStep={currentStep}
+                  languageCode={topic.languageCode}
+                  level={topic.level}
+                  checkedStatus={checkedStatus}
+                  dictationText={dictationText}
+                  setDictationText={setDictationText}
+                  selectedOption={selectedOption}
+                  setSelectedOption={setSelectedOption}
+                  storyShowTranslations={storyShowTranslations}
+                  setStoryShowTranslations={setStoryShowTranslations}
+                  storyActiveLine={storyActiveLine}
+                  playStoryLineAt={playStoryLineAt}
+                />
+                {currentStep.type === 'story' &&
+                  renderUnitVocabInUseStrip(
+                    currentStep.lines.map((l) => l.text).join('\n'),
+                    topicVocab,
+                    (w) => playAudio(w, 0.9),
+                  )}
+              </>
             )}
         </div>
       </main>
