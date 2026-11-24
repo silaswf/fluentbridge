@@ -41,6 +41,8 @@ export function useCloudSyncController({
 
   const hasBootstrappedCloudRef = useRef(false);
   const skipNextCloudPushRef = useRef(false);
+  const masterVocabRef = useRef(masterVocab);
+  masterVocabRef.current = masterVocab;
 
   // Bootstrap from Supabase & hydrate Supabase OAuth / Auth user on startup
   useEffect(() => {
@@ -54,7 +56,11 @@ export function useCloudSyncController({
         skipNextCloudPushRef.current = true;
         setState((prev) => {
           const merged = mergePlatformStates(prev, pullRes.state, 'remote');
-          return normalizePlatformState(merged, defaultState, masterVocab);
+          return normalizePlatformState(
+            merged,
+            defaultState,
+            masterVocabRef.current,
+          );
         });
         setAutoSyncStatus({
           state: 'synced',

@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v8.0.0 E2E Suite', () => {
+test.describe('FluentBridge v8.0.1 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.0\/FluentBridge-Setup-8\.0\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.1\/FluentBridge-Setup-8\.0\.1\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.0\/FluentBridge-v8\.0\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.1\/FluentBridge-v8\.0\.1\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -121,9 +121,8 @@ test.describe('FluentBridge v8.0.0 E2E Suite', () => {
 
     await page.getByRole('button', { name: /Trilha \(/i }).click();
     await page.getByRole('button', { name: /Começar/i }).first().click();
-    await expect(page.getByRole('button', { name: /Continuar|Entendi|Desbloquear/i }).first()).toBeVisible({
-      timeout: 8000,
-    });
+    await expect(page.getByText(/Etapa 1 · Vocabulário da Unidade/i)).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('button', { name: /Desbloquear palavras/i })).toBeVisible();
     expect(errors).toEqual([]);
   });
 

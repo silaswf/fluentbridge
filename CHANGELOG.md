@@ -4,6 +4,14 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.0.1`] — 2026-11-24
+### Preservação Garantida da Etapa 1 (Vocabulário da Unidade) Após Cloud Sync
+- **Correção de hidratação (`storage.ts`, `useCloudSyncController.ts`, `App.tsx`):**
+  - Corrigida condição de corrida onde o bootstrap da nuvem (Supabase) normalizava o estado com `masterVocab = []` antes do carregamento dinâmico do idioma concluir, removendo temporariamente os cards de `currentUser.vocab` e ocultando a **Etapa 1 · Vocabulário da Unidade** no `LessonPlayer`.
+  - `syncUserVocab` agora preserva integralmente cards existentes quando `masterVocab` ainda está vazio ou parcial, `useCloudSyncController` usa `masterVocabRef.current` atualizado e `App.tsx` combina `loadedCourses[activeLanguage].vocab` diretamente no `courseVocab`.
+
+---
+
 ## [`v8.0.0`] — 2026-11-24
 ### Contraste Reading Dark Mode, Coesão Curricular (8–10 Cards + Revisão Espiral), Alfabetos/Kanji Progressivos nas Unidades, Toggle 100% Kana, 4 Simulados DET & Podcasts/Vídeos Integrados com Checkpoints
 - **Contraste Reading em Todas as Plataformas (`index.css`, `LessonPlayer.tsx`):**

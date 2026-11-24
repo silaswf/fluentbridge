@@ -445,10 +445,18 @@ export function App() {
 
   const courseVocab = useMemo(() => {
     if (!currentUser) return [];
+    const loadedLangVocab = loadedCourses[activeLanguage]?.vocab ?? [];
+    if (loadedLangVocab.length > 0) {
+      return mergeLoadedLanguageVocab(
+        currentUser.vocab,
+        loadedLangVocab,
+        activeLanguage,
+      ).filter((v) => (v.languageCode ?? 'en') === activeLanguage);
+    }
     return currentUser.vocab.filter(
       (v) => (v.languageCode ?? 'en') === activeLanguage,
     );
-  }, [currentUser, activeLanguage]);
+  }, [currentUser, activeLanguage, loadedCourses]);
 
   const unlockedCourseVocab = useMemo(
     () => (currentUser ? getUnlockedVocabCards(courseVocab, currentUser) : []),

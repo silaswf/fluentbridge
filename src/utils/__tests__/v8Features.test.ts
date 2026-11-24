@@ -7,6 +7,8 @@ import { PODCAST_EPISODES } from '../../data/podcastEpisodes';
 import type { LanguageCode } from '../../types/learning';
 import { gradeMockExam } from '../examScoring';
 import { toJapaneseKana } from '../japaneseKana';
+import { DEFAULT_PLATFORM_STATE } from '../../data/platformDefaults';
+import { normalizePlatformState } from '../storage';
 import { exampleMatchesWord } from '../vocabValidation';
 
 const ALL_LANGUAGES: LanguageCode[] = [
@@ -114,5 +116,55 @@ describe('FluentBridge v8.0.0 features', () => {
       }
     }
     expect(totalVideos).toBe(36);
+  });
+
+  it('normalizePlatformState preserves user vocab when masterVocab is empty or single-language', () => {
+    const sampleEn = {
+      id: 'en-v-keep',
+      topicId: 'en-t1',
+      languageCode: 'en' as const,
+      word: 'resilient',
+      translation: 'resiliente',
+      ipa: '/rɪˈzɪl.jənt/',
+      category: 'Qualities',
+      exampleEn: 'She is resilient under pressure.',
+      examplePt: 'Ela é resiliente sob pressão.',
+      strength: 'mastered' as const,
+      reviewCount: 4,
+    };
+    const sampleJa = {
+      id: 'ja-v-keep',
+      topicId: 'ja-a1-1',
+      languageCode: 'ja' as const,
+      word: 'はじめまして',
+      translation: 'Muito prazer',
+      ipa: '/hajimemashite/',
+      category: 'Saudações',
+      exampleEn: 'はじめまして、ルカスです。',
+      examplePt: 'Muito prazer, sou Lucas.',
+      strength: 'medium' as const,
+      reviewCount: 2,
+    };
+    const baseUser = {
+      ...DEFAULT_PLATFORM_STATE.users[0],
+      vocab: [sampleEn, sampleJa],
+    };
+
+    const afterEmptyMaster = normalizePlatformState(
+      { ...DEFAULT_PLATFORM_STATE, users: [baseUser] },
+      DEFAULT_PLATFORM_STATE,
+      [],
+    );
+    expect(afterEmptyMaster.users[0].vocab.length).toBe(2);
+
+    const afterSingleLangMaster = normalizePlatformState(
+      { ...DEFAULT_PLATFORM_STATE, users: [baseUser] },
+      DEFAULT_PLATFORM_STATE,
+      [{ ...sampleEn, strength: 'weak', reviewCount: 0 }],
+    );
+    expect(afterSingleLangMaster.users[0].vocab.some((v) => v.id === 'ja-v-keep')).toBe(true);
+    expect(
+      afterSingleLangMaster.users[0].vocab.find((v) => v.id === 'en-v-keep')?.strength,
+    ).toBe('mastered');
   });
 });

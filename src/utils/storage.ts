@@ -61,11 +61,21 @@ function syncUserVocab(
   userVocab: VocabCard[] | undefined,
   masterVocab: VocabCard[],
 ): VocabCard[] {
+  const savedList = userVocab ?? [];
+  if (masterVocab.length === 0) {
+    return savedList.map((c) => ({ ...c }));
+  }
+
   const existingMap = new Map<string, VocabCard>();
-  for (const card of userVocab ?? []) {
+  for (const card of savedList) {
     existingMap.set(card.id, card);
   }
-  return masterVocab.map((masterCard) => {
+  const masterIdSet = new Set(masterVocab.map((m) => m.id));
+  const preservedOtherCards = savedList
+    .filter((c) => !masterIdSet.has(c.id))
+    .map((c) => ({ ...c }));
+
+  const hydratedMaster = masterVocab.map((masterCard) => {
     const saved = existingMap.get(masterCard.id);
     if (!saved) return { ...masterCard };
     return {
@@ -79,6 +89,8 @@ function syncUserVocab(
       lapses: saved.lapses,
     };
   });
+
+  return [...preservedOtherCards, ...hydratedMaster];
 }
 
 export function normalizePlatformState(
