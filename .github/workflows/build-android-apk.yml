@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Multiplatform Release (Android & Windows)
 
 on:
   workflow_dispatch:
@@ -67,7 +67,7 @@ jobs:
         env:
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/fluentbridge-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           cd android
@@ -80,17 +80,7 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab "FluentBridge-${VERSION_LABEL}-playstore.aab"
           cp android/app/build/outputs/bundle/release/app-release.aab "FluentBridge-playstore.aab"
 
-      - name: Upload FluentBridge APK & Play Store AAB artifacts
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: FluentBridge-Android-Release
-          retention-days: 5
-          path: |
-            FluentBridge-${{ env.VERSION_LABEL }}.apk
-            FluentBridge-${{ env.VERSION_LABEL }}-playstore.aab
-
-      - name: Create or update GitHub Release
+      - name: Create or update private GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,3 +101,54 @@ jobs:
               --title "FluentBridge $GITHUB_REF_NAME" \
               --generate-notes
           fi
+
+      - name: Mirror APK to public silaswf/fluentbridge-releases
+        if: startsWith(github.ref, 'refs/tags/v') && secrets.RELEASES_REPO_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo silaswf/fluentbridge-releases >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" --repo silaswf/fluentbridge-releases --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" --repo silaswf/fluentbridge-releases --title "FluentBridge Academy $GITHUB_REF_NAME" --generate-notes
+          fi
+
+  build-windows:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-apk
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies & build Windows Setup .exe
+        shell: pwsh
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+        run: |
+          npm ci
+          npm run installer:build
+
+      - name: Upload Windows Setup .exe to private Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exe = Get-ChildItem release/FluentBridge-Setup-*.exe | Select-Object -First 1
+          gh release upload "${{ github.ref_name }}" $exe.FullName --clobber
+
+      - name: Mirror Windows Setup .exe to public silaswf/fluentbridge-releases
+        if: secrets.RELEASES_REPO_TOKEN != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+        run: |
+          $exe = Get-ChildItem release/FluentBridge-Setup-*.exe | Select-Object -First 1
+          gh release upload "${{ github.ref_name }}" $exe.FullName --repo silaswf/fluentbridge-releases --clobber

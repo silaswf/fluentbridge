@@ -48,6 +48,8 @@ import { getSelectedVoiceLabels } from '../utils/speech';
 import { ConfirmDialog } from './ConfirmDialog';
 import { DualAudioButtons } from './DualAudioButtons';
 import { VipStudentsPanel } from './teacher/VipStudentsPanel';
+import { downloadPedagogicalReportPdf } from '../utils/pedagogicalReportPdf';
+import { getLanguageCourseMeta } from '../data/platformDefaults';
 import {
   DEFAULT_BACKEND_API_URL,
   DEFAULT_TEACHER_ACCESS_CODE,
@@ -1383,6 +1385,21 @@ export function TeacherStudio({
                                     ? `Certificado ${chosenLvl} emitido`
                                     : `Emitir Cert. ${chosenLvl}`}
                                 </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  downloadPedagogicalReportPdf({
+                                    student: stu,
+                                    course: getLanguageCourseMeta(stu.activeLanguage ?? 'en'),
+                                    schoolName: state.schoolName,
+                                    teacherName: currentUser.name,
+                                  })
+                                }
+                                className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+                                title="Gerar Boletim Mensal em PDF"
+                              >
+                                <span>Boletim PDF</span>
                               </button>
                             </div>
                           </div>

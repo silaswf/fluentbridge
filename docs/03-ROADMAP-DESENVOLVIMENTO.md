@@ -84,7 +84,13 @@ Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** 
 - [x] **Comunidade por Idioma (`CommunityHub.tsx`, `communityEngine.ts`)**: Ligas Semanais (Bronze → Diamante) e Fórum com dúvidas, pedidos de correção (`+5 XP`) e moderação docente.
 - [x] **Histórico de Pronúncia & Resumo Semanal Docente** + **Suíte E2E Playwright (`7/7` passando)**.
 
-### Fase 12 — Ecossistema Mobile/iOS, Tempo Real & Lojas Oficiais (`v5.1+`)
-- [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** com Apple Sign-In e notificações push FCM/APNs.
-- [ ] **Modo Chamada IA WebRTC / Baixa Latência Contínua** com VAD automático e relatórios de prosódia/entonação.
-- [ ] **Aulas ao Vivo 1:1 & Turmas com Agenda Integrada** + **Desafios Ao Vivo em Tempo Real entre Turmas** na Comunidade.
+### Fase 12 — Ecossistema v7.0.0 (`v7.0.0`) — CONCLUÍDA (exceto Lojas & Item #18)
+- [x] **Arquitetura Modular por Idioma (`courseLoader.ts`, `platformDefaults.ts`) + Cloudflare R2 (`fluentbridge-media`) + Offline por Unidade (`offlineUnitPack.ts`) + Componentização (`VocabIntroStep.tsx`, `ClassAnalyticsTab.tsx`)**.
+- [x] **Segurança JWT no Worker (`v7.0.0`) + Schema Relacional Estendido (`supabase_schema.sql` Seção 10) + Observabilidade/Telemetria (`/api/telemetry` + `AdminPanel.tsx`)**.
+- [x] **Pedagogia & Retenção**: Cloze SM-2 (`VocabReview.tsx`), Memória Pedagógica no Tutor IA (`tutorMemory.ts`), Onboarding de Meta + Plano Semanal (`GoalOnboardingModal.tsx`, `studyPlanEngine.ts`), **144 Grammar Drills** (`GrammarDrillLab.tsx`) e **12 Graded Readers** (`60` capítulos, `GradedReadersView.tsx`).
+- [x] **Voz & Audiovisual**: Osciloscópio de **Pitch F0** em tempo real (`PitchOscilloscope.tsx`), Streaming MP4 R2 em `InteractiveVideoView.tsx` e Avaliação Fonética com confiança por palavra (`phoneticFeedback.ts`).
+- [x] **Aulas ao Vivo, Boletim PDF, Realtime & i18n/A11y**: `LiveClassroomView.tsx` (Jitsi Meet + tarefa pós-aula), `pedagogicalReportPdf.ts`, Supabase Realtime (`relationalSync.ts`), CI/CD Windows+Android+Releases, `i18n` (`PT/EN/ES`) e escala tipográfica WCAG AA.
+
+### Fase 13 — Lojas Oficiais & Monetização SaaS (Próximo Ciclo)
+- [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** e assinatura Code Signing Windows.
+- [ ] **Planos, Pagamentos (Pix/Stripe) & Multi-Escolas (Item #18)** — em definição de nomenclatura e escopo comercial.

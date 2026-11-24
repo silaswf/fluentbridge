@@ -53,15 +53,22 @@ import type {
   CEFRLevel,
   DailyQuestsProgress,
   LanguageCourse,
+  LearningGoalType,
   StudentSubmission,
   TeacherAssignment,
   Topic,
   UserProfile,
 } from '../types/learning';
 import { ConfirmDialog } from './ConfirmDialog';
+import { GoalOnboardingModal } from './GoalOnboardingModal';
 import { SkillBadge } from './SkillBadge';
 import { SkillRadar } from './SkillRadar';
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
+import {
+  downloadNextUnitsOffline,
+  getCachedOfflineUnits,
+} from '../utils/offlineUnitPack';
+import { generateWeeklyStudyPlan } from '../utils/studyPlanEngine';
 
 interface LearningPathProps {
   currentUser: UserProfile;
@@ -83,6 +90,8 @@ interface LearningPathProps {
   onGoToTeacher?: () => void;
   onOpenTeacherLink?: () => void;
   onSelfUnlinkTeacher?: () => void;
+  onSaveLearningGoal?: (goal: LearningGoalType, targetDate?: string) => void;
+  activeDialect?: string;
 }
 
 const TOPIC_ICONS = {
@@ -185,8 +194,14 @@ export function LearningPath({
   onGoToTeacher,
   onOpenTeacherLink,
   onSelfUnlinkTeacher,
+  onSaveLearningGoal,
+  activeDialect = 'en-US',
 }: LearningPathProps) {
   const [confirmUnlinkOpen, setConfirmUnlinkOpen] = useState(false);
+  const [goalModalOpen, setGoalModalOpen] = useState(false);
+  const [offlineIds, setOfflineIds] = useState<string[]>(() => getCachedOfflineUnits());
+  const [offlineStatus, setOfflineStatus] = useState<string>('');
+  const [downloadingOffline, setDownloadingOffline] = useState(false);
   const [selectedLevel, setSelectedLevel] =
     useState<'ALL' | CEFRLevel>(initialFilterLevel);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(() => {
@@ -317,7 +332,56 @@ export function LearningPath({
                 <Compass className="h-4 w-4" />
                 <span>Teste de Nivelamento Adaptativo (15 questões)</span>
               </button>
+
+              {onSaveLearningGoal && (
+                <button
+                  type="button"
+                  data-testid="goal-onboarding-btn"
+                  onClick={() => setGoalModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
+                >
+                  <Target className="h-4 w-4" />
+                  <span>
+                    {currentUser.learningGoal ? 'Editar Plano Semanal' : 'Definir Objetivo'}
+                  </span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                data-testid="download-offline-pack-btn"
+                disabled={downloadingOffline}
+                onClick={() => {
+                  setDownloadingOffline(true);
+                  setOfflineStatus('Preparando pacote offline...');
+                  void downloadNextUnitsOffline(
+                    topics,
+                    currentUser.vocab,
+                    completedTopicIds,
+                    activeDialect,
+                    3,
+                    (done, total, title) =>
+                      setOfflineStatus(`Baixando ${done}/${total}: ${title}`),
+                  ).then(({ cachedTopicIds, audioCount }) => {
+                    setOfflineIds((prev) =>
+                      Array.from(new Set([...prev, ...cachedTopicIds])),
+                    );
+                    setOfflineStatus(
+                      `${cachedTopicIds.length} unidades (${audioCount} áudios) salvas offline!`,
+                    );
+                    setDownloadingOffline(false);
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 disabled:opacity-60 cursor-pointer"
+              >
+                <span>
+                  {downloadingOffline ? offlineStatus : 'Baixar próximas 3 unidades offline'}
+                </span>
+              </button>
             </div>
+            {offlineStatus && !downloadingOffline && (
+              <p className="text-[11px] font-bold text-emerald-200">{offlineStatus}</p>
+            )}
           </div>
 
           {/* Daily Goal Mini Card */}
@@ -450,6 +514,59 @@ export function LearningPath({
           </div>
         )}
 
+      {/* Weekly Study Plan Card (Goal-Based Onboarding) */}
+      {currentUser.learningGoal && (() => {
+        const plan = generateWeeklyStudyPlan(
+          currentUser.learningGoal,
+          activeCourse.code,
+          topics,
+          completedTopicIds,
+          currentUser.dailyGoalMinutes,
+          currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
+            currentUser.recommendedLevel,
+        );
+        return (
+          <div
+            data-testid="weekly-study-plan-card"
+            className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 shadow-2xs"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-wider text-indigo-800">
+                  Plano Semanal · {plan.goalLabelPt} ({plan.weeklyTargetMinutes} min/sem)
+                </p>
+                <p className="mt-0.5 text-xs text-indigo-900/80">
+                  {plan.descriptionPt} · Exame indicado: <strong>{plan.recommendedExamHint}</strong>
+                </p>
+              </div>
+              {onSaveLearningGoal && (
+                <button
+                  type="button"
+                  onClick={() => setGoalModalOpen(true)}
+                  className="rounded-xl border border-indigo-300 bg-white px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 cursor-pointer"
+                >
+                  Ajustar meta
+                </button>
+              )}
+            </div>
+            {plan.recommendedTopics.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {plan.recommendedTopics.slice(0, 3).map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => onStartTopic(t)}
+                    className="rounded-xl border border-indigo-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:border-indigo-400 cursor-pointer"
+                  >
+                    {t.level} · {t.titlePt} →
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Main 2-column grid */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         {/* Left: Connected Lesson Path */}
@@ -581,6 +698,11 @@ export function LearningPath({
                               <Clock className="h-3.5 w-3.5" />
                               {topic.estimatedMinutes} min
                             </span>
+                            {offlineIds.includes(topic.id) && (
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                                Offline
+                              </span>
+                            )}
                             {isImmersionLevel(topic.level) && (
                               <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200">
                                 🌐 {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).badgeLabel}
@@ -963,6 +1085,16 @@ export function LearningPath({
           </aside>
         )}
       </div>
+
+      {onSaveLearningGoal && (
+        <GoalOnboardingModal
+          open={goalModalOpen}
+          currentGoal={currentUser.learningGoal}
+          currentTargetDate={currentUser.goalTargetDate}
+          onSave={onSaveLearningGoal}
+          onClose={() => setGoalModalOpen(false)}
+        />
+      )}
 
       <ConfirmDialog
         open={confirmUnlinkOpen}

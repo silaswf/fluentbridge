@@ -336,3 +336,22 @@ html.dark .hero-cta-btn {
   background-color: #FFFFFF !important;
   color: #1D4ED8 !important;
 }
+
+/* Accessibility: Font Scale & WCAG AA Keyboard Focus */
+html[data-font-scale='sm'] {
+  font-size: 14px;
+}
+html[data-font-scale='md'] {
+  font-size: 16px;
+}
+html[data-font-scale='lg'] {
+  font-size: 18px;
+}
+html[data-font-scale='xl'] {
+  font-size: 20px;
+}
+
+:focus-visible {
+  outline: 2.5px solid #2563EB;
+  outline-offset: 2px;
+}

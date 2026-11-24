@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Turtle, Volume2 } from 'lucide-react';
-import { getLanguageCourse } from '../data/languages';
+import { getLanguageCourseMeta as getLanguageCourse } from '../data/platformDefaults';
 import type { LanguageCode } from '../types/learning';
 import { speakText } from '../utils/speech';
 

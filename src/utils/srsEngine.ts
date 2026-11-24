@@ -123,3 +123,52 @@ export function sortCardsForReview(
     return (a.intervalDays ?? 0) - (b.intervalDays ?? 0);
   });
 }
+
+export function buildClozePrompt(
+  exampleEn: string,
+  rawWord: string,
+): { maskedSentence: string; answer: string } {
+  const cleanWord = rawWord
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\.{2,}|…/g, ' ')
+    .split(/[\/|,;]+/)[0]
+    .trim();
+
+  const stripped = cleanWord
+    .replace(
+      /^(to|att|a|an|the|el|la|los|las|un|una|le|les|l'|il|lo|der|die|das|ein|eine|de|het|een|en|ett|'n)\s+/i,
+      '',
+    )
+    .trim();
+
+  const candidates = [cleanWord, stripped].filter((c) => c.length >= 2);
+  for (const cand of candidates) {
+    const escaped = cand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(escaped, 'i');
+    if (re.test(exampleEn)) {
+      return {
+        maskedSentence: exampleEn.replace(re, '______'),
+        answer: cand,
+      };
+    }
+  }
+
+  const tokens = stripped.split(/\s+/).filter((t) => t.length >= 4);
+  if (tokens.length > 0) {
+    const stem = tokens[0].slice(0, Math.max(3, tokens[0].length - 2));
+    const stemRe = new RegExp(`\\b${stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\p{L}]*`, 'iu');
+    const m = exampleEn.match(stemRe);
+    if (m) {
+      return {
+        maskedSentence: exampleEn.replace(stemRe, '______'),
+        answer: m[0],
+      };
+    }
+  }
+
+  return {
+    maskedSentence: `${exampleEn} ( ______ )`,
+    answer: stripped || cleanWord,
+  };
+}

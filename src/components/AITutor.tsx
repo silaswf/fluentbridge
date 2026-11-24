@@ -57,6 +57,7 @@ interface AITutorProps {
   geminiApiKey?: string;
   topics?: Topic[];
   initialTopic?: Topic | null;
+  pedagogicalMemory?: string;
   onClearInitialTopic?: () => void;
   onCompleteSession: (xpEarned: number) => void;
 }
@@ -68,6 +69,7 @@ export function AITutor({
   geminiApiKey,
   topics = [],
   initialTopic,
+  pedagogicalMemory,
   onClearInitialTopic,
   onCompleteSession,
 }: AITutorProps) {
@@ -206,6 +208,7 @@ export function AITutor({
       history: messages,
       userText: text,
       geminiApiKey,
+      pedagogicalMemory,
     });
 
     setUsedGeminiSession(result.usedGemini);

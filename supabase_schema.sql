@@ -526,3 +526,95 @@ create policy "community_replies_select" on public.community_replies
 drop policy if exists "community_replies_insert" on public.community_replies;
 create policy "community_replies_insert" on public.community_replies
   for insert to authenticated with check (auth.uid() is not null);
+
+-- ============================================================================
+-- 10. Migração v7.0.0: Aulas ao Vivo, Vocab SRS Relacional, Telemetria & Realtime
+-- ============================================================================
+
+alter table public.profiles add column if not exists learning_goal text;
+alter table public.profiles add column if not exists goal_target_date text;
+
+create table if not exists public.live_sessions (
+  id text primary key,
+  language_code text not null check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv')),
+  teacher_id uuid references public.profiles(id) on delete set null,
+  teacher_name text not null,
+  student_id uuid references public.profiles(id) on delete cascade,
+  class_id uuid references public.classes(id) on delete cascade,
+  title text not null,
+  scheduled_at text not null,
+  duration_min integer not null default 50,
+  room_slug text not null,
+  status text not null default 'scheduled' check (status in ('scheduled','live','completed','cancelled')),
+  notes text not null default '',
+  generated_assignment_id text,
+  created_at timestamptz not null default now()
+);
+alter table public.live_sessions enable row level security;
+drop policy if exists "live_sessions_read" on public.live_sessions;
+create policy "live_sessions_read" on public.live_sessions
+  for select to authenticated using (
+    teacher_id = auth.uid() or student_id = auth.uid() or public.is_teacher()
+  );
+drop policy if exists "live_sessions_manage" on public.live_sessions;
+create policy "live_sessions_manage" on public.live_sessions
+  for all to authenticated using (
+    teacher_id = auth.uid() or public.is_teacher()
+  ) with check (
+    teacher_id = auth.uid() or public.is_teacher()
+  );
+
+create table if not exists public.vocab_progress (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  card_id text not null,
+  language_code text not null check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv')),
+  strength text not null default 'weak',
+  review_count integer not null default 0,
+  next_review_at text,
+  interval_days integer,
+  ease_factor numeric,
+  repetitions integer,
+  lapses integer,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, card_id)
+);
+alter table public.vocab_progress enable row level security;
+drop policy if exists "vocab_progress_own" on public.vocab_progress;
+create policy "vocab_progress_own" on public.vocab_progress
+  for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create table if not exists public.error_telemetry (
+  id text primary key,
+  user_id uuid references public.profiles(id) on delete set null,
+  message text not null,
+  stack text,
+  route text,
+  version text,
+  platform text,
+  created_at timestamptz not null default now()
+);
+alter table public.error_telemetry enable row level security;
+drop policy if exists "error_telemetry_insert" on public.error_telemetry;
+create policy "error_telemetry_insert" on public.error_telemetry
+  for insert to authenticated with check (true);
+drop policy if exists "error_telemetry_teacher_read" on public.error_telemetry;
+create policy "error_telemetry_teacher_read" on public.error_telemetry
+  for select to authenticated using (public.is_teacher());
+
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    begin
+      alter publication supabase_realtime add table public.community_posts;
+    exception when duplicate_object then null;
+    end;
+    begin
+      alter publication supabase_realtime add table public.community_replies;
+    exception when duplicate_object then null;
+    end;
+    begin
+      alter publication supabase_realtime add table public.live_sessions;
+    exception when duplicate_object then null;
+    end;
+  end if;
+end $$;

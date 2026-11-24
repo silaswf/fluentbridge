@@ -12,6 +12,8 @@ import {
 import { InteractiveVideoView } from './InteractiveVideoView';
 import { PodcastImmersionView } from './PodcastImmersionView';
 import { ScriptStrokeTrainer } from './ScriptStrokeTrainer';
+import { GrammarDrillLab } from './GrammarDrillLab';
+import { GradedReadersView } from './GradedReadersView';
 import {
   getGrammarGuideByLanguage,
   type GrammarReferenceEntry,
@@ -30,6 +32,7 @@ import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 interface TipsLibraryProps {
   topics: Topic[];
   languageCode?: LanguageCode;
+  activeDialect?: string;
   savedWords?: Set<string>;
   onSaveWordToDeck?: (payload: {
     word: string;
@@ -39,6 +42,16 @@ interface TipsLibraryProps {
     examplePt: string;
     category: string;
   }) => void;
+  onRecordMistake?: (payload: {
+    topicId: string;
+    topicTitle: string;
+    skill: 'listening' | 'reading' | 'speaking' | 'writing' | 'grammar' | 'vocab';
+    prompt: string;
+    studentAnswer: string;
+    expectedAnswer: string;
+    explanation: string;
+  }) => void;
+  onEarnXp?: (xp: number) => void;
   onPracticeTopic: (topic: Topic) => void;
   onPracticeTopicWithAI?: (topic: Topic) => void;
 }
@@ -59,12 +72,17 @@ const FILTER_OPTIONS: { id: 'all' | TipCategory; label: string }[] = [
 export function TipsLibrary({
   topics,
   languageCode = 'en',
+  activeDialect = 'en-US',
   savedWords,
   onSaveWordToDeck,
+  onRecordMistake,
+  onEarnXp,
   onPracticeTopic,
   onPracticeTopicWithAI,
 }: TipsLibraryProps) {
-  const [viewMode, setViewMode] = useState<'tips' | 'guide' | 'scripts' | 'podcasts' | 'videos'>('tips');
+  const [viewMode, setViewMode] = useState<
+    'tips' | 'guide' | 'drills' | 'readers' | 'scripts' | 'podcasts' | 'videos'
+  >('tips');
   const [showB2C1Translation, setShowB2C1Translation] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<'all' | TipCategory>('all');
@@ -176,6 +194,30 @@ export function TipsLibrary({
             >
               <BookOpen className="h-3.5 w-3.5" />
               <span>Guia ({grammarGuide.length})</span>
+            </button>
+            <button
+              type="button"
+              data-testid="tips-tab-drills"
+              onClick={() => setViewMode('drills')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'drills'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span>Treino Gramatical</span>
+            </button>
+            <button
+              type="button"
+              data-testid="tips-tab-readers"
+              onClick={() => setViewMode('readers')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'readers'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span>Leitura Graduada</span>
             </button>
             <button
               type="button"
@@ -504,6 +546,34 @@ export function TipsLibrary({
             </article>
           ))}
         </div>
+      )}
+
+      {viewMode === 'drills' && (
+        <GrammarDrillLab
+          languageCode={languageCode}
+          onRecordMistake={onRecordMistake}
+          onEarnXp={onEarnXp}
+        />
+      )}
+
+      {viewMode === 'readers' && (
+        <GradedReadersView
+          languageCode={languageCode}
+          dialectCode={activeDialect}
+          onAddWordToSrs={
+            onSaveWordToDeck
+              ? (c) =>
+                  onSaveWordToDeck({
+                    word: c.word,
+                    translation: c.translation,
+                    ipa: c.ipa,
+                    exampleEn: c.exampleEn,
+                    examplePt: c.examplePt,
+                    category: 'Leitura Graduada',
+                  })
+              : undefined
+          }
+        />
       )}
 
       {viewMode === 'scripts' && (

@@ -8,6 +8,7 @@ import type {
   CloudConfig,
   CommunityPost,
   ExamAttemptRecord,
+  LiveSessionRecord,
   MistakeEntry,
   PlatformState,
   PronunciationHistoryEntry,
@@ -259,6 +260,18 @@ export function getSupabaseClient(url: string, anonKey: string): SupabaseClient 
   });
   cachedClientKey = cacheKey;
   return cachedClient;
+}
+
+export async function getSupabaseAccessToken(): Promise<string | null> {
+  try {
+    const cfg = getEffectiveSupabaseConfig();
+    if (!cfg.url || !cfg.anonKey) return null;
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data } = await client.auth.getSession();
+    return data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function mapSupabaseUserToInfo(user: {
@@ -615,6 +628,10 @@ export function mergePlatformStates(
     ...(local.deletedCommunityPostIds ?? []),
     ...(Array.isArray(remote.deletedCommunityPostIds) ? remote.deletedCommunityPostIds : []),
   ]);
+  const deletedLiveSessionIds = new Set<string>([
+    ...(local.deletedLiveSessionIds ?? []),
+    ...(Array.isArray(remote.deletedLiveSessionIds) ? remote.deletedLiveSessionIds : []),
+  ]);
 
   // Users by email (preserve master admin even if somehow listed)
   const localUsers = local.users ?? [];
@@ -700,6 +717,21 @@ export function mergePlatformStates(
     }
   }
 
+  // Live classroom sessions by id
+  const liveSessionMap = new Map<string, LiveSessionRecord>();
+  const remoteLiveSessions = Array.isArray(remote.liveSessions) ? remote.liveSessions : [];
+  const orderedLiveSessions =
+    preferSide === 'local'
+      ? [...remoteLiveSessions, ...(local.liveSessions ?? [])]
+      : [...(local.liveSessions ?? []), ...remoteLiveSessions];
+  for (const s of orderedLiveSessions) {
+    if (!s?.id || deletedLiveSessionIds.has(s.id)) continue;
+    const prev = liveSessionMap.get(s.id);
+    if (!prev || (s.notes?.length ?? 0) >= (prev.notes?.length ?? 0)) {
+      liveSessionMap.set(s.id, s);
+    }
+  }
+
   return {
     schoolName:
       preferSide === 'remote' && remote.schoolName
@@ -720,11 +752,13 @@ export function mergePlatformStates(
     submissions: mergedSubs,
     assignments: Array.from(assignmentMap.values()),
     communityPosts: Array.from(postMap.values()),
+    liveSessions: Array.from(liveSessionMap.values()),
     deletedUserIds: Array.from(deletedUserIds),
     deletedClassIds: Array.from(deletedClassIds),
     deletedTopicIds: Array.from(deletedTopicIds),
     deletedAssignmentIds: Array.from(deletedAssignmentIds),
     deletedCommunityPostIds: Array.from(deletedCommunityPostIds),
+    deletedLiveSessionIds: Array.from(deletedLiveSessionIds),
     cloudConfig: {
       ...(remote.cloudConfig ?? {}),
       ...local.cloudConfig,

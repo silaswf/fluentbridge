@@ -18,7 +18,9 @@ import {
   type InteractiveVideoClip,
   type VideoWordToken,
 } from '../data/interactiveVideos';
+import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { LanguageCode } from '../types/learning';
+import { getSupabaseAccessToken } from '../utils/cloudSync';
 import { isRtlLanguage } from '../utils/platform';
 import { speakText, stopSpeaking } from '../utils/speech';
 
@@ -55,6 +57,9 @@ export function InteractiveVideoView({
     line: InteractiveSubtitleLine;
   } | null>(null);
   const [recentlySaved, setRecentlySaved] = useState<Set<string>>(new Set());
+  const [r2VideoMap, setR2VideoMap] = useState<Record<string, string>>({});
+  const [uploadMsg, setUploadMsg] = useState('');
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const cancelRef = useRef(false);
   const loopRef = useRef(loopLine);
@@ -145,6 +150,36 @@ export function InteractiveVideoView({
       recentlySaved.has(inspected.token.lemma.toLowerCase())
     : false;
 
+  const activeVideoUrl = r2VideoMap[activeClip.id] || activeClip.videoUrl;
+
+  const handleUploadR2Video = async (file: File) => {
+    const apiBase = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
+    if (!apiBase) return;
+    setUploadMsg('Enviando MP4 para o Cloudflare R2...');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('key', `${activeClip.id}-${file.name}`);
+      const token = await getSupabaseAccessToken();
+      const res = await fetch(`${apiBase}/api/media/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: form,
+      });
+      if (!res.ok) {
+        setUploadMsg(`Falha no envio (${res.status}).`);
+        return;
+      }
+      const data = (await res.json()) as { ok?: boolean; url?: string };
+      if (data.ok && data.url) {
+        setR2VideoMap((prev) => ({ ...prev, [activeClip.id]: data.url! }));
+        setUploadMsg('Vídeo hospedado no Cloudflare R2!');
+      }
+    } catch {
+      setUploadMsg('Erro de rede ao enviar vídeo.');
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Header Banner */}
@@ -229,6 +264,18 @@ export function InteractiveVideoView({
             </div>
 
             <div className="flex items-center gap-1.5">
+              <label className="inline-flex items-center gap-1 rounded-xl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-white/25 cursor-pointer">
+                <span>Subir MP4 (R2)</span>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void handleUploadR2Video(f);
+                  }}
+                />
+              </label>
               <button
                 type="button"
                 onClick={() => setShowPtSubtitle((v) => !v)}
@@ -249,6 +296,27 @@ export function InteractiveVideoView({
               </button>
             </div>
           </div>
+
+          {/* Optional Real MP4/WebM Video Stream from Cloudflare R2 */}
+          {activeVideoUrl && (
+            <video
+              ref={videoRef}
+              src={activeVideoUrl}
+              controls
+              playsInline
+              onTimeUpdate={(e) => {
+                const vid = e.currentTarget;
+                if (!vid.duration || activeClip.lines.length === 0) return;
+                const ratio = vid.currentTime / vid.duration;
+                const nextIdx = Math.min(
+                  activeClip.lines.length - 1,
+                  Math.floor(ratio * activeClip.lines.length),
+                );
+                if (nextIdx !== currentLineIdx) setCurrentLineIdx(nextIdx);
+              }}
+              className="mt-3 max-h-60 w-full rounded-2xl border border-white/15 bg-black"
+            />
+          )}
 
           {/* Interactive Dual Subtitle Stage */}
           {activeLine && (
@@ -277,6 +345,11 @@ export function InteractiveVideoView({
               {showPtSubtitle && (
                 <p className="mt-2 text-xs font-medium text-slate-300">
                   {activeLine.textPt}
+                </p>
+              )}
+              {uploadMsg && (
+                <p className="mt-2 text-[11px] font-bold text-emerald-300">
+                  {uploadMsg}
                 </p>
               )}
             </div>

@@ -14,8 +14,29 @@ export default defineConfig(({ command }) => ({
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        globIgnores: [
+          '**/curriculum-*.js',
+          '**/vocab-exp-*.js',
+          '**/grammar-*.js',
+          '**/exams-*.js',
+          '**/tutor-scenarios*.js',
+          '**/placement-bank*.js',
+        ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: 'index.html',
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/.*\.js$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fb-dynamic-chunks-v7',
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+        ],
       },
     }),
   ],

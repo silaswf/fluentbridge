@@ -4,6 +4,30 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v7.0.0`] — 2026-11-24
+### Arquitetura Modular por Idioma, Cloudflare R2, Cloze SM-2, Memória IA, Treino Gramatical, Leitura Graduada, F0 Pitch, Aulas ao Vivo, Boletim PDF, CI/CD & i18n/A11y
+- **Performance, Modularidade & Offline (`courseLoader.ts`, `platformDefaults.ts`, `offlineUnitPack.ts`, `vite.config.ts`):**
+  - Carregamento dinâmico sob demanda por idioma (`loadLanguageCourseData`) com preservação integral do progresso SRS (`mergeLoadedLanguageVocab`).
+  - Modo Offline por Unidade ("Baixar próximas 3 unidades offline") com cache em IndexedDB.
+  - Componentização de `VocabIntroStep.tsx` e `ClassAnalyticsTab.tsx`.
+- **Cloudflare R2, Segurança JWT & Observabilidade (`worker.js`, `wrangler.jsonc`, `telemetry.ts`, `AdminPanel.tsx`):**
+  - Cache persistente de áudios TTS neurais e upload/streaming MP4 no bucket R2 `fluentbridge-media`.
+  - Validação híbrida de JWT Supabase no Cloudflare Worker + endpoint `/api/telemetry` e painel de erros/R2 no `AdminPanel`.
+- **Pedagogia, Retenção & Fluência (`VocabReview.tsx`, `tutorMemory.ts`, `GoalOnboardingModal.tsx`, `studyPlanEngine.ts`, `GrammarDrillLab.tsx`, `GradedReadersView.tsx`, `PitchOscilloscope.tsx`):**
+  - Modo **Cloze · Lacuna** no deck SM-2 (`buildClozePrompt`), Memória Pedagógica contínua no Tutor IA (`buildPedagogicalMemoryContext`), Onboarding de Meta + Plano Semanal Automático (`generateWeeklyStudyPlan`).
+  - **144 Grammar Drills** (`12` por idioma) e **12 Graded Readers** (`60` capítulos com áudio contínuo e envio ao SM-2).
+  - Osciloscópio de **Pitch F0** em tempo real (`detectPitchHz`) para Mandarim e Japonês + feedback fonético palavra a palavra.
+  - Suporte a streaming MP4 real via Cloudflare R2 no `InteractiveVideoView`.
+- **Aulas ao Vivo, Boletim PDF, Realtime & i18n/A11y (`LiveClassroomView.tsx`, `pedagogicalReportPdf.ts`, `relationalSync.ts`, `i18n.ts`, `accessibility.ts`):**
+  - Sala de Aula ao Vivo via Jitsi Meet com agenda VIP/Turma, notas de aula e gerador de tarefa pós-aula.
+  - Exportação de **Boletim Pedagógico (PDF)** no Perfil/Certificados e no Estúdio do Professor.
+  - Supabase Realtime para Comunidade e Aulas ao Vivo (`supabase_schema.sql` Seção 10).
+  - Interface multi-idioma (`PT` / `EN` / `ES`) + escala tipográfica (`sm` / `md` / `lg` / `xl`), `:focus-visible` WCAG AA e skip-to-content.
+- **CI/CD & Publicação Multiplataforma (`.github/workflows/build-android-apk.yml`, `scripts/sync-version-manifest.mjs`):**
+  - Sincronização automatizada de `public/version.json`, build paralelo Android + Windows NSIS e espelhamento para `silaswf/fluentbridge-releases`.
+
+---
+
 ## [`v6.2.1`] — 2026-11-24
 ### Canal Público de Distribuição (`silaswf/fluentbridge-releases`) para Downloads e Atualização In-App
 - Criado o repositório público dedicado `silaswf/fluentbridge-releases` para distribuição dos instaladores oficiais (`.exe` e `.apk`), mantendo o código-fonte 100% privado em `silaswf/fluentbridge`.

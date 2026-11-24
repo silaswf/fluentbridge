@@ -29,6 +29,7 @@ export interface InteractiveVideoClip {
   durationLabel: string;
   gradientClass: string;
   sceneSettingPt: string;
+  videoUrl?: string;
   lines: InteractiveSubtitleLine[];
 }
 

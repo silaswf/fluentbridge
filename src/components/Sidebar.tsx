@@ -23,13 +23,16 @@ import {
   Sparkles,
   Sun,
   Users,
+  Video,
   X,
   Zap,
 } from 'lucide-react';
 import { isMasterAdminEmail } from '../config/appConfig';
-import { LANGUAGE_COURSES } from '../data/languages';
+import { LANGUAGE_COURSES_META as LANGUAGE_COURSES } from '../data/platformDefaults';
 import type { LanguageCode, LanguageCourse, UserProfile } from '../types/learning';
 import type { ThemeMode } from '../utils/theme';
+import type { FontScale } from '../utils/accessibility';
+import { tUi, type UiLocale } from '../utils/i18n';
 
 const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string }> = {
   en: { symbol: 'EN', accent: 'bg-blue-600 text-white' },
@@ -52,6 +55,7 @@ export type NavView =
   | 'review'
   | 'exams'
   | 'community'
+  | 'live'
   | 'tips'
   | 'certificates'
   | 'teacher'
@@ -78,6 +82,10 @@ interface SidebarProps {
   onOpenUpdateModal?: () => void;
   hasAppUpdate?: boolean;
   latestAppVersion?: string;
+  uiLocale?: UiLocale;
+  onChangeUiLocale?: (loc: UiLocale) => void;
+  fontScale?: FontScale;
+  onChangeFontScale?: (scale: FontScale) => void;
   onLogout: () => void;
 }
 
@@ -102,6 +110,10 @@ export function Sidebar({
   onOpenUpdateModal,
   hasAppUpdate,
   latestAppVersion,
+  uiLocale = 'pt',
+  onChangeUiLocale,
+  fontScale = 'md',
+  onChangeFontScale,
   onLogout,
 }: SidebarProps) {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -189,13 +201,19 @@ export function Sidebar({
     },
     {
       id: 'community',
-      label: 'Comunidade & Ligas',
+      label: tUi(uiLocale, 'nav.community'),
       shortLabel: 'Comunidade',
       Icon: Users,
     },
     {
+      id: 'live',
+      label: tUi(uiLocale, 'nav.live'),
+      shortLabel: 'Ao Vivo',
+      Icon: Video,
+    },
+    {
       id: 'tips',
-      label: 'Central & Guia',
+      label: uiLocale === 'pt' ? 'Central & Guia' : tUi(uiLocale, 'nav.tips'),
       shortLabel: 'Dicas',
       Icon: Lightbulb,
     },
@@ -518,6 +536,66 @@ export function Sidebar({
               </span>
             </button>
 
+            {(onChangeUiLocale || onChangeFontScale) && (
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
+                {onChangeUiLocale && (
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] font-semibold text-slate-600">
+                      {tUi(uiLocale, 'a11y.uiLang')}
+                    </span>
+                    <div className="flex gap-1">
+                      {(['pt', 'en', 'es'] as const).map((loc) => (
+                        <button
+                          key={loc}
+                          type="button"
+                          data-testid={`ui-locale-${loc}`}
+                          onClick={() => onChangeUiLocale(loc)}
+                          className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase cursor-pointer ${
+                            uiLocale === loc
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                          }`}
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {onChangeFontScale && (
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] font-semibold text-slate-600">
+                      {tUi(uiLocale, 'a11y.fontScale')}
+                    </span>
+                    <div className="flex gap-1">
+                      {(
+                        [
+                          { id: 'sm', label: 'A-' },
+                          { id: 'md', label: 'A' },
+                          { id: 'lg', label: 'A+' },
+                          { id: 'xl', label: 'A++' },
+                        ] as const
+                      ).map((sc) => (
+                        <button
+                          key={sc.id}
+                          type="button"
+                          data-testid={`font-scale-${sc.id}`}
+                          onClick={() => onChangeFontScale(sc.id)}
+                          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold cursor-pointer ${
+                            fontScale === sc.id
+                              ? 'bg-slate-900 text-white'
+                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                          }`}
+                        >
+                          {sc.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {onOpenUpdateModal && (
               <button
                 type="button"
@@ -741,7 +819,67 @@ export function Sidebar({
                     )}
                   </button>
                 ))}
-              {onOpenUpdateModal && (
+              {(onChangeUiLocale || onChangeFontScale) && (
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
+                {onChangeUiLocale && (
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] font-semibold text-slate-600">
+                      {tUi(uiLocale, 'a11y.uiLang')}
+                    </span>
+                    <div className="flex gap-1">
+                      {(['pt', 'en', 'es'] as const).map((loc) => (
+                        <button
+                          key={loc}
+                          type="button"
+                          data-testid={`ui-locale-${loc}`}
+                          onClick={() => onChangeUiLocale(loc)}
+                          className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase cursor-pointer ${
+                            uiLocale === loc
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                          }`}
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {onChangeFontScale && (
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] font-semibold text-slate-600">
+                      {tUi(uiLocale, 'a11y.fontScale')}
+                    </span>
+                    <div className="flex gap-1">
+                      {(
+                        [
+                          { id: 'sm', label: 'A-' },
+                          { id: 'md', label: 'A' },
+                          { id: 'lg', label: 'A+' },
+                          { id: 'xl', label: 'A++' },
+                        ] as const
+                      ).map((sc) => (
+                        <button
+                          key={sc.id}
+                          type="button"
+                          data-testid={`font-scale-${sc.id}`}
+                          onClick={() => onChangeFontScale(sc.id)}
+                          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold cursor-pointer ${
+                            fontScale === sc.id
+                              ? 'bg-slate-900 text-white'
+                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                          }`}
+                        >
+                          {sc.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {onOpenUpdateModal && (
                 <button
                   type="button"
                   data-testid="mobile-update-app-btn"

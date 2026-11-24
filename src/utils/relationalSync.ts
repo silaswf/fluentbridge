@@ -1,6 +1,12 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getEffectiveSupabaseConfig } from '../config/appConfig';
-import type { CloudConfig, PlatformState } from '../types/learning';
+import type {
+  CloudConfig,
+  CommunityPost,
+  CommunityReply,
+  LiveSessionRecord,
+  PlatformState,
+} from '../types/learning';
 import { getSupabaseClient } from './cloudSync';
 
 export interface SecurityAuditStatus {
@@ -179,5 +185,120 @@ export async function getSecurityAuditStatus(
       authenticated: false,
       relationalReady: false,
     };
+  }
+}
+
+export async function syncCommunityPostToCloud(post: CommunityPost): Promise<void> {
+  const cfg = getEffectiveSupabaseConfig();
+  if (!cfg.url || !cfg.anonKey) return;
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data } = await client.auth.getSession();
+    if (!data.session?.user?.id) return;
+    await client.from('community_posts').upsert({
+      id: post.id,
+      language_code: post.languageCode,
+      author_id: data.session.user.id,
+      author_name: post.authorName,
+      level: post.level,
+      category: post.category,
+      title: post.title,
+      body: post.body,
+      target_snippet: post.targetSnippet ?? null,
+      likes: post.likes,
+      pinned: Boolean(post.pinned),
+      created_at: post.createdAt,
+    });
+  } catch {
+    // Best-effort cloud sync
+  }
+}
+
+export async function syncCommunityReplyToCloud(
+  postId: string,
+  reply: CommunityReply,
+): Promise<void> {
+  const cfg = getEffectiveSupabaseConfig();
+  if (!cfg.url || !cfg.anonKey) return;
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data } = await client.auth.getSession();
+    if (!data.session?.user?.id) return;
+    await client.from('community_replies').upsert({
+      id: reply.id,
+      post_id: postId,
+      author_id: data.session.user.id,
+      author_name: reply.authorName,
+      content: reply.content,
+      correction_suggestion: reply.correctionSuggestion ?? null,
+      likes: reply.likes,
+      created_at: reply.createdAt,
+    });
+  } catch {
+    // Best-effort cloud sync
+  }
+}
+
+export async function syncLiveSessionToCloud(session: LiveSessionRecord): Promise<void> {
+  const cfg = getEffectiveSupabaseConfig();
+  if (!cfg.url || !cfg.anonKey) return;
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data } = await client.auth.getSession();
+    if (!data.session?.user?.id) return;
+    await client.from('live_sessions').upsert({
+      id: session.id,
+      language_code: session.languageCode,
+      teacher_id: data.session.user.id,
+      teacher_name: session.teacherName,
+      student_id: null,
+      class_id: null,
+      title: session.title,
+      scheduled_at: session.scheduledAt,
+      duration_min: session.durationMin,
+      room_slug: session.roomSlug,
+      status: session.status,
+      notes: session.notes,
+      generated_assignment_id: session.generatedAssignmentId ?? null,
+      created_at: session.createdAt,
+    });
+  } catch {
+    // Best-effort cloud sync
+  }
+}
+
+export function subscribeCommunityRealtime(
+  onRemoteUpdate: () => void,
+  onStatusChange?: (connected: boolean) => void,
+): () => void {
+  const cfg = getEffectiveSupabaseConfig();
+  if (!cfg.url || !cfg.anonKey) {
+    onStatusChange?.(false);
+    return () => undefined;
+  }
+  try {
+    const client = getSupabaseClient(cfg.url, cfg.anonKey);
+    const channel = client
+      .channel('fb-community-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'community_posts' },
+        () => onRemoteUpdate(),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'community_replies' },
+        () => onRemoteUpdate(),
+      )
+      .subscribe((status) => {
+        onStatusChange?.(status === 'SUBSCRIBED');
+      });
+
+    return () => {
+      void client.removeChannel(channel);
+    };
+  } catch {
+    onStatusChange?.(false);
+    return () => undefined;
   }
 }

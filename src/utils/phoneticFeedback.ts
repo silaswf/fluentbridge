@@ -7,16 +7,24 @@ export interface PhoneticTipItem {
   highlight?: string;
 }
 
+export interface PhoneticDrillItem {
+  soundLabel: string;
+  contrastPair: string;
+  practiceSentence: string;
+}
+
 export interface PhoneticWordDetail {
   word: string;
   syllables: string[];
   matched: boolean;
+  confidence?: number;
 }
 
 export interface PhoneticFeedbackResult {
   score: number;
   words: PhoneticWordDetail[];
   phoneticTips: PhoneticTipItem[];
+  targetedDrills: PhoneticDrillItem[];
   summaryPt: string;
 }
 
@@ -163,13 +171,26 @@ export function analyzePhoneticFeedback(
   target: string,
   spoken: string,
   languageCode: LanguageCode = 'en',
+  wordConfidences?: Array<{ word: string; probability?: number }>,
 ): PhoneticFeedbackResult {
   const base = evaluatePronunciation(target, spoken);
-  const words: PhoneticWordDetail[] = base.words.map((w) => ({
-    word: w.word,
-    syllables: splitSyllables(w.word),
-    matched: w.matched,
-  }));
+  const confMap = new Map<string, number>();
+  for (const wc of wordConfidences ?? []) {
+    if (typeof wc.probability === 'number') {
+      confMap.set(wc.word.trim().toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''), wc.probability);
+    }
+  }
+
+  const words: PhoneticWordDetail[] = base.words.map((w) => {
+    const key = w.word.trim().toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+    const conf = confMap.get(key);
+    return {
+      word: w.word,
+      syllables: splitSyllables(w.word),
+      matched: w.matched && (conf === undefined || conf >= 0.45),
+      confidence: conf,
+    };
+  });
 
   const missedWords = words.filter((w) => !w.matched).map((w) => w.word);
   const probeText = missedWords.length > 0 ? missedWords.join(' ') : target;
@@ -188,6 +209,36 @@ export function analyzePhoneticFeedback(
     if (tips.length >= 2) break;
   }
 
+  const DRILL_BY_LANG: Partial<Record<LanguageCode, PhoneticDrillItem[]>> = {
+    en: [
+      { soundLabel: '/θ/ vs /t/', contrastPair: 'think vs. tink · three vs. tree', practiceSentence: 'I think these three things work together.' },
+      { soundLabel: '/ɪ/ vs /iː/', contrastPair: 'live vs. leave · ship vs. sheep', practiceSentence: 'Please leave the ship before evening.' },
+    ],
+    es: [
+      { soundLabel: 'RR / R', contrastPair: 'pero vs. perro · caro vs. carro', practiceSentence: 'El perro corre rápido por el parque.' },
+    ],
+    fr: [
+      { soundLabel: 'U /y/ vs OU /u/', contrastPair: 'tu vs. tout · rue vs. roue', practiceSentence: 'Tu veux tout voir dans cette rue ?' },
+    ],
+    de: [
+      { soundLabel: 'Ü / Ö / CH', contrastPair: 'müssen vs. messen · ich vs. ach', practiceSentence: 'Ich möchte heute pünktlich zurückkommen.' },
+    ],
+    ru: [
+      { soundLabel: 'Ы vs И / Ь', contrastPair: 'быть vs. бить · мыло vs. мило', practiceSentence: 'Мы были рады видеть вас сегодня.' },
+    ],
+    zh: [
+      { soundLabel: 'Tons 1–4', contrastPair: 'mā (mãe) vs. mǎ (cavalo)', practiceSentence: '妈妈今天买了一个新手机。' },
+    ],
+    ja: [
+      { soundLabel: 'Vogais Longas & っ', contrastPair: 'kite (vir) vs. kitte (selo)', practiceSentence: '郵便局で切手を三枚買いました。' },
+    ],
+    ar: [
+      { soundLabel: 'ح vs هـ / ق vs ك', contrastPair: 'قلب (coração) vs. كلب (cachorro)', practiceSentence: 'الحمد لله، قهوة الصباح جاهزة.' },
+    ],
+  };
+
+  const targetedDrills = missedWords.length > 0 ? (DRILL_BY_LANG[languageCode] ?? []) : [];
+
   let summaryPt = '';
   if (base.score >= 90) {
     summaryPt =
@@ -202,6 +253,7 @@ export function analyzePhoneticFeedback(
     score: base.score,
     words,
     phoneticTips: tips,
+    targetedDrills,
     summaryPt,
   };
 }

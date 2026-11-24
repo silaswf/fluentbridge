@@ -1,8 +1,8 @@
 {
-  "version": "6.2.1",
+  "version": "7.0.0",
   "publishedAt": "2026-11-24",
-  "releaseNotes": "v6.2.1: Canal público de releases (silaswf/fluentbridge-releases) habilitando downloads diretos e atualização automática no Windows e Android mantendo o código-fonte 100% privado.",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v6.2.1/FluentBridge-Setup-6.2.1.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v6.2.1/FluentBridge-v6.2.1.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v6.2.1"
+  "releaseNotes": "FluentBridge Academy v7.0.0",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v7.0.0/FluentBridge-Setup-7.0.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v7.0.0/FluentBridge-v7.0.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v7.0.0"
 }

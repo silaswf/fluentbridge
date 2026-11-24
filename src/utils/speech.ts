@@ -190,7 +190,7 @@ function normalizeTtsLocale(locale: string): string {
   return 'en-US';
 }
 
-async function fetchNeuralTtsBlob(
+export async function fetchNeuralTtsBlob(
   text: string,
   targetLocale: string,
   voice?: 'female' | 'male',
@@ -514,10 +514,24 @@ function shouldUseCloudStt(): boolean {
   return getSpeechRecognitionConstructor() === null;
 }
 
-export async function transcribeAudioBlob(
+export interface SttWordConfidence {
+  word: string;
+  probability?: number;
+  start?: number;
+  end?: number;
+}
+
+export interface DetailedSttResult {
+  ok: boolean;
+  text?: string;
+  words?: SttWordConfidence[];
+  error?: string;
+}
+
+export async function transcribeAudioBlobDetailed(
   blob: Blob,
   langCode = 'en-US',
-): Promise<{ ok: boolean; text?: string; error?: string }> {
+): Promise<DetailedSttResult> {
   const apiBase = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
   if (!apiBase || typeof fetch === 'undefined') {
     return { ok: false, error: 'Serviço de transcrição em nuvem não configurado.' };
@@ -528,18 +542,33 @@ export async function transcribeAudioBlob(
       ? globalThis.setTimeout(() => controller.abort(), 15000)
       : undefined;
   try {
+    let token: string | null = null;
+    try {
+      const { getSupabaseAccessToken } = await import('./cloudSync');
+      token = await getSupabaseAccessToken();
+    } catch {
+      token = null;
+    }
+    const headers: Record<string, string> = {
+      'Content-Type': blob.type || 'audio/webm',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const res = await fetch(`${apiBase}/api/stt?lang=${encodeURIComponent(langCode)}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': blob.type || 'audio/webm',
-      },
+      headers,
       body: blob,
       signal: controller?.signal,
     });
     if (!res.ok) {
       return { ok: false, error: `Falha ao transcrever áudio (${res.status}).` };
     }
-    const data = (await res.json()) as { ok?: boolean; text?: string; error?: string };
+    const data = (await res.json()) as {
+      ok?: boolean;
+      text?: string;
+      words?: SttWordConfidence[];
+      error?: string;
+    };
     const text = (data.text ?? '').trim();
     if (!text) {
       return {
@@ -547,7 +576,7 @@ export async function transcribeAudioBlob(
         error: 'Não captamos fala clara. Tente falar mais perto do microfone.',
       };
     }
-    return { ok: true, text };
+    return { ok: true, text, words: Array.isArray(data.words) ? data.words : undefined };
   } catch {
     return {
       ok: false,
@@ -558,6 +587,14 @@ export async function transcribeAudioBlob(
       globalThis.clearTimeout(timeoutId);
     }
   }
+}
+
+export async function transcribeAudioBlob(
+  blob: Blob,
+  langCode = 'en-US',
+): Promise<{ ok: boolean; text?: string; error?: string }> {
+  const res = await transcribeAudioBlobDetailed(blob, langCode);
+  return { ok: res.ok, text: res.text, error: res.error };
 }
 
 export function isSpeechRecognitionSupported(): boolean {

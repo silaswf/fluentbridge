@@ -457,9 +457,19 @@ async function callGeminiJson<T>(
 
   try {
     if (useCloudProxy && DEFAULT_BACKEND_API_URL.trim().length > 0) {
+      let token: string | null = null;
+      try {
+        const { getSupabaseAccessToken } = await import('./cloudSync');
+        token = await getSupabaseAccessToken();
+      } catch {
+        token = null;
+      }
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(proxyEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(bodyPayload),
       });
       if (res.ok) {
@@ -751,8 +761,9 @@ export async function generateTutorReply(params: {
   history: TutorMessage[];
   userText: string;
   geminiApiKey?: string;
+  pedagogicalMemory?: string;
 }): Promise<TutorReplyResult> {
-  const { scenario, history, userText, geminiApiKey } = params;
+  const { scenario, history, userText, geminiApiKey, pedagogicalMemory } = params;
   const lang = scenario.languageCode ?? 'en';
   const targetLangName = LANG_NAME_EN[lang];
   const immersion = isImmersionLevel(scenario.level);
@@ -772,9 +783,12 @@ export async function generateTutorReply(params: {
       .join('\n');
 
     const feedbackLang = immersion ? targetLangName : 'Brazilian Portuguese';
+    const memoryLine = pedagogicalMemory
+      ? `\nPedagogical Memory (weave subtly when natural): ${pedagogicalMemory}\n`
+      : '';
     const prompt = `You are ${scenario.personaName} (${scenario.personaRole}) in an unscripted, natural ${targetLangName} conversation with a Brazilian learner at CEFR ${scenario.level}.
 Scenario: ${scenario.settingPt}
-
+${memoryLine}
 Conversation so far:
 ${recentHistory}
 Student just wrote: "${userText}"

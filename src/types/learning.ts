@@ -430,6 +430,25 @@ export interface CommunityPost {
   createdAt: string;
 }
 
+export type LearningGoalType = 'travel' | 'career' | 'exam' | 'abroad' | 'culture';
+
+export interface LiveSessionRecord {
+  id: string;
+  languageCode: LanguageCode;
+  teacherId: string;
+  teacherName: string;
+  studentId?: string;
+  classId?: string;
+  title: string;
+  scheduledAt: string;
+  durationMin: number;
+  roomSlug: string;
+  status: 'scheduled' | 'live' | 'completed' | 'cancelled';
+  notes: string;
+  generatedAssignmentId?: string;
+  createdAt: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -451,6 +470,8 @@ export interface UserProfile {
   accent: Accent;
   recommendedLevel?: CEFRLevel;
   recommendedLevelByLanguage?: Partial<Record<LanguageCode, CEFRLevel>>;
+  learningGoal?: LearningGoalType;
+  goalTargetDate?: string;
   dailyGoalMinutes: number;
   todayMinutes: number;
   xp: number;
@@ -494,12 +515,14 @@ export interface PlatformState {
   submissions: StudentSubmission[];
   assignments?: TeacherAssignment[];
   communityPosts?: CommunityPost[];
+  liveSessions?: LiveSessionRecord[];
   cloudConfig: CloudConfig;
   deletedUserIds?: string[];
   deletedClassIds?: string[];
   deletedTopicIds?: string[];
   deletedAssignmentIds?: string[];
   deletedCommunityPostIds?: string[];
+  deletedLiveSessionIds?: string[];
 }
 
 export interface AITutorScenario {

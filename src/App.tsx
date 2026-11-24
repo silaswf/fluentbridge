@@ -77,17 +77,19 @@ const MockExamHub = lazy(() =>
 const CommunityHub = lazy(() =>
   import('./components/CommunityHub').then((m) => ({ default: m.CommunityHub })),
 );
+const LiveClassroomView = lazy(() =>
+  import('./components/LiveClassroomView').then((m) => ({ default: m.LiveClassroomView })),
+);
 import {
-  getActiveDialect,
-  getCourseTopics,
-  getLanguageCourse,
-} from './data/languages';
-import {
-  ALL_BUILTIN_TOPICS,
-  ALL_INITIAL_VOCABULARY,
   DEFAULT_PLATFORM_STATE,
-  cloneInitialVocab,
-} from './data/lessons';
+  getActiveDialectMeta as getActiveDialect,
+  getLanguageCourseMeta as getLanguageCourse,
+} from './data/platformDefaults';
+import {
+  getCachedCourseData,
+  loadLanguageCourseData,
+  type LoadedCourseBundle,
+} from './data/courseLoader';
 import type {
   Accent,
   CEFRLevel,
@@ -96,6 +98,8 @@ import type {
   CommunityPost,
   ExamAttemptRecord,
   LanguageCode,
+  LearningGoalType,
+  LiveSessionRecord,
   PlatformState,
   PronunciationRubric,
   SkillType,
@@ -104,12 +108,31 @@ import type {
   UserProfile,
   UserRole,
 } from './types/learning';
+import {
+  applyFontScale,
+  loadStoredFontScale,
+  saveFontScale,
+  type FontScale,
+} from './utils/accessibility';
+import {
+  loadStoredUiLocale,
+  saveUiLocale,
+  type UiLocale,
+} from './utils/i18n';
+import {
+  subscribeCommunityRealtime,
+  syncCommunityPostToCloud,
+  syncCommunityReplyToCloud,
+  syncLiveSessionToCloud,
+} from './utils/relationalSync';
+import { buildPedagogicalMemoryContext } from './utils/tutorMemory';
 import { playSound } from './utils/soundFx';
 import {
   clearPlatformState,
   generateTeacherInviteCode,
   hashPassword,
   loadPlatformState,
+  mergeLoadedLanguageVocab,
   normalizePlatformState,
   savePlatformState,
   verifyPassword,
@@ -147,8 +170,11 @@ function buildCertificate(
 }
 
 export function App() {
+  const [loadedCourses, setLoadedCourses] = useState<
+    Partial<Record<LanguageCode, LoadedCourseBundle>>
+  >({});
   const [state, setState] = useState<PlatformState>(() =>
-    loadPlatformState(DEFAULT_PLATFORM_STATE, ALL_INITIAL_VOCABULARY),
+    loadPlatformState(DEFAULT_PLATFORM_STATE, []),
   );
   const [activeView, setActiveView] = useState<NavView>('learn');
   const [teacherInitialTab, setTeacherInitialTab] =
@@ -168,6 +194,9 @@ export function App() {
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
+  const [uiLocale, setUiLocale] = useState<UiLocale>(() => loadStoredUiLocale());
+  const [fontScale, setFontScale] = useState<FontScale>(() => loadStoredFontScale());
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
 
   const effectiveSupabase = useMemo(
@@ -187,7 +216,10 @@ export function App() {
     supabaseUrl: effectiveSupabase.url,
     supabaseAnonKey: effectiveSupabase.anonKey,
     defaultState: DEFAULT_PLATFORM_STATE,
-    masterVocab: ALL_INITIAL_VOCABULARY,
+    masterVocab: getCachedCourseData(
+      (state.users.find((u) => u.id === state.currentUserId)?.activeLanguage ??
+        'en') as LanguageCode,
+    )?.vocab ?? [],
     onSupabaseUserHydrated: (authUser) => applySupabaseAuthUser(authUser, false),
   });
 
@@ -210,6 +242,28 @@ export function App() {
     mq.addEventListener?.('change', onChange);
     return () => mq.removeEventListener?.('change', onChange);
   }, [themeMode]);
+
+  useEffect(() => {
+    applyFontScale(fontScale);
+    saveFontScale(fontScale);
+  }, [fontScale]);
+
+  useEffect(() => {
+    saveUiLocale(uiLocale);
+  }, [uiLocale]);
+
+  useEffect(() => {
+    if (!isCloudConfigured) {
+      setRealtimeConnected(false);
+      return undefined;
+    }
+    return subscribeCommunityRealtime(
+      () => {
+        // Trigger a gentle refresh indicator when remote community changes arrive
+      },
+      setRealtimeConnected,
+    );
+  }, [isCloudConfigured]);
 
   const applySupabaseAuthUser = (
     authUser: SupabaseAuthUserInfo,
@@ -283,7 +337,7 @@ export function App() {
         streakDays: 1,
         completedTopicIds: [],
         skillScores: { listening: 45, reading: 45, speaking: 40, writing: 45 },
-        vocab: cloneInitialVocab(),
+        vocab: [...(getCachedCourseData('en')?.vocab ?? [])],
         issuedCertificates: [],
         dailyQuests: {
           lessonsCompletedToday: 0,
@@ -353,6 +407,26 @@ export function App() {
     [activeLanguage],
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    void loadLanguageCourseData(activeLanguage).then((bundle) => {
+      if (cancelled) return;
+      setLoadedCourses((prev) =>
+        prev[activeLanguage] ? prev : { ...prev, [activeLanguage]: bundle },
+      );
+      setState((prev) => ({
+        ...prev,
+        users: prev.users.map((u) => ({
+          ...u,
+          vocab: mergeLoadedLanguageVocab(u.vocab, bundle.vocab, activeLanguage),
+        })),
+      }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLanguage]);
+
   const activeDialect = currentUser
     ? getActiveDialect(
       activeLanguage,
@@ -361,10 +435,13 @@ export function App() {
     )
     : 'en-US';
 
-  const courseTopics = useMemo(
-    () => getCourseTopics(activeLanguage, state.customTopics),
-    [activeLanguage, state.customTopics],
-  );
+  const courseTopics = useMemo(() => {
+    const builtin = loadedCourses[activeLanguage]?.topics ?? [];
+    const custom = state.customTopics.filter(
+      (t) => (t.languageCode ?? 'en') === activeLanguage,
+    );
+    return [...builtin, ...custom];
+  }, [loadedCourses, activeLanguage, state.customTopics]);
 
   const courseVocab = useMemo(() => {
     if (!currentUser) return [];
@@ -455,7 +532,7 @@ export function App() {
       streakDays: 1,
       completedTopicIds: [],
       skillScores: { listening: 45, reading: 45, speaking: 40, writing: 45 },
-      vocab: cloneInitialVocab(),
+      vocab: [...(loadedCourses[activeLanguage]?.vocab ?? getCachedCourseData('en')?.vocab ?? [])],
       issuedCertificates: [],
       dailyQuests: {
         lessonsCompletedToday: 0,
@@ -674,14 +751,15 @@ export function App() {
           nextScores[skill] = Math.min(100, nextScores[skill] + 7);
         }
 
-        const completedTopicObj = ALL_BUILTIN_TOPICS.find(
+        const loadedTopics = loadedCourses[activeLanguage]?.topics ?? [];
+        const completedTopicObj = loadedTopics.find(
           (t) => t.id === result.topicId,
         );
         let nextCerts = baseUser.issuedCertificates;
 
         if (completedTopicObj) {
           const targetLang = completedTopicObj.languageCode ?? 'en';
-          const levelTopics = ALL_BUILTIN_TOPICS.filter(
+          const levelTopics = loadedTopics.filter(
             (t) =>
               (t.languageCode ?? 'en') === targetLang &&
               t.level === completedTopicObj.level,
@@ -1542,6 +1620,7 @@ export function App() {
       ...prev,
       communityPosts: [newPost, ...(prev.communityPosts ?? [])],
     }));
+    void syncCommunityPostToCloud(newPost);
     showToast('Publicação enviada para o fórum!');
   };
 
@@ -1551,30 +1630,29 @@ export function App() {
     correctionSuggestion?: string,
   ) => {
     const wk = getCurrentWeekKey();
+    const newReply = {
+      id: `rep-${Date.now()}`,
+      authorId: currentUser.id,
+      authorName: currentUser.name,
+      authorAvatarColor: currentUser.avatarColor,
+      authorRole: currentUser.role,
+      content,
+      correctionSuggestion,
+      likes: [] as string[],
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
     setState((prev) => ({
       ...prev,
       communityPosts: (prev.communityPosts ?? []).map((p) =>
         p.id === postId
           ? {
             ...p,
-            replies: [
-              ...p.replies,
-              {
-                id: `rep-${Date.now()}`,
-                authorId: currentUser.id,
-                authorName: currentUser.name,
-                authorAvatarColor: currentUser.avatarColor,
-                authorRole: currentUser.role,
-                content,
-                correctionSuggestion,
-                likes: [],
-                createdAt: new Date().toISOString().slice(0, 10),
-              },
-            ],
+            replies: [...p.replies, newReply],
           }
           : p,
       ),
     }));
+    void syncCommunityReplyToCloud(postId, newReply);
     updateCurrentUser((u) => {
       const prevWeekly = u.weeklyXpWeekKey === wk ? u.weeklyXpByLanguage?.[activeLanguage] ?? 0 : 0;
       return {
@@ -1658,10 +1736,68 @@ export function App() {
     currentUser.role === 'teacher' ||
     Boolean(currentUser.assignedTeacherId || currentUser.classId);
 
+  const handleCreateLiveSession = (
+    payload: Omit<LiveSessionRecord, 'id' | 'createdAt'>,
+  ) => {
+    const newSession: LiveSessionRecord = {
+      ...payload,
+      id: `live-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    setState((prev) => ({
+      ...prev,
+      liveSessions: [newSession, ...(prev.liveSessions ?? [])],
+    }));
+    void syncLiveSessionToCloud(newSession);
+    showToast('Aula ao vivo agendada!');
+  };
+
+  const handleUpdateLiveSessionNotes = (sessionId: string, notes: string) => {
+    setState((prev) => ({
+      ...prev,
+      liveSessions: (prev.liveSessions ?? []).map((s) =>
+        s.id === sessionId ? { ...s, notes } : s,
+      ),
+    }));
+    showToast('Notas da aula salvas!');
+  };
+
+  const handleGeneratePostClassTask = (session: LiveSessionRecord) => {
+    const fallbackTopic = courseTopics[0];
+    if (!fallbackTopic) return;
+    const dueDate = new Date(Date.now() + 3 * 86400_000).toISOString().slice(0, 10);
+    const newAssignment = {
+      id: `assign-live-${Date.now()}`,
+      title: `Pós-Aula: ${session.title}`,
+      description:
+        session.notes?.trim() ||
+        'Revisar vocabulário e pontos praticados na aula ao vivo.',
+      classId: session.classId,
+      studentId: session.studentId,
+      teacherId: currentUser.id,
+      languageCode: session.languageCode,
+      topicId: fallbackTopic.id,
+      dueDate,
+      createdAt: new Date().toISOString().slice(0, 10),
+      createdBy: currentUser.name,
+    };
+    setState((prev) => ({
+      ...prev,
+      assignments: [newAssignment, ...(prev.assignments ?? [])],
+    }));
+    showToast('Tarefa pós-aula gerada para o aluno!');
+  };
+
   const classmates = state.users.filter((u) => u.role === 'student');
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F7F9FC] lg:flex-row">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-xl focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-xs focus:font-bold focus:text-white"
+      >
+        Pular para o conteúdo principal
+      </a>
       <Sidebar
         activeView={activeView}
         onChangeView={setActiveView}
@@ -1679,6 +1815,10 @@ export function App() {
         pendingSubmissionsCount={pendingSubmissionsCount}
         themeMode={themeMode}
         onCycleTheme={handleCycleTheme}
+        uiLocale={uiLocale}
+        onChangeUiLocale={setUiLocale}
+        fontScale={fontScale}
+        onChangeFontScale={setFontScale}
         onOpenDownloadModal={() => setShowDownloadModal(true)}
         onOpenUpdateModal={() => setShowUpdateModal(true)}
         hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
@@ -1687,6 +1827,7 @@ export function App() {
       />
 
       <main
+        id="main-content"
         dir={isRtlLanguage(activeLanguage) ? 'rtl' : 'ltr'}
         className="safe-main-pb flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 lg:pb-10"
       >
@@ -1696,6 +1837,7 @@ export function App() {
             teacherName={state.teacherName}
             assignedTeacherName={assignedTeacher?.name}
             activeCourse={activeCourse}
+            activeDialect={activeDialect}
             classNameLabel={userClassName}
             topics={courseTopics}
             classmates={classmates}
@@ -1709,6 +1851,10 @@ export function App() {
             onChangeDailyGoal={(dailyGoalMinutes) =>
               updateCurrentUser((u) => ({ ...u, dailyGoalMinutes }))
             }
+            onSaveLearningGoal={(learningGoal: LearningGoalType, goalTargetDate?: string) => {
+              updateCurrentUser((u) => ({ ...u, learningGoal, goalTargetDate }));
+              showToast('Objetivo de estudo atualizado!');
+            }}
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             onPracticeTopicWithAI={(topic) => {
@@ -1744,6 +1890,13 @@ export function App() {
               geminiApiKey={effectiveGeminiKey}
               topics={courseTopics}
               initialTopic={tutorTargetTopic}
+              pedagogicalMemory={
+                buildPedagogicalMemoryContext(
+                  activeLanguage,
+                  currentUser.vocab,
+                  currentUser.mistakeBank,
+                ).promptInstruction
+              }
               onClearInitialTopic={() => setTutorTargetTopic(null)}
               onCompleteSession={handleTutorSessionComplete}
             />
@@ -1782,6 +1935,7 @@ export function App() {
               users={state.users}
               activeCourse={activeCourse}
               posts={state.communityPosts ?? []}
+              realtimeConnected={realtimeConnected}
               onCreatePost={handleCreateCommunityPost}
               onReplyPost={handleReplyCommunityPost}
               onToggleLikePost={handleToggleLikePost}
@@ -1789,12 +1943,28 @@ export function App() {
             />
           )}
 
+          {activeView === 'live' && (
+            <LiveClassroomView
+              currentUser={currentUser}
+              activeLanguage={activeLanguage}
+              classes={state.classes}
+              students={classmates}
+              sessions={state.liveSessions ?? []}
+              onCreateSession={handleCreateLiveSession}
+              onUpdateSessionNotes={handleUpdateLiveSessionNotes}
+              onGeneratePostClassTask={handleGeneratePostClassTask}
+            />
+          )}
+
           {activeView === 'tips' && (
             <TipsLibrary
               topics={courseTopics}
               languageCode={activeLanguage}
+              activeDialect={activeDialect}
               savedWords={savedVideoWords}
               onSaveWordToDeck={handleSaveCustomVocabCard}
+              onRecordMistake={handleRecordMistake}
+              onEarnXp={(xp) => updateCurrentUser((u) => ({ ...u, xp: u.xp + xp }))}
               onPracticeTopic={(topic) => setActiveTopic(topic)}
               onPracticeTopicWithAI={(topic) => {
                 setTutorTargetTopic(topic);
@@ -1847,7 +2017,7 @@ export function App() {
                 const normalized = normalizePlatformState(
                   { ...snapshot, currentUserId: state.currentUserId },
                   DEFAULT_PLATFORM_STATE,
-                  ALL_INITIAL_VOCABULARY,
+                  loadedCourses[activeLanguage]?.vocab ?? [],
                 );
                 setState(normalized);
                 showToast('Estado da nuvem aplicado!');
@@ -1857,7 +2027,7 @@ export function App() {
                   normalizePlatformState(
                     imported,
                     DEFAULT_PLATFORM_STATE,
-                    ALL_INITIAL_VOCABULARY,
+                    loadedCourses[activeLanguage]?.vocab ?? [],
                   ),
                 );
                 showToast('Backup importado com sucesso!');
@@ -1871,7 +2041,7 @@ export function App() {
                       currentUserId: state.currentUserId,
                     },
                     DEFAULT_PLATFORM_STATE,
-                    ALL_INITIAL_VOCABULARY,
+                    loadedCourses[activeLanguage]?.vocab ?? [],
                   ),
                 );
                 showToast('Dados de demonstração restaurados.');
@@ -1895,7 +2065,7 @@ export function App() {
               <AdminPanel
                 state={state}
                 currentUser={currentUser}
-                totalBuiltinTopicsCount={ALL_BUILTIN_TOPICS.length}
+                totalBuiltinTopicsCount={1236}
                 autoSyncStatus={autoSyncStatus}
                 onUpdateTeacherAccessCode={handleUpdateTeacherAccessCode}
                 onUpdateTeacherInviteCode={handleUpdateTeacherInviteCode}
@@ -2008,7 +2178,11 @@ export function App() {
       />
 
       {toastMessage && (
-        <div className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6">
+        <div
+          role="status"
+          aria-live="polite"
+          className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6"
+        >
           <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>

@@ -1,5 +1,5 @@
 import { isMasterAdminEmail } from '../config/appConfig';
-import type { PlatformState, UserProfile, VocabCard } from '../types/learning';
+import type { LanguageCode, PlatformState, UserProfile, VocabCard } from '../types/learning';
 
 export const PLATFORM_STORAGE_KEY = 'fluentbridge_platform_v3';
 
@@ -214,6 +214,12 @@ export function normalizePlatformState(
     assignments: Array.isArray(raw.assignments)
       ? raw.assignments
       : defaults.assignments ?? [],
+    communityPosts: Array.isArray(raw.communityPosts)
+      ? raw.communityPosts
+      : defaults.communityPosts ?? [],
+    liveSessions: Array.isArray(raw.liveSessions)
+      ? raw.liveSessions
+      : defaults.liveSessions ?? [],
     deletedUserIds: Array.isArray(raw.deletedUserIds)
       ? raw.deletedUserIds
       : defaults.deletedUserIds ?? [],
@@ -226,11 +232,46 @@ export function normalizePlatformState(
     deletedAssignmentIds: Array.isArray(raw.deletedAssignmentIds)
       ? raw.deletedAssignmentIds
       : defaults.deletedAssignmentIds ?? [],
+    deletedCommunityPostIds: Array.isArray(raw.deletedCommunityPostIds)
+      ? raw.deletedCommunityPostIds
+      : defaults.deletedCommunityPostIds ?? [],
+    deletedLiveSessionIds: Array.isArray(raw.deletedLiveSessionIds)
+      ? raw.deletedLiveSessionIds
+      : defaults.deletedLiveSessionIds ?? [],
     cloudConfig: {
       ...defaults.cloudConfig,
       ...(raw.cloudConfig ?? {}),
     },
   };
+}
+
+export function mergeLoadedLanguageVocab(
+  existingVocab: VocabCard[] | undefined,
+  loadedLangVocab: VocabCard[],
+  langCode: LanguageCode,
+): VocabCard[] {
+  const savedById = new Map<string, VocabCard>();
+  for (const c of existingVocab ?? []) {
+    savedById.set(c.id, c);
+  }
+  const otherLangCards = (existingVocab ?? []).filter(
+    (c) => (c.languageCode ?? 'en') !== langCode,
+  );
+  const hydratedLangCards = loadedLangVocab.map((masterCard) => {
+    const saved = savedById.get(masterCard.id);
+    if (!saved) return { ...masterCard };
+    return {
+      ...masterCard,
+      strength: saved.strength,
+      reviewCount: saved.reviewCount,
+      nextReviewAt: saved.nextReviewAt,
+      intervalDays: saved.intervalDays,
+      easeFactor: saved.easeFactor,
+      repetitions: saved.repetitions,
+      lapses: saved.lapses,
+    };
+  });
+  return [...otherLangCards, ...hydratedLangCards];
 }
 
 export function loadPlatformState(

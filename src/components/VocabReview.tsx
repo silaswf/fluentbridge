@@ -17,6 +17,7 @@ import type {
   VocabCard,
 } from '../types/learning';
 import {
+  buildClozePrompt,
   isCardDue,
   previewNextIntervalLabel,
   sortCardsForReview,
@@ -68,7 +69,9 @@ export function VocabReview({
 }: VocabReviewProps) {
   const [sectionTab, setSectionTab] = useState<'vocab' | 'mistakes' | 'pronunciation'>('vocab');
   const [scope, setScope] = useState<'learned' | 'catalog'>('learned');
-  const [mode, setMode] = useState<'flashcards' | 'list'>('flashcards');
+  const [mode, setMode] = useState<'flashcards' | 'cloze' | 'list'>('flashcards');
+  const [clozeInput, setClozeInput] = useState('');
+  const [clozeChecked, setClozeChecked] = useState<boolean | null>(null);
   const [filterStrength, setFilterStrength] = useState<'all' | 'due' | VocabCard['strength']>('all');
   const [filterLevel, setFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [search, setSearch] = useState('');
@@ -147,6 +150,8 @@ export function VocabReview({
     if (!activeCard) return;
     onRateCard(activeCard.id, rating);
     setFlipped(false);
+    setClozeInput('');
+    setClozeChecked(null);
     setCardIndex((prev) => prev + 1);
   };
 
@@ -280,6 +285,24 @@ export function VocabReview({
             >
               <BrainCircuit className="h-4 w-4" />
               <span>Flashcards</span>
+            </button>
+            <button
+              type="button"
+              data-testid="vocab-mode-cloze"
+              onClick={() => {
+                setMode('cloze');
+                setFlipped(false);
+                setClozeInput('');
+                setClozeChecked(null);
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+                mode === 'cloze'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Cloze · Lacuna</span>
             </button>
             <button
               type="button"
@@ -465,8 +488,8 @@ export function VocabReview({
         </button>
       </div>
 
-      {/* FLASHCARD MODE */}
-      {mode === 'flashcards' && (
+      {/* FLASHCARD & CLOZE MODE */}
+      {(mode === 'flashcards' || mode === 'cloze') && (
         <div className="mx-auto max-w-xl space-y-4">
           {!activeCard ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
@@ -562,40 +585,102 @@ export function VocabReview({
                   />
                 </div>
 
-                <div className="my-6 text-center">
-                  <h2 className="font-display text-3xl font-extrabold text-slate-900">
-                    {activeCard.word}
-                  </h2>
-                  <p className="mt-1.5 font-mono text-sm text-slate-400">
-                    {activeCard.ipa}
-                  </p>
-                </div>
-
-                {/* Contextual Example Sentence Preview (Front & Back) */}
-                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                      Frase de exemplo
-                    </p>
-                    <p className="mt-0.5 text-sm font-bold text-slate-800">
-                      “{activeCard.exampleEn}”
-                    </p>
-                    {flipped && (
-                      <p className="mt-0.5 text-xs text-slate-600">
-                        {activeCard.examplePt}
+                {mode === 'cloze' ? (
+                  (() => {
+                    const cloze = buildClozePrompt(activeCard.exampleEn, activeCard.word);
+                    return (
+                      <div className="my-5 space-y-4">
+                        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-5 text-center">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-700">
+                            Complete a lacuna ({activeCard.translation})
+                          </p>
+                          <p className="mt-2 font-display text-xl font-extrabold text-slate-900">
+                            “{cloze.maskedSentence}”
+                          </p>
+                          {activeCard.ipa && (
+                            <p className="mt-1 font-mono text-xs text-slate-500">
+                              Dica IPA: {activeCard.ipa}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <input
+                            type="text"
+                            data-testid="cloze-answer-input"
+                            value={clozeInput}
+                            onChange={(e) => setClozeInput(e.target.value)}
+                            placeholder="Digite a palavra ou expressão..."
+                            className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-indigo-500"
+                          />
+                          <button
+                            type="button"
+                            data-testid="cloze-check-btn"
+                            onClick={() => {
+                              const ok =
+                                clozeInput.trim().toLowerCase() ===
+                                cloze.answer.trim().toLowerCase();
+                              setClozeChecked(ok);
+                              setFlipped(true);
+                            }}
+                            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                          >
+                            Verificar
+                          </button>
+                        </div>
+                        {clozeChecked !== null && (
+                          <p
+                            className={`rounded-xl px-3 py-2 text-xs font-bold ${
+                              clozeChecked
+                                ? 'bg-emerald-50 text-emerald-800'
+                                : 'bg-rose-50 text-rose-800'
+                            }`}
+                          >
+                            {clozeChecked
+                              ? `Perfeito! Resposta: "${cloze.answer}"`
+                              : `Esperado: "${cloze.answer}" — frase completa: "${activeCard.exampleEn}"`}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <>
+                    <div className="my-6 text-center">
+                      <h2 className="font-display text-3xl font-extrabold text-slate-900">
+                        {activeCard.word}
+                      </h2>
+                      <p className="mt-1.5 font-mono text-sm text-slate-400">
+                        {activeCard.ipa}
                       </p>
-                    )}
-                  </div>
-                  <DualAudioButtons
-                    text={activeCard.exampleEn}
-                    languageCode={
-                      activeCard.languageCode ??
-                      topicLangMap.get(activeCard.topicId) ??
-                      'en'
-                    }
-                    size="xs"
-                  />
-                </div>
+                    </div>
+
+                    {/* Contextual Example Sentence Preview (Front & Back) */}
+                    <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                          Frase de exemplo
+                        </p>
+                        <p className="mt-0.5 text-sm font-bold text-slate-800">
+                          “{activeCard.exampleEn}”
+                        </p>
+                        {flipped && (
+                          <p className="mt-0.5 text-xs text-slate-600">
+                            {activeCard.examplePt}
+                          </p>
+                        )}
+                      </div>
+                      <DualAudioButtons
+                        text={activeCard.exampleEn}
+                        languageCode={
+                          activeCard.languageCode ??
+                          topicLangMap.get(activeCard.topicId) ??
+                          'en'
+                        }
+                        size="xs"
+                      />
+                    </div>
+                  </>
+                )}
 
                 {!flipped ? (
                   <button

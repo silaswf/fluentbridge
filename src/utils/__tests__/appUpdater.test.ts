@@ -15,21 +15,21 @@ describe('App Updater Engine (v6.1.0)', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          version: '6.9.0',
+          version: '9.9.0',
           releaseNotes: 'Correções e novidades',
           publishedAt: '2026-12-01',
-          releasePageUrl: 'https://github.com/silaswf/fluentbridge/releases/tag/v6.9.0',
-          windowsUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-Setup-6.9.0.exe',
-          androidUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-v6.9.0.apk',
+          releasePageUrl: 'https://github.com/silaswf/fluentbridge/releases/tag/v9.9.0',
+          windowsUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v9.9.0/FluentBridge-Setup-9.9.0.exe',
+          androidUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v9.9.0/FluentBridge-v9.9.0.apk',
         }),
       }),
     );
 
     const res = await checkForAppUpdate();
     expect(res.hasUpdate).toBe(true);
-    expect(res.latestVersion).toBe('6.9.0');
-    expect(res.windowsUrl).toContain('FluentBridge-Setup-6.9.0.exe');
-    expect(res.androidUrl).toContain('FluentBridge-v6.9.0.apk');
+    expect(res.latestVersion).toBe('9.9.0');
+    expect(res.windowsUrl).toContain('FluentBridge-Setup-9.9.0.exe');
+    expect(res.androidUrl).toContain('FluentBridge-v9.9.0.apk');
 
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const offline = await checkForAppUpdate();

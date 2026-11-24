@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v6.2.1 E2E Suite', () => {
+test.describe('FluentBridge v7.0.0 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v6\.2\.1\/FluentBridge-Setup-6\.2\.1\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v7\.0\.0\/FluentBridge-Setup-7\.0\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v6\.2\.1\/FluentBridge-v6\.2\.1\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v7\.0\.0\/FluentBridge-v7\.0\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -161,5 +161,35 @@ test.describe('FluentBridge v6.2.1 E2E Suite', () => {
     await page.getByTestId('community-post-body').fill('Como usar piece of cake?');
     await page.getByTestId('community-publish-btn').click();
     await expect(page.getByText('Dúvida E2E sobre Idioms')).toBeVisible();
+  });
+
+  test('9. v7.0.0 Cloze SM-2, Grammar Drills, Graded Readers, Live Classroom & i18n/a11y controls work', async ({
+    page,
+  }) => {
+    await loginAsMasterAdmin(page);
+
+    // Cloze mode in VocabReview
+    await page.getByRole('button', { name: /Revisão \(/i }).click();
+    await page.getByTestId('vocab-mode-cloze').click();
+    await expect(page.getByTestId('vocab-mode-cloze')).toBeVisible();
+
+    // Grammar Drills & Graded Readers in TipsLibrary
+    await page.getByRole('button', { name: /Central & Guia/i }).click();
+    await page.getByTestId('tips-tab-drills').click();
+    await expect(page.getByTestId('grammar-drill-lab')).toBeVisible();
+    await page.getByTestId('tips-tab-readers').click();
+    await expect(page.getByTestId('graded-readers-view')).toBeVisible();
+
+    // Live Classroom
+    await page.getByRole('button', { name: /Aulas ao Vivo/i }).click();
+    await expect(page.getByTestId('live-classroom-view')).toBeVisible();
+
+    // Accessibility Font Scale & i18n toggle
+    await page.getByTestId('font-scale-lg').click();
+    await expect(page.locator('html')).toHaveAttribute('data-font-scale', 'lg');
+    await page.getByTestId('font-scale-md').click();
+
+    await page.getByTestId('ui-locale-en').click();
+    await page.getByTestId('ui-locale-pt').click();
   });
 });

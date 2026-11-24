@@ -14,6 +14,8 @@ import type {
   UserProfile,
 } from '../types/learning';
 import { downloadCertificatePdf } from '../utils/certificatePdf';
+import { downloadPedagogicalReportPdf } from '../utils/pedagogicalReportPdf';
+import { getLanguageCourseMeta } from '../data/platformDefaults';
 
 interface CertificatesViewProps {
   user: UserProfile;
@@ -96,7 +98,25 @@ export function CertificatesView({
           </p>
         </div>
 
-        {user.role === 'teacher' && onGoToTeacherClasses && (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            data-testid="download-pedagogical-report-btn"
+            onClick={() =>
+              downloadPedagogicalReportPdf({
+                student: user,
+                course: getLanguageCourseMeta(user.activeLanguage ?? 'en'),
+                schoolName,
+                teacherName,
+              })
+            }
+            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+          >
+            <FileDown className="h-4 w-4" />
+            <span>Boletim Pedagógico (PDF)</span>
+          </button>
+
+          {user.role === 'teacher' && onGoToTeacherClasses && (
           <button
             type="button"
             onClick={onGoToTeacherClasses}
@@ -105,7 +125,8 @@ export function CertificatesView({
             <Sparkles className="h-3.5 w-3.5" />
             <span>Emitir certificado para alunos em Turmas →</span>
           </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Levels Grid */}

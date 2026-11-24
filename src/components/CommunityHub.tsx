@@ -32,6 +32,7 @@ interface CommunityHubProps {
   users: UserProfile[];
   activeCourse: LanguageCourse;
   posts: CommunityPost[];
+  realtimeConnected?: boolean;
   onCreatePost: (payload: {
     languageCode: LanguageCourse['code'];
     level: CEFRLevel;
@@ -57,6 +58,7 @@ export function CommunityHub({
   users,
   activeCourse,
   posts,
+  realtimeConnected = false,
   onCreatePost,
   onReplyPost,
   onToggleLikePost,
@@ -191,6 +193,15 @@ export function CommunityHub({
                 <div className="rounded-2xl bg-blue-50 px-4 py-3 text-center">
                   <p className="font-mono text-2xl font-extrabold text-blue-700">{myWeeklyXp}</p>
                   <p className="text-[11px] font-bold text-blue-600">XP Semanal</p>
+                  <span
+                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      realtimeConnected
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {realtimeConnected ? 'Supabase Realtime' : 'Modo Local'}
+                  </span>
                 </div>
               </div>
 

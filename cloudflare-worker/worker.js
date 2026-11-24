@@ -16,14 +16,60 @@ const GEMINI_FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
 const MAX_TTS_CHARS = 800;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const rateLimitBuckets = new Map();
+const jwtCache = new Map();
+const memoryTelemetryLogs = [];
 
-function checkRateLimit(request, routeKey, maxPerMinute) {
+async function verifySupabaseJwt(request, env) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.toLowerCase().startsWith('bearer ')) {
+    return { authenticated: false, userId: null, email: null };
+  }
+  const token = authHeader.slice(7).trim();
+  if (!token || token.length < 20) {
+    return { authenticated: false, userId: null, email: null };
+  }
+  const now = Date.now();
+  const cached = jwtCache.get(token);
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+  const supabaseUrl = (env.SUPABASE_URL || 'https://wyonvrrcdoikrspbpeis.supabase.co').replace(/\/+$/, '');
+  const apiKey = (env.SUPABASE_ANON_KEY || '').trim();
+  try {
+    const headers = { Authorization: `Bearer ${token}` };
+    if (apiKey) headers.apikey = apiKey;
+    const res = await fetch(`${supabaseUrl}/auth/v1/user`, { headers });
+    if (!res.ok) {
+      return { authenticated: false, userId: null, email: null };
+    }
+    const user = await res.json();
+    const value = {
+      authenticated: Boolean(user?.id),
+      userId: user?.id || null,
+      email: user?.email || null,
+    };
+    if (jwtCache.size > 400) jwtCache.clear();
+    jwtCache.set(token, { value, expiresAt: now + 5 * 60_000 });
+    return value;
+  } catch {
+    return { authenticated: false, userId: null, email: null };
+  }
+}
+
+async function buildR2TtsKey(locale, speaker, text) {
+  const data = new TextEncoder().encode(`${locale}|${speaker}|${text}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `tts/v4/${locale}/${hex}.audio`;
+}
+
+function checkRateLimit(request, routeKey, maxPerMinute, userId = null) {
   const ip =
     request.headers.get('CF-Connecting-IP') ||
     request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
     'unknown';
   const now = Date.now();
-  const bucketKey = `${routeKey}:${ip}`;
+  const bucketKey = userId ? `${routeKey}:user:${userId}` : `${routeKey}:ip:${ip}`;
   if (rateLimitBuckets.size > 500) {
     for (const [k, v] of rateLimitBuckets.entries()) {
       if (v.resetAt <= now) rateLimitBuckets.delete(k);
@@ -546,6 +592,7 @@ async function handleTtsRequest(request, env, ctx) {
   );
   const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
   const cache = typeof caches !== 'undefined' ? caches.default : null;
+  const r2Key = env.MEDIA_BUCKET ? await buildR2TtsKey(cfg.locale, cfg.speaker, clippedText) : null;
 
   if (cache) {
     const cached = await cache.match(cacheKey);
@@ -557,6 +604,31 @@ async function handleTtsRequest(request, env, ctx) {
         status: 200,
         headers: hitHeaders,
       });
+    }
+  }
+
+  if (env.MEDIA_BUCKET && r2Key) {
+    try {
+      const r2Obj = await env.MEDIA_BUCKET.get(r2Key);
+      if (r2Obj) {
+        const r2Buf = await r2Obj.arrayBuffer();
+        const r2ContentType = r2Obj.httpMetadata?.contentType || 'audio/mpeg';
+        const r2Provider = r2Obj.customMetadata?.provider || 'r2-cache';
+        const hitHeaders = {
+          'Content-Type': r2ContentType,
+          'Cache-Control': 'public, max-age=604800',
+          'X-TTS-Provider': r2Provider,
+          'X-TTS-Locale': cfg.locale,
+          'X-TTS-Cache': 'R2-HIT',
+          ...CORS_HEADERS,
+        };
+        if (cache && ctx && typeof ctx.waitUntil === 'function') {
+          ctx.waitUntil(cache.put(cacheKey, new Response(r2Buf.slice(0), { status: 200, headers: hitHeaders })));
+        }
+        return new Response(r2Buf, { status: 200, headers: hitHeaders });
+      }
+    } catch {
+      // Continue to synthesis if R2 read fails
     }
   }
 
@@ -632,6 +704,15 @@ async function handleTtsRequest(request, env, ctx) {
       },
     });
     ctx.waitUntil(cache.put(cacheKey, toCache));
+  }
+
+  if (env.MEDIA_BUCKET && r2Key && ctx && typeof ctx.waitUntil === 'function') {
+    ctx.waitUntil(
+      env.MEDIA_BUCKET.put(r2Key, audioBuffer.slice(0), {
+        httpMetadata: { contentType },
+        customMetadata: { provider, locale: cfg.locale },
+      }).catch(() => undefined),
+    );
   }
 
   return new Response(audioBuffer, {
@@ -800,6 +881,8 @@ async function handleSttRequest(request, env) {
       return jsonResponse({
         ok: true,
         text,
+        words: Array.isArray(turboRes?.words) ? turboRes.words : undefined,
+        segments: Array.isArray(turboRes?.segments) ? turboRes.segments : undefined,
         model: '@cf/openai/whisper-large-v3-turbo',
       });
     }
@@ -828,6 +911,129 @@ async function handleSttRequest(request, env) {
   }
 }
 
+async function handleMediaRequest(request, env, path) {
+  if (!env.MEDIA_BUCKET) {
+    return jsonResponse({ error: 'R2 MEDIA_BUCKET not configured' }, 503);
+  }
+
+  if (path === '/api/media/upload') {
+    if (request.method !== 'POST') {
+      return jsonResponse({ error: 'Method not allowed' }, 405);
+    }
+    const auth = await verifySupabaseJwt(request, env);
+    if (env.REQUIRE_SUPABASE_JWT === 'true' && !auth.authenticated) {
+      return jsonResponse({ error: 'Authentication required for media upload' }, 401);
+    }
+    const url = new URL(request.url);
+    let rawKey = (url.searchParams.get('key') || `clip-${Date.now()}.mp4`).trim();
+    let contentType = request.headers.get('content-type') || 'video/mp4';
+    let bodyBytes;
+
+    if (contentType.includes('multipart/form-data')) {
+      const form = await request.formData();
+      const file = form.get('file');
+      if (!file || typeof file === 'string') {
+        return jsonResponse({ error: 'Missing file in multipart form' }, 400);
+      }
+      rawKey = String(form.get('key') || file.name || rawKey);
+      contentType = file.type || 'video/mp4';
+      bodyBytes = await file.arrayBuffer();
+    } else {
+      bodyBytes = await request.arrayBuffer();
+    }
+
+    if (!bodyBytes || bodyBytes.byteLength === 0) {
+      return jsonResponse({ error: 'Empty media payload' }, 400);
+    }
+    if (bodyBytes.byteLength > 15 * 1024 * 1024) {
+      return jsonResponse({ error: 'Media payload exceeds 15MB limit' }, 413);
+    }
+
+    const safeName = rawKey.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+/, '');
+    const key = safeName.startsWith('videos/') ? safeName : `videos/${safeName}`;
+    await env.MEDIA_BUCKET.put(key, bodyBytes, {
+      httpMetadata: { contentType },
+      customMetadata: { uploadedBy: auth.userId || 'local' },
+    });
+    const baseUrl = `${url.origin}/api/media/${key}`;
+    return jsonResponse({ ok: true, key, url: baseUrl, size: bodyBytes.byteLength });
+  }
+
+  const key = decodeURIComponent(path.replace(/^\/api\/media\//, '')).replace(/^\/+/, '');
+  if (!key) {
+    return jsonResponse({ error: 'Missing media key' }, 400);
+  }
+  const obj = await env.MEDIA_BUCKET.get(key);
+  if (!obj) {
+    return jsonResponse({ error: 'Media not found' }, 404);
+  }
+  const headers = new Headers();
+  obj.writeHttpMetadata(headers);
+  if (!headers.get('Content-Type')) headers.set('Content-Type', 'application/octet-stream');
+  headers.set('Cache-Control', 'public, max-age=31536000');
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => headers.set(k, v));
+  return new Response(obj.body, { status: 200, headers });
+}
+
+async function handleTelemetryRequest(request, env) {
+  const TELEMETRY_KEY = 'telemetry/errors.json';
+  if (request.method === 'GET') {
+    let logs = [...memoryTelemetryLogs];
+    if (env.MEDIA_BUCKET) {
+      try {
+        const obj = await env.MEDIA_BUCKET.get(TELEMETRY_KEY);
+        if (obj) {
+          const parsed = await obj.json();
+          if (Array.isArray(parsed)) logs = parsed;
+        }
+      } catch {
+        // Ignore R2 read error
+      }
+    }
+    return jsonResponse({ ok: true, logs });
+  }
+
+  if (request.method === 'POST') {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON payload' }, 400);
+    }
+    const entry = {
+      id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      message: String(body.message || 'Unknown error').slice(0, 300),
+      stack: String(body.stack || '').slice(0, 800),
+      route: String(body.route || '/').slice(0, 120),
+      version: String(body.version || 'unknown').slice(0, 32),
+      platform: String(body.platform || 'web').slice(0, 32),
+      timestamp: new Date().toISOString(),
+    };
+    memoryTelemetryLogs.unshift(entry);
+    if (memoryTelemetryLogs.length > 100) memoryTelemetryLogs.length = 100;
+
+    if (env.MEDIA_BUCKET) {
+      try {
+        let existing = [];
+        const prev = await env.MEDIA_BUCKET.get(TELEMETRY_KEY);
+        if (prev) {
+          const parsed = await prev.json().catch(() => []);
+          if (Array.isArray(parsed)) existing = parsed;
+        }
+        const next = [entry, ...existing].slice(0, 100);
+        await env.MEDIA_BUCKET.put(TELEMETRY_KEY, JSON.stringify(next), {
+          httpMetadata: { contentType: 'application/json' },
+        });
+      } catch {
+        // Keep memory fallback
+      }
+    }
+    return jsonResponse({ ok: true, id: entry.id });
+  }
+
+  return jsonResponse({ error: 'Method not allowed' }, 405);
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
@@ -841,9 +1047,9 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '6.1.0',
+        version: '7.0.0',
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
-        endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
+        endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],
         rateLimits: {
           ttsPerMin: 120,
           sttPerMin: 30,
@@ -851,6 +1057,8 @@ export default {
         },
         hasAiBinding: Boolean(env.AI),
         hasGeminiSecret: Boolean(env.GEMINI_API_KEY),
+        hasR2Bucket: Boolean(env.MEDIA_BUCKET),
+        jwtMode: env.REQUIRE_SUPABASE_JWT === 'true' ? 'strict' : 'hybrid',
       });
     }
 
@@ -871,7 +1079,11 @@ export default {
     }
 
     if (path === '/api/stt') {
-      const rl = checkRateLimit(request, 'stt', 30);
+      const auth = await verifySupabaseJwt(request, env);
+      if (env.REQUIRE_SUPABASE_JWT === 'true' && !auth.authenticated) {
+        return jsonResponse({ ok: false, error: 'Authentication required' }, 401);
+      }
+      const rl = checkRateLimit(request, 'stt', auth.authenticated ? 60 : 30, auth.userId);
       if (!rl.allowed) {
         return jsonResponse(
           { ok: false, error: 'Rate limit exceeded for /api/stt', retryAfterSec: rl.resetSec },
@@ -887,7 +1099,11 @@ export default {
     }
 
     if (path === '/api/gemini-tutor') {
-      const rl = checkRateLimit(request, 'gemini', 30);
+      const auth = await verifySupabaseJwt(request, env);
+      if (env.REQUIRE_SUPABASE_JWT === 'true' && !auth.authenticated) {
+        return jsonResponse({ ok: false, error: 'Authentication required' }, 401);
+      }
+      const rl = checkRateLimit(request, 'gemini', auth.authenticated ? 60 : 30, auth.userId);
       if (!rl.allowed) {
         return jsonResponse(
           { ok: false, error: 'Rate limit exceeded for /api/gemini-tutor', retryAfterSec: rl.resetSec },
@@ -900,6 +1116,18 @@ export default {
         );
       }
       return handleGeminiTutorRequest(request, env);
+    }
+
+    if (path.startsWith('/api/media/')) {
+      return handleMediaRequest(request, env, path);
+    }
+
+    if (path === '/api/telemetry') {
+      const rl = checkRateLimit(request, 'telemetry', 20);
+      if (!rl.allowed) {
+        return jsonResponse({ ok: false, error: 'Rate limit exceeded for /api/telemetry' }, 429);
+      }
+      return handleTelemetryRequest(request, env);
     }
 
     return jsonResponse({ error: 'Not found' }, 404);

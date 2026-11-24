@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, Copy, RotateCcw } from 'lucide-react';
+import { reportClientError } from '../utils/telemetry';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('FluentBridge ErrorBoundary caught:', error, info);
+    void reportClientError(error, typeof window !== 'undefined' ? window.location.pathname : '/');
   }
 
   handleReload = () => {

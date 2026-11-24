@@ -4,5 +4,11 @@
   "compatibility_date": "2026-10-01",
   "ai": {
     "binding": "AI"
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "fluentbridge-media"
+    }
+  ]
 }
