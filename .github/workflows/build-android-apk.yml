@@ -103,10 +103,14 @@ jobs:
           fi
 
       - name: Mirror APK to public silaswf/fluentbridge-releases
-        if: startsWith(github.ref, 'refs/tags/v') && secrets.RELEASES_REPO_TOKEN != ''
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
         run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "RELEASES_REPO_TOKEN not configured, skipping public mirror."
+            exit 0
+          fi
           if gh release view "$GITHUB_REF_NAME" --repo silaswf/fluentbridge-releases >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" "FluentBridge-${VERSION_LABEL}.apk" "FluentBridge.apk" --repo silaswf/fluentbridge-releases --clobber
           else
@@ -145,10 +149,13 @@ jobs:
           gh release upload "${{ github.ref_name }}" $exe.FullName --clobber
 
       - name: Mirror Windows Setup .exe to public silaswf/fluentbridge-releases
-        if: secrets.RELEASES_REPO_TOKEN != ''
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
         run: |
+          if (-not $env:GH_TOKEN) {
+            Write-Output "RELEASES_REPO_TOKEN not configured, skipping public mirror."
+            exit 0
+          }
           $exe = Get-ChildItem release/FluentBridge-Setup-*.exe | Select-Object -First 1
           gh release upload "${{ github.ref_name }}" $exe.FullName --repo silaswf/fluentbridge-releases --clobber
