@@ -1,0 +1,8 @@
+{
+  "version": "6.2.0",
+  "publishedAt": "2026-11-24",
+  "releaseNotes": "v6.2.0: Pelo menos 6 vocabulários ligados ao tema por unidade nos 12 idiomas (7.400+ cards), 100% dos exemplos contendo a palavra-alvo e verificador de atualização sem 404.",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge/releases/download/v6.2.0/FluentBridge-Setup-6.2.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge/releases/download/v6.2.0/FluentBridge-v6.2.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge/releases/tag/v6.2.0"
+}

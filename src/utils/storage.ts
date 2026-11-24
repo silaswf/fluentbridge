@@ -132,6 +132,10 @@ export function normalizePlatformState(
             ru: 'ru-RU',
             ja: 'ja-JP',
             zh: 'zh-CN',
+            ar: 'ar-SA',
+            nl: 'nl-NL',
+            af: 'af-ZA',
+            sv: 'sv-SE',
             ...(u.dialectByLanguage ?? {}),
           },
           completedTopicIds: Array.isArray(u.completedTopicIds)

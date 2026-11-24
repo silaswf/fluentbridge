@@ -23,6 +23,7 @@ import {
   UNIT_ROLEPLAY_ANGLES,
 } from '../../data/tutorScenarios';
 import { getAllVoiceDiagnostics } from '../speech';
+import { exampleMatchesWord, isMetaFallbackExample } from '../vocabValidation';
 
 const ALL_12_LANGS = [
   'en',
@@ -70,6 +71,14 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v6.0.0
       expect(topicIds.has(v.topicId)).toBe(true);
       expect(v.exampleEn.trim().length).toBeGreaterThan(0);
       expect(v.examplePt.trim().length).toBeGreaterThan(0);
+      expect(
+        isMetaFallbackExample(v.exampleEn),
+        `Meta fallback example in ${v.topicId} (${v.id}): "${v.exampleEn}"`,
+      ).toBe(false);
+      expect(
+        exampleMatchesWord(v.exampleEn, v.word, v.languageCode),
+        `Example does not match word "${v.word}" in ${v.topicId} (${v.id}, ${v.languageCode}): "${v.exampleEn}"`,
+      ).toBe(true);
     }
 
     const vocabByTopic = new Map<string, typeof ALL_INITIAL_VOCABULARY>();
@@ -78,7 +87,16 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v6.0.0
       list.push(v);
       vocabByTopic.set(v.topicId, list);
     }
+    for (const t of ALL_BUILTIN_TOPICS) {
+      const list = vocabByTopic.get(t.id) ?? [];
+      expect(
+        list.length,
+        `Topic ${t.id} (${t.languageCode}) has fewer than 6 vocab cards (${list.length})`,
+      ).toBeGreaterThanOrEqual(6);
+    }
     for (const [tid, list] of vocabByTopic.entries()) {
+      const uniqueWords = new Set(list.map((c) => c.word.trim().toLowerCase()));
+      expect(uniqueWords.size, `Duplicate word inside topic ${tid}`).toBe(list.length);
       const uniqueExamples = new Set(list.map((c) => c.exampleEn.trim().toLowerCase()));
       expect(uniqueExamples.size, `Duplicate exampleEn inside topic ${tid}`).toBe(list.length);
     }

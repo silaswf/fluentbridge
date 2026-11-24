@@ -1269,7 +1269,8 @@ export function LessonPlayer({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-800">
                   <Sparkles className="h-3.5 w-3.5" />
-                  Etapa 1 · Vocabulário da Unidade ({currentStep.cards.length} palavras)
+                  Etapa 1 · Vocabulário da Unidade ({currentStep.cards.length}{' '}
+                  {currentStep.cards.length === 1 ? 'palavra' : 'palavras'})
                 </span>
                 <button
                   type="button"

@@ -50,7 +50,14 @@ interface EnSpecialBlueprint {
   speakFocus: string;
   writePrompt: string;
   writeModel: string;
-  vocab: [string, string, string, string, string];
+  vocab: Array<{
+    word: string;
+    ipa: string;
+    pt: string;
+    cat: string;
+    exampleTarget: string;
+    examplePt: string;
+  }>;
 }
 
 const BLUEPRINTS: EnSpecialBlueprint[] = [
@@ -104,7 +111,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Encurte "live" e alongue bem "leave".',
     writePrompt: 'Escreva 2 frases usando LIVE e LEAVE.',
     writeModel: 'I live with my family and I leave home at eight every morning.',
-    vocab: ['leave', 'to leave', '/liːv/', 'sair / partir', 'Verbo'],
+    vocab: [
+      { word: 'to leave', ipa: '/liːv/', pt: 'sair / partir', cat: 'Verbo', exampleTarget: 'I leave for work at eight every morning.', examplePt: 'Eu saio para o trabalho às oito todas as manhãs.' },
+      { word: 'to live', ipa: '/lɪv/', pt: 'morar / viver', cat: 'Verbo', exampleTarget: 'I live ten minutes from the pier.', examplePt: 'Eu moro a dez minutos do píer.' },
+      { word: 'ship', ipa: '/ʃɪp/', pt: 'navio', cat: 'Substantivo', exampleTarget: 'Please check the ship schedule before boarding.', examplePt: 'Por favor, confira o horário do navio antes de embarcar.' },
+      { word: 'sheep', ipa: '/ʃiːp/', pt: 'ovelha', cat: 'Substantivo', exampleTarget: 'We saw a flock of sheep on the green hill.', examplePt: 'Vimos um rebanho de ovelhas na colina verde.' },
+      { word: 'ferry', ipa: '/ˈferi/', pt: 'balsa', cat: 'Transporte', exampleTarget: 'The morning ferry leaves at nine sharp.', examplePt: 'A balsa da manhã parte às nove em ponto.' },
+      { word: 'pier', ipa: '/pɪr/', pt: 'píer / cais', cat: 'Lugar', exampleTarget: 'Let us meet at the pier before 7:30.', examplePt: 'Vamos nos encontrar no píer antes das 7h30.' },
+    ],
   },
   {
     id: 'en-sp-2',
@@ -156,7 +170,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Soprar o TH com a língua leve entre os dentes.',
     writePrompt: 'Escreva uma frase com THINK e THANK.',
     writeModel: 'I think this course is very helpful, thank you!',
-    vocab: ['thoughtful', 'thoughtful', '/ˈθɔːtfəl/', 'atencioso / cuidadoso', 'Adjetivo'],
+    vocab: [
+      { word: 'thoughtful', ipa: '/ˈθɔːtfəl/', pt: 'atencioso / cuidadoso', cat: 'Adjetivo', exampleTarget: 'Thank you for such a thoughtful gift!', examplePt: 'Obrigado por um presente tão atencioso!' },
+      { word: 'to think', ipa: '/θɪŋk/', pt: 'pensar / achar', cat: 'Verbo', exampleTarget: 'I think we should review these three options.', examplePt: 'Eu acho que deveríamos revisar essas três opções.' },
+      { word: 'three', ipa: '/θriː/', pt: 'três', cat: 'Número', exampleTarget: 'We have three tickets for the morning train.', examplePt: 'Temos três passagens para o trem da manhã.' },
+      { word: 'weather', ipa: '/ˈweðər/', pt: 'clima / tempo', cat: 'Substantivo', exampleTarget: 'The weather is sunny and warm this Thursday.', examplePt: 'O clima está ensolarado e agradável nesta quinta.' },
+      { word: 'together', ipa: '/təˈɡeðər/', pt: 'juntos', cat: 'Advérbio', exampleTarget: 'Let us practice these sounds together.', examplePt: 'Vamos praticar esses sons juntos.' },
+      { word: 'Thursday', ipa: '/ˈθɜːrzdeɪ/', pt: 'quinta-feira', cat: 'Tempo', exampleTarget: 'Our pronunciation workshop starts on Thursday.', examplePt: 'Nossa oficina de pronúncia começa na quinta-feira.' },
+    ],
   },
   {
     id: 'en-sp-3',
@@ -208,7 +229,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Pronuncie claramente "return ticket".',
     writePrompt: 'Responda ao oficial da imigração explicando motivo, hotel e duração.',
     writeModel: 'I am here on vacation for twelve days and I am staying near Hyde Park.',
-    vocab: ['boarding pass', 'boarding pass', '/ˈbɔːrdɪŋ pæs/', 'cartão de embarque', 'Viagem'],
+    vocab: [
+      { word: 'boarding pass', ipa: '/ˈbɔːrdɪŋ pæs/', pt: 'cartão de embarque', cat: 'Viagem', exampleTarget: 'Please show your passport and boarding pass at gate twelve.', examplePt: 'Por favor, mostre seu passaporte e cartão de embarque no portão doze.' },
+      { word: 'customs', ipa: '/ˈkʌstəmz/', pt: 'alfândega', cat: 'Viagem', exampleTarget: 'All international arrivals must go through customs.', examplePt: 'Todas as chegadas internacionais devem passar pela alfândega.' },
+      { word: 'luggage', ipa: '/ˈlʌɡɪdʒ/', pt: 'bagagem', cat: 'Viagem', exampleTarget: 'Did you pack your luggage yourself?', examplePt: 'Você mesmo fez a sua bagagem?' },
+      { word: 'departure gate', ipa: '/dɪˈpɑːrtʃər ɡeɪt/', pt: 'portão de embarque', cat: 'Viagem', exampleTarget: 'Our departure gate changed from B4 to C9.', examplePt: 'Nosso portão de embarque mudou de B4 para C9.' },
+      { word: 'baggage claim', ipa: '/ˈbæɡɪdʒ kleɪm/', pt: 'restituição de bagagens', cat: 'Viagem', exampleTarget: 'Wait for your suitcase at baggage claim belt three.', examplePt: 'Espere pela sua mala na esteira três da restituição de bagagens.' },
+      { word: 'purpose of visit', ipa: '/ˈpɜːrpəs əv ˈvɪzɪt/', pt: 'motivo da viagem', cat: 'Imigração', exampleTarget: 'The officer asked about the purpose of my visit.', examplePt: 'O agente perguntou qual era o motivo da minha viagem.' },
+    ],
   },
   {
     id: 'en-sp-4',
@@ -260,7 +288,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Ligue "figure it out" suavemente.',
     writePrompt: 'Escreva 2 frases usando Phrasal Verbs (turn on/off, look for, give up).',
     writeModel: 'I was looking for my phone, then I turned the desk lamp on.',
-    vocab: ['figure out', 'to figure out', '/ˈfɪɡjər aʊt/', 'descobrir / resolver', 'Phrasal Verb'],
+    vocab: [
+      { word: 'to figure out', ipa: '/ˈfɪɡjər aʊt/', pt: 'descobrir / resolver', cat: 'Phrasal Verb', exampleTarget: 'We need to figure out how to fix this login bug.', examplePt: 'Precisamos descobrir como corrigir esse erro de login.' },
+      { word: 'to wake up', ipa: '/weɪk ʌp/', pt: 'acordar', cat: 'Phrasal Verb', exampleTarget: 'I usually wake up at six-thirty on weekdays.', examplePt: 'Eu geralmente acordo às seis e meia nos dias úteis.' },
+      { word: 'to pick up', ipa: '/pɪk ʌp/', pt: 'pegar / buscar', cat: 'Phrasal Verb', exampleTarget: 'I will pick up some coffee on my way to the office.', examplePt: 'Vou pegar um café no caminho para o escritório.' },
+      { word: 'to turn on', ipa: '/tɜːrn ɒn/', pt: 'ligar (aparelho)', cat: 'Phrasal Verb', exampleTarget: 'Could you turn on the air conditioning, please?', examplePt: 'Você poderia ligar o ar-condicionado, por favor?' },
+      { word: 'to look for', ipa: '/lʊk fɔːr/', pt: 'procurar por', cat: 'Phrasal Verb', exampleTarget: 'I am looking for my keys near the front door.', examplePt: 'Estou procurando minhas chaves perto da porta da frente.' },
+      { word: 'to give up', ipa: '/ɡɪv ʌp/', pt: 'desistir', cat: 'Phrasal Verb', exampleTarget: 'Never give up when a phrasal verb seems tricky.', examplePt: 'Nunca desista quando um phrasal verb parecer difícil.' },
+    ],
   },
   {
     id: 'en-sp-5',
@@ -312,7 +347,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Pronuncie "cough" terminando em /f/.',
     writePrompt: 'Descreva sintomas a um médico/farmacêutico e pergunte a dosagem.',
     writeModel: 'I have a sore throat and a mild fever. How often should I take this?',
-    vocab: ['prescription', 'prescription', '/prɪˈskrɪpʃən/', 'receita médica', 'Saúde'],
+    vocab: [
+      { word: 'prescription', ipa: '/prɪˈskrɪpʃən/', pt: 'receita médica', cat: 'Saúde', exampleTarget: 'The doctor wrote a prescription for antibiotics.', examplePt: 'O médico escreveu uma receita para antibióticos.' },
+      { word: 'symptom', ipa: '/ˈsɪmptəm/', pt: 'sintoma', cat: 'Saúde', exampleTarget: 'A mild fever is a common symptom of the flu.', examplePt: 'Uma febre leve é um sintoma comum da gripe.' },
+      { word: 'pharmacy', ipa: '/ˈfɑːrməsi/', pt: 'farmácia', cat: 'Saúde', exampleTarget: 'There is a twenty-four-hour pharmacy across the street.', examplePt: 'Há uma farmácia 24 horas do outro lado da rua.' },
+      { word: 'dosage', ipa: '/ˈdoʊsɪdʒ/', pt: 'dosagem', cat: 'Saúde', exampleTarget: 'Always check the recommended dosage on the label.', examplePt: 'Sempre confira a dosagem recomendada no rótulo.' },
+      { word: 'sore throat', ipa: '/sɔːr θroʊt/', pt: 'dor de garganta', cat: 'Saúde', exampleTarget: 'I have had a sore throat since yesterday evening.', examplePt: 'Estou com dor de garganta desde ontem à noite.' },
+      { word: 'allergy', ipa: '/ˈælərdʒi/', pt: 'alergia', cat: 'Saúde', exampleTarget: 'Please tell the nurse if you have any medication allergy.', examplePt: 'Por favor, avise a enfermeira se você tiver alguma alergia a remédios.' },
+    ],
   },
   {
     id: 'en-sp-6',
@@ -364,7 +406,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Pronuncie "schedule" com som de /sk/.',
     writePrompt: 'Escreva um e-mail curto de follow-up cobrando um retorno até sexta.',
     writeModel: 'Hi Maria, I am following up on the proposal. Could you send feedback by Friday?',
-    vocab: ['deadline', 'deadline', '/ˈdedlaɪn/', 'prazo final', 'Negócios'],
+    vocab: [
+      { word: 'deadline', ipa: '/ˈdedlaɪn/', pt: 'prazo final', cat: 'Negócios', exampleTarget: 'Can we move the project deadline to next Wednesday?', examplePt: 'Podemos mover o prazo final do projeto para a próxima quarta?' },
+      { word: 'attached', ipa: '/əˈtætʃt/', pt: 'em anexo', cat: 'E-mail', exampleTarget: 'Please find the updated budget attached to this email.', examplePt: 'Segue em anexo o orçamento atualizado neste e-mail.' },
+      { word: 'follow-up', ipa: '/ˈfɒloʊ ʌp/', pt: 'acompanhamento / retorno', cat: 'Negócios', exampleTarget: 'I am sending a quick follow-up on yesterday’s meeting.', examplePt: 'Estou enviando um retorno rápido sobre a reunião de ontem.' },
+      { word: 'agenda', ipa: '/əˈdʒendə/', pt: 'pauta da reunião', cat: 'Negócios', exampleTarget: 'Let us share the meeting agenda before noon.', examplePt: 'Vamos compartilhar a pauta da reunião antes do meio-dia.' },
+      { word: 'action items', ipa: '/ˈækʃən ˈaɪtəmz/', pt: 'itens de ação / tarefas', cat: 'Negócios', exampleTarget: 'Here are the key action items from our call.', examplePt: 'Aqui estão os principais itens de ação da nossa chamada.' },
+      { word: 'to reschedule', ipa: '/ˌriːˈskedʒuːl/', pt: 'reagendar', cat: 'Negócios', exampleTarget: 'Could we reschedule our call to 3 p.m.?', examplePt: 'Poderíamos reagendar nossa chamada para as 15h?' },
+    ],
   },
   {
     id: 'en-sp-7',
@@ -416,7 +465,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Destaque o sufixo "-ed" suave em "streamlined".',
     writePrompt: 'Escreva 1 conquista profissional usando o método STAR.',
     writeModel: 'When traffic spiked, I optimized database queries and cut page latency by 35%.',
-    vocab: ['streamline', 'to streamline', '/ˈstriːmlaɪn/', 'otimizar / simplificar', 'Carreira'],
+    vocab: [
+      { word: 'to streamline', ipa: '/ˈstriːmlaɪn/', pt: 'otimizar / simplificar', cat: 'Carreira', exampleTarget: 'I helped streamline our onboarding workflow by forty percent.', examplePt: 'Ajudei a otimizar nosso fluxo de integração em quarenta por cento.' },
+      { word: 'accomplishment', ipa: '/əˈkɑːmplɪʃmənt/', pt: 'conquista / realização', cat: 'Carreira', exampleTarget: 'Leading the migration was my biggest accomplishment last year.', examplePt: 'Liderar a migração foi minha maior conquista no ano passado.' },
+      { word: 'stakeholder', ipa: '/ˈsteɪkhoʊldər/', pt: 'parte interessada / cliente interno', cat: 'Carreira', exampleTarget: 'Every stakeholder approved the new launch timeline.', examplePt: 'Cada parte interessada aprovou o novo cronograma de lançamento.' },
+      { word: 'ownership', ipa: '/ˈoʊnərʃɪp/', pt: 'protagonismo / responsabilidade', cat: 'Carreira', exampleTarget: 'Taking ownership of bugs builds trust with the team.', examplePt: 'Assumir responsabilidade pelos bugs gera confiança na equipe.' },
+      { word: 'measurable impact', ipa: '/ˈmeʒərəbl ˈɪmpækt/', pt: 'impacto mensurável', cat: 'Carreira', exampleTarget: 'STAR stories should highlight a measurable impact.', examplePt: 'Histórias no formato STAR devem destacar um impacto mensurável.' },
+      { word: 'cross-functional', ipa: '/krɔːs ˈfʌŋkʃənəl/', pt: 'multidisciplinar (entre áreas)', cat: 'Carreira', exampleTarget: 'She coordinated a cross-functional team of designers and engineers.', examplePt: 'Ela coordenou uma equipe multidisciplinar de designers e engenheiros.' },
+    ],
   },
   {
     id: 'en-sp-8',
@@ -468,7 +524,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Conecte "check out" como "tche-kaut".',
     writePrompt: 'Escreva o que gosta de assistir em inglês e como treina o ouvido.',
     writeModel: 'I watch comedy series with English subtitles to recognize fast linking.',
-    vocab: ['binge-watch', 'to binge-watch', '/ˈbɪndʒ wɒtʃ/', 'maratonar série', 'Entretenimento'],
+    vocab: [
+      { word: 'to binge-watch', ipa: '/ˈbɪndʒ wɒtʃ/', pt: 'maratonar série', cat: 'Entretenimento', exampleTarget: 'We stayed home to binge-watch the entire season.', examplePt: 'Ficamos em casa para maratonar a temporada inteira.' },
+      { word: 'gonna', ipa: '/ˈɡʌnə/', pt: 'vai / vou (going to informal)', cat: 'Fala Conectada', exampleTarget: 'Are you gonna watch the new episode tonight?', examplePt: 'Você vai assistir ao novo episódio hoje à noite?' },
+      { word: 'wanna', ipa: '/ˈwɑːnə/', pt: 'querer (want to informal)', cat: 'Fala Conectada', exampleTarget: 'Do you wanna grab popcorn before the movie starts?', examplePt: 'Você quer pegar pipoca antes do filme começar?' },
+      { word: 'plot twist', ipa: '/plɒt twɪst/', pt: 'reviravolta na trama', cat: 'Entretenimento', exampleTarget: 'That final plot twist surprised everyone in the theater.', examplePt: 'Aquela reviravolta final surpreendeu todo mundo no cinema.' },
+      { word: 'spoiler', ipa: '/ˈspɔɪlər/', pt: 'revelação antecipada (spoiler)', cat: 'Entretenimento', exampleTarget: 'Please do not give me any spoiler about the ending!', examplePt: 'Por favor, não me dê nenhum spoiler sobre o final!' },
+      { word: 'subtitles', ipa: '/ˈsʌbtaɪtəlz/', pt: 'legendas', cat: 'Entretenimento', exampleTarget: 'Watching with English subtitles boosts listening speed.', examplePt: 'Assistir com legendas em inglês acelera a compreensão auditiva.' },
+    ],
   },
   {
     id: 'en-sp-9',
@@ -520,7 +583,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Pronounce "climbed" as a single syllable (/klaɪmd/), not "climb-ed".',
     writePrompt: 'Describe a chart trend in English using an advanced verb (surge, plummet, or climb steadily).',
     writeModel: 'After launching the mobile app, daily active users surged by forty percent.',
-    vocab: ['plateau', 'to plateau', '/plæˈtoʊ/', 'to level off after growth or decline', 'Data'],
+    vocab: [
+      { word: 'to plateau', ipa: '/plæˈtoʊ/', pt: 'estabilizar após crescimento ou queda', cat: 'Data', exampleTarget: 'Sign-ups began to plateau in Q3 before our new campaign launched.', examplePt: 'As inscrições começaram a estabilizar no 3º trimestre antes da nova campanha.' },
+      { word: 'sharp increase', ipa: '/ʃɑːrp ˈɪnkriːs/', pt: 'aumento acentuado', cat: 'Data', exampleTarget: 'The dashboard shows a sharp increase in daily active learners.', examplePt: 'O painel mostra um aumento acentuado nos alunos ativos diários.' },
+      { word: 'conversion rate', ipa: '/kənˈvɜːrʒən reɪt/', pt: 'taxa de conversão', cat: 'Analytics', exampleTarget: 'Our checkout conversion rate rose from three to five percent.', examplePt: 'Nossa taxa de conversão no checkout subiu de três para cinco por cento.' },
+      { word: 'benchmark', ipa: '/ˈbentʃmɑːrk/', pt: 'referência / padrão comparativo', cat: 'Data', exampleTarget: 'Industry benchmarks suggest a fifteen-percent retention target.', examplePt: 'Referências do setor sugerem uma meta de retenção de quinze por cento.' },
+      { word: 'outlier', ipa: '/ˈaʊtlaɪər/', pt: 'valor fora da curva', cat: 'Data', exampleTarget: 'One enterprise account was a clear outlier in monthly usage.', examplePt: 'Uma conta corporativa foi um claro ponto fora da curva no uso mensal.' },
+      { word: 'takeaway', ipa: '/ˈteɪkəweɪ/', pt: 'conclusão principal', cat: 'Presentation', exampleTarget: 'The key takeaway from this chart is steady mobile growth.', examplePt: 'A principal conclusão deste gráfico é o crescimento contínuo no mobile.' },
+    ],
   },
   {
     id: 'en-sp-10',
@@ -572,7 +642,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Link "pays off" smoothly and keep crisp /t/ in "cut".',
     writePrompt: 'Write a natural sentence using "hit the nail on the head" or "call it a day".',
     writeModel: 'After finishing all the reports, we decided to call it a day.',
-    vocab: ['cut corners', 'to cut corners', '/kʌt ˈkɔːrnərz/', 'take shortcuts that compromise quality', 'Idioms'],
+    vocab: [
+      { word: 'to cut corners', ipa: '/kʌt ˈkɔːrnərz/', pt: 'fazer nas coxas / economizar na qualidade', cat: 'Idioms', exampleTarget: 'Never cut corners on automated security testing before launch.', examplePt: 'Nunca economize na qualidade dos testes de segurança antes do lançamento.' },
+      { word: 'on the same page', ipa: '/ɒn ðə seɪm peɪdʒ/', pt: 'alinhados / de acordo', cat: 'Idioms', exampleTarget: 'Let us hold a brief sync so everyone is on the same page.', examplePt: 'Vamos fazer uma breve reunião para que todos estejam alinhados.' },
+      { word: 'hit the nail on the head', ipa: '/hɪt ðə neɪl/', pt: 'acertar em cheio', cat: 'Idioms', exampleTarget: 'You hit the nail on the head when you spotted that UX flaw.', examplePt: 'Você acertou em cheio quando identificou aquela falha de UX.' },
+      { word: 'silver lining', ipa: '/ˈsɪlvər ˈlaɪnɪŋ/', pt: 'lado positivo de algo ruim', cat: 'Idioms', exampleTarget: 'The delay had a silver lining: we caught a critical bug.', examplePt: 'O atraso teve um lado positivo: pegamos um bug crítico.' },
+      { word: 'ballpark figure', ipa: '/ˈbɔːlpɑːrk ˈfɪɡjər/', pt: 'estimativa aproximada', cat: 'Idioms', exampleTarget: 'Could you share a ballpark figure for the cloud migration?', examplePt: 'Você poderia compartilhar uma estimativa aproximada para a migração na nuvem?' },
+      { word: 'back to square one', ipa: '/bæk tuː skwer wʌn/', pt: 'voltar à estaca zero', cat: 'Idioms', exampleTarget: 'If the client rejects the prototype, we are back to square one.', examplePt: 'Se o cliente rejeitar o protótipo, voltamos à estaca zero.' },
+    ],
   },
   {
     id: 'en-sp-11',
@@ -624,7 +701,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Keep clear secondary stress on "user experience" without dropping the /s/ in "requests".',
     writePrompt: 'Explain a simple technical issue and how your team resolved it in English.',
     writeModel: 'We fixed the memory leak by closing unused listeners and adding unit tests.',
-    vocab: ['bottleneck', 'bottleneck', '/ˈbɒtəlnek/', 'a constraint that slows down an entire system', 'Technology'],
+    vocab: [
+      { word: 'bottleneck', ipa: '/ˈbɒtəlnek/', pt: 'gargalo (ponto que trava o sistema)', cat: 'Technology', exampleTarget: 'The unindexed database query became our main bottleneck under load.', examplePt: 'A consulta sem índice no banco tornou-se nosso principal gargalo sob carga.' },
+      { word: 'to deploy', ipa: '/dɪˈplɔɪ/', pt: 'publicar / implantar em produção', cat: 'Technology', exampleTarget: 'We plan to deploy the caching patch right after code review.', examplePt: 'Planejamos publicar o patch de cache logo após a revisão de código.' },
+      { word: 'to roll back', ipa: '/roʊl bæk/', pt: 'reverter versão (rollback)', cat: 'Technology', exampleTarget: 'If error rates spike, we can roll back the release in thirty seconds.', examplePt: 'Se a taxa de erros subir, podemos reverter a versão em trinta segundos.' },
+      { word: 'regression', ipa: '/rɪˈɡreʃən/', pt: 'regressão (erro que voltou)', cat: 'Technology', exampleTarget: 'End-to-end tests prevent a login regression from reaching users.', examplePt: 'Testes ponta a ponta evitam que uma regressão de login chegue aos usuários.' },
+      { word: 'edge case', ipa: '/edʒ keɪs/', pt: 'caso extremo / exceção rara', cat: 'Technology', exampleTarget: 'Offline sync on slow 3G networks is a classic edge case.', examplePt: 'Sincronização offline em redes 3G lentas é um caso extremo clássico.' },
+      { word: 'latency', ipa: '/ˈleɪtənsi/', pt: 'latência / tempo de resposta', cat: 'Technology', exampleTarget: 'Edge caching reduced API latency from 400ms to 35ms.', examplePt: 'O cache na borda reduziu a latência da API de 400ms para 35ms.' },
+    ],
   },
   {
     id: 'en-sp-12',
@@ -676,7 +760,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Keep "though" smooth and silent on "-gh" (/ðoʊ/).',
     writePrompt: 'Politely disagree with a proposal in English using "I see your point, however...".',
     writeModel: 'I see your point about speed, however stability must come first for our users.',
-    vocab: ['outweigh', 'to outweigh', '/ˌaʊtˈweɪ/', 'be more significant or valuable than', 'Argumentation'],
+    vocab: [
+      { word: 'to outweigh', ipa: '/ˌaʊtˈweɪ/', pt: 'superar em peso/importância', cat: 'Argumentation', exampleTarget: 'Long-term reliability benefits clearly outweigh the initial setup cost.', examplePt: 'Os benefícios de confiabilidade a longo prazo claramente superam o custo inicial.' },
+      { word: 'counterargument', ipa: '/ˈkaʊntərˌɑːrɡjumənt/', pt: 'contra-argumento', cat: 'Argumentation', exampleTarget: 'She addressed every counterargument with calm empirical evidence.', examplePt: 'Ela respondeu a cada contra-argumento com evidências empíricas calmas.' },
+      { word: 'to concede', ipa: '/kənˈsiːd/', pt: 'admitir / conceder um ponto', cat: 'Argumentation', exampleTarget: 'I concede that the timeline is tight, yet the goal remains realistic.', examplePt: 'Admito que o prazo é apertado, mas a meta continua realista.' },
+      { word: 'nuanced', ipa: '/ˈnjuːɑːnst/', pt: 'sutil / cheio de nuances', cat: 'Argumentation', exampleTarget: 'Complex policy debates require a nuanced rather than binary view.', examplePt: 'Debates políticos complexos exigem uma visão com nuances em vez de binária.' },
+      { word: 'trade-off', ipa: '/ˈtreɪd ɒf/', pt: 'troca / equilíbrio entre escolhas', cat: 'Argumentation', exampleTarget: 'Every architecture choice involves a trade-off between speed and cost.', examplePt: 'Toda escolha de arquitetura envolve uma troca entre velocidade e custo.' },
+      { word: 'valid point', ipa: '/ˈvælɪd pɔɪnt/', pt: 'ponto válido / pertinente', cat: 'Argumentation', exampleTarget: 'That is a valid point, though customer feedback suggests otherwise.', examplePt: 'Esse é um ponto válido, embora o feedback dos clientes sugira o contrário.' },
+    ],
   },
   {
     id: 'en-sp-13',
@@ -728,7 +819,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Keep primary stress on "-LESS" in "nevertheless" (/ˌnevərðəˈles/).',
     writePrompt: 'Write a short academic paragraph in English using "whereas" or "nevertheless".',
     writeModel: 'Digital platforms expand reach; nevertheless, structured feedback remains pivotal.',
-    vocab: ['paramount', 'paramount', '/ˈpærəmaʊnt/', 'of supreme importance', 'Academic'],
+    vocab: [
+      { word: 'paramount', ipa: '/ˈpærəmaʊnt/', pt: 'de importância suprema / primordial', cat: 'Academic', exampleTarget: 'Ensuring transparent peer review is paramount in academic publishing.', examplePt: 'Garantir revisão por pares transparente é primordial na publicação acadêmica.' },
+      { word: 'nevertheless', ipa: '/ˌnevərðəˈles/', pt: 'não obstante / ainda assim', cat: 'Cohesion', exampleTarget: 'The sample size was modest; nevertheless, the findings held across cohorts.', examplePt: 'O tamanho da amostra foi modesto; ainda assim, os achados se mantiveram.' },
+      { word: 'whereas', ipa: '/werˈæz/', pt: 'enquanto que (contraste)', cat: 'Cohesion', exampleTarget: 'Urban enrollment climbed steadily, whereas rural access lagged behind.', examplePt: 'As matrículas urbanas subiram de forma contínua, enquanto o acesso rural ficou atrás.' },
+      { word: 'empirical', ipa: '/ɪmˈpɪrɪkəl/', pt: 'empírico / baseado em evidências', cat: 'Academic', exampleTarget: 'The thesis relies on empirical data gathered over five years.', examplePt: 'A tese se baseia em dados empíricos coletados ao longo de cinco anos.' },
+      { word: 'to corroborate', ipa: '/kəˈrɒbəreɪt/', pt: 'corroborar / confirmar', cat: 'Academic', exampleTarget: 'Independent lab trials corroborate the author’s initial hypothesis.', examplePt: 'Testes independentes de laboratório corroboram a hipótese inicial do autor.' },
+      { word: 'disparity', ipa: '/dɪˈspærəti/', pt: 'disparidade / desigualdade', cat: 'Academic', exampleTarget: 'Researchers analyzed the regional disparity in broadband speed.', examplePt: 'Pesquisadores analisaram a disparidade regional na velocidade de banda larga.' },
+    ],
   },
   {
     id: 'en-sp-14',
@@ -780,7 +878,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Maintain rhythmic clarity across "subject to legal approval".',
     writePrompt: 'Propose a conditional concession in English using "Provided that...".',
     writeModel: 'We can deliver the extra module early provided that the scope stays frozen.',
-    vocab: ['provided that', 'provided that', '/prəˈvaɪdɪd ðæt/', 'on the condition that', 'Contracts'],
+    vocab: [
+      { word: 'provided that', ipa: '/prəˈvaɪdɪd ðæt/', pt: 'contanto que / desde que', cat: 'Contracts', exampleTarget: 'We accept the revised fee, provided that payment clears within fifteen days.', examplePt: 'Aceitamos o valor revisado, desde que o pagamento compense em quinze dias.' },
+      { word: 'clause', ipa: '/klɔːz/', pt: 'cláusula contratual', cat: 'Contracts', exampleTarget: 'Please review the exclusivity clause before signing the agreement.', examplePt: 'Por favor, revise a cláusula de exclusividade antes de assinar o acordo.' },
+      { word: 'scope of work', ipa: '/skoʊp əv wɜːrk/', pt: 'escopo do trabalho', cat: 'Contracts', exampleTarget: 'Deliverables outside the scope of work require a separate addendum.', examplePt: 'Entregas fora do escopo do trabalho exigem um aditivo separado.' },
+      { word: 'retainer', ipa: '/rɪˈteɪnər/', pt: 'honorário mensal recorrente', cat: 'Contracts', exampleTarget: 'The agency proposed a monthly retainer covering twenty consulting hours.', examplePt: 'A agência propôs um honorário mensal cobrindo vinte horas de consultoria.' },
+      { word: 'binding', ipa: '/ˈbaɪndɪŋ/', pt: 'juridicamente vinculante', cat: 'Contracts', exampleTarget: 'Once countersigned, the settlement terms become legally binding.', examplePt: 'Uma vez contra-assinados, os termos do acordo tornam-se vinculantes.' },
+      { word: 'termination notice', ipa: '/ˌtɜːrmɪˈneɪʃən ˈnoʊtɪs/', pt: 'aviso prévio de rescisão', cat: 'Contracts', exampleTarget: 'Either party must give thirty days’ written termination notice.', examplePt: 'Qualquer uma das partes deve dar aviso prévio por escrito de trinta dias.' },
+    ],
   },
   {
     id: 'en-sp-15',
@@ -832,7 +937,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Keep crisp articulation on "non-negotiable" (/ˌnɒn nɪˈɡoʊʃəbl/).',
     writePrompt: 'Write a concise data-protection rule in English using binding "shall".',
     writeModel: 'The platform shall encrypt user passwords before storing any record.',
-    vocab: ['liability', 'liability', '/ˌlaɪəˈbɪləti/', 'legal responsibility or financial exposure', 'Legal'],
+    vocab: [
+      { word: 'liability', ipa: '/ˌlaɪəˈbɪləti/', pt: 'responsabilidade civil / passivo', cat: 'Legal', exampleTarget: 'The indemnity section caps total vendor liability at twelve months of fees.', examplePt: 'A seção de indenização limita a responsabilidade total do fornecedor a doze meses de taxas.' },
+      { word: 'compliance', ipa: '/kəmˈplaɪəns/', pt: 'conformidade regulatória', cat: 'Legal', exampleTarget: 'Annual audits verify full compliance with regional privacy laws.', examplePt: 'Auditorias anuais verificam total conformidade com as leis regionais de privacidade.' },
+      { word: 'data controller', ipa: '/ˈdeɪtə kənˈtroʊlər/', pt: 'controlador de dados', cat: 'Privacy', exampleTarget: 'Under GDPR, the hospital acts as the primary data controller.', examplePt: 'Sob a GDPR, o hospital atua como o controlador de dados principal.' },
+      { word: 'breach notification', ipa: '/briːtʃ ˌnoʊtɪfɪˈkeɪʃən/', pt: 'notificação de incidente de dados', cat: 'Privacy', exampleTarget: 'Regulators require a breach notification within seventy-two hours.', examplePt: 'Reguladores exigem uma notificação de violação em até setenta e duas horas.' },
+      { word: 'consent', ipa: '/kənˈsent/', pt: 'consentimento expresso', cat: 'Privacy', exampleTarget: 'Analytics cookies load only after explicit user consent.', examplePt: 'Cookies analíticos carregam somente após consentimento explícito do usuário.' },
+      { word: 'to encrypt', ipa: '/ɪnˈkrɪpt/', pt: 'criptografar', cat: 'Security', exampleTarget: 'The platform shall encrypt user passwords and voice recordings at rest.', examplePt: 'A plataforma deve criptografar senhas e gravações de voz em repouso.' },
+    ],
   },
   {
     id: 'en-sp-16',
@@ -884,7 +996,14 @@ const BLUEPRINTS: EnSpecialBlueprint[] = [
     speakFocus: 'Give "By no means" measured emphasis before inverting "should we".',
     writePrompt: 'Write an elegant sentence using formal inversion ("By no means..." or "Not only...").',
     writeModel: 'By no means is fluency about perfection; it is about fearless connection.',
-    vocab: ['subtle', 'subtle', '/ˈsʌtəl/', 'delicate, understated, or not obvious (silent b)', 'Nuance'],
+    vocab: [
+      { word: 'subtle', ipa: '/ˈsʌtəl/', pt: 'sutil / discreto (b mudo)', cat: 'Nuance', exampleTarget: 'By no means should we ignore the subtle shift in his tone.', examplePt: 'De modo algum devemos ignorar a mudança sutil no tom dele.' },
+      { word: 'understatement', ipa: '/ˈʌndərsteɪtmənt/', pt: 'eufemismo / atenuação britânica', cat: 'Nuance', exampleTarget: 'Calling a blizzard "a bit chilly" is classic British understatement.', examplePt: 'Chamar uma nevasca de "um pouco friozinho" é um clássico eufemismo britânico.' },
+      { word: 'by no means', ipa: '/baɪ noʊ miːnz/', pt: 'de maneira nenhuma (inversão formal)', cat: 'Rhetoric', exampleTarget: 'By no means is fluency about perfection; it is about fearless connection.', examplePt: 'De maneira nenhuma fluência é perfeição; trata-se de conexão sem medo.' },
+      { word: 'lukewarm', ipa: '/ˌluːkˈwɔːrm/', pt: 'morno / pouco entusiasmado', cat: 'Nuance', exampleTarget: 'The board gave a lukewarm response to the unedited pitch.', examplePt: 'O conselho deu uma resposta morna à apresentação não revisada.' },
+      { word: 'reading between the lines', ipa: '/ˈriːdɪŋ bɪˈtwiːn ðə laɪnz/', pt: 'ler nas entrelinhas', cat: 'Nuance', exampleTarget: 'Diplomacy depends on reading between the lines during negotiations.', examplePt: 'A diplomacia depende de ler nas entrelinhas durante negociações.' },
+      { word: 'with all due respect', ipa: '/wɪð ɔːl djuː rɪˈspekt/', pt: 'com todo o devido respeito (discordância firme)', cat: 'Rhetoric', exampleTarget: 'With all due respect, the latest forecast overlooks seasonal churn.', examplePt: 'Com todo o devido respeito, a previsão mais recente ignora a sazonalidade.' },
+    ],
   },
 ];
 
@@ -1090,16 +1209,18 @@ export const TOPICS_EN_SPECIAL: Topic[] = BLUEPRINTS.map((b, idx) =>
   buildSpecialTopic(b, idx),
 );
 
-export const VOCAB_EN_SPECIAL: VocabCard[] = BLUEPRINTS.map((b, idx) => ({
-  id: `voc-en-sp-${idx + 1}`,
-  topicId: b.id,
-  languageCode: 'en',
-  word: b.vocab[1],
-  translation: b.vocab[3],
-  ipa: b.vocab[2],
-  exampleEn: b.exampleEn,
-  examplePt: b.examplePt,
-  category: b.vocab[4],
-  strength: 'weak',
-  reviewCount: 0,
-}));
+export const VOCAB_EN_SPECIAL: VocabCard[] = BLUEPRINTS.flatMap((b, idx) =>
+  b.vocab.map((v, vIdx) => ({
+    id: vIdx === 0 ? `voc-en-sp-${idx + 1}` : `voc-en-sp-${idx + 1}-${vIdx + 1}`,
+    topicId: b.id,
+    languageCode: 'en' as const,
+    word: v.word,
+    translation: v.pt,
+    ipa: v.ipa,
+    exampleEn: v.exampleTarget,
+    examplePt: v.examplePt,
+    category: v.cat,
+    strength: 'weak' as const,
+    reviewCount: 0,
+  })),
+);

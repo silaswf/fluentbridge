@@ -9,26 +9,18 @@ describe('App Updater Engine (v6.1.0)', () => {
     expect(compareVersions('7.0.0', '6.9.9')).toBe(1);
   });
 
-  it('parses latest GitHub Release assets and falls back gracefully offline', async () => {
+  it('parses Cloudflare Pages version.json manifest and falls back gracefully offline', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          tag_name: 'v6.9.0',
-          body: 'Correções e novidades',
-          published_at: '2026-12-01T10:00:00Z',
-          html_url: 'https://github.com/silaswf/fluentbridge/releases/tag/v6.9.0',
-          assets: [
-            {
-              name: 'FluentBridge-Setup-6.9.0.exe',
-              browser_download_url: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-Setup-6.9.0.exe',
-            },
-            {
-              name: 'FluentBridge-v6.9.0.apk',
-              browser_download_url: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-v6.9.0.apk',
-            },
-          ],
+          version: '6.9.0',
+          releaseNotes: 'Correções e novidades',
+          publishedAt: '2026-12-01',
+          releasePageUrl: 'https://github.com/silaswf/fluentbridge/releases/tag/v6.9.0',
+          windowsUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-Setup-6.9.0.exe',
+          androidUrl: 'https://github.com/silaswf/fluentbridge/releases/download/v6.9.0/FluentBridge-v6.9.0.apk',
         }),
       }),
     );

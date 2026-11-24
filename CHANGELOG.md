@@ -4,6 +4,18 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v6.2.0`] — 2026-11-24
+### >= 6 Vocabulários Ligados ao Tema em Todas as 1.236 Unidades, 100% dos Exemplos Contendo a Palavra-Alvo & Manifest de Atualização Sem 404
+- **Validador Estrito de Exemplos (`src/utils/vocabValidation.ts`, `courseBuilder.ts`):**
+  - Criado `exampleMatchesWord` + `isMetaFallbackExample` para garantir que 100% dos cards em todos os 12 idiomas possuam frases reais e naturais que utilizam explicitamente a palavra/estrutura ensinada (eliminando frases genéricas e exemplos desconexos como em `bottleneck`).
+- **Expansão Completa de Vocabulário nos 12 Cursos (`enSpecialTracks.ts`, `src/data/curriculum/vocabExpansion/`):**
+  - Expandidas as 16 unidades especiais de inglês (`en-sp-1` a `en-sp-16`) de 1 para 6 vocabulários por unidade e criadas as expansões dos 12 idiomas (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`), garantindo **pelo menos 6 vocabulários ligados ao tema** em cada uma das **1.236 unidades** (`>= 7.416` cards no catálogo).
+- **Polimento & Atualizador Sem 404 (`LessonPlayer.tsx`, `storage.ts`, `public/version.json`, `appUpdater.ts`):**
+  - Corrigido o rótulo singular/plural na Etapa 1 (`1 palavra` vs. `6 palavras`) e adicionados os dialetos padrão de `ar`, `nl`, `af` e `sv` em `normalizePlatformState`.
+  - Adicionado `public/version.json` no Cloudflare Pages para verificação de versão sem erro `404` no console quando o repositório GitHub é privado.
+
+---
+
 ## [`v6.1.0`] — 2026-11-24
 ### Atualizador In-App (Windows, Android & Web), Correção Definitiva do `React #300` ao Concluir Unidade, Exemplos Únicos em Todos os 3.886 Cards & Vozes Nativas nos 12 Idiomas
 - **Atualizador In-App Multiplataforma (`AppUpdateModal.tsx`, `appUpdater.ts`, `electron/main.cjs`, `electron/preload.cjs`):**

@@ -7,6 +7,7 @@ import type {
   VocabCard,
 } from '../../types/learning';
 import { getImmersionStrings, isImmersionLevel } from '../../utils/immersion';
+import { exampleMatchesWord } from '../../utils/vocabValidation';
 
 export interface RichLanguageBlueprint {
   id: string;
@@ -334,41 +335,6 @@ export function buildRichLanguageTopic(
   };
 }
 
-function normalizeTokenForMatch(raw: string): string {
-  return raw
-    .normalize('NFKC')
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/[¡!¿?.,;:«»"'`“”‘’]/g, ' ')
-    .trim()
-    .toLowerCase()
-    .replace(
-      /^(to|a|an|the|el|la|los|las|un|una|unos|unas|le|l'|les|il|lo|i|gli|der|die|das|ein|eine|een|het|de|en|ett|’n)\s+/i,
-      '',
-    )
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function sentenceContainsWord(sentence: string, rawWord: string): boolean {
-  const normSent = sentence.normalize('NFKC').toLowerCase();
-  const variants = rawWord
-    .split(/[\/|]/)
-    .map(normalizeTokenForMatch)
-    .filter(Boolean);
-
-  for (const v of variants) {
-    if (normSent.includes(v)) return true;
-    const parts = v.split(/\s+/).filter(Boolean);
-    for (const part of parts) {
-      const minLen = /[\u3040-\u30ff\u3400-\u9fff\u0600-\u06ff]/.test(part) ? 2 : 4;
-      if (part.length >= minLen && normSent.includes(part)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 function splitIntoSentences(text: string): string[] {
   return text
     .split(/(?<=[.!?؟。])\s+/)
@@ -499,7 +465,12 @@ export function buildLanguageVocab(
       let chosenEn = '';
       let chosenPt = '';
 
-      if (v.exampleTarget && v.examplePt && !usedEn.has(v.exampleTarget.trim().toLowerCase())) {
+      if (
+        v.exampleTarget &&
+        v.examplePt &&
+        !usedEn.has(v.exampleTarget.trim().toLowerCase()) &&
+        exampleMatchesWord(v.exampleTarget, v.word, languageCode)
+      ) {
         chosenEn = v.exampleTarget.trim();
         chosenPt = v.examplePt.trim();
       }
@@ -508,7 +479,7 @@ export function buildLanguageVocab(
         const matchedPair = exactPairs.find(
           (p) =>
             !usedEn.has(p.en.trim().toLowerCase()) &&
-            sentenceContainsWord(p.en, v.word),
+            exampleMatchesWord(p.en, v.word, languageCode),
         );
         if (matchedPair) {
           chosenEn = matchedPair.en.trim();
@@ -520,7 +491,7 @@ export function buildLanguageVocab(
         const matchedSentence = rawSentences.find(
           (s) =>
             !usedEn.has(s.trim().toLowerCase()) &&
-            sentenceContainsWord(s, v.word),
+            exampleMatchesWord(s, v.word, languageCode),
         );
         if (matchedSentence) {
           chosenEn = matchedSentence.trim();

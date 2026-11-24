@@ -115,6 +115,18 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/afrikaansCourse')) return 'curriculum-af';
           if (id.includes('/curriculum/afrikaansExpansion')) return 'curriculum-af-exp';
           if (id.includes('/curriculum/swedishCourse')) return 'curriculum-sv';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpEn')) return 'vocab-exp-en';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpEs')) return 'vocab-exp-es';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpFr')) return 'vocab-exp-fr';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpIt')) return 'vocab-exp-it';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpDe')) return 'vocab-exp-de';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpRu')) return 'vocab-exp-ru';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpJa')) return 'vocab-exp-ja';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpZh')) return 'vocab-exp-zh';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpAr')) return 'vocab-exp-ar';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpNl')) return 'vocab-exp-nl';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpAf')) return 'vocab-exp-af';
+          if (id.includes('/curriculum/vocabExpansion/vocabExpSv')) return 'vocab-exp-sv';
           if (id.includes('/curriculum/swedishExpansion')) return 'curriculum-sv-exp';
           if (id.includes('/grammar/enGrammarExtra') || id.includes('/grammar/enGrammarV4')) return 'grammar-en';
           if (id.includes('/grammar/esGrammarExtra') || id.includes('/grammar/esGrammarV4')) return 'grammar-es';

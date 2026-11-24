@@ -82,6 +82,39 @@ export async function checkForAppUpdate(): Promise<AppUpdateInfo> {
       : undefined;
 
   try {
+    const manifestRes = await fetch('https://fluentbridge.pages.dev/version.json', {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+      signal: controller?.signal,
+    });
+    if (manifestRes.ok) {
+      const m = (await manifestRes.json()) as {
+        version?: string;
+        publishedAt?: string;
+        releaseNotes?: string;
+        windowsUrl?: string;
+        androidUrl?: string;
+        releasePageUrl?: string;
+      };
+      if (m.version) {
+        const latestVersion = m.version.replace(/^v/i, '');
+        return {
+          currentVersion: APP_VERSION,
+          latestVersion,
+          hasUpdate: compareVersions(latestVersion, APP_VERSION) > 0,
+          releaseNotes: (m.releaseNotes ?? '').trim().slice(0, 600),
+          publishedAt: (m.publishedAt ?? '').slice(0, 10),
+          windowsUrl: m.windowsUrl || WINDOWS_DOWNLOAD_URL,
+          androidUrl: m.androidUrl || ANDROID_APK_DOWNLOAD_URL,
+          releasePageUrl: m.releasePageUrl || GITHUB_RELEASES_URL,
+          checkedAt: new Date().toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        };
+      }
+    }
+
     const res = await fetch(
       'https://api.github.com/repos/silaswf/fluentbridge/releases/latest',
       {
