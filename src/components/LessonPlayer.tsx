@@ -6,11 +6,8 @@ import {
   BookOpen,
   Check,
   CheckCircle2,
-  Eye,
-  EyeOff,
   Flame,
   Heart,
-  HelpCircle,
   Infinity as InfinityIcon,
   Lightbulb,
   Mic,
@@ -60,7 +57,15 @@ import { Phase8StepsView } from './steps/Phase8StepsView';
 import { ScriptPhonicsStepView } from './steps/ScriptPhonicsStepView';
 import { ShadowingPanel } from './steps/ShadowingPanel';
 import { VocabIntroStep } from './steps/VocabIntroStep';
+import { ListeningStepView } from './steps/ListeningStepView';
+import { ReadingStepView } from './steps/ReadingStepView';
+import { MatchingStepView } from './steps/MatchingStepView';
+import { WritingFreeStepView } from './steps/WritingFreeStepView';
 import { PitchOscilloscope } from './PitchOscilloscope';
+import {
+  computeAdaptiveProfile,
+  type AdaptiveDifficultyMode,
+} from '../utils/adaptiveDifficulty';
 import {
   loadJapaneseScriptMode,
   saveJapaneseScriptMode,
@@ -338,8 +343,23 @@ export function LessonPlayer({
   const [hearts, setHearts] = useState(5);
   const [relaxedMode, setRelaxedMode] = useState(false);
   const [combo, setCombo] = useState(0);
+  const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
+  const [sessionWrongCount, setSessionWrongCount] = useState(0);
+  const [adaptiveOverride, setAdaptiveOverride] =
+    useState<AdaptiveDifficultyMode | null>(null);
   const [muted, setMuted] = useState(() => isSoundMuted());
   const [showHeartRecovery, setShowHeartRecovery] = useState(false);
+
+  const adaptiveProfile = useMemo(
+    () =>
+      computeAdaptiveProfile(
+        sessionCorrectCount,
+        sessionWrongCount,
+        combo,
+        adaptiveOverride,
+      ),
+    [sessionCorrectCount, sessionWrongCount, combo, adaptiveOverride],
+  );
 
   // Audio playback state
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -512,6 +532,7 @@ export function LessonPlayer({
     playSound('correct');
     const nextCombo = combo + 1;
     setCombo(nextCombo);
+    setSessionCorrectCount((c) => c + 1);
     const comboBonus = nextCombo >= 3 ? 5 : 0;
     setEarnedXp((prev) => prev + baseXp + comboBonus);
   };
@@ -519,6 +540,7 @@ export function LessonPlayer({
   const registerMistake = () => {
     playSound('wrong');
     setCombo(0);
+    setSessionWrongCount((c) => c + 1);
     setEarnedXp((prev) => prev + 6);
     if (!relaxedMode) {
       setHearts((prev) => {
@@ -1237,6 +1259,26 @@ export function LessonPlayer({
               </button>
             )}
 
+            <button
+              type="button"
+              data-testid="adaptive-difficulty-badge"
+              onClick={() =>
+                setAdaptiveOverride((prev) =>
+                  prev === null
+                    ? 'guided'
+                    : prev === 'guided'
+                      ? 'immersive'
+                      : prev === 'immersive'
+                        ? 'balanced'
+                        : null,
+                )
+              }
+              title={adaptiveProfile.summaryPt}
+              className="hidden rounded-xl border border-indigo-200 bg-indigo-50/70 px-2.5 py-1.5 text-[11px] font-bold text-indigo-800 hover:bg-indigo-100 md:inline-flex cursor-pointer"
+            >
+              ⚡ {adaptiveProfile.labelPt}
+            </button>
+
             {isImmersionLevel(topic.level) && (
               <button
                 type="button"
@@ -1520,329 +1562,67 @@ export function LessonPlayer({
 
           {/* LISTENING STEP */}
           {currentStep.type === 'listening' && (
-            <div className="animate-fade-up space-y-5">
-              <div className="rounded-3xl border border-indigo-200/80 bg-white p-6 shadow-xs">
-                <p className="text-xs font-bold text-indigo-600">
-                  {currentStep.speakerLabel}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">{currentStep.contextPt}</p>
-
-                <div className="mt-4 flex flex-col items-center justify-between gap-4 rounded-2xl bg-indigo-50/80 p-4 sm:flex-row">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 items-center gap-1 px-2" aria-hidden="true">
-                      {[0.4, 0.9, 0.6, 1, 0.5, 0.85, 0.45].map((h, i) => (
-                        <span
-                          key={i}
-                          className={`w-1.5 rounded-full bg-indigo-500 transition-all ${isPlayingAudio ? 'animate-wave h-8' : 'h-4 opacity-60'
-                            }`}
-                          style={{
-                            animationDelay: `${i * 0.1}s`,
-                            transform: isPlayingAudio ? undefined : `scaleY(${h})`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs font-semibold text-indigo-900">
-                      {isPlayingAudio ? 'Reproduzindo áudio...' : 'Clique para ouvir'}
-                    </span>
-                  </div>
-
-                  <DualAudioButtons
-                    text={currentStep.audioText}
-                    languageCode={topic.languageCode}
-                    showSlow
-                    size="md"
-                    onPlayStart={() => setIsPlayingAudio(true)}
-                    onPlayEnd={() => setIsPlayingAudio(false)}
-                  />
-                </div>
-
-                {renderUnitVocabInUseStrip(currentStep.audioText, topicVocab, (w) =>
-                  playAudio(w, 0.9),
-                )}
-
-                {checkedStatus !== 'idle' && (
-                  <div className="mt-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowTranscript((v) => !v)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:underline cursor-pointer"
-                    >
-                      {showTranscript ? (
-                        <EyeOff className="h-3.5 w-3.5" />
-                      ) : (
-                        <Eye className="h-3.5 w-3.5" />
-                      )}
-                      <span>
-                        {showTranscript ? 'Ocultar transcrição' : 'Ver transcrição do áudio'}
-                      </span>
-                    </button>
-                    {showTranscript && (
-                      <p className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed font-medium text-slate-700">
-                        “{currentStep.audioText}”
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {currentStep.question}
-                </h2>
-                <div className="mt-4 space-y-2.5">
-                  {currentStep.options.map((opt, i) => {
-                    const isPicked = selectedOption === i;
-                    const isRight = i === currentStep.correctIndex;
-                    let cardStyle =
-                      'border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/40';
-                    if (checkedStatus === 'idle' && isPicked) {
-                      cardStyle = 'border-blue-600 bg-blue-50 ring-2 ring-blue-200';
-                    } else if (checkedStatus !== 'idle') {
-                      if (isRight) {
-                        cardStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
-                      } else if (isPicked && !isRight) {
-                        cardStyle = 'border-rose-400 bg-rose-50 text-rose-950 animate-shake';
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        disabled={checkedStatus !== 'idle'}
-                        onClick={() => setSelectedOption(i)}
-                        className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left text-sm font-medium transition cursor-pointer disabled:cursor-default ${cardStyle}`}
-                      >
-                        <span>{opt}</span>
-                        {checkedStatus !== 'idle' && isRight && (
-                          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-                        )}
-                        {checkedStatus !== 'idle' && isPicked && !isRight && (
-                          <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <ListeningStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              isPlayingAudio={isPlayingAudio}
+              setIsPlayingAudio={setIsPlayingAudio}
+              showTranscript={showTranscript}
+              setShowTranscript={setShowTranscript}
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              checkedStatus={checkedStatus}
+              rateMultiplier={adaptiveProfile.recommendedRate}
+              unitVocabInUseNode={renderUnitVocabInUseStrip(
+                currentStep.audioText,
+                topicVocab,
+                (w) => playAudio(w, 0.9),
+              )}
+            />
           )}
 
           {/* READING STEP */}
           {currentStep.type === 'reading' && (
-            <div className="animate-fade-up space-y-5">
-              <div className="rounded-3xl border border-teal-200/80 bg-white p-6 shadow-xs">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <span className="text-[11px] font-bold tracking-wider text-teal-700 uppercase">
-                      {FORMAT_LABELS[currentStep.format]}
-                    </span>
-                    <h2 className="font-display text-lg font-bold text-slate-900">
-                      {currentStep.title}
-                    </h2>
-                  </div>
-                  <DualAudioButtons
-                    text={currentStep.text}
-                    languageCode={topic.languageCode}
-                    size="xs"
-                  />
-                </div>
-
-                <div
-                  data-testid="reading-passage-box"
-                  className="reading-passage-box mt-4 rounded-2xl border p-4 text-sm"
-                >
-                  {renderInteractivePassage(
-                    jaText(currentStep.text),
-                    currentStep.glossary,
-                    selectedGloss,
-                    (g) => setSelectedGloss(g),
-                  )}
-                </div>
-
-                <div className="mt-3">
-                  {selectedGloss ? (
-                    <div className="animate-fade-up flex items-center justify-between gap-3 rounded-2xl border border-teal-300 bg-teal-50 p-3.5">
-                      <div className="space-y-0.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-extrabold text-teal-950">
-                            {selectedGloss.word}
-                          </span>
-                          {selectedGloss.ipa && (
-                            <span className="font-mono text-xs text-teal-700">
-                              {selectedGloss.ipa}
-                            </span>
-                          )}
-                          <span className="text-xs font-bold text-teal-900">
-                            → {selectedGloss.translation}
-                          </span>
-                        </div>
-                        {selectedGloss.note && (
-                          <p className="text-xs text-teal-800">{selectedGloss.note}</p>
-                        )}
-                      </div>
-                      <DualAudioButtons
-                        text={selectedGloss.word}
-                        languageCode={topic.languageCode}
-                        size="xs"
-                      />
-                    </div>
-                  ) : (
-                    currentStep.glossary.length > 0 && (
-                      <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <BookOpen className="h-3.5 w-3.5 text-teal-600" />
-                        Toque nas palavras sublinhadas acima para ver tradução, IPA e dica do professor.
-                      </p>
-                    )
-                  )}
-                </div>
-
-                {renderUnitVocabInUseStrip(
-                  jaText(currentStep.text),
-                  topicVocab,
-                  (w) => playAudio(w, 0.9),
-                )}
-              </div>
-
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
-                <h3 className="font-display text-base font-bold text-slate-900">
-                  {currentStep.question}
-                </h3>
-                <div className="mt-3.5 space-y-2.5">
-                  {currentStep.options.map((opt, i) => {
-                    const isPicked = selectedOption === i;
-                    const isRight = i === currentStep.correctIndex;
-                    let cardStyle =
-                      'border-slate-200 bg-white hover:border-teal-300 hover:bg-teal-50/40';
-                    if (checkedStatus === 'idle' && isPicked) {
-                      cardStyle = 'border-teal-600 bg-teal-50 ring-2 ring-teal-200';
-                    } else if (checkedStatus !== 'idle') {
-                      if (isRight) {
-                        cardStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
-                      } else if (isPicked && !isRight) {
-                        cardStyle = 'border-rose-400 bg-rose-50 text-rose-950 animate-shake';
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        disabled={checkedStatus !== 'idle'}
-                        onClick={() => setSelectedOption(i)}
-                        className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left text-sm font-medium transition cursor-pointer disabled:cursor-default ${cardStyle}`}
-                      >
-                        <span>{opt}</span>
-                        {checkedStatus !== 'idle' && isRight && (
-                          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-                        )}
-                        {checkedStatus !== 'idle' && isPicked && !isRight && (
-                          <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <ReadingStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              displayText={jaText(currentStep.text)}
+              formatLabel={FORMAT_LABELS[currentStep.format]}
+              selectedGloss={selectedGloss}
+              onSelectGloss={(g) => setSelectedGloss(g)}
+              renderPassage={renderInteractivePassage}
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              checkedStatus={checkedStatus}
+              rateMultiplier={adaptiveProfile.recommendedRate}
+              unitVocabInUseNode={renderUnitVocabInUseStrip(
+                jaText(currentStep.text),
+                topicVocab,
+                (w) => playAudio(w, 0.9),
+              )}
+            />
           )}
 
           {/* NEW STEP: MATCHING PAIRS */}
           {currentStep.type === 'matching' && (
-            <div className="animate-fade-up rounded-3xl border border-sky-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {currentStep.promptPt}
-                </h2>
-                <span className="rounded-full bg-sky-50 px-2.5 py-0.5 font-mono text-xs font-bold text-sky-700">
-                  {matchedIds.length}/{currentStep.pairs.length}
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">
-                Toque em uma expressão à esquerda (com áudio) e depois no equivalente à direita.
-              </p>
-
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="space-y-2.5">
-                  {matchingColumns.targets.map((pair) => {
-                    const isCleared = matchedIds.includes(pair.id);
-                    const isPicked = pickedTargetId === pair.id;
-                    const isErr = matchErrorIds?.[0] === pair.id;
-
-                    return (
-                      <div
-                        key={`t-${pair.id}`}
-                        onClick={() => {
-                          if (isCleared) return;
-                          playAudio(pair.target, 0.95);
-                          setPickedTargetId(pair.id);
-                          tryResolveMatch(pair.id, pickedPtId);
-                        }}
-                        role="button"
-                        tabIndex={isCleared ? -1 : 0}
-                        onKeyDown={(e) => {
-                          if ((e.key === 'Enter' || e.key === ' ') && !isCleared) {
-                            e.preventDefault();
-                            playAudio(pair.target, 0.95);
-                            setPickedTargetId(pair.id);
-                            tryResolveMatch(pair.id, pickedPtId);
-                          }
-                        }}
-                        className={`flex w-full flex-wrap items-center justify-between gap-2 rounded-2xl border p-3.5 text-left text-xs font-bold transition sm:text-sm ${isCleared
-                          ? 'border-emerald-200 bg-emerald-50/70 text-emerald-700 opacity-70'
-                          : isErr
-                            ? 'animate-shake border-rose-400 bg-rose-50 text-rose-800'
-                            : isPicked
-                              ? 'border-blue-600 bg-blue-50 text-blue-800 ring-2 ring-blue-100'
-                              : 'border-slate-200 bg-white text-slate-800 hover:border-blue-300 cursor-pointer'
-                          }`}
-                      >
-                        <span>{pair.target}</span>
-                        <DualAudioButtons
-                          text={pair.target}
-                          languageCode={topic.languageCode}
-                          size="xs"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="space-y-2.5">
-                  {matchingColumns.pts.map((pair) => {
-                    const isCleared = matchedIds.includes(pair.id);
-                    const isPicked = pickedPtId === pair.id;
-                    const isErr = matchErrorIds?.[1] === pair.id;
-
-                    return (
-                      <button
-                        key={`p-${pair.id}`}
-                        type="button"
-                        disabled={isCleared}
-                        onClick={() => {
-                          setPickedPtId(pair.id);
-                          tryResolveMatch(pickedTargetId, pair.id);
-                        }}
-                        className={`flex w-full items-center justify-between gap-2 rounded-2xl border p-3.5 text-left text-xs font-semibold transition sm:text-sm ${isCleared
-                          ? 'border-emerald-200 bg-emerald-50/70 text-emerald-700 opacity-70'
-                          : isErr
-                            ? 'animate-shake border-rose-400 bg-rose-50 text-rose-800'
-                            : isPicked
-                              ? 'border-sky-600 bg-sky-50 text-sky-900 ring-2 ring-sky-100'
-                              : 'border-slate-200 bg-slate-50/60 text-slate-700 hover:border-sky-300 cursor-pointer'
-                          }`}
-                      >
-                        <span>{pair.pt}</span>
-                        {isCleared && (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <MatchingStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              matchingColumns={matchingColumns}
+              matchedIds={matchedIds}
+              pickedTargetId={pickedTargetId}
+              pickedPtId={pickedPtId}
+              matchErrorIds={matchErrorIds}
+              onPickTarget={(id, targetText) => {
+                playAudio(targetText, 0.95);
+                setPickedTargetId(id);
+                tryResolveMatch(id, pickedPtId);
+              }}
+              onPickPt={(id) => {
+                setPickedPtId(id);
+                tryResolveMatch(pickedTargetId, id);
+              }}
+            />
           )}
 
           {/* NEW STEP: FILL IN THE BLANK */}
@@ -2230,117 +2010,36 @@ export function LessonPlayer({
 
           {/* WRITING FREE */}
           {currentStep.type === 'writing_free' && (
-            <div className="animate-fade-up space-y-4 rounded-3xl border border-amber-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <div>
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {currentStep.promptPt}
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">{currentStep.scenarioPt}</p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                  <span>Checklist automático em tempo real</span>
-                  <span
-                    className={`font-mono ${freeWordCount >= currentStep.minWords
-                      ? 'text-emerald-600'
-                      : 'text-slate-500'
-                      }`}
-                  >
-                    {freeWordCount} / {currentStep.minWords} palavras mín.
-                  </span>
-                </div>
-                <ul className="mt-2.5 space-y-1.5">
-                  {currentStep.checklist.map((item, idx) => {
-                    const lower = freeText.toLowerCase();
-                    const passed = item.keywords.some((kw) =>
-                      lower.includes(kw.toLowerCase()),
-                    );
-                    return (
-                      <li
-                        key={idx}
-                        className={`flex items-center gap-2 text-xs font-medium transition ${passed ? 'text-emerald-700' : 'text-slate-500'
-                          }`}
-                      >
-                        <CheckCircle2
-                          className={`h-4 w-4 shrink-0 ${passed ? 'text-emerald-500' : 'text-slate-300'
-                            }`}
-                        />
-                        <span>{item.label}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <textarea
-                rows={4}
-                value={freeText}
-                onChange={(e) => setFreeText(e.target.value)}
-                placeholder="Escreva sua resposta no idioma da lição..."
-                className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-              />
-
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                {hasLinkedTeacher ? (
-                  <button
-                    type="button"
-                    disabled={freeWordCount < 3}
-                    onClick={() => handleSendFreeWriting(true)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    <span>
-                      {submittedToTeacher
-                        ? 'Enviado para o Professor!'
-                        : 'Enviar resposta para o Professor corrigir'}
-                    </span>
-                  </button>
-                ) : (
-                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] text-amber-950">
-                    <span className="font-semibold">
-                      Correção docente restrita sem professor vinculado.
-                    </span>
-                    {onRequestTeacherLink && (
-                      <button
-                        type="button"
-                        onClick={onRequestTeacherLink}
-                        className="rounded-lg bg-amber-600 px-2.5 py-1 font-bold text-white hover:bg-amber-700 cursor-pointer"
-                      >
-                        Vincular professor
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setShowModelAnswer((v) => !v)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
-                >
-                  <HelpCircle className="h-3.5 w-3.5" />
-                  <span>{showModelAnswer ? 'Ocultar exemplo' : 'Ver resposta modelo'}</span>
-                </button>
-              </div>
-
-              {showModelAnswer && (
-                <div className="animate-fade-up flex flex-col justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-3.5 sm:flex-row sm:items-center">
-                  <div>
-                    <p className="text-[11px] font-bold text-blue-800 uppercase">
-                      Resposta modelo do professor
-                    </p>
-                    <p className="mt-0.5 text-sm font-medium text-slate-800">
-                      “{currentStep.modelAnswer}”
-                    </p>
-                  </div>
-                  <DualAudioButtons
-                    text={currentStep.modelAnswer}
-                    languageCode={topic.languageCode}
-                    size="xs"
-                  />
-                </div>
-              )}
-            </div>
+            <WritingFreeStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              freeText={freeText}
+              setFreeText={setFreeText}
+              freeWordCount={freeWordCount}
+              hasLinkedTeacher={hasLinkedTeacher}
+              submittedToTeacher={submittedToTeacher}
+              onSendToTeacher={() => handleSendFreeWriting(true)}
+              onRequestTeacherLink={onRequestTeacherLink}
+              showModelAnswer={showModelAnswer}
+              onToggleModelAnswer={() => setShowModelAnswer((v) => !v)}
+              onSaveMistakesToBank={
+                onRecordMistake
+                  ? (items) => {
+                      for (const item of items) {
+                        onRecordMistake({
+                          topicId: topic.id,
+                          topicTitle: topic.titlePt,
+                          skill: 'writing',
+                          prompt: item.prompt,
+                          studentAnswer: item.studentAnswer,
+                          expectedAnswer: item.expectedAnswer,
+                          explanation: item.explanation,
+                        });
+                      }
+                    }
+                  : undefined
+              }
+            />
           )}
 
           {/* PHASE 8: DICTATION, MINIMAL PAIRS & MULTI-VOICE STORY */}

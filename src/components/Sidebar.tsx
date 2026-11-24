@@ -19,6 +19,7 @@ import {
   PanelLeftOpen,
   RefreshCw,
   ShieldAlert,
+  ShieldCheck,
   Snowflake,
   Sparkles,
   Sun,
@@ -80,6 +81,9 @@ interface SidebarProps {
   onCycleTheme: () => void;
   onOpenDownloadModal?: () => void;
   onOpenUpdateModal?: () => void;
+  onOpenPrivacyLgpd?: () => void;
+  pendingOutboxCount?: number;
+  onFlushOutbox?: () => void;
   hasAppUpdate?: boolean;
   latestAppVersion?: string;
   uiLocale?: UiLocale;
@@ -108,6 +112,9 @@ export function Sidebar({
   onCycleTheme,
   onOpenDownloadModal,
   onOpenUpdateModal,
+  onOpenPrivacyLgpd,
+  pendingOutboxCount = 0,
+  onFlushOutbox,
   hasAppUpdate,
   latestAppVersion,
   uiLocale = 'pt',
@@ -619,6 +626,34 @@ export function Sidebar({
               </button>
             )}
 
+            {pendingOutboxCount > 0 && onFlushOutbox && (
+              <button
+                type="button"
+                data-testid="sidebar-flush-outbox-btn"
+                onClick={onFlushOutbox}
+                className="flex w-full items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 cursor-pointer"
+              >
+                <span>Sincronizar fila offline</span>
+                <span className="rounded-full bg-amber-600 px-2 py-0.5 font-mono text-[10px] text-white">
+                  {pendingOutboxCount}
+                </span>
+              </button>
+            )}
+
+            {onOpenPrivacyLgpd && (
+              <button
+                type="button"
+                data-testid="sidebar-privacy-lgpd-btn"
+                onClick={onOpenPrivacyLgpd}
+                className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Privacidade &amp; LGPD</span>
+                </span>
+              </button>
+            )}
+
             {onOpenDownloadModal && (
               <button
                 type="button"
@@ -898,6 +933,38 @@ export function Sidebar({
                       v{latestAppVersion}
                     </span>
                   )}
+                </button>
+              )}
+
+            {pendingOutboxCount > 0 && onFlushOutbox && (
+              <button
+                type="button"
+                data-testid="mobile-flush-outbox-btn"
+                onClick={() => {
+                  setMobileMoreOpen(false);
+                  onFlushOutbox();
+                }}
+                className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-xs font-bold text-amber-800"
+              >
+                <span>Sincronizar fila offline</span>
+                <span className="rounded-full bg-amber-600 px-2 py-0.5 font-mono text-[10px] text-white">
+                  {pendingOutboxCount}
+                </span>
+              </button>
+            )}
+
+            {onOpenPrivacyLgpd && (
+                <button
+                  type="button"
+                  data-testid="mobile-privacy-lgpd-btn"
+                  onClick={() => {
+                    setMobileMoreOpen(false);
+                    onOpenPrivacyLgpd();
+                  }}
+                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700"
+                >
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  <span>Privacidade &amp; LGPD</span>
                 </button>
               )}
 

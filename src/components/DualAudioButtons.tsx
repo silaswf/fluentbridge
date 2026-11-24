@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Turtle, Volume2 } from 'lucide-react';
+import { ChevronDown, Globe2, Turtle, Volume2 } from 'lucide-react';
 import { getLanguageCourseMeta as getLanguageCourse } from '../data/platformDefaults';
+import { getRegionalAccents } from '../data/regionalAccents';
 import type { LanguageCode } from '../types/learning';
 import { speakText } from '../utils/speech';
 
@@ -11,6 +12,7 @@ interface DualAudioButtonsProps {
   size?: 'xs' | 'sm' | 'md';
   stopPropagation?: boolean;
   className?: string;
+  rateMultiplier?: number;
   onPlayStart?: () => void;
   onPlayEnd?: () => void;
 }
@@ -22,15 +24,19 @@ export function DualAudioButtons({
   size = 'sm',
   stopPropagation = true,
   className = '',
+  rateMultiplier = 1,
   onPlayStart,
   onPlayEnd,
 }: DualAudioButtonsProps) {
   const course = getLanguageCourse(languageCode);
   const dialects = course.dialects;
+  const regionalAccents = getRegionalAccents(languageCode);
+  const extraAccentsCount = Math.max(0, regionalAccents.length - dialects.length);
   const [activeCode, setActiveCode] = useState<string>(
     dialects[0]?.code ?? 'en-US',
   );
   const [playingCode, setPlayingCode] = useState<string | null>(null);
+  const [accentsOpen, setAccentsOpen] = useState(false);
 
   const handlePlay = (
     e: React.MouseEvent,
@@ -42,7 +48,7 @@ export function DualAudioButtons({
     setActiveCode(langCode);
     speakText(text, {
       langCode,
-      rate,
+      rate: Math.max(0.65, Math.min(1.25, rate * rateMultiplier)),
       onStart: () => {
         setPlayingCode(tag);
         onPlayStart?.();
@@ -62,7 +68,7 @@ export function DualAudioButtons({
         : 'px-2.5 py-1.5 text-[11px] rounded-xl gap-1';
 
   return (
-    <div className={`inline-flex flex-wrap items-center gap-1.5 ${className}`}>
+    <div className={`relative inline-flex flex-wrap items-center gap-1.5 ${className}`}>
       {dialects.map((dial, idx) => {
         const shortTag =
           dial.code === 'en-US'
@@ -95,6 +101,24 @@ export function DualAudioButtons({
         );
       })}
 
+      {size !== 'xs' && regionalAccents.length > 2 && (
+        <button
+          type="button"
+          data-testid="more-accents-trigger"
+          aria-expanded={accentsOpen}
+          onClick={(e) => {
+            if (stopPropagation) e.stopPropagation();
+            setAccentsOpen((v) => !v);
+          }}
+          title={`Explorar todos os ${regionalAccents.length} sotaques regionais`}
+          className={`inline-flex items-center border border-slate-200 bg-white font-bold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer ${btnSizing}`}
+        >
+          <Globe2 className="h-3.5 w-3.5 text-indigo-600" />
+          <span>+{extraAccentsCount > 0 ? extraAccentsCount : regionalAccents.length} sotaques</span>
+          <ChevronDown className={`h-3 w-3 transition-transform ${accentsOpen ? 'rotate-180' : ''}`} />
+        </button>
+      )}
+
       {showSlow && (
         <button
           type="button"
@@ -110,6 +134,54 @@ export function DualAudioButtons({
           <Turtle className={size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
           <span>0.75x</span>
         </button>
+      )}
+
+      {accentsOpen && (
+        <div
+          data-testid="more-accents-menu"
+          onClick={(e) => {
+            if (stopPropagation) e.stopPropagation();
+          }}
+          className="animate-fade-up absolute top-full right-0 z-40 mt-1.5 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl"
+        >
+          <p className="px-2 py-1 text-[10px] font-extrabold tracking-wider text-slate-500 uppercase">
+            Sotaques regionais ({regionalAccents.length})
+          </p>
+          <div className="max-h-60 space-y-1 overflow-y-auto">
+            {regionalAccents.map((acc) => {
+              const isPlaying = playingCode === acc.code;
+              return (
+                <button
+                  key={acc.code}
+                  type="button"
+                  data-testid={`accent-option-${acc.code}`}
+                  onClick={(e) => {
+                    handlePlay(e, acc.code, 1, acc.code);
+                    setAccentsOpen(false);
+                  }}
+                  className={`flex w-full items-start justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition cursor-pointer ${
+                    isPlaying
+                      ? 'bg-indigo-100 text-indigo-950'
+                      : 'hover:bg-slate-50 text-slate-800'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-xs font-bold">
+                      <span>{acc.flag}</span>
+                      <span className="truncate">{acc.regionPt}</span>
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-slate-500">
+                      {acc.descriptionPt}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-600">
+                    {acc.shortLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

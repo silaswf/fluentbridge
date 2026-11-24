@@ -19,7 +19,14 @@ import {
 import { AppDownloadGateway } from './components/AppDownloadGateway';
 import { AppUpdateModal } from './components/AppUpdateModal';
 import { AuthScreen } from './components/AuthScreen';
+import { PrivacyLgpdModal } from './components/PrivacyLgpdModal';
 import { checkForAppUpdate, type AppUpdateInfo } from './utils/appUpdater';
+import {
+  clearOfflineOutbox,
+  flushOfflineOutbox,
+  getPendingOutboxCount,
+} from './utils/offlineOutbox';
+import { reportClientError } from './utils/telemetry';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
 import { TeacherLinkModal } from './components/TeacherLinkModal';
@@ -190,6 +197,8 @@ export function App() {
   });
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
   const [appUpdateInfo, setAppUpdateInfo] = useState<AppUpdateInfo | null>(null);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -1437,6 +1446,32 @@ export function App() {
     showToast('Tarefa removida.');
   };
 
+  const handleFlushOfflineOutbox = async () => {
+    const res = await flushOfflineOutbox(async (item) => {
+      if (item.kind === 'telemetry') {
+        await reportClientError(
+          String(item.payload.message ?? 'Offline telemetry'),
+          String(item.payload.route ?? '/'),
+        );
+        return true;
+      }
+      return true;
+    });
+    setPendingOutboxCount(res.remaining);
+    if (res.flushed > 0) {
+      showToast(`${res.flushed} item(ns) da fila offline sincronizado(s)!`);
+    }
+  };
+
+  useEffect(() => {
+    void getPendingOutboxCount().then(setPendingOutboxCount);
+    const onOnline = () => {
+      void handleFlushOfflineOutbox();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, []);
+
   if (!currentUser) {
     if (!dismissedWebGateway && isWebPlatform()) {
       return (
@@ -1829,6 +1864,9 @@ export function App() {
         onChangeFontScale={setFontScale}
         onOpenDownloadModal={() => setShowDownloadModal(true)}
         onOpenUpdateModal={() => setShowUpdateModal(true)}
+        onOpenPrivacyLgpd={() => setShowPrivacyModal(true)}
+        pendingOutboxCount={pendingOutboxCount}
+        onFlushOutbox={() => void handleFlushOfflineOutbox()}
         hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
         latestAppVersion={appUpdateInfo?.latestVersion}
         onLogout={handleLogout}
@@ -2195,6 +2233,19 @@ export function App() {
         initialInfo={appUpdateInfo}
         onUpdateInfo={(info) => setAppUpdateInfo(info)}
         onClose={() => setShowUpdateModal(false)}
+      />
+
+      <PrivacyLgpdModal
+        open={showPrivacyModal}
+        user={currentUser}
+        onClose={() => setShowPrivacyModal(false)}
+        onDeleteAccount={async () => {
+          await clearOfflineOutbox();
+          setPendingOutboxCount(0);
+          handleDeleteUser(currentUser.id);
+          setShowPrivacyModal(false);
+          handleLogout();
+        }}
       />
 
       {toastMessage && (

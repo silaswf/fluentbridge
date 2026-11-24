@@ -1,8 +1,8 @@
 {
-  "version": "8.1.0",
+  "version": "8.2.0",
   "publishedAt": "2026-11-24",
-  "releaseNotes": "FluentBridge Academy v8.1.0",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.1.0/FluentBridge-Setup-8.1.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.1.0/FluentBridge-v8.1.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.1.0"
+  "releaseNotes": "FluentBridge Academy v8.2.0",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.0/FluentBridge-Setup-8.2.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.0/FluentBridge-v8.2.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.2.0"
 }

@@ -618,3 +618,42 @@ begin
     end;
   end if;
 end $$;
+
+-- ============================================================================
+-- SEÇÃO 10 (v8.2.0): QUOTAS POR USUÁRIO, LGPD SELF-SERVICE & HARDENING RLS
+-- ============================================================================
+create table if not exists public.user_quotas (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  tts_requests_month integer not null default 0,
+  stt_requests_month integer not null default 0,
+  tutor_requests_month integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_quotas enable row level security;
+drop policy if exists "user_quotas_owner_read" on public.user_quotas;
+create policy "user_quotas_owner_read" on public.user_quotas
+  for select to authenticated using (auth.uid() = user_id);
+
+-- RPC de auto-exclusão LGPD (Art. 18 Lei 13.709/2018) respeitando auth.uid()
+create or replace function public.delete_my_account_data()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'Authentication required';
+  end if;
+  delete from public.submissions where student_id = uid;
+  delete from public.student_progress where user_id = uid;
+  delete from public.certificates where user_id = uid;
+  delete from public.user_quotas where user_id = uid;
+  delete from public.profiles where id = uid;
+end;
+$$;
+revoke all on function public.delete_my_account_data() from public;
+grant execute on function public.delete_my_account_data() to authenticated;

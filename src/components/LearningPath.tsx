@@ -73,6 +73,11 @@ import {
 } from './TrailCheckpointModal';
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import {
+  computeRetentionAlerts,
+  requestAndSendBrowserNotification,
+} from '../utils/retentionNotifications';
+import { ModuleAccordionHeader } from './trail/ModuleAccordionHeader';
+import {
   downloadNextUnitsOffline,
   getCachedOfflineUnits,
 } from '../utils/offlineUnitPack';
@@ -221,6 +226,9 @@ export function LearningPath({
     if (typeof window === 'undefined') return true;
     return window.localStorage.getItem('fluentbridge_right_panel_open') !== '0';
   });
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+  const [expandAllModules, setExpandAllModules] = useState(false);
+  const [retentionNoticeMsg, setRetentionNoticeMsg] = useState('');
 
   const toggleRightPanel = () => {
     setIsRightPanelOpen((prev) => {
@@ -244,6 +252,33 @@ export function LearningPath({
     selectedLevel === 'ALL'
       ? topics
       : topics.filter((t) => t.level === selectedLevel);
+
+  const moduleGroups: Array<{
+    key: string;
+    level: CEFRLevel;
+    title: string;
+    topics: Topic[];
+  }> = [];
+  for (const t of filteredTopics) {
+    const title = t.moduleTitlePt ?? `Módulo ${t.level}`;
+    const key = `${t.level}::${title}`;
+    const last = moduleGroups[moduleGroups.length - 1];
+    if (last && last.key === key) {
+      last.topics.push(t);
+    } else {
+      moduleGroups.push({ key, level: t.level, title, topics: [t] });
+    }
+  }
+
+  const activeModuleKey =
+    moduleGroups.find((g) => g.topics.some((t) => t.id === nextTopic?.id))?.key ??
+    moduleGroups[0]?.key ??
+    '';
+
+  const retentionAlerts = computeRetentionAlerts(
+    currentUser,
+    reviewedSubmissions.length,
+  );
 
   const goalPct = Math.min(
     100,
@@ -608,6 +643,16 @@ export function LearningPath({
                   {lvl === 'ALL' ? 'Todos' : lvl}
                 </button>
               ))}
+              {moduleGroups.length > 1 && (
+                <button
+                  type="button"
+                  data-testid="toggle-all-modules-btn"
+                  onClick={() => setExpandAllModules((v) => !v)}
+                  className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+                >
+                  {expandAllModules ? 'Só o módulo atual' : 'Expandir todos'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={toggleRightPanel}
@@ -629,6 +674,39 @@ export function LearningPath({
             </div>
           </div>
 
+          {retentionAlerts.length > 0 && (
+            <div
+              data-testid="retention-alerts-card"
+              className="rounded-2xl border border-indigo-200/80 bg-indigo-50/60 p-3.5 shadow-2xs"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-950">
+                  <Bell className="h-4 w-4 text-indigo-600" />
+                  <span>{retentionAlerts[0].titlePt}</span>
+                  {retentionAlerts.length > 1 && (
+                    <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200">
+                      +{retentionAlerts.length - 1} alerta(s)
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    void requestAndSendBrowserNotification(retentionAlerts[0]).then((r) =>
+                      setRetentionNoticeMsg(r.message),
+                    )
+                  }
+                  className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                >
+                  Ativar lembrete
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-indigo-900">
+                {retentionNoticeMsg || retentionAlerts[0].bodyPt}
+              </p>
+            </div>
+          )}
+
           {filteredTopics.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
               <p className="font-display text-base font-bold text-slate-800">
@@ -641,93 +719,84 @@ export function LearningPath({
             </div>
           ) : (
             <div className="relative space-y-4">
-              {filteredTopics.map((topic, idx) => {
-                const Icon = getTopicIcon(topic.icon);
-                const isCompleted = completedTopicIds.includes(topic.id);
-                const isNext = nextTopic?.id === topic.id && !isCompleted;
-                const savedProgress = !isCompleted
-                  ? currentUser.topicStepProgress?.[topic.id]
-                  : undefined;
-                const hasPartialProgress = Boolean(
-                  savedProgress &&
-                    (savedProgress.stepIdx > 0 ||
-                      savedProgress.completedSteps.length > 0),
-                );
-                const partialPct = savedProgress
-                  ? Math.min(
-                      95,
-                      Math.max(
-                        10,
-                        Math.round(
-                          ((savedProgress.stepIdx + 1) /
-                            Math.max(1, savedProgress.totalSteps)) *
-                            100,
-                        ),
-                      ),
-                    )
-                  : 0;
-
-                const isModuleStart =
-                  idx === 0 ||
-                  filteredTopics[idx - 1]?.moduleTitlePt !== topic.moduleTitlePt;
-                const isModuleEnd =
-                  idx === filteredTopics.length - 1 ||
-                  filteredTopics[idx + 1]?.moduleTitlePt !== topic.moduleTitlePt;
-                const moduleTitle =
-                  topic.moduleTitlePt ?? `Módulo ${topic.level}`;
-                const moduleUnits = filteredTopics.filter(
-                  (ft) => (ft.moduleTitlePt ?? `Módulo ${ft.level}`) === moduleTitle,
-                );
-                const moduleDoneCount = moduleUnits.filter((ft) =>
+              {moduleGroups.map((mod) => {
+                const moduleDoneCount = mod.topics.filter((ft) =>
                   completedTopicIds.includes(ft.id),
                 ).length;
                 const modulePct =
-                  moduleUnits.length > 0
-                    ? Math.round((moduleDoneCount / moduleUnits.length) * 100)
+                  mod.topics.length > 0
+                    ? Math.round((moduleDoneCount / mod.topics.length) * 100)
                     : 0;
-                const checkpointId = `chk-${activeCourse.code}-${topic.moduleIndex ?? idx + 1}-${topic.level.toLowerCase()}`;
+                const isCurrentModule = mod.key === activeModuleKey;
+                const isExpanded =
+                  expandAllModules ||
+                  (expandedModules[mod.key] !== undefined
+                    ? expandedModules[mod.key]
+                    : isCurrentModule);
+
+                const lastTopic = mod.topics[mod.topics.length - 1];
+                const checkpointId = `chk-${activeCourse.code}-${lastTopic.moduleIndex ?? mod.topics.length}-${mod.level.toLowerCase()}`;
                 const checkpointKind: 'podcast' | 'video' =
-                  (topic.moduleIndex ?? idx) % 2 === 0 ? 'video' : 'podcast';
+                  (lastTopic.moduleIndex ?? 0) % 2 === 0 ? 'video' : 'podcast';
                 const checkpointDone = (
                   currentUser.completedCheckpoints ?? []
                 ).includes(checkpointId);
 
                 return (
-                  <div key={topic.id} className="space-y-4">
-                    {isModuleStart && (
-                      <div
-                        data-testid="module-header-card"
-                        className="rounded-2xl border border-blue-200/80 bg-blue-50/70 px-4 py-3 shadow-2xs"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div>
-                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700">
-                              Nível {topic.level} · Trilha Modular
-                            </p>
-                            <h3 className="font-display text-sm font-extrabold text-slate-900 sm:text-base">
-                              {moduleTitle}
-                            </h3>
-                          </div>
-                          <span className="rounded-full bg-white px-2.5 py-0.5 font-mono text-[11px] font-bold text-blue-800 ring-1 ring-blue-200">
-                            {moduleDoneCount}/{moduleUnits.length} ({modulePct}%)
-                          </span>
-                        </div>
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-blue-200/70">
-                          <div
-                            className="h-full rounded-full bg-blue-600 transition-all"
-                            style={{ width: `${modulePct}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
+                  <div key={mod.key} className="space-y-3">
+                    <ModuleAccordionHeader
+                      moduleKey={mod.key}
+                      level={mod.level}
+                      moduleTitle={mod.title}
+                      doneCount={moduleDoneCount}
+                      totalCount={mod.topics.length}
+                      pct={modulePct}
+                      isExpanded={isExpanded}
+                      isCurrentModule={isCurrentModule}
+                      onToggle={() =>
+                        setExpandedModules((prev) => ({
+                          ...prev,
+                          [mod.key]: !isExpanded,
+                        }))
+                      }
+                    />
 
-                    <div className="relative flex gap-4">
-                      {idx < filteredTopics.length - 1 && (
-                        <div
-                          className="absolute top-12 bottom-[-16px] left-6 hidden w-0.5 bg-slate-200 sm:block"
-                          aria-hidden="true"
-                        />
-                      )}
+                    {isExpanded && (
+                      <div className="space-y-4 pl-1 sm:pl-2">
+                        {mod.topics.map((topic, idx) => {
+                          const Icon = getTopicIcon(topic.icon);
+                          const isCompleted = completedTopicIds.includes(topic.id);
+                          const isNext = nextTopic?.id === topic.id && !isCompleted;
+                          const savedProgress = !isCompleted
+                            ? currentUser.topicStepProgress?.[topic.id]
+                            : undefined;
+                          const hasPartialProgress = Boolean(
+                            savedProgress &&
+                              (savedProgress.stepIdx > 0 ||
+                                savedProgress.completedSteps.length > 0),
+                          );
+                          const partialPct = savedProgress
+                            ? Math.min(
+                                95,
+                                Math.max(
+                                  10,
+                                  Math.round(
+                                    ((savedProgress.stepIdx + 1) /
+                                      Math.max(1, savedProgress.totalSteps)) *
+                                      100,
+                                  ),
+                                ),
+                              )
+                            : 0;
+
+                          return (
+                            <div key={topic.id} className="relative flex gap-4">
+                              {idx < mod.topics.length - 1 && (
+                                <div
+                                  className="absolute top-12 bottom-[-16px] left-6 hidden w-0.5 bg-slate-200 sm:block"
+                                  aria-hidden="true"
+                                />
+                              )}
 
                     <div className="relative z-10 mt-5 hidden sm:block">
                       <div
@@ -896,68 +965,70 @@ export function LearningPath({
                         )}
                       </div>
                     </article>
-                    </div>
+                            </div>
+                          );
+                        })}
 
-                    {isModuleEnd && (
-                      <div
-                        data-testid="trail-checkpoint-card"
-                        className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 p-4 transition ${
-                          checkpointDone
-                            ? 'border-emerald-300 bg-emerald-50/70'
-                            : 'border-amber-300 bg-amber-50/70'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-                              checkpointDone
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-amber-400 text-slate-950'
-                            }`}
-                          >
-                            {checkpointDone ? (
-                              <CheckCircle2 className="h-5 w-5" />
-                            ) : checkpointKind === 'podcast' ? (
-                              <Headphones className="h-5 w-5" />
-                            ) : (
-                              <Clapperboard className="h-5 w-5" />
-                            )}
-                          </span>
-                          <div>
-                            <p className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">
-                              <Flag className="h-3 w-3" />
-                              <span>Ponto de Verificação · {moduleTitle}</span>
-                            </p>
-                            <p className="font-display text-sm font-extrabold text-slate-900">
-                              {checkpointKind === 'podcast'
-                                ? `Podcast de Checagem (${topic.level}) — Diálogo & Compreensão`
-                                : `Vídeo Interativo de Checagem (${topic.level}) — Legendas & Quiz`}
-                            </p>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveCheckpoint({
-                              id: checkpointId,
-                              kind: checkpointKind,
-                              level: topic.level,
-                              titlePt: `${moduleTitle} (${topic.level})`,
-                              mediaId:
-                                checkpointKind === 'podcast'
-                                  ? `pod-${activeCourse.code}-${topic.level.toLowerCase()}`
-                                  : undefined,
-                            })
-                          }
-                          className={`rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
+                        <div
+                          data-testid="trail-checkpoint-card"
+                          className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 p-4 transition ${
                             checkpointDone
-                              ? 'border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
-                              : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                              ? 'border-emerald-300 bg-emerald-50/70'
+                              : 'border-amber-300 bg-amber-50/70'
                           }`}
                         >
-                          {checkpointDone ? 'Revisar Checagem' : 'Abrir Checagem (+60 XP)'}
-                        </button>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+                                checkpointDone
+                                  ? 'bg-emerald-500 text-white'
+                                  : 'bg-amber-400 text-slate-950'
+                              }`}
+                            >
+                              {checkpointDone ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : checkpointKind === 'podcast' ? (
+                                <Headphones className="h-5 w-5" />
+                              ) : (
+                                <Clapperboard className="h-5 w-5" />
+                              )}
+                            </span>
+                            <div>
+                              <p className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">
+                                <Flag className="h-3 w-3" />
+                                <span>Ponto de Verificação · {mod.title}</span>
+                              </p>
+                              <p className="font-display text-sm font-extrabold text-slate-900">
+                                {checkpointKind === 'podcast'
+                                  ? `Podcast de Checagem (${mod.level}) — Diálogo & Compreensão`
+                                  : `Vídeo Interativo de Checagem (${mod.level}) — Legendas & Quiz`}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveCheckpoint({
+                                id: checkpointId,
+                                kind: checkpointKind,
+                                level: mod.level,
+                                titlePt: `${mod.title} (${mod.level})`,
+                                mediaId:
+                                  checkpointKind === 'podcast'
+                                    ? `pod-${activeCourse.code}-${mod.level.toLowerCase()}`
+                                    : undefined,
+                              })
+                            }
+                            className={`rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
+                              checkpointDone
+                                ? 'border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
+                                : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                            }`}
+                          >
+                            {checkpointDone ? 'Revisar Checagem' : 'Abrir Checagem (+60 XP)'}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

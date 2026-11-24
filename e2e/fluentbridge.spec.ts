@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v8.1.0 E2E Suite', () => {
+test.describe('FluentBridge v8.2.0 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.1\.0\/FluentBridge-Setup-8\.1\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.2\.0\/FluentBridge-Setup-8\.2\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.1\.0\/FluentBridge-v8\.1\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.2\.0\/FluentBridge-v8\.2\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -120,7 +120,11 @@ test.describe('FluentBridge v8.1.0 E2E Suite', () => {
     }
 
     await page.getByRole('button', { name: /Trilha \(/i }).click();
-    await page.getByRole('button', { name: /Começar/i }).first().click();
+    const startBtn6 = page.getByRole('button', { name: /^Começar$/i }).first();
+    if (!(await startBtn6.isVisible({ timeout: 2000 }).catch(() => false))) {
+      await page.getByTestId('toggle-all-modules-btn').click();
+    }
+    await startBtn6.click();
     await expect(page.getByText(/Etapa 1 · Vocabulário da Unidade \([1-9]\d+ palavras\)/i)).toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('button', { name: /Desbloquear palavras/i })).toBeVisible();
     expect(errors).toEqual([]);
@@ -207,10 +211,15 @@ test.describe('FluentBridge v8.1.0 E2E Suite', () => {
 
     // 2) Dark mode Reading passage contrast
     await selectLanguage(page, 'en');
+    await expect(page.getByText(/Inglês · .*103 unidades/i)).toBeVisible({ timeout: 8000 });
     await page.getByRole('button', { name: /Tema da interface/i }).click();
-    await page.getByRole('button', { name: /Começar/i }).first().click();
+    const startBtn10 = page.getByRole('button', { name: /^Começar$/i }).first();
+    if (!(await startBtn10.isVisible({ timeout: 2000 }).catch(() => false))) {
+      await page.getByTestId('toggle-all-modules-btn').click();
+    }
+    await startBtn10.click();
     await expect(page.locator('.fixed.inset-0.z-50')).toBeVisible({ timeout: 8000 });
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 12; i++) {
       if (await page.getByTestId('reading-passage-box').isVisible().catch(() => false)) break;
       const unlockBtn = page.getByRole('button', { name: /Desbloquear palavras/i });
       if (await unlockBtn.isVisible().catch(() => false)) {
@@ -224,7 +233,13 @@ test.describe('FluentBridge v8.1.0 E2E Suite', () => {
       }
       const verifyBtn = page.getByRole('button', { name: /Verificar resposta|Check/i });
       if (await verifyBtn.isVisible().catch(() => false)) {
-        await page.locator('.fixed.inset-0.z-50 .mt-4.space-y-2\\.5 button').first().click();
+        await page
+          .locator(
+            '.fixed.inset-0.z-50 main .space-y-2\\.5 > button:not([disabled]), .fixed.inset-0.z-50 main .grid.grid-cols-1.gap-2\\.5 > button:not([disabled])',
+          )
+          .first()
+          .click();
+        await expect(verifyBtn).toBeEnabled();
         await verifyBtn.click();
         await page.locator('.fixed.inset-0.z-50 footer button').last().click();
       }
@@ -233,11 +248,14 @@ test.describe('FluentBridge v8.1.0 E2E Suite', () => {
     await expect(readingBox).toBeVisible();
     const readingBg = await readingBox.evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(readingBg).toBe('rgb(15, 23, 42)');
-    await page.locator('.fixed.inset-0.z-50 button').filter({ has: page.locator('svg.lucide-x') }).first().click();
+    await page.getByRole('button', { name: 'Sair da lição' }).click();
+    await expect(page.locator('.fixed.inset-0.z-50')).toBeHidden();
 
     // 3) Japanese script_phonics step & Kana toggle
     await selectLanguage(page, 'ja');
-    await page.getByRole('button', { name: /Começar|Refazer|Continuar/i }).first().click();
+    const jaCard = page.locator('article').filter({ hasText: /Hiragana|Katakana/i }).first();
+    await expect(jaCard).toBeVisible({ timeout: 8000 });
+    await jaCard.getByRole('button', { name: /Começar|Refazer|Continuar/i }).click();
     await expect(page.getByTestId('ja-kana-toggle')).toBeVisible();
     await page.getByTestId('ja-kana-toggle').click();
     await expect(page.getByTestId('ja-kana-toggle')).toContainText(/Kana/i);

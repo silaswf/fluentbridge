@@ -158,4 +158,9 @@ jobs:
             exit 0
           }
           $exe = Get-ChildItem release/FluentBridge-Setup-*.exe | Select-Object -First 1
-          gh release upload "${{ github.ref_name }}" $exe.FullName --repo silaswf/fluentbridge-releases --clobber
+          gh release view "${{ github.ref_name }}" --repo silaswf/fluentbridge-releases *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload "${{ github.ref_name }}" $exe.FullName --repo silaswf/fluentbridge-releases --clobber
+          } else {
+            gh release create "${{ github.ref_name }}" $exe.FullName --repo silaswf/fluentbridge-releases --title "FluentBridge Academy ${{ github.ref_name }}" --generate-notes
+          }

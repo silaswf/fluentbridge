@@ -60,7 +60,7 @@ async function buildR2TtsKey(locale, speaker, text) {
   const data = new TextEncoder().encode(`${locale}|${speaker}|${text}`);
   const digest = await crypto.subtle.digest('SHA-256', data);
   const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
-  return `tts/v4/${locale}/${hex}.audio`;
+  return `tts/v5/${locale}/${hex}.audio`;
 }
 
 function checkRateLimit(request, routeKey, maxPerMinute, userId = null) {
@@ -107,13 +107,47 @@ function resolveTtsConfig(rawLang, rawVoice) {
   const lower = (rawLang || 'en-US').trim().toLowerCase();
   const isMale = (rawVoice || '').trim().toLowerCase() === 'male';
 
-  if (lower === 'en-gb' || lower.startsWith('en-gb') || lower === 'uk') {
+  if (lower === 'en-gb' || lower === 'uk') {
     return {
       engine: 'deepgram',
       locale: 'en-GB',
       model: '@cf/deepgram/aura-2-en',
       speaker: isMale ? 'draco' : 'pandora',
       googleLang: 'en-GB',
+    };
+  }
+  if (lower === 'en-gb-sct') {
+    return {
+      engine: 'gemini-tts',
+      locale: 'en-GB-SCT',
+      bcp47: 'en-GB',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read only the following text aloud with a natural Scottish English (Edinburgh) accent, no commentary:',
+      quoteOpen: '"',
+      quoteClose: '"',
+      googleLang: 'en-GB',
+    };
+  }
+  if (lower === 'en-au' || lower === 'en-ca' || lower === 'en-ie' || lower === 'en-in' || lower === 'en-za') {
+    const regionMap = {
+      'en-au': { label: 'Australian English (Sydney)', bcp47: 'en-AU' },
+      'en-ca': { label: 'Canadian English (Toronto)', bcp47: 'en-CA' },
+      'en-ie': { label: 'Irish English (Dublin)', bcp47: 'en-IE' },
+      'en-in': { label: 'Indian English', bcp47: 'en-IN' },
+      'en-za': { label: 'South African English', bcp47: 'en-ZA' },
+    };
+    const r = regionMap[lower];
+    return {
+      engine: 'gemini-tts',
+      locale: lower.toUpperCase(),
+      bcp47: r.bcp47,
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Zephyr',
+      promptPrefix: `Read only the following text aloud as a native ${r.label} speaker, without commentary:`,
+      quoteOpen: '"',
+      quoteClose: '"',
+      googleLang: r.bcp47,
     };
   }
   if (lower === 'es-es') {
@@ -125,6 +159,26 @@ function resolveTtsConfig(rawLang, rawVoice) {
       googleLang: 'es-ES',
     };
   }
+  if (lower === 'es-ar' || lower === 'es-co' || lower === 'es-cl' || lower === 'es-pr') {
+    const esMap = {
+      'es-ar': { label: 'español rioplatense de Buenos Aires', bcp47: 'es-AR' },
+      'es-co': { label: 'español colombiano de Bogotá', bcp47: 'es-CO' },
+      'es-cl': { label: 'español chileno de Santiago', bcp47: 'es-CL' },
+      'es-pr': { label: 'español caribeño de Puerto Rico', bcp47: 'es-PR' },
+    };
+    const r = esMap[lower];
+    return {
+      engine: 'gemini-tts',
+      locale: lower.toUpperCase(),
+      bcp47: r.bcp47,
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: `Lee únicamente en voz alta el siguiente texto como hablante nativo de ${r.label}, sin comentarios:`,
+      quoteOpen: '«',
+      quoteClose: '»',
+      googleLang: r.bcp47,
+    };
+  }
   if (lower.startsWith('es')) {
     return {
       engine: 'deepgram',
@@ -134,17 +188,23 @@ function resolveTtsConfig(rawLang, rawVoice) {
       googleLang: 'es',
     };
   }
-  if (lower === 'fr-ca') {
+  if (lower === 'fr-ca' || lower === 'fr-be' || lower === 'fr-ch') {
+    const frLabel =
+      lower === 'fr-ca'
+        ? 'français québécois'
+        : lower === 'fr-be'
+          ? 'français belge de Bruxelles'
+          : 'français suisse de Genève';
     return {
       engine: 'gemini-tts',
-      locale: 'fr-CA',
-      bcp47: 'fr-CA',
+      locale: lower.toUpperCase(),
+      bcp47: lower === 'fr-ca' ? 'fr-CA' : lower === 'fr-be' ? 'fr-BE' : 'fr-CH',
       model: 'gemini-2.5-flash-preview-tts',
       speaker: isMale ? 'Puck' : 'Zephyr',
-      promptPrefix: 'Lis uniquement à voix haute le texte suivant en français québécois naturel, sans aucun accent étranger et sans commentaire :',
+      promptPrefix: `Lis uniquement à voix haute le texte suivant en ${frLabel} naturel, sans aucun accent étranger et sans commentaire :`,
       quoteOpen: '« ',
       quoteClose: ' »',
-      googleLang: 'fr-CA',
+      googleLang: lower,
     };
   }
   if (lower.startsWith('fr')) {
@@ -1024,6 +1084,10 @@ async function handleTelemetryRequest(request, env) {
         await env.MEDIA_BUCKET.put(TELEMETRY_KEY, JSON.stringify(next), {
           httpMetadata: { contentType: 'application/json' },
         });
+        const dayKey = `telemetry/daily-${entry.timestamp.slice(0, 10)}.json`;
+        await env.MEDIA_BUCKET.put(dayKey, JSON.stringify(next.slice(0, 50)), {
+          httpMetadata: { contentType: 'application/json' },
+        });
       } catch {
         // Keep memory fallback
       }
@@ -1043,13 +1107,14 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    if (path === '/' || path === '/health') {
+    if (path === '/' || path === '/health' || path === '/api/health') {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '7.0.0',
+        version: '8.2.0',
+        accentCount: 49,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
-        endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],
+        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],
         rateLimits: {
           ttsPerMin: 120,
           sttPerMin: 30,

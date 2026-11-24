@@ -1,5 +1,6 @@
 import { APP_VERSION, DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import { getActivePlatformLabel } from './appUpdater';
+import { enqueueOfflineMutation } from './offlineOutbox';
 
 export interface TelemetryErrorLog {
   id: string;
@@ -9,6 +10,14 @@ export interface TelemetryErrorLog {
   version: string;
   platform: string;
   timestamp: string;
+}
+
+export interface SyntheticHealthResult {
+  name: string;
+  ok: boolean;
+  status: number;
+  latencyMs: number;
+  detail: string;
 }
 
 let listenersInstalled = false;
@@ -28,20 +37,30 @@ export async function reportClientError(
   const apiBase = DEFAULT_BACKEND_API_URL.replace(/\/+$/, '');
   if (!apiBase) return;
 
+  const payload = {
+    message: msg.slice(0, 300),
+    stack: stack.slice(0, 800),
+    route: route.slice(0, 120),
+    version: APP_VERSION,
+    platform: getActivePlatformLabel(),
+  };
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    await enqueueOfflineMutation('telemetry', payload);
+    return;
+  }
+
   try {
-    await fetch(`${apiBase}/api/telemetry`, {
+    const res = await fetch(`${apiBase}/api/telemetry`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: msg.slice(0, 300),
-        stack: stack.slice(0, 800),
-        route: route.slice(0, 120),
-        version: APP_VERSION,
-        platform: getActivePlatformLabel(),
-      }),
+      body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      await enqueueOfflineMutation('telemetry', payload);
+    }
   } catch {
-    // Telemetry is best-effort
+    await enqueueOfflineMutation('telemetry', payload);
   }
 }
 
@@ -71,4 +90,59 @@ export async function fetchTelemetryLogs(): Promise<TelemetryErrorLog[]> {
   } catch {
     return [];
   }
+}
+
+export async function runSyntheticHealthChecks(): Promise<SyntheticHealthResult[]> {
+  if (typeof fetch === 'undefined') return [];
+  const apiBase = DEFAULT_BACKEND_API_URL.replace(/\/+$/, '');
+  const checks = [
+    {
+      name: 'Manifesto Web (version.json)',
+      url: '/version.json',
+      parseDetail: async (res: Response) => {
+        const j = (await res.json()) as { version?: string };
+        return `v${j.version ?? '?'}`;
+      },
+    },
+    {
+      name: 'Cloudflare Worker (/api/health)',
+      url: `${apiBase}/api/health`,
+      parseDetail: async (res: Response) => {
+        const j = (await res.json()) as { version?: string; jwtMode?: string };
+        return `v${j.version ?? '?'} · jwt=${j.jwtMode ?? 'hybrid'}`;
+      },
+    },
+    {
+      name: 'Vozes Neurais (/api/tts)',
+      url: `${apiBase}/api/tts?lang=en-US&text=Health`,
+      parseDetail: async (res: Response) =>
+        `cache=${res.headers.get('X-TTS-Cache') ?? 'OK'}`,
+    },
+  ];
+
+  const results: SyntheticHealthResult[] = [];
+  for (const c of checks) {
+    const started = Date.now();
+    try {
+      const res = await fetch(c.url);
+      const latencyMs = Date.now() - started;
+      const detail = res.ok ? await c.parseDetail(res) : `HTTP ${res.status}`;
+      results.push({
+        name: c.name,
+        ok: res.ok,
+        status: res.status,
+        latencyMs,
+        detail,
+      });
+    } catch (err) {
+      results.push({
+        name: c.name,
+        ok: false,
+        status: 0,
+        latencyMs: Date.now() - started,
+        detail: err instanceof Error ? err.message : 'Network error',
+      });
+    }
+  }
+  return results;
 }

@@ -4,6 +4,25 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.2.0`] — 2026-11-24
+### Módulos Desdobráveis, 49 Sotaques Regionais, Ruído Ambiente B1–C1, Diff Linha-a-Linha, Fila Offline Outbox, LGPD, Health Checks & Testes E2E Humanos
+- **Ponto 3.1 (Arquitetura, UX Modular & Offline):**
+  - **Módulos Desdobráveis (`ModuleAccordionHeader.tsx`, `LearningPath.tsx`):** apenas o módulo atual do aluno abre por padrão na trilha, reduzindo drasticamente a rolagem; botão **"Expandir todos" / "Só o módulo atual"** adicionado.
+  - **Modularização do `LessonPlayer.tsx`:** extraídos `ListeningStepView.tsx`, `ReadingStepView.tsx`, `MatchingStepView.tsx` e `WritingFreeStepView.tsx`.
+  - **Fila Offline *Outbox* & Pré-aquecimento R2 (`offlineOutbox.ts`, `scripts/prewarm-r2-tts.mjs`):** fila persistente IndexedDB/`localStorage` com sincronização automática ao reconectar (`online`) e botão de sync na `Sidebar`.
+- **Ponto 3.2 (Segurança, LGPD & Observabilidade):**
+  - **Worker `v8.2.0` (`cloudflare-worker/worker.js`):** suporte a **49 sotaques regionais**, cache `tts/v5/`, alias `/api/health` e telemetria diária persistida no Cloudflare R2.
+  - **Privacidade & LGPD (`PrivacyLgpdModal.tsx`, `supabase_schema.sql` Seção 10):** exportação completa em JSON e exclusão self-service de conta/dados (`delete_my_account_data()`), além da tabela `user_quotas`.
+  - **Health Checks Sintéticos (`telemetry.ts`, `AdminPanel.tsx`, `scripts/synthetic-health-check.mjs`):** botão **"Executar Health Check Ao Vivo"** no Painel Admin testando Manifesto Web, Worker `/api/health` e TTS.
+- **Ponto 3.3 (Pedagogia & Retenção):**
+  - **49 Sotaques Regionais (`regionalAccents.ts`, `DualAudioButtons.tsx`):** popover `+N sotaques` em todos os 12 idiomas (EN 8, ES 6, FR 4, IT 4, DE 4, RU 3, JA 3, ZH 3, AR 5, NL 3, AF 3, SV 3).
+  - **Ruído Ambiente (`ambientNoiseEngine.ts`), Writing Diff (`writingDiffGrader.ts`), Dificuldade Adaptativa (`adaptiveDifficulty.ts`) & Alertas de Retenção (`retentionNotifications.ts`).**
+- **Ponto 3.6 (#18, #19) & Testes Simulando Humanos:**
+  - Secret `RELEASES_REPO_TOKEN` configurado no GitHub Actions para espelhamento automático em `silaswf/fluentbridge-releases`.
+  - **19 suítes / 60 testes Vitest** + **13/13 testes E2E Playwright** (incluindo `e2e/human-journey.spec.ts` simulando jornadas humanas em Desktop e Mobile `390x844`).
+
+---
+
 ## [`v8.1.0`] — 2026-11-24
 ### >= 10 Palavras Coesas em Todas as 1.236 Unidades, Extração de Vocabulário das Atividades, Glossário Unicode no Reading & Alinhamento Profundo das Etapas
 - **Vocabulário Garantido (`>= 10` cards) em 100% das 1.236 Unidades (`inLessonLexicon.ts`, `courseCohesion.ts`):**
