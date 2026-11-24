@@ -4,6 +4,13 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v6.2.1`] — 2026-11-24
+### Canal Público de Distribuição (`silaswf/fluentbridge-releases`) para Downloads e Atualização In-App
+- Criado o repositório público dedicado `silaswf/fluentbridge-releases` para distribuição dos instaladores oficiais (`.exe` e `.apk`), mantendo o código-fonte 100% privado em `silaswf/fluentbridge`.
+- Atualizados `appConfig.ts`, `appUpdater.ts`, `public/version.json` e `electron/main.cjs` para apontar e autorizar downloads diretos via `silaswf/fluentbridge-releases`.
+
+---
+
 ## [`v6.2.0`] — 2026-11-24
 ### >= 6 Vocabulários Ligados ao Tema em Todas as 1.236 Unidades, 100% dos Exemplos Contendo a Palavra-Alvo & Manifest de Atualização Sem 404
 - **Validador Estrito de Exemplos (`src/utils/vocabValidation.ts`, `courseBuilder.ts`):**

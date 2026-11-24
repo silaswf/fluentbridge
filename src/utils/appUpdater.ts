@@ -116,7 +116,7 @@ export async function checkForAppUpdate(): Promise<AppUpdateInfo> {
     }
 
     const res = await fetch(
-      'https://api.github.com/repos/silaswf/fluentbridge/releases/latest',
+      'https://api.github.com/repos/silaswf/fluentbridge-releases/releases/latest',
       {
         headers: { Accept: 'application/vnd.github+json' },
         signal: controller?.signal,

@@ -103,9 +103,13 @@ ipcMain.handle('fb:open-external', async (_event, url) => {
 ipcMain.handle('fb:download-and-install', async (_event, payload) => {
   const url = payload?.url;
   const version = String(payload?.version || 'latest').replace(/[^0-9A-Za-z._-]/g, '');
+  const allowedPrefixes = [
+    'https://github.com/silaswf/fluentbridge-releases/releases/',
+    'https://github.com/silaswf/fluentbridge/releases/',
+  ];
   if (
     typeof url !== 'string' ||
-    !url.startsWith('https://github.com/silaswf/fluentbridge/releases/')
+    !allowedPrefixes.some((prefix) => url.startsWith(prefix))
   ) {
     return { ok: false, error: 'URL de atualização não autorizada.' };
   }
