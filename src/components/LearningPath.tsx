@@ -9,6 +9,7 @@ import {
   Briefcase,
   Calendar,
   CheckCircle2,
+  Clapperboard,
   Clock,
   CloudSun,
   Coffee,
@@ -16,10 +17,12 @@ import {
   Cpu,
   Crown,
   Factory,
+  Flag,
   GitBranch,
   Globe,
   Hand,
   Handshake,
+  Headphones,
   HeartPulse,
   HelpCircle,
   History,
@@ -37,6 +40,7 @@ import {
   Plane,
   Play,
   Presentation,
+  RefreshCw,
   RotateCcw,
   ShieldCheck,
   ShoppingBag,
@@ -63,6 +67,10 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { GoalOnboardingModal } from './GoalOnboardingModal';
 import { SkillBadge } from './SkillBadge';
 import { SkillRadar } from './SkillRadar';
+import {
+  TrailCheckpointModal,
+  type TrailCheckpointTarget,
+} from './TrailCheckpointModal';
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import {
   downloadNextUnitsOffline,
@@ -91,6 +99,7 @@ interface LearningPathProps {
   onOpenTeacherLink?: () => void;
   onSelfUnlinkTeacher?: () => void;
   onSaveLearningGoal?: (goal: LearningGoalType, targetDate?: string) => void;
+  onCompleteCheckpoint?: (checkpointId: string, scorePercent: number) => void;
   activeDialect?: string;
 }
 
@@ -195,10 +204,14 @@ export function LearningPath({
   onOpenTeacherLink,
   onSelfUnlinkTeacher,
   onSaveLearningGoal,
+  onCompleteCheckpoint,
   activeDialect = 'en-US',
 }: LearningPathProps) {
   const [confirmUnlinkOpen, setConfirmUnlinkOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
+  const [activeCheckpoint, setActiveCheckpoint] = useState<TrailCheckpointTarget | null>(
+    null,
+  );
   const [offlineIds, setOfflineIds] = useState<string[]>(() => getCachedOfflineUnits());
   const [offlineStatus, setOfflineStatus] = useState<string>('');
   const [downloadingOffline, setDownloadingOffline] = useState(false);
@@ -654,14 +667,67 @@ export function LearningPath({
                     )
                   : 0;
 
+                const isModuleStart =
+                  idx === 0 ||
+                  filteredTopics[idx - 1]?.moduleTitlePt !== topic.moduleTitlePt;
+                const isModuleEnd =
+                  idx === filteredTopics.length - 1 ||
+                  filteredTopics[idx + 1]?.moduleTitlePt !== topic.moduleTitlePt;
+                const moduleTitle =
+                  topic.moduleTitlePt ?? `Módulo ${topic.level}`;
+                const moduleUnits = filteredTopics.filter(
+                  (ft) => (ft.moduleTitlePt ?? `Módulo ${ft.level}`) === moduleTitle,
+                );
+                const moduleDoneCount = moduleUnits.filter((ft) =>
+                  completedTopicIds.includes(ft.id),
+                ).length;
+                const modulePct =
+                  moduleUnits.length > 0
+                    ? Math.round((moduleDoneCount / moduleUnits.length) * 100)
+                    : 0;
+                const checkpointId = `chk-${activeCourse.code}-${topic.moduleIndex ?? idx + 1}-${topic.level.toLowerCase()}`;
+                const checkpointKind: 'podcast' | 'video' =
+                  (topic.moduleIndex ?? idx) % 2 === 0 ? 'video' : 'podcast';
+                const checkpointDone = (
+                  currentUser.completedCheckpoints ?? []
+                ).includes(checkpointId);
+
                 return (
-                  <div key={topic.id} className="relative flex gap-4">
-                    {idx < filteredTopics.length - 1 && (
+                  <div key={topic.id} className="space-y-4">
+                    {isModuleStart && (
                       <div
-                        className="absolute top-12 bottom-[-16px] left-6 hidden w-0.5 bg-slate-200 sm:block"
-                        aria-hidden="true"
-                      />
+                        data-testid="module-header-card"
+                        className="rounded-2xl border border-blue-200/80 bg-blue-50/70 px-4 py-3 shadow-2xs"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700">
+                              Nível {topic.level} · Trilha Modular
+                            </p>
+                            <h3 className="font-display text-sm font-extrabold text-slate-900 sm:text-base">
+                              {moduleTitle}
+                            </h3>
+                          </div>
+                          <span className="rounded-full bg-white px-2.5 py-0.5 font-mono text-[11px] font-bold text-blue-800 ring-1 ring-blue-200">
+                            {moduleDoneCount}/{moduleUnits.length} ({modulePct}%)
+                          </span>
+                        </div>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-blue-200/70">
+                          <div
+                            className="h-full rounded-full bg-blue-600 transition-all"
+                            style={{ width: `${modulePct}%` }}
+                          />
+                        </div>
+                      </div>
                     )}
+
+                    <div className="relative flex gap-4">
+                      {idx < filteredTopics.length - 1 && (
+                        <div
+                          className="absolute top-12 bottom-[-16px] left-6 hidden w-0.5 bg-slate-200 sm:block"
+                          aria-hidden="true"
+                        />
+                      )}
 
                     <div className="relative z-10 mt-5 hidden sm:block">
                       <div
@@ -813,14 +879,87 @@ export function LearningPath({
                         </div>
                       )}
 
-                      <div className="mt-3.5 flex flex-wrap gap-1.5">
+                      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
                         <SkillBadge kind="vocab_intro" compact />
                         <SkillBadge kind="listening" compact />
                         <SkillBadge kind="reading" compact />
                         <SkillBadge kind="speaking" compact />
                         <SkillBadge kind="writing" compact />
+                        {topic.recycledLinks && topic.recycledLinks.length > 0 && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200"
+                            title={`Revisão espiral de: ${topic.recycledLinks.map((l) => l.titlePt).join(', ')}`}
+                          >
+                            <RefreshCw className="h-2.5 w-2.5" />
+                            Revisão Espiral ({topic.recycledLinks.length})
+                          </span>
+                        )}
                       </div>
                     </article>
+                    </div>
+
+                    {isModuleEnd && (
+                      <div
+                        data-testid="trail-checkpoint-card"
+                        className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 p-4 transition ${
+                          checkpointDone
+                            ? 'border-emerald-300 bg-emerald-50/70'
+                            : 'border-amber-300 bg-amber-50/70'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+                              checkpointDone
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-amber-400 text-slate-950'
+                            }`}
+                          >
+                            {checkpointDone ? (
+                              <CheckCircle2 className="h-5 w-5" />
+                            ) : checkpointKind === 'podcast' ? (
+                              <Headphones className="h-5 w-5" />
+                            ) : (
+                              <Clapperboard className="h-5 w-5" />
+                            )}
+                          </span>
+                          <div>
+                            <p className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-800">
+                              <Flag className="h-3 w-3" />
+                              <span>Ponto de Verificação · {moduleTitle}</span>
+                            </p>
+                            <p className="font-display text-sm font-extrabold text-slate-900">
+                              {checkpointKind === 'podcast'
+                                ? `Podcast de Checagem (${topic.level}) — Diálogo & Compreensão`
+                                : `Vídeo Interativo de Checagem (${topic.level}) — Legendas & Quiz`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActiveCheckpoint({
+                              id: checkpointId,
+                              kind: checkpointKind,
+                              level: topic.level,
+                              titlePt: `${moduleTitle} (${topic.level})`,
+                              mediaId:
+                                checkpointKind === 'podcast'
+                                  ? `pod-${activeCourse.code}-${topic.level.toLowerCase()}`
+                                  : undefined,
+                            })
+                          }
+                          className={`rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
+                            checkpointDone
+                              ? 'border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
+                              : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                          }`}
+                        >
+                          {checkpointDone ? 'Revisar Checagem' : 'Abrir Checagem (+60 XP)'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1085,6 +1224,18 @@ export function LearningPath({
           </aside>
         )}
       </div>
+
+      {activeCheckpoint && (
+        <TrailCheckpointModal
+          checkpoint={activeCheckpoint}
+          languageCode={activeCourse.code}
+          alreadyCompleted={(currentUser.completedCheckpoints ?? []).includes(
+            activeCheckpoint.id,
+          )}
+          onComplete={(id, score) => onCompleteCheckpoint?.(id, score)}
+          onClose={() => setActiveCheckpoint(null)}
+        />
+      )}
 
       {onSaveLearningGoal && (
         <GoalOnboardingModal

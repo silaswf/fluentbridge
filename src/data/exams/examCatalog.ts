@@ -67,6 +67,22 @@ export const EXAM_TYPES: ExamTypeMeta[] = [
     ],
   },
   {
+    id: 'det',
+    languageCode: 'en',
+    name: 'Duolingo English Test (DET)',
+    officialOrg: 'Duolingo (Adaptive University Admissions)',
+    scaleLabel: '10 – 160 pontos',
+    passingRulePt: 'Aceito por 5.000+ universidades; admissão típica exige 105–130 pontos (subscores Literacy, Comprehension, Conversation, Production).',
+    durationMinutes: 45,
+    referenceTable: [
+      { label: '145 – 160 pts', minScore: 145, maxScore: 160, cefr: 'C2', meaningPt: 'Mastery (C2) — Compreensão e produção precisas em contextos acadêmicos e profissionais complexos.', passing: true },
+      { label: '120 – 140 pts', minScore: 120, maxScore: 140, cefr: 'C1', meaningPt: 'Advanced (C1) — Excelente fluência para pós-graduação, bolsas e universidades competitivas.', passing: true },
+      { label: '90 – 115 pts', minScore: 90, maxScore: 115, cefr: 'B2', meaningPt: 'Upper-Intermediate (B2) — Aceito na maioria das graduações internacionais e intercâmbios.', passing: true },
+      { label: '60 – 85 pts', minScore: 60, maxScore: 85, cefr: 'B1', meaningPt: 'Intermediate (B1) — Base comunicativa funcional; recomenda-se curso preparatório (pathway).', passing: false },
+      { label: '10 – 55 pts', minScore: 10, maxScore: 55, cefr: 'A2', meaningPt: 'Basic (A1–A2) — Vocabulário inicial; reforce leitura rápida e ditado auditivo.', passing: false },
+    ],
+  },
+  {
     id: 'dele',
     languageCode: 'es',
     name: 'DELE (Instituto Cervantes)',

@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v7.0.0 E2E Suite', () => {
+test.describe('FluentBridge v8.0.0 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v7\.0\.0\/FluentBridge-Setup-7\.0\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.0\/FluentBridge-Setup-8\.0\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v7\.0\.0\/FluentBridge-v7\.0\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.0\.0\/FluentBridge-v8\.0\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -191,5 +191,64 @@ test.describe('FluentBridge v7.0.0 E2E Suite', () => {
 
     await page.getByTestId('ui-locale-en').click();
     await page.getByTestId('ui-locale-pt').click();
+  });
+
+  test('10. v8.0.0 Dark Mode Reading contrast, Japanese Kana toggle, DET Mock Exam & Trail Checkpoint work', async ({
+    page,
+  }) => {
+    await loginAsMasterAdmin(page);
+    await page.getByRole('button', { name: /Trilha \(/i }).click();
+
+    // 1) Busuu-style Module Header & Trail Checkpoint Modal on LearningPath
+    await expect(page.getByTestId('module-header-card').first()).toBeVisible();
+    await page.getByTestId('trail-checkpoint-card').first().getByRole('button').click();
+    await expect(page.getByTestId('trail-checkpoint-modal')).toBeVisible();
+    await page.getByTestId('complete-checkpoint-btn').click();
+    await expect(page.getByTestId('trail-checkpoint-modal')).toBeHidden();
+
+    // 2) Dark mode Reading passage contrast
+    await selectLanguage(page, 'en');
+    await page.getByRole('button', { name: /Tema da interface/i }).click();
+    await page.getByRole('button', { name: /Começar/i }).first().click();
+    await expect(page.locator('.fixed.inset-0.z-50')).toBeVisible({ timeout: 8000 });
+    for (let i = 0; i < 6; i++) {
+      if (await page.getByTestId('reading-passage-box').isVisible().catch(() => false)) break;
+      const unlockBtn = page.getByRole('button', { name: /Desbloquear palavras/i });
+      if (await unlockBtn.isVisible().catch(() => false)) {
+        await unlockBtn.click();
+        continue;
+      }
+      const gotItBtn = page.getByRole('button', { name: /Entendi|Got it/i }).first();
+      if (await gotItBtn.isVisible().catch(() => false)) {
+        await gotItBtn.click();
+        continue;
+      }
+      const verifyBtn = page.getByRole('button', { name: /Verificar resposta|Check/i });
+      if (await verifyBtn.isVisible().catch(() => false)) {
+        await page.locator('.fixed.inset-0.z-50 .mt-4.space-y-2\\.5 button').first().click();
+        await verifyBtn.click();
+        await page.locator('.fixed.inset-0.z-50 footer button').last().click();
+      }
+    }
+    const readingBox = page.getByTestId('reading-passage-box');
+    await expect(readingBox).toBeVisible();
+    const readingBg = await readingBox.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(readingBg).toBe('rgb(15, 23, 42)');
+    await page.locator('.fixed.inset-0.z-50 button').filter({ has: page.locator('svg.lucide-x') }).first().click();
+
+    // 3) Japanese script_phonics step & Kana toggle
+    await selectLanguage(page, 'ja');
+    await page.getByRole('button', { name: /Começar|Refazer|Continuar/i }).first().click();
+    await expect(page.getByTestId('ja-kana-toggle')).toBeVisible();
+    await page.getByTestId('ja-kana-toggle').click();
+    await expect(page.getByTestId('ja-kana-toggle')).toContainText(/Kana/i);
+    await page.locator('.fixed.inset-0.z-50 button').filter({ has: page.locator('svg.lucide-x') }).first().click();
+
+    // 4) DET Mock Exam in English
+    await selectLanguage(page, 'en');
+    await page.getByRole('button', { name: /Simulados Oficiais/i }).click();
+    await expect(page.getByRole('heading', { name: 'Duolingo English Test (DET)' })).toBeVisible();
+    await page.getByTestId('start-exam-det-sim-1').click();
+    await expect(page.getByTestId('exam-timer')).toBeVisible();
   });
 });

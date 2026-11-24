@@ -411,6 +411,12 @@ function mergeUserProfiles(
       ...(remoteUser.completedTopicIds ?? []),
     ]),
   );
+  const completedCheckpoints = Array.from(
+    new Set([
+      ...(localUser.completedCheckpoints ?? []),
+      ...(remoteUser.completedCheckpoints ?? []),
+    ]),
+  );
 
   const certMap = new Map<string, (typeof localUser.issuedCertificates)[number]>();
   for (const cert of [...(secondary.issuedCertificates ?? []), ...(primary.issuedCertificates ?? [])]) {
@@ -449,6 +455,7 @@ function mergeUserProfiles(
     ...primary,
     password: primary.password || secondary.password,
     completedTopicIds,
+    completedCheckpoints,
     learnedVocabIds,
     topicStepProgress: mergedTopicProgress,
     mistakeBank: (() => {

@@ -1855,6 +1855,18 @@ export function App() {
               updateCurrentUser((u) => ({ ...u, learningGoal, goalTargetDate }));
               showToast('Objetivo de estudo atualizado!');
             }}
+            onCompleteCheckpoint={(checkpointId, scorePercent) => {
+              updateCurrentUser((u) => {
+                const prev = u.completedCheckpoints ?? [];
+                if (prev.includes(checkpointId)) return u;
+                return {
+                  ...u,
+                  xp: u.xp + 60,
+                  completedCheckpoints: [...prev, checkpointId],
+                };
+              });
+              showToast(`Ponto de verificação concluído (${scorePercent}%)! +60 XP`);
+            }}
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             onPracticeTopicWithAI={(topic) => {

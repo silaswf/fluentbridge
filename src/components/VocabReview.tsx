@@ -23,6 +23,12 @@ import {
   sortCardsForReview,
   type SrsRating,
 } from '../utils/srsEngine';
+import {
+  loadJapaneseScriptMode,
+  saveJapaneseScriptMode,
+  toJapaneseKana,
+  type JapaneseScriptMode,
+} from '../utils/japaneseKana';
 import { DualAudioButtons } from './DualAudioButtons';
 import { MistakeNotebookView } from './MistakeNotebookView';
 
@@ -77,6 +83,9 @@ export function VocabReview({
   const [search, setSearch] = useState('');
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
+    loadJapaneseScriptMode(),
+  );
 
   const unlockedIdSet = useMemo(() => new Set(vocab.map((c) => c.id)), [vocab]);
   const activeSourceVocab =
@@ -316,6 +325,20 @@ export function VocabReview({
               <List className="h-4 w-4" />
               <span>Lista ({deck.length})</span>
             </button>
+            {languageCode === 'ja' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const next: JapaneseScriptMode =
+                    jaScriptMode === 'standard' ? 'kana' : 'standard';
+                  setJaScriptMode(next);
+                  saveJapaneseScriptMode(next);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-800 cursor-pointer"
+              >
+                {jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -647,7 +670,9 @@ export function VocabReview({
                   <>
                     <div className="my-6 text-center">
                       <h2 className="font-display text-3xl font-extrabold text-slate-900">
-                        {activeCard.word}
+                        {languageCode === 'ja' && jaScriptMode === 'kana'
+                          ? toJapaneseKana(activeCard.word)
+                          : activeCard.word}
                       </h2>
                       <p className="mt-1.5 font-mono text-sm text-slate-400">
                         {activeCard.ipa}
@@ -661,7 +686,11 @@ export function VocabReview({
                           Frase de exemplo
                         </p>
                         <p className="mt-0.5 text-sm font-bold text-slate-800">
-                          “{activeCard.exampleEn}”
+                          “
+                          {languageCode === 'ja' && jaScriptMode === 'kana'
+                            ? toJapaneseKana(activeCard.exampleEn)
+                            : activeCard.exampleEn}
+                          ”
                         </p>
                         {flipped && (
                           <p className="mt-0.5 text-xs text-slate-600">

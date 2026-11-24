@@ -163,14 +163,14 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v6.0.0
     expect(UNIT_ROLEPLAY_ANGLES.length).toBe(10);
   });
 
-  it('ships complete alphabets and 76 full official mock exams (19 exam types incl. CELPIP, >=12 Qs & 3-part Speaking each)', () => {
+  it('ships complete alphabets and 80 full official mock exams (20 exam types incl. CELPIP & DET, >=12 Qs & 3-part Speaking each)', () => {
     expect(JAPANESE_HIRAGANA.length).toBe(46);
     expect(JAPANESE_KATAKANA.length).toBe(46);
     expect(RUSSIAN_CYRILLIC.length).toBe(33);
     expect(ARABIC_ALPHABET.length).toBe(28);
 
-    expect(EXAM_TYPES.length).toBe(19);
-    expect(ALL_MOCK_EXAMS.length).toBe(76);
+    expect(EXAM_TYPES.length).toBe(20);
+    expect(ALL_MOCK_EXAMS.length).toBe(80);
     for (const meta of EXAM_TYPES) {
       const ofType = ALL_MOCK_EXAMS.filter((e) => e.examTypeId === meta.id);
       expect(ofType.length).toBe(4);

@@ -1,4 +1,9 @@
 import type { CEFRLevel, LanguageCode } from '../types/learning';
+import {
+  buildVideoCheckpoints,
+  expandPodcastLinesAndCheckpoints,
+  type ImmersionCheckpoint,
+} from '../utils/immersionExpander';
 
 export interface VideoWordToken {
   surface: string;
@@ -31,6 +36,7 @@ export interface InteractiveVideoClip {
   sceneSettingPt: string;
   videoUrl?: string;
   lines: InteractiveSubtitleLine[];
+  checkpoints?: ImmersionCheckpoint[];
 }
 
 export const INTERACTIVE_VIDEO_CLIPS: InteractiveVideoClip[] = [
@@ -1095,7 +1101,66 @@ export const INTERACTIVE_VIDEO_CLIPS: InteractiveVideoClip[] = [
 export function getInteractiveVideosByLanguage(
   languageCode: LanguageCode,
 ): InteractiveVideoClip[] {
-  return INTERACTIVE_VIDEO_CLIPS.filter((v) => v.languageCode === languageCode);
+  return INTERACTIVE_VIDEO_CLIPS.filter((v) => v.languageCode === languageCode).map(
+    (clip) => {
+      if (clip.lines.length >= 8 && clip.checkpoints && clip.checkpoints.length >= 2) {
+        return clip;
+      }
+      const first = clip.lines[0];
+      const second = clip.lines[1] ?? first;
+      const expanded = expandPodcastLinesAndCheckpoints({
+        id: clip.id,
+        lang: clip.languageCode,
+        level: clip.level,
+        titleTarget: clip.titleTarget,
+        s1: first?.speaker ?? 'Host',
+        d1: first?.dialectCode ?? clip.languageCode,
+        s2: second?.speaker ?? 'Guest',
+        d2: second?.dialectCode ?? clip.languageCode,
+        baseLines: clip.lines.map((l) => ({
+          speaker: l.speaker,
+          voice: l.voice,
+          dialectCode: l.dialectCode,
+          text: l.textTarget,
+          translationPt: l.textPt,
+        })),
+        finalQuestion: `O que melhor resume "${clip.titlePt}"?`,
+        finalOptions: [
+          `Situação real: ${clip.sceneSettingPt}`,
+          'Lista isolada de verbos irregulares',
+          'Aula apenas de ortografia',
+        ],
+        finalCorrectIndex: 0,
+      });
+      const richLines: InteractiveSubtitleLine[] = expanded.lines
+        .slice(0, 9)
+        .map((l, idx) => {
+          const orig = clip.lines.find((o) => o.textTarget === l.text);
+          return (
+            orig ?? {
+              id: `${clip.id}-exp-${idx + 1}`,
+              speaker: l.speaker,
+              voice: l.voice,
+              dialectCode: l.dialectCode,
+              textTarget: l.text,
+              textPt: l.translationPt,
+              tokens: [],
+            }
+          );
+        });
+      return {
+        ...clip,
+        durationLabel: expanded.durationLabel,
+        lines: richLines,
+        checkpoints: buildVideoCheckpoints(
+          clip.id,
+          clip.languageCode,
+          richLines.length,
+          clip.titlePt,
+        ),
+      };
+    },
+  );
 }
 
 export function lookupSubtitleWord(

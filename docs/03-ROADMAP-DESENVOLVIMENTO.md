@@ -91,6 +91,13 @@ Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** 
 - [x] **Voz & Audiovisual**: Osciloscópio de **Pitch F0** em tempo real (`PitchOscilloscope.tsx`), Streaming MP4 R2 em `InteractiveVideoView.tsx` e Avaliação Fonética com confiança por palavra (`phoneticFeedback.ts`).
 - [x] **Aulas ao Vivo, Boletim PDF, Realtime & i18n/A11y**: `LiveClassroomView.tsx` (Jitsi Meet + tarefa pós-aula), `pedagogicalReportPdf.ts`, Supabase Realtime (`relationalSync.ts`), CI/CD Windows+Android+Releases, `i18n` (`PT/EN/ES`) e escala tipográfica WCAG AA.
 
-### Fase 13 — Lojas Oficiais & Monetização SaaS (Próximo Ciclo)
+### Fase 13 — Coesão Curricular, Kana/Kanji Progressivo, DET & Checkpoints (`v8.0.0`) — CONCLUÍDA
+- [x] **Contraste Reading Dark Mode WCAG AA** em Web, Windows e Android (`.reading-passage-box` e `.reading-gloss-chip`).
+- [x] **Coesão Pedagógica, Vocabulário 8–10 Cards & Revisão Espiral (`courseCohesion.ts`)** em todos os 12 idiomas.
+- [x] **Letras, Sons & Kanji Progressivo dentro das Unidades (`unitScriptPhonics.ts`) + Toggle `漢字 Padrão` / `あいう 100% Kana` (`japaneseKana.ts`)**.
+- [x] **4 Simulados Oficiais Duolingo English Test (`examsDet.ts`, escala `10–160`)**.
+- [x] **60 Podcasts (10+ falas, 3 checagens) & 36 Vídeos (8+ falas, 2 checagens) integrados à Trilha Modular estilo Busuu (`TrailCheckpointModal.tsx`)**.
+
+### Fase 14 — Lojas Oficiais & Monetização SaaS (Próximo Ciclo)
 - [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** e assinatura Code Signing Windows.
 - [ ] **Planos, Pagamentos (Pix/Stripe) & Multi-Escolas (Item #18)** — em definição de nomenclatura e escopo comercial.

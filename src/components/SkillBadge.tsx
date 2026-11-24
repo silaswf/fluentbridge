@@ -17,6 +17,7 @@ import type { SkillType, TipCategory } from '../types/learning';
 export type BadgeKind =
   | SkillType
   | 'vocab_intro'
+  | 'script_phonics'
   | 'tip'
   | 'matching'
   | 'fill_blank'
@@ -79,6 +80,15 @@ export const SKILL_META: Record<BadgeKind, SkillMeta> = {
     border: 'border-cyan-200',
     dot: 'bg-cyan-500',
     Icon: BookOpen,
+  },
+  script_phonics: {
+    label: 'Letras, Sons & Kanji',
+    shortLabel: 'Escrita',
+    bg: 'bg-violet-50',
+    text: 'text-violet-700',
+    border: 'border-violet-200',
+    dot: 'bg-violet-500',
+    Icon: Sparkles,
   },
   tip: {
     label: 'Dica do Professor',

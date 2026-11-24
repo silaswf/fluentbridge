@@ -167,6 +167,14 @@ export function gradeMockExam(
       passed = lvl >= 7;
       break;
     }
+    case 'det': {
+      const rawDet = 10 + (rawPercent / 100) * 150;
+      const roundedDet = Math.max(10, Math.min(160, Math.round(rawDet / 5) * 5));
+      officialScore = roundedDet;
+      officialLabel = `${roundedDet} / 160 (DET)`;
+      passed = roundedDet >= 90;
+      break;
+    }
     case 'dele': {
       officialScore = rawPercent;
       if (categoryFilter === 'full') {

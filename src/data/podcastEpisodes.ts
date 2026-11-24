@@ -1,4 +1,8 @@
 import type { CEFRLevel, LanguageCode } from '../types/learning';
+import {
+  expandPodcastLinesAndCheckpoints,
+  type ImmersionCheckpoint,
+} from '../utils/immersionExpander';
 
 export interface PodcastLine {
   speaker: string;
@@ -18,6 +22,7 @@ export interface PodcastEpisode {
   themePt: string;
   videoTipPt: string;
   lines: PodcastLine[];
+  checkpoints: ImmersionCheckpoint[];
   question: string;
   options: string[];
   correctIndex: number;
@@ -707,23 +712,42 @@ const SEEDS: EpSeed[] = [
   },
 ];
 
-export const PODCAST_EPISODES: PodcastEpisode[] = SEEDS.map((s) => ({
-  id: `pod-${s.lang}-${s.lvl.toLowerCase()}`,
-  languageCode: s.lang,
-  level: s.lvl,
-  titlePt: s.titlePt,
-  titleTarget: s.titleTarget,
-  durationLabel: '~2 min',
-  themePt: s.themePt,
-  videoTipPt: s.videoTipPt,
-  lines: s.lines.map(([spk, text, translationPt]) => ({
+export const PODCAST_EPISODES: PodcastEpisode[] = SEEDS.map((s) => {
+  const id = `pod-${s.lang}-${s.lvl.toLowerCase()}`;
+  const baseLines: PodcastLine[] = s.lines.map(([spk, text, translationPt]) => ({
     speaker: spk === 1 ? s.s1 : s.s2,
     voice: spk === 1 ? 'male' : 'female',
     dialectCode: spk === 1 ? s.d1 : s.d2,
     text,
     translationPt,
-  })),
-  question: s.q,
-  options: s.opts,
-  correctIndex: s.ans,
-}));
+  }));
+  const expanded = expandPodcastLinesAndCheckpoints({
+    id,
+    lang: s.lang,
+    level: s.lvl,
+    titleTarget: s.titleTarget,
+    s1: s.s1,
+    d1: s.d1,
+    s2: s.s2,
+    d2: s.d2,
+    baseLines,
+    finalQuestion: s.q,
+    finalOptions: s.opts,
+    finalCorrectIndex: s.ans,
+  });
+  return {
+    id,
+    languageCode: s.lang,
+    level: s.lvl,
+    titlePt: s.titlePt,
+    titleTarget: s.titleTarget,
+    durationLabel: expanded.durationLabel,
+    themePt: s.themePt,
+    videoTipPt: s.videoTipPt,
+    lines: expanded.lines,
+    checkpoints: expanded.checkpoints,
+    question: s.q,
+    options: s.opts,
+    correctIndex: s.ans,
+  };
+});

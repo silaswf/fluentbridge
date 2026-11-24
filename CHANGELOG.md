@@ -4,6 +4,22 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.0.0`] — 2026-11-24
+### Contraste Reading Dark Mode, Coesão Curricular (8–10 Cards + Revisão Espiral), Alfabetos/Kanji Progressivos nas Unidades, Toggle 100% Kana, 4 Simulados DET & Podcasts/Vídeos Integrados com Checkpoints
+- **Contraste Reading em Todas as Plataformas (`index.css`, `LessonPlayer.tsx`):**
+  - Corrigido o fundo branco translúcido (`.bg-slate-50/90`) no Dark Mode e criadas as classes `.reading-passage-box` e `.reading-gloss-chip` garantindo leitura WCAG AA em Web, Windows e Android.
+- **Coesão Pedagógica, Vocabulário Expandido (até 10 palavras) & Revisão Espiral (`courseCohesion.ts`, `courseLoader.ts`, `VocabIntroStep.tsx`):**
+  - Cada unidade agora mantém `8–10` cards coesos (extraindo lacunas do Reading + até 2 cards de **Revisão Espiral** conectados a aulas anteriores), glossários interativos ampliados no Reading, pares de Matching alinhados e gaveta rápida **"Vocab"** no `LessonPlayer`.
+- **Letras, Sons & Kanji Progressivo dentro das Unidades + Toggle 100% Kana (`unitScriptPhonics.ts`, `ScriptPhonicsStepView.tsx`, `japaneseKana.ts`):**
+  - Etapas `script_phonics` dentro das unidades para Russo (33 letras), Árabe (28 letras + 4 formas RTL), Chinês (Hanzi + tons) e Japonês (Hiragana/Katakana + **introdução progressiva de todo novo Kanji** antes das atividades).
+  - Toggle **`漢字 Padrão` / `あいう Kana`** no Japonês (`LessonPlayer`, `VocabIntroStep`, `PodcastImmersionView`, `InteractiveVideoView`).
+- **4 Simulados Duolingo English Test (`examsDet.ts`, `examCatalog.ts`, `examScoring.ts`):**
+  - Adicionados 4 simulados completos do **DET** com formatos *Read & Complete*, *Read & Select*, *Interactive Reading/Listening*, *Speaking* e *Writing* na escala oficial `10–160`.
+- **Podcasts (`60` episódios, 10+ falas) & Vídeos (`36` clipes, 8+ falas) com Checagens no Meio + Trilha Modular estilo Busuu (`immersionExpander.ts`, `TrailCheckpointModal.tsx`, `LearningPath.tsx`):**
+  - Diálogos completos com `3` checagens distribuídas durante o áudio e `2` durante o vídeo, além de agrupamento em **Módulos** e cartões de **Ponto de Verificação (+60 XP)** diretamente na trilha.
+
+---
+
 ## [`v7.0.0`] — 2026-11-24
 ### Arquitetura Modular por Idioma, Cloudflare R2, Cloze SM-2, Memória IA, Treino Gramatical, Leitura Graduada, F0 Pitch, Aulas ao Vivo, Boletim PDF, CI/CD & i18n/A11y
 - **Performance, Modularidade & Offline (`courseLoader.ts`, `platformDefaults.ts`, `offlineUnitPack.ts`, `vite.config.ts`):**

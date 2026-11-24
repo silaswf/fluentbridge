@@ -226,8 +226,45 @@ export interface VocabIntroStep {
   cards: VocabCard[];
 }
 
+export interface ScriptPhonicsChar {
+  char: string;
+  reading: string;
+  meaningPt: string;
+  exampleWord: string;
+  examplePt: string;
+  strokes?: number;
+  strokeHints?: string[];
+  cursiveNote?: string;
+  direction?: 'ltr' | 'rtl';
+  jlptLevel?: 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
+  forms?: {
+    isolated: string;
+    initial: string;
+    medial: string;
+    final: string;
+  };
+}
+
+export interface ScriptPhonicsStep {
+  id: string;
+  type: 'script_phonics';
+  stageLabelPt?: string;
+  categoryTitlePt: string;
+  introPt: string;
+  languageCode: 'ru' | 'ar' | 'ja' | 'zh';
+  items: ScriptPhonicsChar[];
+  soundQuiz: {
+    promptPt: string;
+    audioText: string;
+    options: Array<{ char: string; reading: string }>;
+    correctIndex: number;
+    explanationPt: string;
+  };
+}
+
 export type LessonStep =
   | VocabIntroStep
+  | ScriptPhonicsStep
   | TipStep
   | ListeningStep
   | ReadingStep
@@ -251,6 +288,9 @@ export interface Topic {
   icon: string;
   color: string;
   isCustom?: boolean;
+  moduleIndex?: number;
+  moduleTitlePt?: string;
+  recycledLinks?: Array<{ topicId: string; titlePt: string; words: string[] }>;
   topicTipsSummary: string[];
   steps: LessonStep[];
 }
@@ -272,6 +312,8 @@ export interface VocabCard {
   easeFactor?: number;
   repetitions?: number;
   lapses?: number;
+  isRecycled?: boolean;
+  recycledFromTitle?: string;
 }
 
 export interface PronunciationRubric {
@@ -482,6 +524,7 @@ export interface UserProfile {
   examAttempts?: ExamAttemptRecord[];
   streakDays: number;
   completedTopicIds: string[];
+  completedCheckpoints?: string[];
   topicStepProgress?: Record<string, TopicProgressRecord>;
   learnedVocabIds?: string[];
   mistakeBank?: MistakeEntry[];

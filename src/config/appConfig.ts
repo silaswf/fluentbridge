@@ -1,12 +1,12 @@
 import type { CloudConfig } from '../types/learning';
 
-export const APP_VERSION = '7.0.0';
+export const APP_VERSION = '8.0.0';
 export const GITHUB_RELEASES_URL =
   'https://github.com/silaswf/fluentbridge-releases/releases/latest';
 export const WINDOWS_DOWNLOAD_URL =
-  'https://github.com/silaswf/fluentbridge-releases/releases/download/v7.0.0/FluentBridge-Setup-7.0.0.exe';
+  'https://github.com/silaswf/fluentbridge-releases/releases/download/v8.0.0/FluentBridge-Setup-8.0.0.exe';
 export const ANDROID_APK_DOWNLOAD_URL =
-  'https://github.com/silaswf/fluentbridge-releases/releases/download/v7.0.0/FluentBridge-v7.0.0.apk';
+  'https://github.com/silaswf/fluentbridge-releases/releases/download/v8.0.0/FluentBridge-v8.0.0.apk';
 
 export const MASTER_ADMIN_EMAIL = 'silaswf@gmail.com';
 export const DEFAULT_TEACHER_ACCESS_CODE = 'SILAS-PROF-2026';

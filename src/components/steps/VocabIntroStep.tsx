@@ -1,12 +1,14 @@
-import { Check, Sparkles } from 'lucide-react';
+import { Check, RefreshCw, Sparkles } from 'lucide-react';
 import type { LanguageCode, VocabCard } from '../../types/learning';
 import { extractScriptCharsFromWord } from '../../data/scriptTrainerData';
+import { toJapaneseKana, type JapaneseScriptMode } from '../../utils/japaneseKana';
 import { DualAudioButtons } from '../DualAudioButtons';
 import { ScriptStrokeTrainer } from '../ScriptStrokeTrainer';
 
 interface VocabIntroStepProps {
   cards: VocabCard[];
   topicLanguageCode?: LanguageCode;
+  jaScriptMode?: JapaneseScriptMode;
   studiedVocabIds: string[];
   expandedTraceCardId: string | null;
   onMarkStudied: (cardId: string) => void;
@@ -17,6 +19,7 @@ interface VocabIntroStepProps {
 export function VocabIntroStep({
   cards,
   topicLanguageCode,
+  jaScriptMode = 'standard',
   studiedVocabIds,
   expandedTraceCardId,
   onMarkStudied,
@@ -64,7 +67,9 @@ export function VocabIntroStep({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-display text-lg font-extrabold text-slate-900">
-                      {card.word}
+                      {lang === 'ja' && jaScriptMode === 'kana'
+                        ? toJapaneseKana(card.word)
+                        : card.word}
                     </span>
                     {card.ipa && (
                       <span className="font-mono text-xs text-slate-500">
@@ -74,6 +79,19 @@ export function VocabIntroStep({
                     <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
                       {card.category}
                     </span>
+                    {card.isRecycled && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200"
+                        title={
+                          card.recycledFromTitle
+                            ? `Conectado com: ${card.recycledFromTitle}`
+                            : 'Revisão espiral de unidade anterior'
+                        }
+                      >
+                        <RefreshCw className="h-2.5 w-2.5" />
+                        Revisão Espiral
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm font-bold text-emerald-700">
                     {card.translation}

@@ -119,4 +119,5 @@ Em **`v7.0.0`**, foram entregues integralmente os blocos **3.1** (#1–#3), **3.
 | Fase | Foco Principal | Status / Entregas |
 | --- | --- | --- |
 | **`v7.0.0` (Entregue)** | **Performance, R2, Segurança, Pedagogia, Pitch F0, Aulas ao Vivo, PDF & CI/CD** | ✅ `dynamic import()` por idioma + Cache TTS/MP4 no Cloudflare R2 + Offline 3 unidades + JWT híbrido & `/api/telemetry` + Cloze SM-2 + Memória IA + 144 Grammar Drills + 12 Graded Readers (60 cap.) + Pitch F0 + Sala ao Vivo Jitsi + Boletim PDF + Realtime + CI Windows/Android + `i18n` (`PT/EN/ES`) & WCAG AA. |
-| **`v8.0.0` (Em Aberto)** | **Lojas Oficiais & Monetização SaaS** | ⏳ Publicação Google Play Store + iOS (App Store) + Windows Code Signing (#20) e Sistema de Planos/Pagamentos + Multi-Escolas (#18). |
+| **`v8.0.0` (Entregue)** | **Coesão Busuu, Kanji/Kana, DET & Podcasts/Vídeos com Checkpoints** | ✅ Reading Dark Mode contraste AA + `8–10` cards coesos/unidade com Revisão Espiral + `script_phonics` (RU/AR/ZH/JA + Kanji progressivo) + Toggle `100% Kana` + `4` simulados DET (`10–160`) + Podcasts/Vídeos expandidos com checagens no meio integrados aos Módulos da trilha. |
+| **`v9.0.0` (Em Aberto)** | **Lojas Oficiais & Monetização SaaS** | ⏳ Publicação Google Play Store + iOS (App Store) + Windows Code Signing (#20) e Sistema de Planos/Pagamentos + Multi-Escolas (#18). |

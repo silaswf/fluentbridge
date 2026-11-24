@@ -2,6 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Check, Play, Plus, Square, Volume2 } from 'lucide-react';
 import type { LanguageCode } from '../types/learning';
 import { getGradedReaderByLanguage } from '../data/gradedReaders';
+import {
+  loadJapaneseScriptMode,
+  saveJapaneseScriptMode,
+  toJapaneseKana,
+  type JapaneseScriptMode,
+} from '../utils/japaneseKana';
 import { speakText, stopSpeaking } from '../utils/speech';
 
 interface GradedReadersViewProps {
@@ -21,6 +27,9 @@ export function GradedReadersView({
   const [isPlayingAll, setIsPlayingAll] = useState(false);
   const [showPt, setShowPt] = useState(true);
   const [savedWords, setSavedWords] = useState<string[]>([]);
+  const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
+    loadJapaneseScriptMode(),
+  );
 
   useEffect(() => {
     setChapterIdx(0);
@@ -59,7 +68,21 @@ export function GradedReadersView({
           </h3>
           <p className="text-xs text-emerald-800">{book.subtitlePt}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {languageCode === 'ja' && (
+            <button
+              type="button"
+              onClick={() => {
+                const next: JapaneseScriptMode =
+                  jaScriptMode === 'standard' ? 'kana' : 'standard';
+                setJaScriptMode(next);
+                saveJapaneseScriptMode(next);
+              }}
+              className="rounded-xl border border-violet-300 bg-white px-3 py-1.5 text-xs font-bold text-violet-800 cursor-pointer"
+            >
+              {jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setShowPt((p) => !p)}
@@ -129,7 +152,9 @@ export function GradedReadersView({
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold leading-relaxed text-slate-900">
-                    {s.target}
+                    {languageCode === 'ja' && jaScriptMode === 'kana'
+                      ? toJapaneseKana(s.target)
+                      : s.target}
                   </p>
                   <Volume2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                 </div>

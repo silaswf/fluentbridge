@@ -24,6 +24,7 @@ export function getUnlockedVocabCards(
 
 export type LessonStageKey =
   | 'vocab'
+  | 'script'
   | 'tips'
   | 'listening'
   | 'reading'
@@ -38,6 +39,8 @@ export function getStepStageMeta(step: LessonStep): {
   switch (step.type) {
     case 'vocab_intro':
       return { key: 'vocab', label: 'Vocabulário' };
+    case 'script_phonics':
+      return { key: 'script', label: step.stageLabelPt ?? 'Letras & Sons' };
     case 'tip':
       return { key: 'tips', label: 'Dicas' };
     case 'listening':

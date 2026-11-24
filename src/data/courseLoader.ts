@@ -1,4 +1,5 @@
 import type { LanguageCode, Topic, VocabCard } from '../types/learning';
+import { enrichCourseCohesion } from '../utils/courseCohesion';
 import { mergeCourseVocab } from './curriculum/vocabExpansion';
 
 export interface LoadedCourseBundle {
@@ -228,6 +229,7 @@ export async function loadLanguageCourseData(
     }
   }
 
+  bundle = enrichCourseCohesion(lang, bundle.topics, bundle.vocab);
   courseCache.set(lang, bundle);
   return bundle;
 }

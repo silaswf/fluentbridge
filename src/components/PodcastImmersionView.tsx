@@ -14,38 +14,62 @@ import {
   type PodcastEpisode,
 } from '../data/podcastEpisodes';
 import type { LanguageCode } from '../types/learning';
+import type { ImmersionCheckpoint } from '../utils/immersionExpander';
+import {
+  loadJapaneseScriptMode,
+  saveJapaneseScriptMode,
+  toJapaneseKana,
+  type JapaneseScriptMode,
+} from '../utils/japaneseKana';
 import { speakText, stopSpeaking } from '../utils/speech';
 
 interface PodcastImmersionViewProps {
   languageCode: LanguageCode;
+  initialEpisodeId?: string;
   onStartShadowingText?: (text: string, dialectCode: string) => void;
+  onCompleteEpisode?: (episodeId: string, scorePercent: number) => void;
 }
 
 export function PodcastImmersionView({
   languageCode,
+  initialEpisodeId,
+  onCompleteEpisode,
 }: PodcastImmersionViewProps) {
   const episodes = PODCAST_EPISODES.filter(
     (e) => e.languageCode === languageCode,
   );
-  const [selectedId, setSelectedId] = useState(episodes[0]?.id ?? '');
+  const [selectedId, setSelectedId] = useState(
+    initialEpisodeId || episodes[0]?.id || '',
+  );
   const activeEp: PodcastEpisode | undefined =
     episodes.find((e) => e.id === selectedId) ?? episodes[0];
 
   const [activeLineIdx, setActiveLineIdx] = useState<number | null>(null);
   const [speed, setSpeed] = useState<0.75 | 1 | 1.2>(1);
   const [showTranslations, setShowTranslations] = useState(false);
+  const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
+    loadJapaneseScriptMode(),
+  );
+  const [activeCheckpoint, setActiveCheckpoint] = useState<ImmersionCheckpoint | null>(
+    null,
+  );
+  const [checkpointAnswers, setCheckpointAnswers] = useState<Record<string, number>>(
+    {},
+  );
   const [pickedOpt, setPickedOpt] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const cancelRef = useRef(false);
 
   useEffect(() => {
-    setSelectedId(episodes[0]?.id ?? '');
+    setSelectedId(initialEpisodeId || episodes[0]?.id || '');
     setPickedOpt(null);
     setChecked(false);
+    setActiveCheckpoint(null);
+    setCheckpointAnswers({});
     cancelRef.current = true;
     stopSpeaking();
     setActiveLineIdx(null);
-  }, [languageCode]);
+  }, [languageCode, initialEpisodeId]);
 
   useEffect(() => {
     return () => {
@@ -68,11 +92,17 @@ export function PodcastImmersionView({
       rate: speed,
       onStart: () => setActiveLineIdx(idx),
       onEnd: () => {
-        if (
-          sequential &&
-          !cancelRef.current &&
-          idx + 1 < activeEp.lines.length
-        ) {
+        if (!sequential || cancelRef.current) {
+          setActiveLineIdx(null);
+          return;
+        }
+        const cp = activeEp.checkpoints.find((c) => c.afterLineIdx === idx);
+        if (cp && checkpointAnswers[cp.id] === undefined) {
+          setActiveLineIdx(null);
+          setActiveCheckpoint(cp);
+          return;
+        }
+        if (idx + 1 < activeEp.lines.length) {
           playFrom(idx + 1, true);
         } else {
           setActiveLineIdx(null);
@@ -96,7 +126,21 @@ export function PodcastImmersionView({
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {languageCode === 'ja' && (
+            <button
+              type="button"
+              onClick={() => {
+                const next: JapaneseScriptMode =
+                  jaScriptMode === 'standard' ? 'kana' : 'standard';
+                setJaScriptMode(next);
+                saveJapaneseScriptMode(next);
+              }}
+              className="rounded-lg border border-violet-200 bg-white px-2.5 py-1 text-[11px] font-bold text-violet-800 cursor-pointer"
+            >
+              {jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}
+            </button>
+          )}
           {([0.75, 1, 1.2] as const).map((r) => (
             <button
               key={r}
@@ -222,7 +266,9 @@ export function PodcastImmersionView({
                   </span>
                 </div>
                 <p className="mt-1 text-sm font-bold text-slate-900">
-                  {line.text}
+                  {languageCode === 'ja' && jaScriptMode === 'kana'
+                    ? toJapaneseKana(line.text)
+                    : line.text}
                 </p>
                 {showTranslations && (
                   <p className="mt-0.5 text-xs text-slate-600">
@@ -234,11 +280,85 @@ export function PodcastImmersionView({
           })}
         </div>
 
-        {/* Quick Comprehension Check */}
+        {/* Mid-Episode In-Audio Checkpoint (pauses playback until answered) */}
+        {activeCheckpoint && (
+          <div
+            data-testid="podcast-mid-checkpoint"
+            className="animate-fade-up rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 space-y-3"
+          >
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">
+              Checagem durante o episódio (Fala #{activeCheckpoint.afterLineIdx + 1})
+            </p>
+            <p className="text-sm font-bold text-slate-900">{activeCheckpoint.question}</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {activeCheckpoint.options.map((opt, oIdx) => {
+                const answered = checkpointAnswers[activeCheckpoint.id];
+                const isAnswered = answered !== undefined;
+                const isCorrect = isAnswered && oIdx === activeCheckpoint.correctIndex;
+                const isWrong = isAnswered && answered === oIdx && !isCorrect;
+                return (
+                  <button
+                    key={oIdx}
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...checkpointAnswers, [activeCheckpoint.id]: oIdx };
+                      setCheckpointAnswers(updated);
+                      if (Object.keys(updated).length >= activeEp.checkpoints.length) {
+                        const hits = activeEp.checkpoints.filter(
+                          (c) => updated[c.id] === c.correctIndex,
+                        ).length;
+                        onCompleteEpisode?.(
+                          activeEp.id,
+                          Math.round((hits / activeEp.checkpoints.length) * 100),
+                        );
+                      }
+                    }}
+                    className={`rounded-xl border px-3 py-2 text-left text-xs font-semibold cursor-pointer ${
+                      isCorrect
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                        : isWrong
+                          ? 'border-rose-400 bg-rose-50 text-rose-900'
+                          : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+            {checkpointAnswers[activeCheckpoint.id] !== undefined && (
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <p className="text-xs font-semibold text-indigo-900">
+                  {activeCheckpoint.explanationPt}
+                </p>
+                {activeCheckpoint.afterLineIdx + 1 < activeEp.lines.length && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextIdx = activeCheckpoint.afterLineIdx + 1;
+                      setActiveCheckpoint(null);
+                      playFrom(nextIdx, true);
+                    }}
+                    className="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                  >
+                    Continuar episódio →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Quick Comprehension Check + Checkpoints Summary */}
         <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-2.5">
-          <p className="text-xs font-bold text-slate-900">
-            Compreensão do episódio: {activeEp.question}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-900">
+              Compreensão do episódio: {activeEp.question}
+            </p>
+            <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-800">
+              {activeEp.checkpoints.length} checagens no áudio
+            </span>
+          </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {activeEp.options.map((opt, oIdx) => {
               const isSelected = pickedOpt === oIdx;

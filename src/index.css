@@ -160,10 +160,48 @@ html.dark .bg-\[\#F7F9FC\] {
   background-color: #0B1120 !important;
 }
 html.dark .bg-slate-50,
-html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/50,
 html.dark .bg-slate-50\/60,
-html.dark .bg-slate-100 {
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/90,
+html.dark .bg-slate-100,
+html.dark .bg-slate-100\/70 {
   background-color: #1E293B !important;
+}
+
+/* Reading step passage & clickable glossary contrast (Light + Dark across Web, Windows, Android) */
+.reading-passage-box {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+html.dark .reading-passage-box {
+  background-color: #0F172A !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+.reading-gloss-chip {
+  background-color: #CCFBF1;
+  color: #115E59;
+  border-bottom: 2px dotted #0D9488;
+}
+.reading-gloss-chip:hover,
+.reading-gloss-chip[data-selected='true'] {
+  background-color: #99F6E4;
+  color: #042F2E;
+  border-bottom-color: #0F766E;
+}
+html.dark .reading-gloss-chip {
+  background-color: #134E4A !important;
+  color: #CCFBF1 !important;
+  border-bottom: 2px dotted #2DD4BF !important;
+}
+html.dark .reading-gloss-chip:hover,
+html.dark .reading-gloss-chip[data-selected='true'] {
+  background-color: #0F766E !important;
+  color: #FFFFFF !important;
+  border-bottom-color: #5EEAD4 !important;
 }
 html.dark .border-slate-200,
 html.dark .border-slate-200\/90,

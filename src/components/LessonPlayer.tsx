@@ -57,9 +57,16 @@ import {
 import { DualAudioButtons } from './DualAudioButtons';
 import { SkillBadge, TIP_CATEGORY_META } from './SkillBadge';
 import { Phase8StepsView } from './steps/Phase8StepsView';
+import { ScriptPhonicsStepView } from './steps/ScriptPhonicsStepView';
 import { ShadowingPanel } from './steps/ShadowingPanel';
 import { VocabIntroStep } from './steps/VocabIntroStep';
 import { PitchOscilloscope } from './PitchOscilloscope';
+import {
+  loadJapaneseScriptMode,
+  saveJapaneseScriptMode,
+  toJapaneseKana,
+  type JapaneseScriptMode,
+} from '../utils/japaneseKana';
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import { analyzePhoneticFeedback } from '../utils/phoneticFeedback';
 
@@ -187,10 +194,8 @@ function renderInteractivePassage(
                   key={partIdx}
                   type="button"
                   onClick={() => onSelectWord(matched)}
-                  className={`mx-0.5 inline rounded-md border-b-2 border-dotted px-1 py-0.5 font-semibold transition cursor-pointer ${isSelected
-                    ? 'border-teal-600 bg-teal-100 text-teal-950'
-                    : 'border-teal-500 bg-teal-50/80 text-teal-800 hover:bg-teal-100/80'
-                    }`}
+                  data-selected={isSelected ? 'true' : 'false'}
+                  className="reading-gloss-chip mx-0.5 inline rounded-md px-1 py-0.5 font-semibold transition cursor-pointer"
                   title={`Ver tradução de "${matched.word}"`}
                 >
                   {part}
@@ -265,7 +270,15 @@ export function LessonPlayer({
   const [expandedTraceCardId, setExpandedTraceCardId] = useState<string | null>(null);
   const [showPtTranslation, setShowPtTranslation] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showVocabDrawer, setShowVocabDrawer] = useState(false);
+  const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
+    loadJapaneseScriptMode(),
+  );
   const [isCompletedScreen, setIsCompletedScreen] = useState(false);
+  const jaText = (s: string) =>
+    topic.languageCode === 'ja' && jaScriptMode === 'kana'
+      ? toJapaneseKana(s)
+      : s;
 
   // Gamification: Hearts, Combo, Sound FX, Relaxed Mode
   const [hearts, setHearts] = useState(5);
@@ -800,6 +813,7 @@ export function LessonPlayer({
     if (currentStep.type === 'vocab_intro') {
       return 'Ouça cada palavra e frase de exemplo antes de seguir. Ao concluir esta etapa, os cards entram automaticamente na sua aba de Revisão!';
     }
+    if (currentStep.type === 'script_phonics') return currentStep.introPt;
     if (currentStep.type === 'tip') return currentStep.tip.warning ?? currentStep.tip.summary;
     if (currentStep.type === 'speaking') return currentStep.focusTip;
     return currentStep.hintTip;
@@ -1183,6 +1197,43 @@ export function LessonPlayer({
               </button>
             )}
 
+            {topic.languageCode === 'ja' && (
+              <button
+                type="button"
+                data-testid="ja-kana-toggle"
+                onClick={() => {
+                  const next: JapaneseScriptMode =
+                    jaScriptMode === 'standard' ? 'kana' : 'standard';
+                  setJaScriptMode(next);
+                  saveJapaneseScriptMode(next);
+                }}
+                className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                  jaScriptMode === 'kana'
+                    ? 'border-violet-400 bg-violet-100 text-violet-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+                title="Alternar entre escrita padrão (Kanji + Kana) e 100% Hiragana/Katakana"
+              >
+                <span>{jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}</span>
+              </button>
+            )}
+
+            {topicVocab.length > 0 && (
+              <button
+                type="button"
+                data-testid="unit-vocab-drawer-btn"
+                onClick={() => setShowVocabDrawer((v) => !v)}
+                className={`hidden sm:inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                  showVocabDrawer
+                    ? 'border-cyan-400 bg-cyan-100 text-cyan-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+                title="Consultar vocabulário desta unidade"
+              >
+                <span>Vocab ({topicVocab.length})</span>
+              </button>
+            )}
+
             {activeHint && (
               <button
                 type="button"
@@ -1263,11 +1314,43 @@ export function LessonPlayer({
             </div>
           )}
 
+          {showVocabDrawer && topicVocab.length > 0 && (
+            <div className="animate-fade-up rounded-2xl border border-cyan-200 bg-cyan-50/70 p-4 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-extrabold uppercase tracking-wider text-cyan-900">
+                  Vocabulário da Unidade ({topicVocab.length} expressões)
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowVocabDrawer(false)}
+                  className="text-xs font-bold text-cyan-800 hover:underline cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+              <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {topicVocab.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-cyan-200/80 bg-white px-3 py-2 text-xs"
+                  >
+                    <div>
+                      <span className="font-bold text-slate-900">{jaText(c.word)}</span>
+                      <span className="ml-1.5 text-emerald-700">→ {c.translation}</span>
+                    </div>
+                    <DualAudioButtons text={c.word} languageCode={topic.languageCode} size="xs" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* VOCAB INTRO STAGE (Busuu-style progressive vocabulary unlock) */}
           {currentStep.type === 'vocab_intro' && (
             <VocabIntroStep
               cards={currentStep.cards}
               topicLanguageCode={topic.languageCode}
+              jaScriptMode={jaScriptMode}
               studiedVocabIds={studiedVocabIds}
               expandedTraceCardId={expandedTraceCardId}
               onMarkStudied={(cardId) =>
@@ -1281,6 +1364,27 @@ export function LessonPlayer({
               onToggleTraceCard={(cardId) =>
                 setExpandedTraceCardId((prev) => (prev === cardId ? null : cardId))
               }
+            />
+          )}
+
+          {/* SCRIPT & PHONICS STEP (RU Cyrillic, AR RTL, JA Kana/Kanji, ZH Hanzi) */}
+          {currentStep.type === 'script_phonics' && (
+            <ScriptPhonicsStepView
+              step={currentStep}
+              dialectCode={dialectCode}
+              quizAnswerIdx={selectedOption}
+              checkedStatus={checkedStatus === 'idle' ? 'idle' : checkedStatus}
+              onSelectQuizOption={(idx) => setSelectedOption(idx)}
+              onCheckQuiz={() => {
+                if (selectedOption === null) return;
+                if (selectedOption === currentStep.soundQuiz.correctIndex) {
+                  setCheckedStatus('correct');
+                  registerCorrect(15);
+                } else {
+                  setCheckedStatus('incorrect');
+                  registerMistake();
+                }
+              }}
             />
           )}
 
@@ -1487,9 +1591,12 @@ export function LessonPlayer({
                   />
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/90 p-4 text-sm text-slate-800">
+                <div
+                  data-testid="reading-passage-box"
+                  className="reading-passage-box mt-4 rounded-2xl border p-4 text-sm"
+                >
                   {renderInteractivePassage(
-                    currentStep.text,
+                    jaText(currentStep.text),
                     currentStep.glossary,
                     selectedGloss,
                     (g) => setSelectedGloss(g),
@@ -2292,7 +2399,7 @@ export function LessonPlayer({
                 <span>Desbloquear palavras &amp; continuar</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
-            ) : currentStep.type === 'tip' ? (
+            ) : currentStep.type === 'tip' || currentStep.type === 'script_phonics' ? (
               <button
                 type="button"
                 onClick={handleNext}

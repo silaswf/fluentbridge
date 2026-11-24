@@ -21,11 +21,19 @@ import {
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { LanguageCode } from '../types/learning';
 import { getSupabaseAccessToken } from '../utils/cloudSync';
+import type { ImmersionCheckpoint } from '../utils/immersionExpander';
+import {
+  loadJapaneseScriptMode,
+  saveJapaneseScriptMode,
+  toJapaneseKana,
+  type JapaneseScriptMode,
+} from '../utils/japaneseKana';
 import { isRtlLanguage } from '../utils/platform';
 import { speakText, stopSpeaking } from '../utils/speech';
 
 interface InteractiveVideoViewProps {
   languageCode: LanguageCode;
+  initialClipId?: string;
   savedWords?: Set<string>;
   onSaveWordToDeck?: (payload: {
     word: string;
@@ -35,15 +43,20 @@ interface InteractiveVideoViewProps {
     examplePt: string;
     category: string;
   }) => void;
+  onCompleteClip?: (clipId: string, scorePercent: number) => void;
 }
 
 export function InteractiveVideoView({
   languageCode,
+  initialClipId,
   savedWords = new Set<string>(),
   onSaveWordToDeck,
+  onCompleteClip,
 }: InteractiveVideoViewProps) {
   const clips = getInteractiveVideosByLanguage(languageCode);
-  const [selectedId, setSelectedId] = useState(clips[0]?.id ?? '');
+  const [selectedId, setSelectedId] = useState(
+    initialClipId || clips[0]?.id || '',
+  );
   const activeClip: InteractiveVideoClip | undefined =
     clips.find((c) => c.id === selectedId) ?? clips[0];
 
@@ -59,6 +72,15 @@ export function InteractiveVideoView({
   const [recentlySaved, setRecentlySaved] = useState<Set<string>>(new Set());
   const [r2VideoMap, setR2VideoMap] = useState<Record<string, string>>({});
   const [uploadMsg, setUploadMsg] = useState('');
+  const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
+    loadJapaneseScriptMode(),
+  );
+  const [activeCheckpoint, setActiveCheckpoint] = useState<ImmersionCheckpoint | null>(
+    null,
+  );
+  const [checkpointAnswers, setCheckpointAnswers] = useState<Record<string, number>>(
+    {},
+  );
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const cancelRef = useRef(false);
@@ -66,13 +88,15 @@ export function InteractiveVideoView({
   loopRef.current = loopLine;
 
   useEffect(() => {
-    setSelectedId(clips[0]?.id ?? '');
+    setSelectedId(initialClipId || clips[0]?.id || '');
     setCurrentLineIdx(0);
     setIsPlaying(false);
     setInspected(null);
+    setActiveCheckpoint(null);
+    setCheckpointAnswers({});
     cancelRef.current = true;
     stopSpeaking();
-  }, [languageCode]);
+  }, [languageCode, initialClipId]);
 
   useEffect(() => {
     return () => {
@@ -107,6 +131,12 @@ export function InteractiveVideoView({
         }
         if (loopRef.current) {
           playLineAt(idx, advance);
+          return;
+        }
+        const cp = activeClip.checkpoints?.find((c) => c.afterLineIdx === idx);
+        if (advance && cp && checkpointAnswers[cp.id] === undefined) {
+          setIsPlaying(false);
+          setActiveCheckpoint(cp);
           return;
         }
         if (advance && idx + 1 < activeClip.lines.length) {
@@ -263,7 +293,21 @@ export function InteractiveVideoView({
               </h3>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {languageCode === 'ja' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next: JapaneseScriptMode =
+                      jaScriptMode === 'standard' ? 'kana' : 'standard';
+                    setJaScriptMode(next);
+                    saveJapaneseScriptMode(next);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-xl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-white/25 cursor-pointer"
+                >
+                  <span>{jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}</span>
+                </button>
+              )}
               <label className="inline-flex items-center gap-1 rounded-xl bg-white/15 px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-white/25 cursor-pointer">
                 <span>Subir MP4 (R2)</span>
                 <input
@@ -471,6 +515,76 @@ export function InteractiveVideoView({
         )}
       </div>
 
+      {/* In-Video Mid-Clip Comprehension Checkpoint */}
+      {activeCheckpoint && (
+        <div
+          data-testid="video-mid-checkpoint"
+          className="animate-fade-up rounded-2xl border-2 border-indigo-400 bg-indigo-50 p-4 space-y-3"
+        >
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">
+            Checagem no Vídeo (Fala #{activeCheckpoint.afterLineIdx + 1})
+          </p>
+          <p className="text-sm font-bold text-slate-900">{activeCheckpoint.question}</p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {activeCheckpoint.options.map((opt, oIdx) => {
+              const ans = checkpointAnswers[activeCheckpoint.id];
+              const answered = ans !== undefined;
+              const isCorrect = answered && oIdx === activeCheckpoint.correctIndex;
+              const isWrong = answered && ans === oIdx && !isCorrect;
+              return (
+                <button
+                  key={oIdx}
+                  type="button"
+                  onClick={() => {
+                    const updated = { ...checkpointAnswers, [activeCheckpoint.id]: oIdx };
+                    setCheckpointAnswers(updated);
+                    const totalCps = activeClip.checkpoints?.length ?? 1;
+                    if (Object.keys(updated).length >= totalCps) {
+                      const hits = (activeClip.checkpoints ?? []).filter(
+                        (c) => updated[c.id] === c.correctIndex,
+                      ).length;
+                      onCompleteClip?.(
+                        activeClip.id,
+                        Math.round((hits / totalCps) * 100),
+                      );
+                    }
+                  }}
+                  className={`rounded-xl border px-3 py-2 text-left text-xs font-semibold cursor-pointer ${
+                    isCorrect
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                      : isWrong
+                        ? 'border-rose-400 bg-rose-50 text-rose-900'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                  }`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+          {checkpointAnswers[activeCheckpoint.id] !== undefined && (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-indigo-900">
+                {activeCheckpoint.explanationPt}
+              </p>
+              {activeCheckpoint.afterLineIdx + 1 < activeClip.lines.length && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextIdx = activeCheckpoint.afterLineIdx + 1;
+                    setActiveCheckpoint(null);
+                    playLineAt(nextIdx, true);
+                  }}
+                  className="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                >
+                  Continuar vídeo →
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Full Interactive Script Below */}
       <div className="rounded-3xl border border-slate-200 bg-white p-5 space-y-2.5">
         <p className="text-xs font-bold text-slate-500 uppercase">
@@ -502,7 +616,12 @@ export function InteractiveVideoView({
                 dir={rtl ? 'rtl' : 'ltr'}
                 className="mt-1 flex flex-wrap gap-1 text-sm font-bold text-slate-900"
               >
-                {ln.textTarget.split(/\s+/).map((w, wi) => (
+                {(languageCode === 'ja' && jaScriptMode === 'kana'
+                  ? toJapaneseKana(ln.textTarget)
+                  : ln.textTarget
+                )
+                  .split(/\s+/)
+                  .map((w, wi) => (
                   <button
                     key={wi}
                     type="button"
