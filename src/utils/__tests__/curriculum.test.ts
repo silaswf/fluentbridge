@@ -22,6 +22,7 @@ import {
   AI_TUTOR_SCENARIOS,
   UNIT_ROLEPLAY_ANGLES,
 } from '../../data/tutorScenarios';
+import { getAllVoiceDiagnostics } from '../speech';
 
 const ALL_12_LANGS = [
   'en',
@@ -70,6 +71,19 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v6.0.0
       expect(v.exampleEn.trim().length).toBeGreaterThan(0);
       expect(v.examplePt.trim().length).toBeGreaterThan(0);
     }
+
+    const vocabByTopic = new Map<string, typeof ALL_INITIAL_VOCABULARY>();
+    for (const v of ALL_INITIAL_VOCABULARY) {
+      const list = vocabByTopic.get(v.topicId) ?? [];
+      list.push(v);
+      vocabByTopic.set(v.topicId, list);
+    }
+    for (const [tid, list] of vocabByTopic.entries()) {
+      const uniqueExamples = new Set(list.map((c) => c.exampleEn.trim().toLowerCase()));
+      expect(uniqueExamples.size, `Duplicate exampleEn inside topic ${tid}`).toBe(list.length);
+    }
+
+    expect(getAllVoiceDiagnostics().length).toBe(12);
 
     for (const t of ALL_BUILTIN_TOPICS) {
       const types = new Set(t.steps.map((s) => s.type));

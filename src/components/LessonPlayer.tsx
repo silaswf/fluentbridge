@@ -903,6 +903,45 @@ export function LessonPlayer({
     return () => window.removeEventListener('keydown', onKeyDown);
   });
 
+  const speakingEval =
+    !isCompletedScreen && currentStep?.type === 'speaking' && spokenText
+      ? analyzePhoneticFeedback(
+          currentStep.targetSentence,
+          spokenText,
+          topic.languageCode ?? 'en',
+        )
+      : null;
+
+  const lastLoggedPronunciationRef = useRef<string>('');
+  useEffect(() => {
+    if (
+      isCompletedScreen ||
+      !speakingEval ||
+      !onRecordPronunciation ||
+      !currentStep ||
+      currentStep.type !== 'speaking'
+    ) {
+      return;
+    }
+    const sig = `${topic.id}:${currentStep.id}:${spokenText}`;
+    if (lastLoggedPronunciationRef.current === sig) return;
+    lastLoggedPronunciationRef.current = sig;
+    onRecordPronunciation({
+      languageCode: topic.languageCode ?? 'en',
+      topicId: topic.id,
+      score: speakingEval.score,
+      weakWords: speakingEval.words.filter((w) => !w.matched).map((w) => w.word),
+    });
+  }, [
+    isCompletedScreen,
+    speakingEval,
+    onRecordPronunciation,
+    currentStep,
+    spokenText,
+    topic.id,
+    topic.languageCode,
+  ]);
+
   if (isCompletedScreen) {
     return (
       <div className="safe-top safe-bottom fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
@@ -1003,29 +1042,6 @@ export function LessonPlayer({
         : currentStep.type === 'writing_builder' || currentStep.type === 'writing_free'
           ? 'writing'
           : currentStep.type;
-
-  const speakingEval =
-    currentStep.type === 'speaking' && spokenText
-      ? analyzePhoneticFeedback(
-        currentStep.targetSentence,
-        spokenText,
-        topic.languageCode ?? 'en',
-      )
-      : null;
-
-  const lastLoggedPronunciationRef = useRef<string>('');
-  useEffect(() => {
-    if (!speakingEval || !onRecordPronunciation || currentStep.type !== 'speaking') return;
-    const sig = `${topic.id}:${currentStep.id}:${spokenText}`;
-    if (lastLoggedPronunciationRef.current === sig) return;
-    lastLoggedPronunciationRef.current = sig;
-    onRecordPronunciation({
-      languageCode: topic.languageCode ?? 'en',
-      topicId: topic.id,
-      score: speakingEval.score,
-      weakWords: speakingEval.words.filter((w) => !w.matched).map((w) => w.word),
-    });
-  }, [speakingEval, onRecordPronunciation, currentStep.id, currentStep.type, spokenText, topic.id, topic.languageCode]);
 
   const activeHint = getActiveHintText();
   const activeDialectObj = dialects.find((d) => d.code === dialectCode) ?? dialects[0];

@@ -92,9 +92,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'fr-CA',
+      bcp47: 'fr-CA',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Québécois French text naturally and clearly, without adding any commentary:',
+      speaker: isMale ? 'Puck' : 'Zephyr',
+      promptPrefix: 'Lis uniquement à voix haute le texte suivant en français québécois naturel, sans aucun accent étranger et sans commentaire :',
+      quoteOpen: '« ',
+      quoteClose: ' »',
       googleLang: 'fr-CA',
     };
   }
@@ -102,9 +105,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'fr-FR',
+      bcp47: 'fr-FR',
       model: 'gemini-2.5-flash-preview-tts',
       speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following Parisian French text naturally and clearly, without adding any commentary:',
+      promptPrefix: 'Lis uniquement à voix haute le texte suivant en français parisien natif, avec une prononciation naturelle et sans commentaire :',
+      quoteOpen: '« ',
+      quoteClose: ' »',
       googleLang: 'fr',
     };
   }
@@ -112,9 +118,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'it-CH',
+      bcp47: 'it-IT',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Swiss Italian text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Orus' : 'Leda',
+      promptPrefix: 'Leggi esclusivamente ad alta voce il seguente testo in italiano svizzero naturale, senza accento straniero e senza commenti:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'it',
     };
   }
@@ -122,9 +131,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'it-IT',
+      bcp47: 'it-IT',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Italian text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Orus' : 'Leda',
+      promptPrefix: 'Leggi esclusivamente ad alta voce il seguente testo in italiano standard nativo, con pronuncia chiara e senza aggiungere commenti:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'it',
     };
   }
@@ -132,9 +144,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'de-AT',
+      bcp47: 'de-DE',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Austrian German text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Charon' : 'Vindemiatrix',
+      promptPrefix: 'Lies ausschließlich den folgenden Text auf österreichischem Deutsch als Muttersprachler laut vor, ohne fremden Akzent und ohne Kommentar:',
+      quoteOpen: '„',
+      quoteClose: '“',
       googleLang: 'de',
     };
   }
@@ -142,9 +157,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'de-DE',
+      bcp47: 'de-DE',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard High German (Hochdeutsch) text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Charon' : 'Vindemiatrix',
+      promptPrefix: 'Lies ausschließlich den folgenden Text auf Hochdeutsch als Muttersprachler klar und natürlich laut vor, ohne Kommentar:',
+      quoteOpen: '„',
+      quoteClose: '“',
       googleLang: 'de',
     };
   }
@@ -152,9 +170,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ru-SPB',
+      bcp47: 'ru-RU',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Saint Petersburg Russian text naturally and clearly, without adding any commentary:',
+      speaker: isMale ? 'Orus' : 'Leda',
+      promptPrefix: 'Прочитай вслух только следующий русский текст как носитель языка из Санкт-Петербурга, с чистым русским произношением, без иностранного акцента и без комментариев:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'ru',
     };
   }
@@ -162,9 +183,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ru-RU',
+      bcp47: 'ru-RU',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Moscow Russian text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Fenrir' : 'Kore',
+      promptPrefix: 'Прочитай вслух только следующий русский текст как носитель московского произношения, с естественной русской интонацией, без английского акцента и без лишних слов:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'ru',
     };
   }
@@ -172,9 +196,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ja-KANSAI',
+      bcp47: 'ja-JP',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following natural Japanese text with warm Kansai/Osaka intonation clearly, without adding any commentary:',
+      speaker: isMale ? 'Fenrir' : 'Aoede',
+      promptPrefix: '次の日本語の文章だけを、自然な関西弁のイントネーションを持つネイティブ話者として、余計な説明なしでそのまま音読してください：',
+      quoteOpen: '「',
+      quoteClose: '」',
       googleLang: 'ja',
     };
   }
@@ -182,9 +209,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ja-JP',
+      bcp47: 'ja-JP',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Tokyo Japanese text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Fenrir' : 'Aoede',
+      promptPrefix: '次の日本語の文章だけを、標準的な東京のネイティブ発音と自然なピッチアクセントで、解説を加えずにそのまま音読してください：',
+      quoteOpen: '「',
+      quoteClose: '」',
       googleLang: 'ja',
     };
   }
@@ -192,9 +222,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'zh-TW',
+      bcp47: 'cmn-TW',
       model: 'gemini-2.5-flash-preview-tts',
       speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Taiwanese Mandarin Chinese text clearly and naturally, without adding any commentary:',
+      promptPrefix: '請僅朗讀以下繁體中文內容，使用自然的台灣國語母語發音與準確聲調，不要添加任何說明：',
+      quoteOpen: '「',
+      quoteClose: '」',
       googleLang: 'zh-TW',
     };
   }
@@ -202,9 +235,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'zh-CN',
+      bcp47: 'cmn-CN',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Mandarin Chinese (Putonghua) text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Puck' : 'Kore',
+      promptPrefix: '请仅朗读以下中文内容，使用标准地道的普通话母语发音和准确声调，不要添加任何额外说明：',
+      quoteOpen: '“',
+      quoteClose: '”',
       googleLang: 'zh-CN',
     };
   }
@@ -212,9 +248,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ar-EG',
+      bcp47: 'ar-EG',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following natural Egyptian Arabic text clearly, without adding any commentary:',
+      speaker: isMale ? 'Alnilam' : 'Sadaltager',
+      promptPrefix: 'اقرأ النص العربي التالي فقط بصوت واضح وطبيعي وبلكنة عربية مصرية أصلية بدون أي تعليق إضافي:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'ar',
     };
   }
@@ -222,9 +261,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'ar-SA',
+      bcp47: 'ar-XA',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following Modern Standard Arabic text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Alnilam' : 'Sadaltager',
+      promptPrefix: 'اقرأ النص العربي الفصيح التالي فقط بصوت ناطق أصلي وبنطق عربي سليم وواضح دون أي إضافة:',
+      quoteOpen: '«',
+      quoteClose: '»',
       googleLang: 'ar',
     };
   }
@@ -232,9 +274,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'nl-BE',
+      bcp47: 'nl-BE',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Flemish Belgian Dutch text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Schedar' : 'Despina',
+      promptPrefix: 'Lees uitsluitend de volgende tekst voor in natuurlijk Vlaams Nederlands als moedertaalspreker, zonder commentaar:',
+      quoteOpen: '„',
+      quoteClose: '”',
       googleLang: 'nl',
     };
   }
@@ -242,9 +287,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'nl-NL',
+      bcp47: 'nl-NL',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Netherlands Dutch text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Schedar' : 'Despina',
+      promptPrefix: 'Lees uitsluitend de volgende tekst hardop voor in natuurlijk Standaardnederlands als moedertaalspreker, zonder commentaar:',
+      quoteOpen: '„',
+      quoteClose: '”',
       googleLang: 'nl',
     };
   }
@@ -252,9 +300,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'af-NA',
+      bcp47: 'af-ZA',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Namibian Afrikaans text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Iapetus' : 'Gacrux',
+      promptPrefix: 'Lees slegs die volgende Afrikaanse teks hardop voor as ’n moedertaalspreker, duidelik en natuurlik sonder kommentaar:',
+      quoteOpen: '„',
+      quoteClose: '”',
       googleLang: 'af',
     };
   }
@@ -262,9 +313,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'af-ZA',
+      bcp47: 'af-ZA',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard South African Afrikaans text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Iapetus' : 'Gacrux',
+      promptPrefix: 'Lees slegs die volgende Suid-Afrikaanse Afrikaanse teks hardop voor as ’n moedertaalspreker, sonder kommentaar:',
+      quoteOpen: '„',
+      quoteClose: '”',
       googleLang: 'af',
     };
   }
@@ -272,9 +326,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'sv-FI',
+      bcp47: 'sv-SE',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Puck' : 'Kore',
-      promptPrefix: 'Read aloud the following Finland Swedish text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Umbriel' : 'Callirrhoe',
+      promptPrefix: 'Läs endast upp följande text på finlandssvenska som en modersmålstalare, tydligt och utan kommentarer:',
+      quoteOpen: '”',
+      quoteClose: '”',
       googleLang: 'sv',
     };
   }
@@ -282,9 +339,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'sv-SE',
+      bcp47: 'sv-SE',
       model: 'gemini-2.5-flash-preview-tts',
-      speaker: isMale ? 'Charon' : 'Aoede',
-      promptPrefix: 'Read aloud the following standard Stockholm Swedish text clearly and naturally, without adding any commentary:',
+      speaker: isMale ? 'Umbriel' : 'Callirrhoe',
+      promptPrefix: 'Läs endast upp följande text på naturlig rikssvenska som en modersmålstalare, utan utländsk brytning och utan kommentarer:',
+      quoteOpen: '”',
+      quoteClose: '”',
       googleLang: 'sv',
     };
   }
@@ -292,9 +352,12 @@ function resolveTtsConfig(rawLang, rawVoice) {
     return {
       engine: 'gemini-tts',
       locale: 'pt-BR',
+      bcp47: 'pt-BR',
       model: 'gemini-2.5-flash-preview-tts',
       speaker: isMale ? 'Puck' : 'Aoede',
-      promptPrefix: 'Leia o texto a seguir em português brasileiro com voz natural:',
+      promptPrefix: 'Leia em voz alta apenas o texto a seguir em português brasileiro natural, sem comentários:',
+      quoteOpen: '“',
+      quoteClose: '”',
       googleLang: 'pt-BR',
     };
   }
@@ -338,55 +401,66 @@ async function synthesizeGeminiNeuralTts(text, cfg, env) {
   if (!apiKey) return null;
 
   const models = [cfg.model || 'gemini-2.5-flash-preview-tts', 'gemini-3.8-flash-lite-tts'];
-  const promptText = `${cfg.promptPrefix || 'Read aloud naturally:'} ${text}`;
+  const qOpen = cfg.quoteOpen || '«';
+  const qClose = cfg.quoteClose || '»';
+  const promptText = `${cfg.promptPrefix || ''} ${qOpen}${text}${qClose}`.trim();
+
+  const speechConfigs = cfg.bcp47
+    ? [
+        { voiceConfig: { prebuiltVoiceConfig: { voiceName: cfg.speaker } }, languageCode: cfg.bcp47 },
+        { voiceConfig: { prebuiltVoiceConfig: { voiceName: cfg.speaker } } },
+      ]
+    : [{ voiceConfig: { prebuiltVoiceConfig: { voiceName: cfg.speaker } } }];
 
   for (const model of models) {
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        model,
-      )}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: cfg.speaker },
-              },
+    for (const sc of speechConfigs) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model,
+        )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig: sc,
             },
-          },
-        }),
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const inlineData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-      if (!inlineData?.data) continue;
+          }),
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const inlineData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+        if (!inlineData?.data) continue;
 
-      const pcmBytes = base64ToUint8Array(inlineData.data);
-      if (pcmBytes.byteLength <= 200) continue;
+        const pcmBytes = base64ToUint8Array(inlineData.data);
+        if (pcmBytes.byteLength <= 200) continue;
+        // Sanity guard: if a short word (<=25 chars) produces >4.5s of audio (~216KB), Gemini likely hallucinated commentary
+        if (text.length <= 25 && pcmBytes.byteLength > 216_000) {
+          return null;
+        }
 
-      const mime = (inlineData.mimeType || '').toLowerCase();
-      if (mime.includes('wav') || mime.includes('mpeg') || mime.includes('mp3')) {
+        const mime = (inlineData.mimeType || '').toLowerCase();
+        if (mime.includes('wav') || mime.includes('mpeg') || mime.includes('mp3')) {
+          return {
+            buffer: pcmBytes.buffer,
+            contentType: mime.includes('wav') ? 'audio/wav' : 'audio/mpeg',
+            provider: `gemini-neural-tts:${cfg.speaker}`,
+          };
+        }
+
+        const rateMatch = mime.match(/rate=(\d+)/);
+        const sampleRate = rateMatch ? Number(rateMatch[1]) : 24000;
+        const wavBuffer = pcm16ToWavBuffer(pcmBytes, sampleRate, 1);
         return {
-          buffer: pcmBytes.buffer,
-          contentType: mime.includes('wav') ? 'audio/wav' : 'audio/mpeg',
+          buffer: wavBuffer,
+          contentType: 'audio/wav',
           provider: `gemini-neural-tts:${cfg.speaker}`,
         };
+      } catch {
+        // Try next speechConfig / model
       }
-
-      const rateMatch = mime.match(/rate=(\d+)/);
-      const sampleRate = rateMatch ? Number(rateMatch[1]) : 24000;
-      const wavBuffer = pcm16ToWavBuffer(pcmBytes, sampleRate, 1);
-      return {
-        buffer: wavBuffer,
-        contentType: 'audio/wav',
-        provider: `gemini-neural-tts:${cfg.speaker}`,
-      };
-    } catch {
-      // Try next Gemini TTS model
     }
   }
   return null;
@@ -468,7 +542,7 @@ async function handleTtsRequest(request, env, ctx) {
   const clippedText = text.slice(0, MAX_TTS_CHARS);
   const cfg = resolveTtsConfig(lang, voice);
   const cacheUrl = new URL(
-    `https://fluentbridge-tts-cache.internal/v3/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(cfg.speaker)}/${encodeURIComponent(clippedText)}`,
+    `https://fluentbridge-tts-cache.internal/v4/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(cfg.speaker)}/${encodeURIComponent(clippedText)}`,
   );
   const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
   const cache = typeof caches !== 'undefined' ? caches.default : null;
@@ -767,7 +841,7 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '5.0.0',
+        version: '6.1.0',
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
         endpoints: ['/api/tts', '/api/stt', '/api/gemini-tutor'],
         rateLimits: {

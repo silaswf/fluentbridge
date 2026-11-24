@@ -17,7 +17,9 @@ import {
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
 import { AppDownloadGateway } from './components/AppDownloadGateway';
+import { AppUpdateModal } from './components/AppUpdateModal';
 import { AuthScreen } from './components/AuthScreen';
+import { checkForAppUpdate, type AppUpdateInfo } from './utils/appUpdater';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
 import { TeacherLinkModal } from './components/TeacherLinkModal';
@@ -161,6 +163,8 @@ export function App() {
     return window.localStorage.getItem('fluentbridge_prefer_web') === '1';
   });
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [appUpdateInfo, setAppUpdateInfo] = useState<AppUpdateInfo | null>(null);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
@@ -186,6 +190,10 @@ export function App() {
     masterVocab: ALL_INITIAL_VOCABULARY,
     onSupabaseUserHydrated: (authUser) => applySupabaseAuthUser(authUser, false),
   });
+
+  useEffect(() => {
+    void checkForAppUpdate().then((info) => setAppUpdateInfo(info));
+  }, []);
 
   useEffect(() => {
     savePlatformState(state);
@@ -1672,6 +1680,9 @@ export function App() {
         themeMode={themeMode}
         onCycleTheme={handleCycleTheme}
         onOpenDownloadModal={() => setShowDownloadModal(true)}
+        onOpenUpdateModal={() => setShowUpdateModal(true)}
+        hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
+        latestAppVersion={appUpdateInfo?.latestVersion}
         onLogout={handleLogout}
       />
 
@@ -1988,6 +1999,13 @@ export function App() {
           onClose={() => setShowDownloadModal(false)}
         />
       )}
+
+      <AppUpdateModal
+        open={showUpdateModal}
+        initialInfo={appUpdateInfo}
+        onUpdateInfo={(info) => setAppUpdateInfo(info)}
+        onClose={() => setShowUpdateModal(false)}
+      />
 
       {toastMessage && (
         <div className="animate-fade-up fixed right-5 bottom-20 z-50 flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-xl lg:bottom-6">

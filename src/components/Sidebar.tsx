@@ -17,6 +17,7 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  RefreshCw,
   ShieldAlert,
   Snowflake,
   Sparkles,
@@ -74,6 +75,9 @@ interface SidebarProps {
   themeMode: ThemeMode;
   onCycleTheme: () => void;
   onOpenDownloadModal?: () => void;
+  onOpenUpdateModal?: () => void;
+  hasAppUpdate?: boolean;
+  latestAppVersion?: string;
   onLogout: () => void;
 }
 
@@ -95,6 +99,9 @@ export function Sidebar({
   themeMode,
   onCycleTheme,
   onOpenDownloadModal,
+  onOpenUpdateModal,
+  hasAppUpdate,
+  latestAppVersion,
   onLogout,
 }: SidebarProps) {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -511,6 +518,29 @@ export function Sidebar({
               </span>
             </button>
 
+            {onOpenUpdateModal && (
+              <button
+                type="button"
+                data-testid="sidebar-update-app-btn"
+                onClick={onOpenUpdateModal}
+                className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2 text-xs font-bold cursor-pointer ${
+                  hasAppUpdate
+                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100'
+                    : 'border-slate-200/80 bg-slate-50/70 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <RefreshCw className={`h-3.5 w-3.5 ${hasAppUpdate ? 'text-emerald-600' : 'text-blue-600'}`} />
+                  <span>Atualizar App</span>
+                </span>
+                {hasAppUpdate && latestAppVersion && (
+                  <span className="rounded-full bg-emerald-600 px-2 py-0.5 font-mono text-[10px] font-bold text-white">
+                    v{latestAppVersion}
+                  </span>
+                )}
+              </button>
+            )}
+
             {onOpenDownloadModal && (
               <button
                 type="button"
@@ -711,7 +741,29 @@ export function Sidebar({
                     )}
                   </button>
                 ))}
-              {onOpenDownloadModal && (
+              {onOpenUpdateModal && (
+                <button
+                  type="button"
+                  data-testid="mobile-update-app-btn"
+                  onClick={() => {
+                    setMobileMoreOpen(false);
+                    onOpenUpdateModal();
+                  }}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800"
+                >
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    <span>Atualizar App</span>
+                  </span>
+                  {hasAppUpdate && latestAppVersion && (
+                    <span className="rounded-full bg-emerald-600 px-1.5 py-0.5 font-mono text-[9px] text-white">
+                      v{latestAppVersion}
+                    </span>
+                  )}
+                </button>
+              )}
+
+            {onOpenDownloadModal && (
                 <button
                   type="button"
                   onClick={() => {

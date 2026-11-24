@@ -30,7 +30,7 @@ import {
   getSecurityAuditStatus,
   type SecurityAuditStatus,
 } from '../utils/relationalSync';
-import { getAllVoiceProviderLabels } from '../utils/speech';
+import { getAllVoiceDiagnostics, speakText } from '../utils/speech';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface AdminPanelProps {
@@ -86,11 +86,35 @@ export function AdminPanel({
   const [codeCopied, setCodeCopied] = useState(false);
   const [rlsCopied, setRlsCopied] = useState(false);
   const [secStatus, setSecStatus] = useState<SecurityAuditStatus | null>(null);
+  const [workerHealth, setWorkerHealth] = useState<{
+    version?: string;
+    languagesCount?: number;
+    hasAi?: boolean;
+    hasGemini?: boolean;
+  } | null>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     void getSecurityAuditStatus(state.cloudConfig).then(setSecStatus);
   }, [state.cloudConfig]);
+
+  useEffect(() => {
+    const base = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
+    if (!base || typeof fetch === 'undefined') return;
+    fetch(`${base}/health`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { version?: string; supportedLanguages?: string[]; hasAiBinding?: boolean; hasGeminiSecret?: boolean } | null) => {
+        if (data) {
+          setWorkerHealth({
+            version: data.version,
+            languagesCount: data.supportedLanguages?.length ?? 12,
+            hasAi: Boolean(data.hasAiBinding),
+            hasGemini: Boolean(data.hasGeminiSecret),
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, []);
   const [filter, setFilter] = useState<'all' | 'students' | 'teachers' | 'blocked'>(
     'all',
   );
@@ -123,7 +147,7 @@ export function AdminPanel({
   const studentsCount = state.users.filter((u) => u.role === 'student').length;
   const blockedCount = state.users.filter((u) => Boolean(u.blocked)).length;
   const supaCfg = getEffectiveSupabaseConfig(state.cloudConfig);
-  const voices = getAllVoiceProviderLabels();
+  const voiceDiagnostics = getAllVoiceDiagnostics();
 
   const filteredUsers = state.users.filter((u) => {
     if (filter === 'students' && u.role !== 'student') return false;
@@ -290,11 +314,19 @@ export function AdminPanel({
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs lg:col-span-6">
-          <h2 className="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
-            <Volume2 className="h-5 w-5 text-blue-600" />
-            <span>Saúde dos Serviços & Vozes Neurais</span>
-          </h2>
+        <section
+          data-testid="admin-voice-health-panel"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs lg:col-span-6"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
+              <Volume2 className="h-5 w-5 text-blue-600" />
+              <span>Saúde dos Serviços & Vozes Neurais</span>
+            </h2>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+              {voiceDiagnostics.length}/12 idiomas ativos
+            </span>
+          </div>
           <div className="mt-3 space-y-2.5 text-xs">
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
               <span className="font-semibold text-slate-700">Supabase Cloud</span>
@@ -302,33 +334,48 @@ export function AdminPanel({
                 {supaCfg.url ? `Conectado (${autoSyncStatus?.state ?? 'pronto'})` : 'Offline'}
               </span>
             </div>
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
               <span className="font-semibold text-slate-700">Worker Edge API</span>
               <span className="truncate font-mono text-[11px] font-bold text-blue-700">
                 {DEFAULT_BACKEND_API_URL}
+                {workerHealth?.version ? ` · v${workerHealth.version}` : ''}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 pt-1">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                <p className="font-bold text-slate-800">🇺🇸 / 🇬🇧 Inglês</p>
-                <p className="mt-0.5 text-[11px] text-slate-600">{voices.enUs}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                <p className="font-bold text-slate-800">🇪🇸 / 🇲🇽 Espanhol</p>
-                <p className="mt-0.5 text-[11px] text-slate-600">{voices.esEs}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                <p className="font-bold text-slate-800">🇫🇷 / 🇨🇦 Francês</p>
-                <p className="mt-0.5 text-[11px] text-slate-600">{voices.frFr}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                <p className="font-bold text-slate-800">🇮🇹 / 🇨🇭 Italiano</p>
-                <p className="mt-0.5 text-[11px] text-slate-600">{voices.itIt}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                <p className="font-bold text-slate-800">🇩🇪 / 🇦🇹 Alemão</p>
-                <p className="mt-0.5 text-[11px] text-slate-600">{voices.deDe}</p>
-              </div>
+              {voiceDiagnostics.map((item) => (
+                <div
+                  key={item.code}
+                  data-testid={`voice-health-${item.code}`}
+                  className="flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="font-bold text-slate-800">
+                        <span className="mr-1 rounded bg-slate-200 px-1 py-0.5 font-mono text-[10px] text-slate-800">
+                          {item.symbol}
+                        </span>
+                        {item.namePt}
+                      </p>
+                      <span className="font-mono text-[10px] text-slate-500">
+                        {item.dialectsLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[10px] leading-snug text-slate-600">
+                      {item.providerLabel}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      speakText(item.sampleText, { langCode: item.primaryDialect })
+                    }
+                    className="mt-2 inline-flex items-center justify-center gap-1 rounded-lg border border-blue-200 bg-white px-2 py-1 text-[10px] font-bold text-blue-700 hover:bg-blue-50 cursor-pointer"
+                  >
+                    <Volume2 className="h-3 w-3" />
+                    <span>Testar voz</span>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </section>

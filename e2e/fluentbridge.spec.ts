@@ -20,18 +20,18 @@ async function selectLanguage(
   await page.getByTestId(`lang-option-${code}`).click();
 }
 
-test.describe('FluentBridge v6.0.0 E2E Suite', () => {
+test.describe('FluentBridge v6.1.0 E2E Suite', () => {
   test('1. Download Gateway on Web landing shows Windows .exe & Android .apk and continues to Web login', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /FluentBridge-Setup-6\.0\.0\.exe/,
+      /FluentBridge-Setup-6\.1\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /FluentBridge-v6\.0\.0\.apk/,
+      /FluentBridge-v6\.1\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -39,8 +39,12 @@ test.describe('FluentBridge v6.0.0 E2E Suite', () => {
     await expect(page.getByTestId('download-windows-link')).toBeVisible();
   });
 
-  test('2. Login & in-app Download App modal from Sidebar', async ({ page }) => {
+  test('2. Login, in-app Download App modal & in-app Updater modal from Sidebar', async ({ page }) => {
     await loginAsMasterAdmin(page);
+    await page.getByTestId('sidebar-update-app-btn').click();
+    await expect(page.getByTestId('app-update-modal')).toBeVisible();
+    await page.getByLabel('Fechar atualizador').click();
+
     await page.getByTestId('sidebar-download-app-btn').click();
     await expect(page.getByTestId('download-windows-link')).toBeVisible();
     await page.getByTestId('continue-web-btn').click();
@@ -70,7 +74,6 @@ test.describe('FluentBridge v6.0.0 E2E Suite', () => {
     page,
   }) => {
     await loginAsMasterAdmin(page);
-    // Switch to Dark theme
     await page.getByRole('button', { name: /Tema da interface/i }).click();
     await page.getByRole('button', { name: /Central & Guia/i }).click();
 
@@ -103,14 +106,22 @@ test.describe('FluentBridge v6.0.0 E2E Suite', () => {
     await expect(page.getByText(/Alfabeto Árabe Completo \(28 letras/i)).toBeVisible();
   });
 
-  test('6. Open and advance lesson without console/React errors', async ({ page }) => {
+  test('6. LessonPlayer opens without console/React errors and Admin Panel shows all 12 Neural Voices', async ({
+    page,
+  }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));
 
     await loginAsMasterAdmin(page);
+    await page.getByRole('button', { name: /Painel Admin/i }).click();
+    await expect(page.getByTestId('admin-voice-health-panel')).toBeVisible();
+    for (const code of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv']) {
+      await expect(page.getByTestId(`voice-health-${code}`)).toBeVisible();
+    }
+
     await page.getByRole('button', { name: /Trilha \(/i }).click();
     await page.getByRole('button', { name: /Começar/i }).first().click();
-    await expect(page.getByRole('button', { name: /Continuar|Entendi/i }).first()).toBeVisible({
+    await expect(page.getByRole('button', { name: /Continuar|Entendi|Desbloquear/i }).first()).toBeVisible({
       timeout: 8000,
     });
     expect(errors).toEqual([]);
@@ -120,6 +131,7 @@ test.describe('FluentBridge v6.0.0 E2E Suite', () => {
     page,
   }) => {
     await loginAsMasterAdmin(page);
+    await selectLanguage(page, 'en');
     await page.getByRole('button', { name: /Simulados Oficiais/i }).click();
     await expect(page.getByRole('heading', { name: 'CELPIP General (Canadá / IRCC)' })).toBeVisible();
 

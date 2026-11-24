@@ -4,6 +4,23 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v6.1.0`] — 2026-11-24
+### Atualizador In-App (Windows, Android & Web), Correção Definitiva do `React #300` ao Concluir Unidade, Exemplos Únicos em Todos os 3.886 Cards & Vozes Nativas nos 12 Idiomas
+- **Atualizador In-App Multiplataforma (`AppUpdateModal.tsx`, `appUpdater.ts`, `electron/main.cjs`, `electron/preload.cjs`):**
+  - Novo botão **"Atualizar App"** na barra lateral e no menu mobile (`Mais`) com verificação automática da última release no GitHub.
+  - **Windows (Electron):** baixa automaticamente o `FluentBridge-Setup-X.Y.Z.exe` com barra de progresso ao vivo via IPC seguro e inicia o instalador sobre a versão atual.
+  - **Android:** dispara a instalação do novo `.apk` assinado direto pelo app preservando os dados locais.
+  - **Web (PWA):** força atualização do Service Worker, limpa caches antigos e recarrega a aplicação.
+- **Correção Definitiva do `Minified React error #300` ao Finalizar Unidades (`LessonPlayer.tsx`):**
+  - Movidos `lastLoggedPronunciationRef` e o `useEffect` de registro de pronúncia para antes dos retornos condicionais (`if (isCompletedScreen)` / `if (!currentStep)`), eliminando a divergência no número de hooks ao concluir qualquer unidade.
+- **Exemplos Únicos e Pertinentes em Todos os 12 Cursos (`courseBuilder.ts`):**
+  - Corrigido o gerador `buildLanguageVocab`, que repetia a mesma frase `exampleTarget` para todos os cards de uma unidade em `1.186` unidades (`2.548` duplicatas). Agora cada um dos `3.886` cards em `1.236` unidades recebe uma frase contextual única contendo a palavra/estrutura ensinada (validado por teste automatizado com `0` duplicatas).
+- **Vozes Nativas nos 12 Idiomas & Painel de Saúde Completo (`worker.js` `v6.1.0`, `speech.ts`, `AdminPanel.tsx`):**
+  - Prompts de direção em **idioma nativo** + `speechConfig.languageCode` (BCP-47) + guarda anti-alucinação no Worker `v6.1.0` e novo cache `tts-v4:` / `/v4/`, eliminando o sotaque americano no Russo e aprimorando a naturalidade nos 12 idiomas.
+  - Painel **Saúde dos Serviços & Vozes Neurais** no `AdminPanel` atualizado para exibir todos os **12 idiomas** com versão ao vivo do Worker e botão **"Testar voz"** individual.
+
+---
+
 ## [`v6.0.0`] — 2026-11-24
 ### Chamada de Voz IA Full-Duplex (VAD Contínuo + Prosódia), Vídeos Curtos Interativos com Legendas Clicáveis (`SM-2`), Simulados Completos (`CELPIP` + Categorias + Speaking IA/Professor + Rubrica Analítica 4 Critérios), Expressões Idiomáticas/Gírias/Registro `18+` nos 12 Idiomas & Correções Visuais
 - **Correções Visuais Multiplataforma (`index.css`, `TipsLibrary.tsx`, `LessonPlayer.tsx`, `TeacherLinkModal.tsx`, `Sidebar.tsx`):**

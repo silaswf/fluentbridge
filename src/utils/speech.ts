@@ -203,7 +203,7 @@ async function fetchNeuralTtsBlob(
 
   const normLocale = normalizeTtsLocale(targetLocale);
   const voiceTag = voice === 'male' ? 'male' : 'default';
-  const cacheId = `tts-v3:${normLocale}:${voiceTag}:${cleanText.length}:${hashTtsKey(cleanText)}`;
+  const cacheId = `tts-v4:${normLocale}:${voiceTag}:${cleanText.length}:${hashTtsKey(cleanText)}`;
 
   const cachedBlob = await getAudioClip(cacheId);
   if (cachedBlob && cachedBlob.size > 200) {
@@ -273,27 +273,55 @@ export function getAllVoiceProviderLabels() {
     enGb: 'Deepgram Aura-2 · Pandora / Draco (UK)',
     esEs: 'Deepgram Aura-2 · Nestor / Carina (ES)',
     esMx: 'Deepgram Aura-2 · Estrella / Javier (MX)',
-    frFr: 'Gemini 2.5 Neural TTS · Aoede / Charon (Paris)',
-    frCa: 'Gemini 2.5 Neural TTS · Kore / Puck (Canadá)',
-    itIt: 'Gemini 2.5 Neural TTS · Aoede / Charon (Itália)',
-    itCh: 'Gemini 2.5 Neural TTS · Kore / Puck (Suíça IT)',
-    deDe: 'Gemini 2.5 Neural TTS · Aoede / Charon (Alemanha)',
-    deAt: 'Gemini 2.5 Neural TTS · Kore / Puck (Áustria)',
-    ruRu: 'Gemini 2.5 Neural TTS · Aoede / Charon (Moscou)',
-    ruSpb: 'Gemini 2.5 Neural TTS · Kore / Puck (São Petersburgo)',
-    jaJp: 'Gemini 2.5 Neural TTS · Aoede / Charon (Tóquio)',
-    jaKansai: 'Gemini 2.5 Neural TTS · Kore / Puck (Kansai)',
-    zhCn: 'Gemini 2.5 Neural TTS · Aoede / Charon (Mandarim CN)',
-    zhTw: 'Gemini 2.5 Neural TTS · Kore / Puck (Taiwan TW)',
-    arSa: 'Gemini 2.5 Neural TTS · Aoede / Charon (Árabe Padrão)',
-    arEg: 'Gemini 2.5 Neural TTS · Kore / Puck (Árabe Egípcio)',
-    nlNl: 'Gemini 2.5 Neural TTS · Aoede / Charon (Holanda NL)',
-    nlBe: 'Gemini 2.5 Neural TTS · Kore / Puck (Bélgica/Flamengo)',
-    afZa: 'Gemini 2.5 Neural TTS · Aoede / Charon (África do Sul)',
-    afNa: 'Gemini 2.5 Neural TTS · Kore / Puck (Namíbia)',
-    svSe: 'Gemini 2.5 Neural TTS · Aoede / Charon (Suécia SE)',
-    svFi: 'Gemini 2.5 Neural TTS · Kore / Puck (Sueco Finlândia)',
+    frFr: 'Gemini 2.5 Native TTS (fr-FR) · Aoede / Charon (Paris)',
+    frCa: 'Gemini 2.5 Native TTS (fr-CA) · Zephyr / Puck (Canadá)',
+    itIt: 'Gemini 2.5 Native TTS (it-IT) · Leda / Orus (Itália)',
+    itCh: 'Gemini 2.5 Native TTS (it-IT) · Leda / Orus (Suíça IT)',
+    deDe: 'Gemini 2.5 Native TTS (de-DE) · Vindemiatrix / Charon (Alemanha)',
+    deAt: 'Gemini 2.5 Native TTS (de-DE) · Vindemiatrix / Charon (Áustria)',
+    ruRu: 'Gemini 2.5 Native TTS (ru-RU) · Kore / Fenrir (Moscou)',
+    ruSpb: 'Gemini 2.5 Native TTS (ru-RU) · Leda / Orus (São Petersburgo)',
+    jaJp: 'Gemini 2.5 Native TTS (ja-JP) · Aoede / Fenrir (Tóquio)',
+    jaKansai: 'Gemini 2.5 Native TTS (ja-JP) · Aoede / Fenrir (Kansai)',
+    zhCn: 'Gemini 2.5 Native TTS (cmn-CN) · Kore / Puck (Mandarim CN)',
+    zhTw: 'Gemini 2.5 Native TTS (cmn-TW) · Kore / Puck (Taiwan TW)',
+    arSa: 'Gemini 2.5 Native TTS (ar-XA) · Sadaltager / Alnilam (MSA)',
+    arEg: 'Gemini 2.5 Native TTS (ar-EG) · Sadaltager / Alnilam (Egito)',
+    nlNl: 'Gemini 2.5 Native TTS (nl-NL) · Despina / Schedar (Holanda)',
+    nlBe: 'Gemini 2.5 Native TTS (nl-BE) · Despina / Schedar (Bélgica)',
+    afZa: 'Gemini 2.5 Native TTS (af-ZA) · Gacrux / Iapetus (África do Sul)',
+    afNa: 'Gemini 2.5 Native TTS (af-ZA) · Gacrux / Iapetus (Namíbia)',
+    svSe: 'Gemini 2.5 Native TTS (sv-SE) · Callirrhoe / Umbriel (Suécia)',
+    svFi: 'Gemini 2.5 Native TTS (sv-SE) · Callirrhoe / Umbriel (Finlândia)',
   };
+}
+
+export interface VoiceDiagnosticItem {
+  code: string;
+  symbol: string;
+  namePt: string;
+  dialectsLabel: string;
+  providerLabel: string;
+  primaryDialect: string;
+  sampleText: string;
+}
+
+export function getAllVoiceDiagnostics(): VoiceDiagnosticItem[] {
+  const v = getAllVoiceProviderLabels();
+  return [
+    { code: 'en', symbol: 'EN', namePt: 'Inglês', dialectsLabel: 'US / UK', providerLabel: `${v.enUs} · ${v.enGb}`, primaryDialect: 'en-US', sampleText: 'Hello! Welcome to FluentBridge.' },
+    { code: 'es', symbol: 'ES', namePt: 'Espanhol', dialectsLabel: 'ES / MX', providerLabel: `${v.esEs} · ${v.esMx}`, primaryDialect: 'es-ES', sampleText: '¡Hola! Bienvenido a FluentBridge.' },
+    { code: 'fr', symbol: 'FR', namePt: 'Francês', dialectsLabel: 'FR / CA', providerLabel: v.frFr, primaryDialect: 'fr-FR', sampleText: 'Bonjour ! Bienvenue sur FluentBridge.' },
+    { code: 'it', symbol: 'IT', namePt: 'Italiano', dialectsLabel: 'IT / CH', providerLabel: v.itIt, primaryDialect: 'it-IT', sampleText: 'Ciao! Benvenuto su FluentBridge.' },
+    { code: 'de', symbol: 'DE', namePt: 'Alemão', dialectsLabel: 'DE / AT', providerLabel: v.deDe, primaryDialect: 'de-DE', sampleText: 'Guten Tag! Willkommen bei FluentBridge.' },
+    { code: 'ru', symbol: 'РУ', namePt: 'Russo', dialectsLabel: 'Moscou / SPB', providerLabel: v.ruRu, primaryDialect: 'ru-RU', sampleText: 'Здравствуйте! Добро пожаловать.' },
+    { code: 'ja', symbol: '日本', namePt: 'Japonês', dialectsLabel: 'Tóquio / Kansai', providerLabel: v.jaJp, primaryDialect: 'ja-JP', sampleText: 'こんにちは！ようこそ。' },
+    { code: 'zh', symbol: '中文', namePt: 'Chinês', dialectsLabel: 'CN / TW', providerLabel: v.zhCn, primaryDialect: 'zh-CN', sampleText: '你好！欢迎来到 FluentBridge。' },
+    { code: 'ar', symbol: 'عربي', namePt: 'Árabe', dialectsLabel: 'MSA / Egito', providerLabel: v.arSa, primaryDialect: 'ar-SA', sampleText: 'مرحباً! أهلاً وسهلاً بكم.' },
+    { code: 'nl', symbol: 'NL', namePt: 'Holandês', dialectsLabel: 'NL / BE', providerLabel: v.nlNl, primaryDialect: 'nl-NL', sampleText: 'Goedemorgen! Welkom bij FluentBridge.' },
+    { code: 'af', symbol: 'AF', namePt: 'Africâner', dialectsLabel: 'ZA / NA', providerLabel: v.afZa, primaryDialect: 'af-ZA', sampleText: 'Goeiemôre! Welkom by FluentBridge.' },
+    { code: 'sv', symbol: 'SV', namePt: 'Sueco', dialectsLabel: 'SE / FI', providerLabel: v.svSe, primaryDialect: 'sv-SE', sampleText: 'Hej! Välkommen till FluentBridge.' },
+  ];
 }
 
 export function stopSpeaking(): void {

@@ -58,8 +58,8 @@ export function AppDownloadGateway({
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-slate-600">
           <span className="rounded-full bg-slate-100 px-3 py-1">12 Idiomas Completos</span>
-          <span className="rounded-full bg-slate-100 px-3 py-1">1.200 Unidades A1–C1</span>
-          <span className="rounded-full bg-slate-100 px-3 py-1">72 Simulados Oficiais</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">1.236 Unidades A1–C1</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">76 Simulados Oficiais</span>
           <span className="rounded-full bg-slate-100 px-3 py-1">Comunidade &amp; Ligas</span>
           <span className="rounded-full bg-slate-100 px-3 py-1">Tutor IA + Professor Real</span>
         </div>
