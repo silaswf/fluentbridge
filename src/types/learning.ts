@@ -396,6 +396,7 @@ export interface ExamAttemptRecord {
   rawPercent: number;
   passed: boolean;
   sectionScores: Record<string, number>;
+  practiceCategory?: string;
   completedAt: string;
 }
 
@@ -516,6 +517,16 @@ export interface AITutorScenario {
   initialSuggestions: string[];
 }
 
+export interface ProsodyAnalysis {
+  wpm: number;
+  paceLabel: 'Lento' | 'Natural' | 'Rápido';
+  intonationScore: number;
+  fluencyScore: number;
+  speechDurationSec: number;
+  fillerWords: string[];
+  tipPt: string;
+}
+
 export interface TutorMessage {
   id: string;
   sender: 'tutor' | 'student';
@@ -523,5 +534,6 @@ export interface TutorMessage {
   translationPt?: string;
   feedbackPt?: string;
   correctedEn?: string;
+  prosody?: ProsodyAnalysis;
   timestamp: string;
 }

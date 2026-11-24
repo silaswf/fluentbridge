@@ -1,7 +1,7 @@
-# 08 — Auditoria 360° (`v5.0.0`), Saúde da Arquitetura & Análise Competitiva de Mercado
+# 08 — Auditoria 360° (`v6.0.0`), Saúde da Arquitetura & Análise Competitiva de Mercado
 
-> **Data da auditoria:** 23/11/2026 · **Versão auditada:** `v5.0.0`  
-> **Escopo:** Arquitetura e Estrutura do Código, Bundle/PWA, UI/UX, Pedagogia (`1.200` unidades em `12` idiomas), `72` Simulados Cronometrados Oficiais, Comunidade (Ligas + Fórum), Alfabetos Completos, Gateway de Download, Segurança (RLS Relacional + Compactação Esparsa), Suíte E2E Playwright e Estratégia para Top 1 Mundial.
+> **Data da auditoria:** 24/11/2026 · **Versão auditada:** `v6.0.0`  
+> **Escopo:** Arquitetura e Estrutura do Código, Bundle/PWA, UI/UX, Pedagogia (`1.236` unidades em `12` idiomas), Chamada Full-Duplex VAD + Prosódia, Vídeos Interativos com Legendas Clicáveis (`SM-2`), `76` Simulados Completos (`19` exames incl. CELPIP + Speaking + Rubrica IA), Expressões Idiomáticas/Gírias/Registro `18+` e Suíte E2E Playwright (`8/8`).
 
 ---
 
@@ -122,13 +122,11 @@ Para responder diretamente sobre a saúde estrutural do projeto: **sim, a arquit
 
 ---
 
-## 5. Opções Estratégicas para Chegar ao Top 1 Mundial (`v5.1 → v6.0`)
+## 5. Status de Liderança & Próximos Passos Estratégicos (`v6.0.0` → `v7.0`)
 
-Com a entrega de **`12` idiomas (`1.200` unidades)**, **`72` Simulados Oficiais Cronometrados**, **Comunidade com Ligas + Fórum**, **Alfabetos Completos (`46/46/30/33/28/40`)**, **Gateway de Download Multiplataforma** e **Suíte E2E Playwright (`7/7` passando)**, o FluentBridge já supera Duolingo e Busuu em **profundidade pedagógica + mentoria docente + simulados reais**. Para consolidar liderança absoluta no mercado:
+Com a entrega da **`v6.0.0`**, o FluentBridge agora inclui **Chamada de Voz IA Full-Duplex com VAD & Prosódia**, **Vídeos Curtos Interativos com Legendas Duplas Clicáveis (`SM-2`)**, **`76` Simulados Oficiais Completos (`19` exames incl. CELPIP) com Filtro por Categoria, Speaking Avaliado (IA + Professor) e Rubrica Analítica de Redação (4 critérios + C1/C2)**, além de **Expressões Idiomáticas, Gírias & Registro `18+` nos 12 idiomas (`1.236` unidades)**. Para consolidar liderança absoluta no mercado:
 
-1. **Chamada de Voz IA Full-Duplex em Tempo Real (WebRTC / VAD Contínuo)** — igualar e superar o *Speak* / *Duolingo Max* com conversação por voz de latência sub-segundo sem apertar botão a cada turno e análise de prosódia/entoação.
-2. **Agenda Integrada & Sala de Aula ao Vivo 1:1 / Turmas** — unir o modelo *Preply/Cambly* diretamente dentro da plataforma (agendamento VIP, vídeo WebRTC/Jitsi embutido e geração automática de plano de revisão pós-aula com IA a partir dos erros reais da sessão).
-3. **Publicação Oficial nas Lojas (Google Play Store + Apple App Store / iOS)** — distribuir o `.aab` assinado na Play Store e compilar o alvo Capacitor iOS com Sign-in com Apple e Push Notifications FCM/APNs.
-4. **Imersão por Vídeo Curto Interativo com Legendas Duplas Clicáveis** — clipes curtos estilo *FluentU / Lingopie* onde o aluno clica em qualquer palavra da legenda para ver tradução, IPA e enviar direto para o deck SM-2.
-5. **Simulados de Speaking Avaliados por IA + Professor (IELTS Speaking Part 1–3 / DELF Oral)** — adicionar etapa de entrevista oral cronometrada nos simulados oficiais com transcrição Whisper, pontuação nos critérios oficiais de fluência/coerência e revisão pelo professor.
-6. **Correção Automática de Redação Estilo Exame Oficial (Rubrica Analítica IA)** — detalhar a nota do Writing dos simulados por critério oficial (*Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range*) com reescrita banda C1/C2 gerada via `/api/gemini-tutor`.
+1. **Agenda Integrada & Sala de Aula ao Vivo 1:1 / Turmas** — unir o modelo *Preply/Cambly* diretamente dentro da plataforma (agendamento VIP, vídeo WebRTC/Jitsi embutido e geração automática de plano de revisão pós-aula com IA a partir dos erros reais da sessão).
+2. **Publicação Oficial nas Lojas (Google Play Store + Apple App Store / iOS)** — distribuir o `.aab` assinado na Play Store e compilar o alvo Capacitor iOS com Sign-in com Apple e Push Notifications FCM/APNs.
+3. **Treinador de Pitch Accent & Tons em Tempo Real (Osciloscópio F0)** — feedback visual da curva tonal em Mandarim (tons 1–4) e pitch accent em Japonês sobreposta à curva nativa.
+4. **Modo Offline Inteligente Seletivo por Unidade** — pré-cache sob demanda apenas das próximas 3 unidades da trilha do aluno (mantendo a cota gratuita protegida).

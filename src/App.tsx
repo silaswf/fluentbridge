@@ -369,6 +369,10 @@ export function App() {
     () => (currentUser ? getUnlockedVocabCards(courseVocab, currentUser) : []),
     [courseVocab, currentUser],
   );
+  const savedVideoWords = useMemo(
+    () => new Set(unlockedCourseVocab.map((v) => v.word.toLowerCase())),
+    [unlockedCourseVocab],
+  );
   const dueVocabCount = unlockedCourseVocab.filter((v) => isCardDue(v)).length;
 
   const updateCurrentUser = (updater: (u: UserProfile) => UserProfile) => {
@@ -874,6 +878,55 @@ export function App() {
         ),
       }));
     })();
+  };
+
+  const handleSaveCustomVocabCard = (payload: {
+    word: string;
+    translation: string;
+    ipa: string;
+    exampleEn: string;
+    examplePt: string;
+    category: string;
+  }) => {
+    if (!currentUser) return;
+    const lowerWord = payload.word.trim().toLowerCase();
+    updateCurrentUser((u) => {
+      const existing = u.vocab.find(
+        (c) =>
+          (c.languageCode ?? 'en') === activeLanguage &&
+          c.word.trim().toLowerCase() === lowerWord,
+      );
+      const learned = new Set(u.learnedVocabIds ?? []);
+      if (existing) {
+        learned.add(existing.id);
+        return { ...u, learnedVocabIds: Array.from(learned) };
+      }
+      const newCardId = `voc-vid-${activeLanguage}-${Date.now()}`;
+      learned.add(newCardId);
+      return {
+        ...u,
+        xp: u.xp + 5,
+        learnedVocabIds: Array.from(learned),
+        vocab: [
+          {
+            id: newCardId,
+            topicId: 'video-immersion',
+            languageCode: activeLanguage,
+            word: payload.word,
+            translation: payload.translation,
+            ipa: payload.ipa,
+            exampleEn: payload.exampleEn,
+            examplePt: payload.examplePt,
+            category: payload.category,
+            strength: 'weak',
+            reviewCount: 0,
+            nextReviewAt: new Date().toISOString().slice(0, 10),
+          },
+          ...u.vocab,
+        ],
+      };
+    });
+    showToast(`"${payload.word}" salvo no seu Deck SM-2 (+5 XP)!`);
   };
 
   const handleRateVocab = (cardId: string, rating: SrsRating) => {
@@ -1495,22 +1548,22 @@ export function App() {
       communityPosts: (prev.communityPosts ?? []).map((p) =>
         p.id === postId
           ? {
-              ...p,
-              replies: [
-                ...p.replies,
-                {
-                  id: `rep-${Date.now()}`,
-                  authorId: currentUser.id,
-                  authorName: currentUser.name,
-                  authorAvatarColor: currentUser.avatarColor,
-                  authorRole: currentUser.role,
-                  content,
-                  correctionSuggestion,
-                  likes: [],
-                  createdAt: new Date().toISOString().slice(0, 10),
-                },
-              ],
-            }
+            ...p,
+            replies: [
+              ...p.replies,
+              {
+                id: `rep-${Date.now()}`,
+                authorId: currentUser.id,
+                authorName: currentUser.name,
+                authorAvatarColor: currentUser.avatarColor,
+                authorRole: currentUser.role,
+                content,
+                correctionSuggestion,
+                likes: [],
+                createdAt: new Date().toISOString().slice(0, 10),
+              },
+            ],
+          }
           : p,
       ),
     }));
@@ -1702,6 +1755,11 @@ export function App() {
           {activeView === 'exams' && (
             <MockExamHub
               activeCourse={activeCourse}
+              activeDialect={activeDialect}
+              geminiApiKey={effectiveGeminiKey}
+              hasLinkedTeacher={hasLinkedTeacher}
+              onRequestTeacherLink={() => setShowTeacherLinkModal(true)}
+              onSubmitSpeaking={handleSubmitSpeaking}
               pastAttempts={currentUser.examAttempts ?? []}
               onCompleteExam={handleCompleteMockExam}
             />
@@ -1724,6 +1782,8 @@ export function App() {
             <TipsLibrary
               topics={courseTopics}
               languageCode={activeLanguage}
+              savedWords={savedVideoWords}
+              onSaveWordToDeck={handleSaveCustomVocabCard}
               onPracticeTopic={(topic) => setActiveTopic(topic)}
               onPracticeTopicWithAI={(topic) => {
                 setTutorTargetTopic(topic);

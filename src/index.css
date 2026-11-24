@@ -127,6 +127,24 @@ html.dark .topic-tips-box .topic-tips-item {
   color: #FEF3C7 !important;
 }
 
+/* Warning / Attention box contrast (Light + Dark across Web, Windows, Android) */
+.tip-warning-box {
+  background-color: #FFF1F2;
+  border: 1px solid #FECDD3;
+  color: #881337;
+}
+.tip-warning-box .tip-warning-icon {
+  color: #E11D48;
+}
+html.dark .tip-warning-box {
+  background-color: rgba(136, 19, 55, 0.48) !important;
+  border-color: #BE123C !important;
+  color: #FFE4E6 !important;
+}
+html.dark .tip-warning-box .tip-warning-icon {
+  color: #FDA4AF !important;
+}
+
 /* Dark Mode (Phase 7 & Visual Overhaul) */
 html.dark body {
   background-color: #0B1120;
@@ -178,19 +196,29 @@ html.dark select {
   border-color: #334155 !important;
 }
 html.dark .bg-blue-50,
+html.dark .bg-blue-50\/80,
 html.dark .bg-blue-50\/70,
 html.dark .bg-blue-50\/60,
+html.dark .bg-blue-50\/50,
 html.dark .bg-blue-50\/40,
-html.dark .bg-blue-100 {
+html.dark .bg-blue-100,
+html.dark .bg-blue-100\/70 {
   background-color: rgba(30, 58, 138, 0.35) !important;
 }
 html.dark .bg-emerald-50,
 html.dark .bg-emerald-50\/70,
+html.dark .bg-emerald-50\/60,
+html.dark .bg-emerald-50\/50,
+html.dark .bg-emerald-50\/40,
+html.dark .bg-emerald-50\/20,
 html.dark .bg-emerald-100 {
   background-color: rgba(6, 78, 59, 0.35) !important;
 }
 html.dark .bg-teal-50,
-html.dark .bg-teal-50\/70 {
+html.dark .bg-teal-50\/80,
+html.dark .bg-teal-50\/70,
+html.dark .bg-teal-50\/40,
+html.dark .bg-teal-100\/80 {
   background-color: rgba(17, 94, 89, 0.38) !important;
 }
 html.dark .bg-sky-50,
@@ -198,21 +226,36 @@ html.dark .bg-sky-50\/60 {
   background-color: rgba(7, 89, 133, 0.35) !important;
 }
 html.dark .bg-amber-50,
+html.dark .bg-amber-50\/90,
+html.dark .bg-amber-50\/80,
 html.dark .bg-amber-50\/70,
+html.dark .bg-amber-50\/60,
+html.dark .bg-amber-50\/50,
+html.dark .bg-amber-50\/40,
 html.dark .bg-amber-100,
 html.dark .bg-amber-100\/80 {
   background-color: rgba(120, 53, 15, 0.38) !important;
 }
 html.dark .bg-rose-50,
+html.dark .bg-rose-50\/80,
 html.dark .bg-rose-50\/70,
+html.dark .bg-rose-50\/60,
+html.dark .bg-rose-50\/50,
 html.dark .bg-rose-50\/40,
 html.dark .bg-rose-100 {
-  background-color: rgba(136, 19, 55, 0.35) !important;
+  background-color: rgba(136, 19, 55, 0.42) !important;
 }
 html.dark .bg-violet-50,
+html.dark .bg-violet-50\/50,
 html.dark .bg-purple-50,
+html.dark .bg-purple-50\/70,
 html.dark .bg-indigo-50,
+html.dark .bg-indigo-50\/80,
 html.dark .bg-indigo-50\/70,
+html.dark .bg-indigo-50\/60,
+html.dark .bg-indigo-50\/50,
+html.dark .bg-indigo-50\/40,
+html.dark .bg-indigo-50\/30,
 html.dark .bg-indigo-100,
 html.dark .bg-orange-50,
 html.dark .bg-orange-50\/70,
@@ -271,6 +314,8 @@ html.dark .text-rose-800,
 html.dark .text-rose-700 {
   color: #FDA4AF !important;
 }
+html.dark .text-indigo-950,
+html.dark .text-indigo-900,
 html.dark .text-indigo-800,
 html.dark .text-indigo-700,
 html.dark .text-violet-900,

@@ -66,4 +66,20 @@ describe('Official Mock Exam Scoring Engine (v5.0.0)', () => {
     expect(swedexFail.passed).toBe(false);
     expect(swedexFail.officialLabel).toContain('Underkänd');
   });
+
+  it('grades CELPIP General on 1-12 scale, supports Speaking weight & single-category mode', () => {
+    const celpipMeta = getExamTypeById('celpip')!;
+    const exam = buildDummyExam('celpip', 'en');
+    const answers = { q1: 0, q2: 1, q3: 2, q4: 3, q5: 0, q6: 1 };
+    const writing = 'Dear Manager, however, therefore, moreover, I would appreciate a replacement or refund for the defective battery.';
+
+    const fullRes = gradeMockExam(exam, celpipMeta, answers, writing, 85, 'full');
+    expect(fullRes.officialScore).toBeGreaterThanOrEqual(7);
+    expect(fullRes.officialScore).toBeLessThanOrEqual(12);
+    expect(fullRes.officialLabel).toMatch(/^CELPIP Level \d+ \(CLB \d+\)$/);
+    expect(fullRes.passed).toBe(true);
+
+    const readingOnly = gradeMockExam(exam, celpipMeta, { q1: 0, q2: 1 }, '', undefined, 'reading');
+    expect(readingOnly.rawPercent).toBe(100);
+  });
 });

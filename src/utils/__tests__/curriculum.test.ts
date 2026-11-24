@@ -5,6 +5,7 @@ import {
   ALL_GRAMMAR_GUIDE,
   getGrammarGuideByLanguage,
 } from '../../data/grammarGuide';
+import { INTERACTIVE_VIDEO_CLIPS } from '../../data/interactiveVideos';
 import {
   ALL_BUILTIN_TOPICS,
   ALL_INITIAL_VOCABULARY,
@@ -37,30 +38,32 @@ const ALL_12_LANGS = [
   'sv',
 ] as const;
 
-describe('Multi-language curriculum, immersion, exams & alphabets integrity (v5.0.0)', () => {
-  it('ships 1200 units across 12 languages (100 per language, 20 per CEFR level A1–C1) with >= 200 tips each', () => {
-    expect(BUILTIN_TOPICS.length).toBe(100);
-    expect(ALL_BUILTIN_TOPICS.length).toBe(1200);
+describe('Multi-language curriculum, immersion, exams & videos integrity (v6.0.0)', () => {
+  it('ships 1236 units across 12 languages (103 per language incl. Idioms, Slang & Taboo Register) with >= 200 tips each', () => {
+    expect(BUILTIN_TOPICS.length).toBe(103);
+    expect(ALL_BUILTIN_TOPICS.length).toBe(1236);
 
     for (const lang of ALL_12_LANGS) {
       const langTopics = ALL_BUILTIN_TOPICS.filter(
         (t) => (t.languageCode ?? 'en') === lang,
       );
-      expect(langTopics.length).toBe(100);
+      expect(langTopics.length).toBe(103);
 
-      for (const lvl of ['A1', 'A2', 'B1', 'B2', 'C1'] as const) {
-        expect(langTopics.filter((t) => t.level === lvl).length).toBe(20);
-      }
+      expect(langTopics.filter((t) => t.level === 'A1').length).toBe(20);
+      expect(langTopics.filter((t) => t.level === 'A2').length).toBe(20);
+      expect(langTopics.filter((t) => t.level === 'B1').length).toBe(22);
+      expect(langTopics.filter((t) => t.level === 'B2').length).toBe(21);
+      expect(langTopics.filter((t) => t.level === 'C1').length).toBe(20);
 
       const tipCount = langTopics.reduce(
         (acc, t) => acc + t.steps.filter((s) => s.type === 'tip').length,
         0,
       );
-      expect(tipCount).toBeGreaterThanOrEqual(200);
+      expect(tipCount).toBeGreaterThanOrEqual(206);
     }
 
     const topicIds = new Set(ALL_BUILTIN_TOPICS.map((t) => t.id));
-    expect(topicIds.size).toBe(1200);
+    expect(topicIds.size).toBe(1236);
 
     for (const v of ALL_INITIAL_VOCABULARY) {
       expect(topicIds.has(v.topicId)).toBe(true);
@@ -86,7 +89,7 @@ describe('Multi-language curriculum, immersion, exams & alphabets integrity (v5.
     const b2c1Topics = ALL_BUILTIN_TOPICS.filter(
       (t) => t.level === 'B2' || t.level === 'C1',
     );
-    expect(b2c1Topics.length).toBe(480);
+    expect(b2c1Topics.length).toBe(492);
 
     const ptBoilerplate = [
       'Ouça o áudio com atenção',
@@ -110,8 +113,10 @@ describe('Multi-language curriculum, immersion, exams & alphabets integrity (v5.
     }
   });
 
-  it('ships 480 AI tutor scenarios (40 per language across 12 languages) and 60 podcast episodes', () => {
+  it('ships 480 AI tutor scenarios, 60 podcasts & 36 interactive video clips across 12 languages', () => {
     expect(AI_TUTOR_SCENARIOS.length).toBe(480);
+    expect(PODCAST_EPISODES.length).toBe(60);
+    expect(INTERACTIVE_VIDEO_CLIPS.length).toBe(36);
     for (const lang of ALL_12_LANGS) {
       expect(
         AI_TUTOR_SCENARIOS.filter((s) => s.languageCode === lang).length,
@@ -119,22 +124,28 @@ describe('Multi-language curriculum, immersion, exams & alphabets integrity (v5.
       expect(
         PODCAST_EPISODES.filter((p) => p.languageCode === lang).length,
       ).toBe(5);
+      expect(
+        INTERACTIVE_VIDEO_CLIPS.filter((v) => v.languageCode === lang).length,
+      ).toBe(3);
     }
     expect(UNIT_ROLEPLAY_ANGLES.length).toBe(10);
-    expect(PODCAST_EPISODES.length).toBe(60);
   });
 
-  it('ships complete alphabets in Script & Stroke Trainer and 72 official mock exams (4 per exam type)', () => {
+  it('ships complete alphabets and 76 full official mock exams (19 exam types incl. CELPIP, >=12 Qs & 3-part Speaking each)', () => {
     expect(JAPANESE_HIRAGANA.length).toBe(46);
     expect(JAPANESE_KATAKANA.length).toBe(46);
     expect(RUSSIAN_CYRILLIC.length).toBe(33);
     expect(ARABIC_ALPHABET.length).toBe(28);
 
-    expect(EXAM_TYPES.length).toBe(18);
-    expect(ALL_MOCK_EXAMS.length).toBe(72);
+    expect(EXAM_TYPES.length).toBe(19);
+    expect(ALL_MOCK_EXAMS.length).toBe(76);
     for (const meta of EXAM_TYPES) {
-      const count = ALL_MOCK_EXAMS.filter((e) => e.examTypeId === meta.id).length;
-      expect(count).toBe(4);
+      const ofType = ALL_MOCK_EXAMS.filter((e) => e.examTypeId === meta.id);
+      expect(ofType.length).toBe(4);
+      for (const exam of ofType) {
+        expect(exam.questions.length).toBeGreaterThanOrEqual(12);
+        expect(exam.speakingTask?.parts.length).toBe(3);
+      }
     }
   });
 });

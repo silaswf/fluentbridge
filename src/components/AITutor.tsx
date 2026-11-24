@@ -22,6 +22,7 @@ import type {
   Accent,
   CEFRLevel,
   LanguageCode,
+  ProsodyAnalysis,
   Topic,
   TutorMessage,
 } from '../types/learning';
@@ -40,7 +41,13 @@ import {
   speakText,
   startSpeechRecognition,
   stopSpeaking,
+  transcribeAudioBlob,
 } from '../utils/speech';
+import {
+  analyzeProsody,
+  startContinuousVadSession,
+  type VadSessionState,
+} from '../utils/voiceVadEngine';
 import { DualAudioButtons } from './DualAudioButtons';
 
 interface AITutorProps {
@@ -92,6 +99,10 @@ export function AITutor({
   const [showTranslations, setShowTranslations] = useState<Record<string, boolean>>({});
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [callMode, setCallMode] = useState(false);
+  const [vadState, setVadState] = useState<VadSessionState>('idle');
+  const [audioBars, setAudioBars] = useState<number[]>(Array(12).fill(12));
+  const [bargeInEnabled, setBargeInEnabled] = useState(true);
+  const [vadSilenceMs, setVadSilenceMs] = useState<700 | 950 | 1400>(950);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
@@ -101,7 +112,14 @@ export function AITutor({
   const [sessionAwarded, setSessionAwarded] = useState(false);
 
   const stopRecRef = useRef<(() => void) | null>(null);
+  const vadSessionRef = useRef<{ stop: () => void } | null>(null);
+  const isAssistantSpeakingRef = useRef(false);
+  const bargeInEnabledRef = useRef(bargeInEnabled);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bargeInEnabledRef.current = bargeInEnabled;
+  }, [bargeInEnabled]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,6 +129,7 @@ export function AITutor({
     return () => {
       stopSpeaking();
       stopRecRef.current?.();
+      vadSessionRef.current?.stop();
     };
   }, []);
 
@@ -125,8 +144,21 @@ export function AITutor({
     }
   }, [initialTopic, topics, selectedUnitId, onClearInitialTopic]);
 
+  const speakTutorLine = (text: string) => {
+    speakText(text, {
+      langCode: effectiveDialect,
+      onStart: () => {
+        isAssistantSpeakingRef.current = true;
+      },
+      onEnd: () => {
+        isAssistantSpeakingRef.current = false;
+      },
+    });
+  };
+
   const startScenario = (scenario: AITutorScenario) => {
     stopSpeaking();
+    isAssistantSpeakingRef.current = false;
     setSelectedScenario(scenario);
     setMessages([
       {
@@ -144,11 +176,11 @@ export function AITutor({
     setSessionAwarded(false);
     setUsedGeminiSession(Boolean(geminiApiKey?.trim()));
     if (autoSpeak || callMode) {
-      speakText(scenario.openingEn, { langCode: effectiveDialect });
+      speakTutorLine(scenario.openingEn);
     }
   };
 
-  const handleSendText = async (overrideText?: string) => {
+  const handleSendText = async (overrideText?: string, prosody?: ProsodyAnalysis) => {
     if (!selectedScenario || isSending) return;
     const text = (overrideText ?? input).trim();
     if (!text) return;
@@ -162,6 +194,7 @@ export function AITutor({
       id: studentMsgId,
       sender: 'student',
       textEn: text,
+      prosody,
       timestamp: 'Agora',
     };
 
@@ -201,7 +234,7 @@ export function AITutor({
     setIsSending(false);
 
     if (autoSpeak || callMode) {
-      speakText(result.replyEn, { langCode: effectiveDialect });
+      speakTutorLine(result.replyEn);
     }
 
     const totalStudentTurns =
@@ -211,6 +244,73 @@ export function AITutor({
       onCompleteSession(35);
     }
   };
+
+  const handleSendRef = useRef(handleSendText);
+  handleSendRef.current = handleSendText;
+
+  useEffect(() => {
+    if (!callMode || !selectedScenario) {
+      vadSessionRef.current?.stop();
+      vadSessionRef.current = null;
+      setVadState('idle');
+      setAudioBars(Array(12).fill(12));
+      return undefined;
+    }
+
+    let cancelled = false;
+    setVoiceError('');
+    void startContinuousVadSession({
+      silenceMs: vadSilenceMs,
+      isAssistantSpeaking: () => isAssistantSpeakingRef.current,
+      bargeInEnabled: () => bargeInEnabledRef.current,
+      onBargeIn: () => {
+        stopSpeaking();
+        isAssistantSpeakingRef.current = false;
+      },
+      onLevel: (_lvl, bars) => {
+        if (!cancelled) setAudioBars(bars);
+      },
+      onStateChange: (nextState) => {
+        if (!cancelled) setVadState(nextState);
+      },
+      onUtterance: async ({ blob, speechDurationMs, pauseMs, rmsSamples }) => {
+        if (cancelled) return;
+        setVadState('processing');
+        const stt = await transcribeAudioBlob(blob, effectiveDialect);
+        if (cancelled) return;
+        if (stt.ok && stt.text) {
+          const prosody = analyzeProsody(
+            stt.text,
+            speechDurationMs,
+            pauseMs,
+            rmsSamples,
+          );
+          await handleSendRef.current(stt.text, prosody);
+        } else if (stt.error) {
+          setVoiceError(stt.error);
+        }
+        if (!cancelled) setVadState('listening');
+      },
+      onError: (msg) => {
+        if (!cancelled) {
+          setVoiceError(msg);
+          setCallMode(false);
+        }
+      },
+    }).then((session) => {
+      if (cancelled) {
+        session?.stop();
+      } else {
+        vadSessionRef.current = session;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      vadSessionRef.current?.stop();
+      vadSessionRef.current = null;
+    };
+  }, [callMode, selectedScenario?.id, vadSilenceMs, effectiveDialect]);
 
   const handleToggleVoiceInput = () => {
     if (isListeningVoice) {
@@ -600,6 +700,8 @@ export function AITutor({
             type="button"
             onClick={() => {
               stopSpeaking();
+              isAssistantSpeakingRef.current = false;
+              setCallMode(false);
               setSelectedScenario(null);
             }}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 cursor-pointer"
@@ -633,6 +735,7 @@ export function AITutor({
           )}
           <button
             type="button"
+            data-testid="toggle-full-duplex-call"
             onClick={() => {
               const next = !callMode;
               setCallMode(next);
@@ -643,10 +746,10 @@ export function AITutor({
                 ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
                 : 'border-slate-200 bg-white text-slate-600'
             }`}
-            title="Modo Chamada: envia sua fala e lê a resposta automaticamente"
+            title="Chamada Full-Duplex VAD: detecta sua fala e envia automaticamente ao pausar"
           >
-            <PhoneCall className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{callMode ? 'Chamada ON' : 'Chamada'}</span>
+            <PhoneCall className={`h-3.5 w-3.5 ${callMode ? 'animate-pulse text-emerald-600' : ''}`} />
+            <span className="hidden sm:inline">{callMode ? 'Chamada Ao Vivo ON' : 'Chamada IA'}</span>
           </button>
           <button
             type="button"
@@ -667,6 +770,76 @@ export function AITutor({
           </button>
         </div>
       </header>
+
+      {/* Full-Duplex VAD Live Call Bar */}
+      {callMode && (
+        <div
+          data-testid="full-duplex-call-bar"
+          className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-200 bg-emerald-50/70 px-4 py-2.5 sm:px-6"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 items-end gap-0.5 rounded-lg bg-white/90 px-2 py-1 ring-1 ring-emerald-200">
+              {audioBars.map((bar, idx) => (
+                <span
+                  key={idx}
+                  className={`w-1 rounded-full transition-all duration-75 ${
+                    vadState === 'speaking' ? 'bg-emerald-600' : 'bg-blue-500/70'
+                  }`}
+                  style={{ height: `${Math.max(18, bar)}%` }}
+                />
+              ))}
+            </div>
+            <div>
+              <p className="text-xs font-extrabold text-emerald-900">
+                {vadState === 'speaking'
+                  ? 'Captando sua voz...'
+                  : vadState === 'processing'
+                    ? 'Transcrevendo Whisper + Prosódia...'
+                    : 'Chamada Full-Duplex ativa — fale naturalmente sem apertar botão'}
+              </p>
+              <p className="text-[11px] text-emerald-700">
+                Pausa automática ({vadSilenceMs}ms) · Barge-in {bargeInEnabled ? 'ativo' : 'pausado'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {([700, 950, 1400] as const).map((ms) => (
+              <button
+                key={ms}
+                type="button"
+                onClick={() => setVadSilenceMs(ms)}
+                className={`rounded-lg px-2 py-1 font-mono text-[10px] font-bold cursor-pointer ${
+                  vadSilenceMs === ms
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-white text-emerald-800 ring-1 ring-emerald-200'
+                }`}
+              >
+                {ms === 700 ? 'Rápido' : ms === 950 ? 'Normal' : 'Calmo'}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setBargeInEnabled((v) => !v)}
+              className={`rounded-lg px-2 py-1 text-[10px] font-bold cursor-pointer ${
+                bargeInEnabled
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-slate-600 ring-1 ring-slate-200'
+              }`}
+              title="Permite interromper a fala da IA ao começar a falar"
+            >
+              Interromper IA: {bargeInEnabled ? 'ON' : 'OFF'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCallMode(false)}
+              className="rounded-lg bg-rose-600 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-rose-700 cursor-pointer"
+            >
+              Encerrar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Messages Area */}
       <div className="flex-1 space-y-4 overflow-y-auto bg-[#F7F9FC] p-4 sm:p-6">
@@ -722,12 +895,24 @@ export function AITutor({
               </div>
 
               {/* Inline Teacher/Tutor Feedback under student turn */}
-              {!isTutor && (msg.feedbackPt || msg.correctedEn) && (
-                <div className="mt-1.5 max-w-[85%] rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs text-amber-950">
-                  <p className="flex items-start gap-1.5">
-                    <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
-                    <span>{msg.feedbackPt}</span>
-                  </p>
+              {!isTutor && (msg.feedbackPt || msg.correctedEn || msg.prosody) && (
+                <div className="mt-1.5 max-w-[85%] space-y-1.5 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs text-amber-950">
+                  {msg.prosody && (
+                    <div className="rounded-xl border border-emerald-200/80 bg-white/80 px-2.5 py-1.5 text-[11px] text-slate-800">
+                      <div className="flex flex-wrap items-center gap-2 font-mono font-bold text-emerald-800">
+                        <span>🎙️ {msg.prosody.wpm} WPM ({msg.prosody.paceLabel})</span>
+                        <span>· Entonação {msg.prosody.intonationScore}%</span>
+                        <span>· Fluência {msg.prosody.fluencyScore}%</span>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-slate-600">{msg.prosody.tipPt}</p>
+                    </div>
+                  )}
+                  {msg.feedbackPt && (
+                    <p className="flex items-start gap-1.5">
+                      <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                      <span>{msg.feedbackPt}</span>
+                    </p>
+                  )}
                   {msg.correctedEn && (
                     <p className="mt-1 font-semibold text-emerald-800">
                       Forma mais natural: “{msg.correctedEn}”

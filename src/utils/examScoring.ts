@@ -1,4 +1,9 @@
-import type { ExamBandReference, ExamTypeMeta, MockExam } from '../types/exams';
+import type {
+  ExamBandReference,
+  ExamPracticeCategory,
+  ExamTypeMeta,
+  MockExam,
+} from '../types/exams';
 
 export interface GradedExamResult {
   officialScore: number;
@@ -6,11 +11,14 @@ export interface GradedExamResult {
   rawPercent: number;
   passed: boolean;
   matchedBand: ExamBandReference;
-  sectionBreakdown: Record<'reading' | 'listening' | 'language_use' | 'writing', {
-    correct: number;
-    total: number;
-    percent: number;
-  }>;
+  sectionBreakdown: Record<
+    'reading' | 'listening' | 'language_use' | 'writing' | 'speaking',
+    {
+      correct: number;
+      total: number;
+      percent: number;
+    }
+  >;
   writingFeedbackPt: string;
 }
 
@@ -34,10 +42,16 @@ function evaluateWritingSection(
   const kwRatio =
     exam.writingTask.expectedKeywords.length === 0
       ? 1
-      : Math.min(1, keywordHits / Math.max(1, Math.ceil(exam.writingTask.expectedKeywords.length * 0.6)));
+      : Math.min(
+          1,
+          keywordHits /
+            Math.max(1, Math.ceil(exam.writingTask.expectedKeywords.length * 0.6)),
+        );
   const hasSentencePunctuation = /[.!?؟。]/.test(clean) ? 1 : 0.7;
 
-  const raw = Math.round((wordRatio * 0.55 + kwRatio * 0.35 + hasSentencePunctuation * 0.1) * 100);
+  const raw = Math.round(
+    (wordRatio * 0.55 + kwRatio * 0.35 + hasSentencePunctuation * 0.1) * 100,
+  );
   const percent = Math.max(15, Math.min(100, raw));
 
   const feedbackPt =
@@ -60,6 +74,8 @@ export function gradeMockExam(
   examMeta: ExamTypeMeta,
   answers: Record<string, number>,
   writingResponse: string,
+  speakingPercent?: number,
+  categoryFilter: ExamPracticeCategory = 'full',
 ): GradedExamResult {
   const sections: Array<'reading' | 'listening' | 'language_use'> = [
     'reading',
@@ -72,6 +88,11 @@ export function gradeMockExam(
     listening: { correct: 0, total: 0, percent: 0 },
     language_use: { correct: 0, total: 0, percent: 0 },
     writing: { correct: 0, total: 100, percent: 0 },
+    speaking: {
+      correct: speakingPercent ?? 0,
+      total: 100,
+      percent: speakingPercent ?? 0,
+    },
   };
 
   let totalObjCorrect = 0;
@@ -95,7 +116,25 @@ export function gradeMockExam(
   };
 
   const objPercent = totalObjCount > 0 ? (totalObjCorrect / totalObjCount) * 100 : 0;
-  const rawPercent = Math.round(objPercent * 0.75 + writingEval.percent * 0.25);
+
+  let rawPercent: number;
+  if (categoryFilter === 'reading') {
+    rawPercent = breakdown.reading.percent;
+  } else if (categoryFilter === 'listening') {
+    rawPercent = breakdown.listening.percent;
+  } else if (categoryFilter === 'language_use') {
+    rawPercent = breakdown.language_use.percent;
+  } else if (categoryFilter === 'writing') {
+    rawPercent = breakdown.writing.percent;
+  } else if (categoryFilter === 'speaking') {
+    rawPercent = breakdown.speaking.percent;
+  } else if (speakingPercent !== undefined) {
+    rawPercent = Math.round(
+      objPercent * 0.55 + writingEval.percent * 0.25 + speakingPercent * 0.2,
+    );
+  } else {
+    rawPercent = Math.round(objPercent * 0.75 + writingEval.percent * 0.25);
+  }
 
   let officialScore = rawPercent;
   let officialLabel = `${rawPercent}/100`;
@@ -121,11 +160,22 @@ export function gradeMockExam(
       passed = officialScore >= 160;
       break;
     }
+    case 'celpip': {
+      const lvl = Math.max(1, Math.min(12, Math.round(1 + (rawPercent / 100) * 11)));
+      officialScore = lvl;
+      officialLabel = `CELPIP Level ${lvl} (CLB ${lvl})`;
+      passed = lvl >= 7;
+      break;
+    }
     case 'dele': {
       officialScore = rawPercent;
-      const g1 = Math.round((breakdown.reading.percent + breakdown.writing.percent) / 2);
-      const g2 = Math.round((breakdown.listening.percent + breakdown.language_use.percent) / 2);
-      passed = g1 >= 60 && g2 >= 60;
+      if (categoryFilter === 'full') {
+        const g1 = Math.round((breakdown.reading.percent + breakdown.writing.percent) / 2);
+        const g2 = Math.round((breakdown.listening.percent + breakdown.language_use.percent) / 2);
+        passed = g1 >= 60 && g2 >= 60;
+      } else {
+        passed = rawPercent >= 60;
+      }
       officialLabel = `${officialScore}/100 (${passed ? 'APTO' : 'NO APTO'})`;
       break;
     }
@@ -137,12 +187,16 @@ export function gradeMockExam(
     }
     case 'delf': {
       officialScore = rawPercent;
-      const minSection = Math.min(
-        breakdown.reading.percent * 0.25,
-        breakdown.listening.percent * 0.25,
-        breakdown.writing.percent * 0.25,
-      );
-      passed = officialScore >= 50 && minSection >= 5;
+      if (categoryFilter === 'full') {
+        const minSection = Math.min(
+          breakdown.reading.percent * 0.25,
+          breakdown.listening.percent * 0.25,
+          breakdown.writing.percent * 0.25,
+        );
+        passed = officialScore >= 50 && minSection >= 5;
+      } else {
+        passed = officialScore >= 50;
+      }
       officialLabel = `${officialScore}/100 (${passed ? 'ADMIS' : 'AJOURNÉ'})`;
       break;
     }
@@ -161,7 +215,13 @@ export function gradeMockExam(
     case 'celi': {
       officialScore = Math.round((rawPercent / 100) * 200);
       const grade =
-        officialScore >= 170 ? 'A' : officialScore >= 150 ? 'B' : officialScore >= 120 ? 'C' : 'D/E';
+        officialScore >= 170
+          ? 'A'
+          : officialScore >= 150
+            ? 'B'
+            : officialScore >= 120
+              ? 'C'
+              : 'D/E';
       officialLabel = `${officialScore}/200 (Fascia ${grade})`;
       passed = officialScore >= 120;
       break;
@@ -173,7 +233,8 @@ export function gradeMockExam(
       break;
     }
     case 'testdaf': {
-      const tdn = rawPercent >= 85 ? 5 : rawPercent >= 70 ? 4 : rawPercent >= 55 ? 3 : 2;
+      const tdn =
+        rawPercent >= 85 ? 5 : rawPercent >= 70 ? 4 : rawPercent >= 55 ? 3 : 2;
       officialScore = tdn;
       officialLabel = tdn >= 3 ? `TDN ${tdn}` : '< TDN 3';
       passed = tdn >= 4;
@@ -217,7 +278,12 @@ export function gradeMockExam(
     }
     case 'swedex': {
       officialScore = rawPercent;
-      const grade = rawPercent >= 80 ? 'Väl godkänd' : rawPercent >= 60 ? 'Godkänd' : 'Underkänd';
+      const grade =
+        rawPercent >= 80
+          ? 'Väl godkänd'
+          : rawPercent >= 60
+            ? 'Godkänd'
+            : 'Underkänd';
       officialLabel = `${officialScore}% (${grade})`;
       passed = rawPercent >= 60;
       break;

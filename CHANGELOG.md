@@ -4,6 +4,26 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v6.0.0`] — 2026-11-24
+### Chamada de Voz IA Full-Duplex (VAD Contínuo + Prosódia), Vídeos Curtos Interativos com Legendas Clicáveis (`SM-2`), Simulados Completos (`CELPIP` + Categorias + Speaking IA/Professor + Rubrica Analítica 4 Critérios), Expressões Idiomáticas/Gírias/Registro `18+` nos 12 Idiomas & Correções Visuais
+- **Correções Visuais Multiplataforma (`index.css`, `TipsLibrary.tsx`, `LessonPlayer.tsx`, `TeacherLinkModal.tsx`, `Sidebar.tsx`):**
+  - **Contraste da Caixa de Atenção (`.tip-warning-box`)**: corrigido o bug no Modo Escuro onde `bg-rose-50/80` + `text-rose-900` gerava texto rosa claro ilegível sobre fundo cinza claro; agora garantido alto contraste no Web, Windows e Android em ambos os temas.
+  - **Seletor de Idioma em Estudo Redesenhado (`Sidebar.tsx`)**: substituída a grade compacta de 4 colunas por um **menu suspenso (dropdown) expansível e harmonioso** com siglas/símbolos limpos (`EN`, `ES`, `FR`, `IT`, `DE`, `РУ`, `日本`, `中文`, `عربي`, `NL`, `AF`, `SV`), nome completo e nome nativo sem truncamentos.
+- **Chamada de Voz IA Full-Duplex em Tempo Real (`voiceVadEngine.ts`, `AITutor.tsx`):**
+  - Detecção contínua de atividade vocal (**Web Audio API VAD**) com equalizador de 12 bandas ao vivo, envio automático após pausa configurável (`700ms / 950ms / 1400ms`), suporte a interrupção da IA (**barge-in**) e **Análise de Prosódia/Entonação** por turno (`WPM`, ritmo, variação de entonação, fluência e detecção de hesitações).
+- **Imersão por Vídeo Curto Interativo com Legendas Duplas Clicáveis (`InteractiveVideoView.tsx`, `interactiveVideos.ts`):**
+  - **`36` clipes curtos (`3` por idioma × `12` idiomas)** estilo *FluentU / Lingopie*: clique em qualquer palavra da legenda para abrir tradução, IPA, classe gramatical, nota de uso, áudio nativo e botão **`+ Salvar no Deck SM-2`**.
+- **Simulados Oficiais Mais Completos & Realistas (`MockExamHub.tsx`, `examsCelpip.ts`, `examEnrichment.ts`, `examAiGrader.ts`, `examScoring.ts`):**
+  - Adicionados **4 Simulados Completos do CELPIP General** (`escala CELPIP 1–12 / CLB`, `19` exames oficiais = **`76` simulados**).
+  - Todos os `76` simulados foram expandidos para **`12` questões objetivas (`4 Reading + 4 Listening + 4 Use of Language`) + Writing + Entrevista Oral (`Speaking` em 3 partes cronometradas)**, com **Filtro por Categoria** (*Prova Completa*, *Reading*, *Listening*, *Use of Language*, *Writing*, *Speaking*).
+  - **Speaking nos Simulados**: gravação de áudio com transcrição Whisper STT, avaliação automática em 4 critérios orais e botão **"Enviar ao Professor"**.
+  - **Rubrica Analítica IA de Redação (`/api/gemini-tutor`)**: nota detalhada em 4 critérios oficiais (*Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy*) + **reescrita automática em nível Banda C1/C2**.
+- **Expressões Idiomáticas, Gírias Cotidianas & Registro `18+` nos 12 Idiomas (`idiomsSlangExpansion.ts`):**
+  - **`36` novas unidades (`3` por idioma -> `103` unidades/idioma = `1.236` unidades totais)** cobrindo *Expressões Idiomáticas*, *Gírias do Dia a Dia* e *Palavrões & Expressões Chulas Comuns com Alternativas Educadas* (imersão B2 com selo `⚠️ 18+`).
+- **Qualidade Validada (`v6.0.0`):** **`15` suítes / `41` testes Vitest aprovados** + **`8/8` testes Playwright E2E aprovados** + **`0` erros TypeScript**.
+
+---
+
 ## [`v5.0.0`] — 2026-11-23
 ### Gateway de Download Web/Desktop/Android, Alfabetos 100% Completos, Fase 11 (72 Simulados Cronometrados Oficiais), 4 Novos Idiomas (`Árabe`, `Holandês`, `Africâner`, `Sueco` — 1.200 Unidades), Comunidade por Idioma & Suíte E2E Playwright
 - **Gateway de Download & Redirecionamento Multiplataforma (`AppDownloadGateway.tsx`, `AuthScreen.tsx`, `Sidebar.tsx`, `platform.ts`):**

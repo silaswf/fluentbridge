@@ -211,9 +211,9 @@ export function TeacherLinkModal({
           </div>
         ) : (
           <div className="mt-5 space-y-4">
-            <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs leading-relaxed text-rose-950">
-              <div className="flex items-center gap-2 font-bold text-rose-800">
-                <AlertTriangle className="h-4 w-4 shrink-0" />
+            <div className="tip-warning-box rounded-2xl p-4 text-xs leading-relaxed">
+              <div className="flex items-center gap-2 font-bold">
+                <AlertTriangle className="tip-warning-icon h-4 w-4 shrink-0" />
                 <span>Aviso de Restrição de Atividades</span>
               </div>
               <p className="mt-2">

@@ -129,9 +129,13 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/grammar/afGrammarGuide')) return 'grammar-af';
           if (id.includes('/grammar/svGrammarGuide')) return 'grammar-sv';
           if (id.includes('/data/exams/examsEnglish')) return 'exams-en';
+          if (id.includes('/data/exams/examsCelpip')) return 'exams-celpip';
+          if (id.includes('/data/exams/examEnrichment')) return 'exams-enrichment';
           if (id.includes('/data/exams/examsRomance')) return 'exams-romance';
           if (id.includes('/data/exams/examsGermanic')) return 'exams-germanic';
           if (id.includes('/data/exams/examsScripts')) return 'exams-scripts';
+          if (id.includes('/data/interactiveVideos')) return 'interactive-videos';
+          if (id.includes('/curriculum/idiomsSlangExpansion')) return 'curriculum-idioms-slang';
           if (id.includes('/data/scriptTrainerData')) return 'script-trainer';
           if (id.includes('/data/podcastEpisodes')) return 'podcasts';
           if (id.includes('/data/tutorScenarios')) return 'tutor-scenarios';

@@ -1,5 +1,13 @@
 import type { CEFRLevel, LanguageCode } from './learning';
 
+export type ExamPracticeCategory =
+  | 'full'
+  | 'reading'
+  | 'listening'
+  | 'language_use'
+  | 'writing'
+  | 'speaking';
+
 export interface ExamBandReference {
   label: string;
   minScore: number;
@@ -41,6 +49,46 @@ export interface ExamWritingTask {
   modelAnswer: string;
 }
 
+export interface ExamSpeakingPart {
+  id: string;
+  partLabel: string;
+  prepSeconds: number;
+  speakSeconds: number;
+  prompt: string;
+  bulletPoints: string[];
+  evaluationCriteria: string[];
+}
+
+export interface ExamSpeakingTask {
+  title: string;
+  instructionsPt: string;
+  parts: ExamSpeakingPart[];
+}
+
+export interface WritingCriterionScore {
+  name: string;
+  score: number;
+  commentPt: string;
+}
+
+export interface AnalyticalWritingRubric {
+  overallPercent: number;
+  estimatedBandLabel: string;
+  criteria: WritingCriterionScore[];
+  strengthsPt: string;
+  improvementsPt: string;
+  c1c2Rewrite: string;
+  usedAi: boolean;
+}
+
+export interface SpeakingEvaluationResult {
+  overallPercent: number;
+  wpm: number;
+  criteria: WritingCriterionScore[];
+  feedbackPt: string;
+  usedAi: boolean;
+}
+
 export interface MockExam {
   id: string;
   examTypeId: string;
@@ -51,4 +99,5 @@ export interface MockExam {
   durationMinutes: number;
   questions: ExamQuestion[];
   writingTask: ExamWritingTask;
+  speakingTask?: ExamSpeakingTask;
 }

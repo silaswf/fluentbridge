@@ -28,6 +28,10 @@ import { ARABIC_100_TOPICS, ARABIC_100_VOCAB } from './curriculum/arabicExpansio
 import { DUTCH_100_TOPICS, DUTCH_100_VOCAB } from './curriculum/dutchExpansion';
 import { AFRIKAANS_100_TOPICS, AFRIKAANS_100_VOCAB } from './curriculum/afrikaansExpansion';
 import { SWEDISH_100_TOPICS, SWEDISH_100_VOCAB } from './curriculum/swedishExpansion';
+import {
+  IDIOMS_SLANG_TOPICS_BY_LANG,
+  IDIOMS_SLANG_VOCAB_BY_LANG,
+} from './curriculum/idiomsSlangExpansion';
 
 export const LANGUAGE_COURSES: LanguageCourse[] = [
   {
@@ -420,6 +424,7 @@ export const ENGLISH_ALL_TOPICS: Topic[] = [
   ...TOPICS_EN_SPECIAL,
   ...TOPICS_EN_EXPANSION,
   ...EN_V4_TOPICS,
+  ...IDIOMS_SLANG_TOPICS_BY_LANG.en,
 ]
   .map((t) => ({ ...t, languageCode: t.languageCode ?? ('en' as LanguageCode) }))
   .sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
@@ -436,25 +441,35 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = [
   ...VOCAB_EN_SPECIAL,
   ...VOCAB_EN_EXPANSION,
   ...EN_V4_VOCAB,
+  ...IDIOMS_SLANG_VOCAB_BY_LANG.en,
 ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) }));
 
 const sortByLevel = (list: Topic[]) =>
   [...list].sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
 
-export const SPANISH_100_TOPICS: Topic[] = sortByLevel([...SPANISH_ALL_TOPICS, ...SPANISH_V4_TOPICS]);
-export const SPANISH_100_VOCAB: VocabCard[] = [...SPANISH_ALL_VOCAB, ...SPANISH_V4_VOCAB];
-export const FRENCH_100_TOPICS: Topic[] = sortByLevel([...FRENCH_ALL_TOPICS, ...FRENCH_V4_TOPICS]);
-export const FRENCH_100_VOCAB: VocabCard[] = [...FRENCH_ALL_VOCAB, ...FRENCH_V4_VOCAB];
-export const ITALIAN_100_TOPICS: Topic[] = sortByLevel([...ITALIAN_ALL_TOPICS, ...ITALIAN_V4_TOPICS]);
-export const ITALIAN_100_VOCAB: VocabCard[] = [...ITALIAN_ALL_VOCAB, ...ITALIAN_V4_VOCAB];
-export const GERMAN_100_TOPICS: Topic[] = sortByLevel([...GERMAN_ALL_TOPICS, ...GERMAN_V4_TOPICS]);
-export const GERMAN_100_VOCAB: VocabCard[] = [...GERMAN_ALL_VOCAB, ...GERMAN_V4_VOCAB];
-export const RUSSIAN_100_TOPICS: Topic[] = sortByLevel([...RUSSIAN_ALL_TOPICS, ...RUSSIAN_V4_TOPICS]);
-export const RUSSIAN_100_VOCAB: VocabCard[] = [...RUSSIAN_ALL_VOCAB, ...RUSSIAN_V4_VOCAB];
-export const JAPANESE_100_TOPICS: Topic[] = sortByLevel([...JAPANESE_ALL_TOPICS, ...JAPANESE_V4_TOPICS]);
-export const JAPANESE_100_VOCAB: VocabCard[] = [...JAPANESE_ALL_VOCAB, ...JAPANESE_V4_VOCAB];
-export const CHINESE_100_TOPICS: Topic[] = sortByLevel([...CHINESE_ALL_TOPICS, ...CHINESE_V4_TOPICS]);
-export const CHINESE_100_VOCAB: VocabCard[] = [...CHINESE_ALL_VOCAB, ...CHINESE_V4_VOCAB];
+export const SPANISH_100_TOPICS: Topic[] = sortByLevel([...SPANISH_ALL_TOPICS, ...SPANISH_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.es]);
+export const SPANISH_100_VOCAB: VocabCard[] = [...SPANISH_ALL_VOCAB, ...SPANISH_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.es];
+export const FRENCH_100_TOPICS: Topic[] = sortByLevel([...FRENCH_ALL_TOPICS, ...FRENCH_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.fr]);
+export const FRENCH_100_VOCAB: VocabCard[] = [...FRENCH_ALL_VOCAB, ...FRENCH_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.fr];
+export const ITALIAN_100_TOPICS: Topic[] = sortByLevel([...ITALIAN_ALL_TOPICS, ...ITALIAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.it]);
+export const ITALIAN_100_VOCAB: VocabCard[] = [...ITALIAN_ALL_VOCAB, ...ITALIAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.it];
+export const GERMAN_100_TOPICS: Topic[] = sortByLevel([...GERMAN_ALL_TOPICS, ...GERMAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.de]);
+export const GERMAN_100_VOCAB: VocabCard[] = [...GERMAN_ALL_VOCAB, ...GERMAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.de];
+export const RUSSIAN_100_TOPICS: Topic[] = sortByLevel([...RUSSIAN_ALL_TOPICS, ...RUSSIAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ru]);
+export const RUSSIAN_100_VOCAB: VocabCard[] = [...RUSSIAN_ALL_VOCAB, ...RUSSIAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ru];
+export const JAPANESE_100_TOPICS: Topic[] = sortByLevel([...JAPANESE_ALL_TOPICS, ...JAPANESE_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ja]);
+export const JAPANESE_100_VOCAB: VocabCard[] = [...JAPANESE_ALL_VOCAB, ...JAPANESE_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ja];
+export const CHINESE_100_TOPICS: Topic[] = sortByLevel([...CHINESE_ALL_TOPICS, ...CHINESE_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.zh]);
+export const CHINESE_100_VOCAB: VocabCard[] = [...CHINESE_ALL_VOCAB, ...CHINESE_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.zh];
+
+const ARABIC_ALL_WITH_CULTURE = sortByLevel([...ARABIC_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ar]);
+const ARABIC_VOCAB_WITH_CULTURE = [...ARABIC_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ar];
+const DUTCH_ALL_WITH_CULTURE = sortByLevel([...DUTCH_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.nl]);
+const DUTCH_VOCAB_WITH_CULTURE = [...DUTCH_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.nl];
+const AFRIKAANS_ALL_WITH_CULTURE = sortByLevel([...AFRIKAANS_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.af]);
+const AFRIKAANS_VOCAB_WITH_CULTURE = [...AFRIKAANS_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.af];
+const SWEDISH_ALL_WITH_CULTURE = sortByLevel([...SWEDISH_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.sv]);
+const SWEDISH_VOCAB_WITH_CULTURE = [...SWEDISH_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.sv];
 
 export {
   SPANISH_ALL_TOPICS,
@@ -471,14 +486,14 @@ export {
   JAPANESE_ALL_VOCAB,
   CHINESE_ALL_TOPICS,
   CHINESE_ALL_VOCAB,
-  ARABIC_100_TOPICS,
-  ARABIC_100_VOCAB,
-  DUTCH_100_TOPICS,
-  DUTCH_100_VOCAB,
-  AFRIKAANS_100_TOPICS,
-  AFRIKAANS_100_VOCAB,
-  SWEDISH_100_TOPICS,
-  SWEDISH_100_VOCAB,
+  ARABIC_ALL_WITH_CULTURE as ARABIC_100_TOPICS,
+  ARABIC_VOCAB_WITH_CULTURE as ARABIC_100_VOCAB,
+  DUTCH_ALL_WITH_CULTURE as DUTCH_100_TOPICS,
+  DUTCH_VOCAB_WITH_CULTURE as DUTCH_100_VOCAB,
+  AFRIKAANS_ALL_WITH_CULTURE as AFRIKAANS_100_TOPICS,
+  AFRIKAANS_VOCAB_WITH_CULTURE as AFRIKAANS_100_VOCAB,
+  SWEDISH_ALL_WITH_CULTURE as SWEDISH_100_TOPICS,
+  SWEDISH_VOCAB_WITH_CULTURE as SWEDISH_100_VOCAB,
 };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
@@ -509,13 +524,13 @@ export function getCourseTopics(
                   : languageCode === 'zh'
                     ? CHINESE_100_TOPICS
                     : languageCode === 'ar'
-                      ? ARABIC_100_TOPICS
+                      ? ARABIC_ALL_WITH_CULTURE
                       : languageCode === 'nl'
-                        ? DUTCH_100_TOPICS
+                        ? DUTCH_ALL_WITH_CULTURE
                         : languageCode === 'af'
-                          ? AFRIKAANS_100_TOPICS
+                          ? AFRIKAANS_ALL_WITH_CULTURE
                           : languageCode === 'sv'
-                            ? SWEDISH_100_TOPICS
+                            ? SWEDISH_ALL_WITH_CULTURE
                             : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,

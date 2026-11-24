@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Award,
   Bot,
   BrainCircuit,
+  Check,
+  ChevronDown,
   Compass,
   Download,
   FileCheck2,
@@ -27,6 +29,21 @@ import { isMasterAdminEmail } from '../config/appConfig';
 import { LANGUAGE_COURSES } from '../data/languages';
 import type { LanguageCode, LanguageCourse, UserProfile } from '../types/learning';
 import type { ThemeMode } from '../utils/theme';
+
+const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string }> = {
+  en: { symbol: 'EN', accent: 'bg-blue-600 text-white' },
+  es: { symbol: 'ES', accent: 'bg-amber-600 text-white' },
+  fr: { symbol: 'FR', accent: 'bg-indigo-600 text-white' },
+  it: { symbol: 'IT', accent: 'bg-emerald-600 text-white' },
+  de: { symbol: 'DE', accent: 'bg-slate-800 text-amber-300' },
+  ru: { symbol: 'РУ', accent: 'bg-sky-700 text-white' },
+  ja: { symbol: '日本', accent: 'bg-rose-600 text-white' },
+  zh: { symbol: '中文', accent: 'bg-red-700 text-amber-200' },
+  ar: { symbol: 'عربي', accent: 'bg-teal-700 text-white' },
+  nl: { symbol: 'NL', accent: 'bg-orange-600 text-white' },
+  af: { symbol: 'AF', accent: 'bg-green-700 text-white' },
+  sv: { symbol: 'SV', accent: 'bg-blue-700 text-yellow-300' },
+};
 
 export type NavView =
   | 'learn'
@@ -81,6 +98,31 @@ export function Sidebar({
   onLogout,
 }: SidebarProps) {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!langMenuOpen) return undefined;
+    const onDocClick = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLangMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [langMenuOpen]);
+
+  const activeLangBadge = LANGUAGE_BADGE_META[activeCourse.code] ?? {
+    symbol: activeCourse.code.toUpperCase(),
+    accent: 'bg-blue-600 text-white',
+  };
   const ThemeIcon =
     themeMode === 'dark' ? Moon : themeMode === 'system' ? Monitor : Sun;
   const themeLabel =
@@ -236,35 +278,89 @@ export function Sidebar({
           </button>
         </div>
 
-        {/* Multi-Language Course Switcher */}
+        {/* Multi-Language Course Switcher (Collapsible Dropdown) */}
         {!isCollapsed && (
-          <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-2.5">
-            <p className="px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+          <div ref={langMenuRef} className="relative mt-4">
+            <p className="mb-1.5 px-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Idioma em estudo
             </p>
-            <div className="mt-1.5 grid grid-cols-4 gap-1">
-              {LANGUAGE_COURSES.map((course) => {
-                const selected = course.code === activeCourse.code;
-                return (
-                  <button
-                    key={course.code}
-                    type="button"
-                    onClick={() => onChangeLanguage(course.code)}
-                    title={`${course.namePt} (${course.nativeName})`}
-                    className={`flex flex-col items-center rounded-xl px-1 py-1.5 text-[10px] font-bold transition cursor-pointer ${
-                      selected
-                        ? 'bg-white text-blue-700 shadow-2xs ring-1 ring-blue-200'
-                        : 'text-slate-600 hover:bg-white/60'
-                    }`}
-                  >
-                    <span className="text-base leading-none">{course.flag}</span>
-                    <span className="mt-1 w-full truncate text-center">
-                      {course.namePt.split(' ')[0]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              type="button"
+              data-testid="language-switcher-trigger"
+              aria-expanded={langMenuOpen}
+              onClick={() => setLangMenuOpen((v) => !v)}
+              className="flex w-full items-center justify-between gap-2.5 rounded-2xl border border-slate-200/90 bg-slate-50/80 px-3 py-2.5 text-left transition hover:border-blue-300 hover:bg-white cursor-pointer"
+            >
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-extrabold tracking-tight shadow-2xs ${activeLangBadge.accent}`}
+                >
+                  {activeLangBadge.symbol}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-display text-sm font-extrabold text-slate-900">
+                    {activeCourse.namePt}
+                  </p>
+                  <p className="truncate text-[11px] font-medium text-slate-500">
+                    {activeCourse.nativeName} · {LANGUAGE_COURSES.length} idiomas
+                  </p>
+                </div>
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${
+                  langMenuOpen ? 'rotate-180 text-blue-600' : ''
+                }`}
+              />
+            </button>
+
+            {langMenuOpen && (
+              <div
+                data-testid="language-switcher-menu"
+                className="animate-fade-up absolute inset-x-0 top-full z-40 mt-1.5 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl"
+              >
+                {LANGUAGE_COURSES.map((course) => {
+                  const selected = course.code === activeCourse.code;
+                  const badge = LANGUAGE_BADGE_META[course.code] ?? {
+                    symbol: course.code.toUpperCase(),
+                    accent: 'bg-slate-600 text-white',
+                  };
+                  return (
+                    <button
+                      key={course.code}
+                      type="button"
+                      data-testid={`lang-option-${course.code}`}
+                      title={`${course.namePt} (${course.nativeName})`}
+                      onClick={() => {
+                        onChangeLanguage(course.code);
+                        setLangMenuOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition cursor-pointer ${
+                        selected
+                          ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10px] font-extrabold ${badge.accent}`}
+                        >
+                          {badge.symbol}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-xs font-bold">
+                            {course.namePt}
+                          </span>
+                          <span className="block truncate text-[10px] text-slate-500">
+                            {course.nativeName}
+                          </span>
+                        </span>
+                      </span>
+                      {selected && <Check className="h-4 w-4 shrink-0 text-blue-600" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -474,11 +570,14 @@ export function Sidebar({
             className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-800"
             aria-label="Selecionar idioma"
           >
-            {LANGUAGE_COURSES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {c.namePt}
-              </option>
-            ))}
+            {LANGUAGE_COURSES.map((c) => {
+              const badge = LANGUAGE_BADGE_META[c.code]?.symbol ?? c.code.toUpperCase();
+              return (
+                <option key={c.code} value={c.code}>
+                  {badge} · {c.namePt}
+                </option>
+              );
+            })}
           </select>
         </div>
 

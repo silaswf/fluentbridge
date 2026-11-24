@@ -1442,8 +1442,11 @@ export function LessonPlayer({
               </div>
 
               {currentStep.tip.warning && (
-                <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/70 p-3.5 text-xs leading-relaxed text-rose-900">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+                <div
+                  data-testid="tip-warning-box"
+                  className="tip-warning-box mt-5 flex items-start gap-2.5 rounded-2xl p-3.5 text-xs leading-relaxed font-medium"
+                >
+                  <AlertCircle className="tip-warning-icon mt-0.5 h-4 w-4 shrink-0" />
                   <div>
                     <span className="font-bold">Atenção brasileiro: </span>
                     {currentStep.tip.warning}

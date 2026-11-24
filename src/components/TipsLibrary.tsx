@@ -3,11 +3,13 @@ import {
   AlertCircle,
   ArrowRight,
   BookOpen,
+  Clapperboard,
   Headphones,
   Lightbulb,
   PenTool,
   Search,
 } from 'lucide-react';
+import { InteractiveVideoView } from './InteractiveVideoView';
 import { PodcastImmersionView } from './PodcastImmersionView';
 import { ScriptStrokeTrainer } from './ScriptStrokeTrainer';
 import {
@@ -28,6 +30,15 @@ import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 interface TipsLibraryProps {
   topics: Topic[];
   languageCode?: LanguageCode;
+  savedWords?: Set<string>;
+  onSaveWordToDeck?: (payload: {
+    word: string;
+    translation: string;
+    ipa: string;
+    exampleEn: string;
+    examplePt: string;
+    category: string;
+  }) => void;
   onPracticeTopic: (topic: Topic) => void;
   onPracticeTopicWithAI?: (topic: Topic) => void;
 }
@@ -48,10 +59,12 @@ const FILTER_OPTIONS: { id: 'all' | TipCategory; label: string }[] = [
 export function TipsLibrary({
   topics,
   languageCode = 'en',
+  savedWords,
+  onSaveWordToDeck,
   onPracticeTopic,
   onPracticeTopicWithAI,
 }: TipsLibraryProps) {
-  const [viewMode, setViewMode] = useState<'tips' | 'guide' | 'scripts' | 'podcasts'>('tips');
+  const [viewMode, setViewMode] = useState<'tips' | 'guide' | 'scripts' | 'podcasts' | 'videos'>('tips');
   const [showB2C1Translation, setShowB2C1Translation] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<'all' | TipCategory>('all');
@@ -188,6 +201,19 @@ export function TipsLibrary({
               <Headphones className="h-3.5 w-3.5" />
               <span>Podcasts</span>
             </button>
+            <button
+              type="button"
+              data-testid="tips-tab-videos"
+              onClick={() => setViewMode('videos')}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                viewMode === 'videos'
+                  ? 'bg-violet-600 text-white'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Clapperboard className="h-3.5 w-3.5" />
+              <span>Vídeos</span>
+            </button>
           </div>
 
           {(viewMode === 'tips' || viewMode === 'guide') && (
@@ -217,7 +243,7 @@ export function TipsLibrary({
             onChange={(e) => setSearch(e.target.value)}
             placeholder={
               viewMode === 'tips'
-                ? 'Buscar dica (ex: actually, push, present perfect, stative, question tag)...'
+                ? 'Buscar dica (ex: gírias, expressões idiomáticas, registro, stative, question tag)...'
                 : 'Buscar tópico gramatical (ex: Past Perfect, Stative, Gerund, Will, Question Tags)...'
             }
             className="w-full rounded-2xl border border-slate-200 bg-white py-3 pr-4 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
@@ -313,12 +339,19 @@ export function TipsLibrary({
                 >
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${cat.bg} ${cat.text}`}
-                      >
-                        <CatIcon className="h-3 w-3" />
-                        {cat.label}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${cat.bg} ${cat.text}`}
+                        >
+                          <CatIcon className="h-3 w-3" />
+                          {cat.label}
+                        </span>
+                        {topic.id.includes('taboo-register') && (
+                          <span className="rounded-full border border-rose-300 bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold text-rose-800">
+                            ⚠️ 18+ Registro Informal
+                          </span>
+                        )}
+                      </div>
                       <span className="font-mono text-[11px] font-bold text-slate-400">
                         {topic.level} · {topic.titlePt}
                       </span>
@@ -362,8 +395,11 @@ export function TipsLibrary({
                     </div>
 
                     {tip.warning && (
-                      <div className="mt-3 flex items-start gap-2 rounded-xl bg-rose-50/80 p-2.5 text-[11px] leading-relaxed text-rose-900">
-                        <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-600" />
+                      <div
+                        data-testid="tip-warning-box"
+                        className="tip-warning-box mt-3 flex items-start gap-2 rounded-xl p-2.5 text-[11px] leading-relaxed font-medium"
+                      >
+                        <AlertCircle className="tip-warning-icon mt-0.5 h-3.5 w-3.5 shrink-0" />
                         <span>{tip.warning}</span>
                       </div>
                     )}
@@ -476,6 +512,14 @@ export function TipsLibrary({
 
       {viewMode === 'podcasts' && (
         <PodcastImmersionView languageCode={languageCode} />
+      )}
+
+      {viewMode === 'videos' && (
+        <InteractiveVideoView
+          languageCode={languageCode}
+          savedWords={savedWords}
+          onSaveWordToDeck={onSaveWordToDeck}
+        />
       )}
     </div>
   );
