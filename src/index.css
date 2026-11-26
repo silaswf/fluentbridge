@@ -183,10 +183,13 @@ html.dark body {
 :where(html.dark) aside,
 :where(html.dark) .lg\:bg-white,
 :where(html.dark) .bg-white,
-:where(html.dark) .bg-white\/95 {
+:where(html.dark) .bg-white\/95,
+:where(html.dark) .bg-white\/90,
+:where(html.dark) .bg-white\/80 {
   background-color: #111827;
 }
-:where(html.dark) .bg-\[\#F7F9FC\] {
+:where(html.dark) .bg-\[\#F7F9FC\],
+:where(html.dark) .bg-\[\#F7F9FC\]\/95 {
   background-color: #0B1120;
 }
 :where(html.dark) .bg-slate-50,

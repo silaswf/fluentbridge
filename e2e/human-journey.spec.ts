@@ -306,12 +306,47 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await expect(page.getByTestId('lesson-mobile-settings-btn')).toBeVisible();
     await page.getByLabel('Sair da lição').click();
 
-    // Verify Dark Mode contrast guard on main trail text (U-05)
+    // Verify Dark Mode contrast guard on main trail text + sticky CEFR header & current module card
     await page.evaluate(() => document.documentElement.classList.add('dark'));
+    await page.waitForTimeout(250);
     const bodyBg = await page.evaluate(
       () => getComputedStyle(document.body).backgroundColor,
     );
     expect(bodyBg).not.toBe('rgb(255, 255, 255)');
+    const darkSurfaceCheck = await page.evaluate(() => {
+      const toRgb = (cssColor: string) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return [255, 255, 255];
+        ctx.fillStyle = '#0B1120';
+        ctx.fillRect(0, 0, 1, 1);
+        ctx.fillStyle = cssColor;
+        ctx.fillRect(0, 0, 1, 1);
+        const d = ctx.getImageData(0, 0, 1, 1).data;
+        return [d[0], d[1], d[2]];
+      };
+      const stickyBar = document
+        .querySelector('[data-testid="cefr-filter-bar"]')
+        ?.closest('.sticky') as HTMLElement | null;
+      const modCard = document.querySelector(
+        '[data-testid="module-header-card"]',
+      ) as HTMLElement | null;
+      const stickyRgb = stickyBar
+        ? toRgb(getComputedStyle(stickyBar).backgroundColor)
+        : [0, 0, 0];
+      const modRgb = modCard
+        ? toRgb(getComputedStyle(modCard).backgroundColor)
+        : [0, 0, 0];
+      return { stickyRgb, modRgb };
+    });
+    expect(darkSurfaceCheck.stickyRgb[0]).toBeLessThan(40);
+    expect(darkSurfaceCheck.stickyRgb[1]).toBeLessThan(50);
+    expect(darkSurfaceCheck.stickyRgb[2]).toBeLessThan(80);
+    expect(darkSurfaceCheck.modRgb[0]).toBeLessThan(40);
+    expect(darkSurfaceCheck.modRgb[1]).toBeLessThan(50);
+    expect(darkSurfaceCheck.modRgb[2]).toBeLessThan(80);
     await page.evaluate(() => document.documentElement.classList.remove('dark'));
 
     // Open Admin Panel via desktop/wide nav and run live Health Check
@@ -385,6 +420,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
 
     expect(await checkContrast()).toBeGreaterThanOrEqual(4.5);
     await page.evaluate(() => document.documentElement.classList.add('dark'));
+    await page.waitForTimeout(250);
     expect(await checkContrast()).toBeGreaterThanOrEqual(4.5);
     await page.evaluate(() => document.documentElement.classList.remove('dark'));
 

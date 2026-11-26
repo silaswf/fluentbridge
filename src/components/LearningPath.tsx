@@ -572,7 +572,7 @@ export function LearningPath({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         {/* Left: Connected Lesson Path */}
         <div className={`space-y-4 ${isRightPanelOpen ? 'xl:col-span-8' : 'xl:col-span-12'}`}>
-          <div className="sticky top-0 z-20 -mx-1 rounded-2xl bg-[#F7F9FC]/95 px-1 py-2 backdrop-blur-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="sticky top-0 z-20 -mx-1 rounded-2xl bg-[#F7F9FC]/95 px-2.5 py-2.5 backdrop-blur-xs flex flex-wrap items-center justify-between gap-3 dark:border dark:border-slate-800/80 dark:bg-[#0B1120]/95">
             <div>
               <h2 className="font-display text-lg font-bold text-slate-900">
                 {tUi(uiLocale, 'trail.journeyTitle')} {activeCourse.namePt} ({filteredTopics.length} {tUi(uiLocale, 'trail.unitsLabel')})
@@ -632,7 +632,7 @@ export function LearningPath({
                     setDownloadingOffline(false);
                   });
                 }}
-                className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60 cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60 cursor-pointer dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
                 title="Baixar próximas 3 unidades para estudo offline"
               >
                 <span>{downloadingOffline ? offlineStatus : tUi(uiLocale, 'trail.downloadOffline')}</span>
@@ -642,7 +642,7 @@ export function LearningPath({
                   type="button"
                   data-testid="toggle-all-modules-btn"
                   onClick={() => setExpandAllModules((v) => !v)}
-                  className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60"
                 >
                   {expandAllModules ? tUi(uiLocale, 'trail.onlyCurrent') : tUi(uiLocale, 'trail.expandAll')}
                 </button>
@@ -728,7 +728,7 @@ export function LearningPath({
                   {retentionAlerts.slice(1).map((al) => (
                     <li
                       key={al.id}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/80 px-3 py-2 text-[11px] text-indigo-950"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/80 px-3 py-2 text-[11px] text-indigo-950 dark:bg-slate-900/80 dark:text-indigo-200"
                     >
                       <div>
                         <p className="font-bold">{al.titlePt}</p>
