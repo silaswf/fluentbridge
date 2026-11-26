@@ -55,8 +55,15 @@ O Google bloqueia OAuth tradicional dentro de WebViews embutidas (`disallowed_us
 
 ---
 
-## 4. Chave Fixa do Google Gemini & Evolução de Segurança
+## 4. Chave do Google Gemini — Guarda Exclusiva no Servidor (atualizado em `v8.2.0`)
 
-- Hoje (`v1.0.3`), `src/config/appConfig.ts` embute `DEFAULT_GEMINI_API_KEY` (com opção de override pelo campo `geminiApiKey` em `TeacherStudio` → `Nuvem & IA`), alimentando `aiTutorEngine.ts` nos modelos `gemini-3.8-flash` (principal) e `gemini-2.5-flash` (fallback).
+> [!WARNING]
+> Nas versões iniciais (`v1.0.x`) a chave do Gemini ficava embutida em `src/config/appConfig.ts`. Ela foi **exposta no histórico público do Git** e revogada pelo Google em 25/11/2026. Veja o incidente completo em [09 — Plano `v8.3`, seção 6](./09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md#6-incidente-de-segurança-e-lições-chave-gemini-exposta). **Nunca** coloque a chave em arquivos do projeto, em `VITE_*` ou em commits.
+
+- **Arquitetura atual:** o app chama apenas o proxy do Cloudflare Worker (`POST /api/gemini-tutor` em `https://fluentbridge-api.silaswf.workers.dev`). O cliente usa o token interno `__CLOUD_PROXY__` (`CLOUD_GEMINI_PROXY_TOKEN`) e o Worker lê a chave de `env.GEMINI_API_KEY`. O Worker tenta `gemini-3.8-flash` e cai para os modelos de fallback; a validação JWT Supabase é híbrida (`REQUIRE_SUPABASE_JWT=true` torna obrigatória).
+- **Como trocar/rotacionar a chave:**
+  1. Gere uma nova chave no Google AI Studio (ou Cloud Console → Credentials) e restrinja-a à *Generative Language API*.
+  2. `cd cloudflare-worker && npx wrangler secret put GEMINI_API_KEY` (cole a chave quando solicitado).
+  3. Verifique `GET /api/health` → `hasGeminiSecret: true`, e uma chamada de teste a `/api/gemini-tutor`.
+- **Override do professor:** o campo `geminiApiKey` em `TeacherStudio` → `Nuvem & IA` continua disponível apenas como chave pessoal local do usuário; não é a chave da plataforma.
 - Se não houver internet ou a cota falhar, o `AITutor` alterna transparentemente para o motor heurístico local offline (correção de *actually/currently*, *I have X years*, *make/do*, etc.).
-- **Próximo passo recomendado (Fase 5 — `v1.1.0`)**: migrar a chamada do Gemini para uma **Supabase Edge Function (`gemini-tutor`)**, mantendo a `GEMINI_API_KEY` exclusivamente nos Secrets do servidor e validando o JWT de cada aluno autenticado.

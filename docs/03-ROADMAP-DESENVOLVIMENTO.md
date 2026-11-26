@@ -98,6 +98,13 @@ Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** 
 - [x] **4 Simulados Oficiais Duolingo English Test (`examsDet.ts`, escala `10–160`)**.
 - [x] **60 Podcasts (10+ falas, 3 checagens) & 36 Vídeos (8+ falas, 2 checagens) integrados à Trilha Modular estilo Busuu (`TrailCheckpointModal.tsx`)**.
 
+### Fase 13.5 — Auditoria Funcional, UI/UX & Segurança (`v8.3.0` → `v8.5.0`) — PLANEJADA
+Detalhes, critérios de aceite e sequência em [09 — Plano `v8.3`](./09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md).
+- [x] **S-01 · Chave Gemini rotacionada** e guardada só como segredo do Worker (`wrangler secret put GEMINI_API_KEY`), validada em `/api/health`, `/api/gemini-tutor` e `/api/tts`.
+- [ ] **`v8.3.0` (P0/P1):** menu "Mais" mobile corrigido + `Revisão` fixa + `⚙️` no LessonPlayer (U-03); Dark Mode `orange/teal/sky` (U-05.1); **sotaques globais + 13 prompts regionais no Worker (F-01)**; modal **Configurações** e Sidebar enxuta (U-01); Hero da trilha limpo e filtro CEFR único (U-02); RPC LGPD real (F-06); Outbox para lição/SRS/checkpoint (F-04); dificuldade adaptativa persistente (F-03); ruído ambiente com volume (F-05); salvaguardas S-02..S-04 (restrição da chave, Secret Scanning, `gitleaks` no CI).
+- [ ] **`v8.4.0` (P2):** Writing híbrido com IA + fallback local (F-02); Retenção expansível/notificações nativas e área "Imersão" (F-07); header mínimo no mobile (U-04).
+- [ ] **`v8.5.0` (P2):** design tokens + teste de contraste Dark Mode (U-05.2); i18n completo `PT/EN/ES` com teste de paridade (U-06); sistema de cards (U-07).
+
 ### Fase 14 — Lojas Oficiais & Monetização SaaS (Próximo Ciclo)
 - [ ] **Publicação Oficial Google Play Store (`.aab`) + Build Nativo iOS (Xcode / TestFlight)** e assinatura Code Signing Windows.
 - [ ] **Planos, Pagamentos (Pix/Stripe) & Multi-Escolas (Item #18)** — em definição de nomenclatura e escopo comercial.

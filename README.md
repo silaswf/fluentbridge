@@ -41,6 +41,7 @@ Toda a documentação detalhada está organizada na pasta **[`docs/`](./docs/REA
 - [06 — Auditoria Completa & Plano de Otimizações](./docs/06-AUDITORIA-OTIMIZACOES.md)
 - [07 — Plano Técnico das Próximas Fases](./docs/07-PLANO-FASE-8-DIFERENCIAIS.md)
 - [08 — Auditoria 360°, Saúde da Arquitetura & Análise Competitiva de Mercado](./docs/08-ANALISE-COMPETITIVA-MERCADO.md)
+- [09 — Plano de Melhorias `v8.3` (Funcional, UI/UX & Segurança)](./docs/09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 
 ---

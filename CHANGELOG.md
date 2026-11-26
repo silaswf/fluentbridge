@@ -4,6 +4,13 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [Não lançado] — 2026-11-25
+### Segurança (chave Gemini) & Documentação do Plano `v8.3`
+- **Segurança:** a chave do Gemini exposta no histórico público (`919cfbb`, `fba45d4`, `26e1c90`) foi revogada pelo Google; nova chave gravada **somente** como segredo do Worker (`GEMINI_API_KEY`). Verificado: `/api/health` (`hasGeminiSecret: true`), `/api/gemini-tutor` e `/api/tts` (Gemini neural `fr-FR`/`it-IT`). Nenhuma alteração de código ou novo deploy foi necessária.
+- **Docs:** novo [`docs/09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md`](./docs/09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md) (auditoria funcional, UI/UX, segurança e roadmap `v8.3 → v8.5`); `docs/04-GUIA-SUPABASE-AUTENTICACAO.md` corrigido (chave só no servidor + procedimento de rotação); `docs/03`, `docs/08`, `docs/README.md` e `README.md` atualizados com referências cruzadas.
+
+---
+
 ## [`v8.2.0`] — 2026-11-24
 ### Módulos Desdobráveis, 49 Sotaques Regionais, Ruído Ambiente B1–C1, Diff Linha-a-Linha, Fila Offline Outbox, LGPD, Health Checks & Testes E2E Humanos
 - **Ponto 3.1 (Arquitetura, UX Modular & Offline):**
