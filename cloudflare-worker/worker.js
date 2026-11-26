@@ -8,7 +8,8 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, Range',
+  'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Range, Content-Length, X-TTS-Cache',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -90,6 +91,36 @@ function checkRateLimit(request, routeKey, maxPerMinute, userId = null) {
     remaining: Math.max(0, maxPerMinute - existing.count),
     resetSec,
   };
+}
+
+async function checkPersistentDailyQuota(env, request, routeKey, dailyLimit, userId = null) {
+  if (!env.MEDIA_BUCKET) return { allowed: true, remaining: dailyLimit };
+  const ip =
+    request.headers.get('CF-Connecting-IP') ||
+    request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+    'unknown';
+  const day = new Date().toISOString().slice(0, 10);
+  const rawId = (userId ? `u_${userId}` : `ip_${ip}`).replace(/[^a-zA-Z0-9._-]/g, '_');
+  const quotaKey = `quotas/${day}/${routeKey}/${rawId}.json`;
+  try {
+    let count = 0;
+    const existing = await env.MEDIA_BUCKET.get(quotaKey);
+    if (existing) {
+      const parsed = await existing.json();
+      count = Number(parsed?.count || 0);
+    }
+    if (count >= dailyLimit) {
+      return { allowed: false, remaining: 0 };
+    }
+    await env.MEDIA_BUCKET.put(
+      quotaKey,
+      JSON.stringify({ count: count + 1, updatedAt: new Date().toISOString() }),
+      { httpMetadata: { contentType: 'application/json' } },
+    );
+    return { allowed: true, remaining: Math.max(0, dailyLimit - (count + 1)) };
+  } catch {
+    return { allowed: true, remaining: dailyLimit };
+  }
 }
 
 function jsonResponse(payload, status = 200, extraHeaders = {}) {
@@ -1104,10 +1135,60 @@ async function handleMediaRequest(request, env, path) {
     return jsonResponse({ ok: true, key, url: baseUrl, size: bodyBytes.byteLength });
   }
 
+  if (path === '/api/media/list') {
+    if (request.method !== 'GET') {
+      return jsonResponse({ error: 'Method not allowed' }, 405);
+    }
+    const url = new URL(request.url);
+    const listed = await env.MEDIA_BUCKET.list({ prefix: 'videos/', limit: 100 });
+    const items = (listed.objects || []).map((obj) => ({
+      key: obj.key,
+      url: `${url.origin}/api/media/${obj.key}`,
+      size: obj.size,
+      uploaded: obj.uploaded,
+    }));
+    return jsonResponse({ ok: true, items });
+  }
+
   const key = decodeURIComponent(path.replace(/^\/api\/media\//, '')).replace(/^\/+/, '');
   if (!key) {
     return jsonResponse({ error: 'Missing media key' }, 400);
   }
+  const rangeHeader = request.headers.get('Range');
+  if (rangeHeader) {
+    const headObj = await env.MEDIA_BUCKET.head(key);
+    if (!headObj) {
+      return jsonResponse({ error: 'Media not found' }, 404);
+    }
+    const total = headObj.size;
+    const match = /^bytes=(\d+)-(\d*)$/i.exec(rangeHeader.trim());
+    if (!match) {
+      return new Response('Invalid Range', { status: 416, headers: CORS_HEADERS });
+    }
+    const start = Number(match[1]);
+    const end = match[2] ? Math.min(Number(match[2]), total - 1) : total - 1;
+    if (start >= total || start > end) {
+      return new Response('Range Not Satisfiable', {
+        status: 416,
+        headers: { ...CORS_HEADERS, 'Content-Range': `bytes */${total}` },
+      });
+    }
+    const length = end - start + 1;
+    const sliced = await env.MEDIA_BUCKET.get(key, { range: { offset: start, length } });
+    if (!sliced) {
+      return jsonResponse({ error: 'Media not found' }, 404);
+    }
+    const headers = new Headers();
+    sliced.writeHttpMetadata(headers);
+    if (!headers.get('Content-Type')) headers.set('Content-Type', 'video/mp4');
+    headers.set('Accept-Ranges', 'bytes');
+    headers.set('Content-Range', `bytes ${start}-${end}/${total}`);
+    headers.set('Content-Length', String(length));
+    headers.set('Cache-Control', 'public, max-age=31536000');
+    Object.entries(CORS_HEADERS).forEach(([k, v]) => headers.set(k, v));
+    return new Response(sliced.body, { status: 206, headers });
+  }
+
   const obj = await env.MEDIA_BUCKET.get(key);
   if (!obj) {
     return jsonResponse({ error: 'Media not found' }, 404);
@@ -1115,6 +1196,10 @@ async function handleMediaRequest(request, env, path) {
   const headers = new Headers();
   obj.writeHttpMetadata(headers);
   if (!headers.get('Content-Type')) headers.set('Content-Type', 'application/octet-stream');
+  headers.set('Accept-Ranges', 'bytes');
+  if (typeof obj.size === 'number') {
+    headers.set('Content-Length', String(obj.size));
+  }
   headers.set('Cache-Control', 'public, max-age=31536000');
   Object.entries(CORS_HEADERS).forEach(([k, v]) => headers.set(k, v));
   return new Response(obj.body, { status: 200, headers });
@@ -1123,6 +1208,12 @@ async function handleMediaRequest(request, env, path) {
 async function handleTelemetryRequest(request, env) {
   const TELEMETRY_KEY = 'telemetry/errors.json';
   if (request.method === 'GET') {
+    if (env.REQUIRE_SUPABASE_JWT === 'true') {
+      const auth = await verifySupabaseJwt(request, env);
+      if (!auth.authenticated) {
+        return jsonResponse({ ok: false, error: 'Authentication required for telemetry read' }, 401);
+      }
+    }
     let logs = [...memoryTelemetryLogs];
     if (env.MEDIA_BUCKET) {
       try {
@@ -1196,14 +1287,15 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '8.3.0',
+        version: '8.4.0',
         accentCount: 49,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
-        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],
+        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/list', '/api/media/*', '/api/telemetry'],
         rateLimits: {
           ttsPerMin: 120,
           sttPerMin: 30,
           geminiTutorPerMin: 30,
+          dailyQuotas: { stt: 200, geminiTutor: 250 },
         },
         hasAiBinding: Boolean(env.AI),
         hasGeminiSecret: Boolean(env.GEMINI_API_KEY),
@@ -1245,6 +1337,10 @@ export default {
           },
         );
       }
+      const dq = await checkPersistentDailyQuota(env, request, 'stt', 200, auth.userId);
+      if (!dq.allowed) {
+        return jsonResponse({ ok: false, error: 'Daily STT quota exceeded' }, 429);
+      }
       return handleSttRequest(request, env);
     }
 
@@ -1264,6 +1360,10 @@ export default {
             'X-RateLimit-Reset': String(rl.resetSec),
           },
         );
+      }
+      const dq = await checkPersistentDailyQuota(env, request, 'gemini', 250, auth.userId);
+      if (!dq.allowed) {
+        return jsonResponse({ ok: false, error: 'Daily AI Tutor quota exceeded' }, 429);
       }
       return handleGeminiTutorRequest(request, env);
     }

@@ -1,6 +1,6 @@
-# Documentação de Desenvolvimento — FluentBridge (`v5.0.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v8.4.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **12 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco** de `A1` a `C1`, com **`1.200` unidades**, **`2.400` guias gramaticais**, **`480` cenários IA**, **`72` Simulados Cronometrados Oficiais**, **Comunidade com Ligas & Fórum**, **Alfabetos Completos no Treinador de Escrita**, **Gateway de Download Web/Win/Android** e **Suíte E2E Playwright**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **12 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco** de `A1` a `C1`, com **`1.236` unidades**, **`49` sotaques neurais**, **`2.400` guias gramaticais**, **`76` Simulados Cronometrados Oficiais**, **Comunidade 2.0**, **Modo Hands-Free**, **Aba Imersão Dedicada**, **Gateway Web/Win/Android/iOS PWA** e **Suíte Vitest + Playwright WCAG AA**).
 
 ---
 
@@ -14,17 +14,17 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°
 6. **[05 - Manual Completo de Funcionalidades](./05-MANUAL-FUNCIONALIDADES.md)** — Guia detalhado de uso das telas do aluno, do Estúdio do Professor e do **Painel Admin Mestre**.
 7. **[06 - Auditoria Completa & Plano de Otimizações](./06-AUDITORIA-OTIMIZACOES.md)** — Auditoria pós-`v2.0.0` com medições reais de bundle (`122,94 kB` inicial), segurança, Dark Mode/responsividade, latência TTS/STT e recomendações futuras.
 8. **[07 - Plano Técnico das Próximas Fases (Fases 10 a 12 · v2.1 → v3.0)](./07-PLANO-FASE-8-DIFERENCIAIS.md)** — Histórico da Fase 8 entregue e blueprints técnicos detalhados para as próximas fases.
-9. **[08 - Auditoria Qualitativa 360° (`v8.3.0`), UI/UX, Segurança & Análise Competitiva de Mercado](./08-ANALISE-COMPETITIVA-MERCADO.md)** — Documento unificado com inventário `v8.3.0`, comparativo competitivo (incluindo UI/UX), diagnóstico qualitativo e plano evolutivo (`v8.4 → v10.0`).
-10. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v3.0.0`).
+9. **[08 - Análise Competitiva, UX/UI, Auditoria Técnica e Plano Mestre 360° (`v8.4.0`)](./08-ANALISE-COMPETITIVA-MERCADO.md)** — Relatório definitivo unificado com benchmark de mercado (incluindo UI/UX), métricas reais escavadas do código, bugs resolvidos, estratégia iOS gratuita e backlog `3.1`–`3.6` (`Q-01`..`Q-24`).
+10. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v8.4.0`).
 
 ---
 
-## Resumo do Estado Atual (`v5.0.0`)
+## Resumo do Estado Atual (`v8.4.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) com **Gateway de Download** + **Edge API `v5.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`FluentBridge-Setup-5.0.0.exe`) |
-| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito (`Seções 9 e 10`)**, `syncRelationalFullState`, **compactação esparsa (~95%)**, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
-| **Currículo, Escrita Completa & CAT** | **`1.200` unidades** (`12` idiomas × `100`/idioma, RTL nativo em Árabe), **Alfabetos 100% Completos (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe 4 formas, `40` Hanzi)**, **`2.400` tabelas gramaticais**, **`480` questões CAT** |
-| **Simulados, Comunidade & Voz/IA** | **`72` Simulados Cronometrados Oficiais** (18 exames, escalas e tabelas reais), **Comunidade por Idioma (Ligas + Fórum)**, **Histórico de Pronúncia**, **Shadowing**, **Caderno de Erros**, **`60` Podcasts**, **Tutor IA (`480` cenários + `12.000` modos)** |
-| **Verificação & CI/CD** | `npm test` (`14` arquivos / `38` testes OK) · `npm run test:e2e` (`7/7` Playwright OK) · `npx tsc --noEmit` (`0` erros) · GitHub Actions `.apk` + `.aab` |
+| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **iPhone/iPad Safari PWA ($0/ano)** + **Edge API `v8.4.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`.exe`) |
+| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito**, cotas diárias R2 (`200` STT / `250` Gemini), streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
+| **Currículo, Escrita Completa & CAT** | **`1.236` unidades** (`12` idiomas, RTL nativo em Árabe), **Alfabetos 100% Completos**, **`2.400` tabelas gramaticais**, **`480` questões CAT**, **`phonemeBreakdown` nos 12 idiomas** |
+| **Simulados, Comunidade & Voz/IA** | **`76` Simulados Cronometrados Oficiais**, **Comunidade 2.0 (Ligas + Desafio do Mês + Moderação + Diff/Aceite + Reações)**, **Modo Hands-Free**, **Aba Imersão Dedicada**, **Tutor IA** |
+| **Verificação & CI/CD** | `npm test` (`22` arquivos / `77` testes OK) · `npm run test:e2e` (`14/14` Playwright + WCAG AA OK) · `npx tsc --noEmit` (`0` erros) · Cloudflare Worker + Pages live |

@@ -33,6 +33,7 @@ import {
   getPendingOutboxCount,
 } from './utils/offlineOutbox';
 import { reportClientError } from './utils/telemetry';
+import { getTeacherDisplayName } from './utils/teacherDisplay';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
 import { TeacherLinkModal } from './components/TeacherLinkModal';
@@ -40,6 +41,7 @@ import type { TeacherTab } from './components/TeacherStudio';
 import { useCloudSyncController } from './hooks/useCloudSyncController';
 import { purgeExpiredSpeakingAudios } from './utils/audioRetention';
 import { getCurrentWeekKey } from './utils/communityEngine';
+import { acceptCorrectionReply, togglePostReaction } from './utils/communityActions';
 import { addMistakeEntry, markMistakeResolved } from './utils/mistakeBank';
 import { scheduleDailyStudyReminder } from './utils/notifications';
 import { isRtlLanguage, isWebPlatform } from './utils/platform';
@@ -1375,6 +1377,7 @@ export function App() {
       (u) => u.id === teacherId && u.role === 'teacher',
     );
     if (!teacher) return;
+    const teacherDisplay = getTeacherDisplayName(teacher, state.teacherName);
     setState((prev) => ({
       ...prev,
       users: prev.users.map((u) =>
@@ -1390,7 +1393,7 @@ export function App() {
       ),
     }));
     setShowTeacherLinkModal(false);
-    showToast(`Aluno vinculado ao(à) Prof. ${teacher.name}!`);
+    showToast(`Aluno vinculado ao(à) Prof. ${teacherDisplay}!`);
   };
 
   const handleUnlinkStudentFromTeacher = (studentId: string, bySelf = false) => {
@@ -1775,6 +1778,57 @@ export function App() {
     showToast('Publicação removida.');
   };
 
+  const handleToggleCommunityReaction = (postId: string, emoji: string) => {
+    if (!currentUser) return;
+    setState((prev) => ({
+      ...prev,
+      communityPosts: togglePostReaction(
+        prev.communityPosts ?? [],
+        postId,
+        emoji,
+        currentUser.id,
+      ),
+    }));
+  };
+
+  const handleAcceptCommunityCorrection = (postId: string, replyId: string) => {
+    if (!currentUser) return;
+    setState((prev) => {
+      const targetPost = (prev.communityPosts ?? []).find((p) => p.id === postId);
+      const targetReply = targetPost?.replies.find((r) => r.id === replyId);
+      const alreadyAccepted = targetPost?.acceptedReplyId === replyId;
+      const nextPosts = acceptCorrectionReply(
+        prev.communityPosts ?? [],
+        postId,
+        replyId,
+      );
+      const nextUsers =
+        !alreadyAccepted && targetReply
+          ? prev.users.map((u) =>
+              u.id === targetReply.authorId ? { ...u, xp: u.xp + 10 } : u,
+            )
+          : prev.users;
+      return {
+        ...prev,
+        communityPosts: nextPosts,
+        users: nextUsers,
+      };
+    });
+    showToast('Correção aceita! +10 XP concedidos ao colega.');
+  };
+
+  const handleClaimMonthlyChallenge = (challengeId: string, xpReward: number) => {
+    if (!currentUser) return;
+    const claimed = currentUser.claimedChallengeIds ?? [];
+    if (claimed.includes(challengeId)) return;
+    updateCurrentUser((u) => ({
+      ...u,
+      xp: u.xp + xpReward,
+      claimedChallengeIds: [...(u.claimedChallengeIds ?? []), challengeId],
+    }));
+    showToast(`Desafio do Mês concluído! +${xpReward} XP!`);
+  };
+
   const handleRunAudioRetentionCleanup = async (): Promise<string> => {
     const res = await purgeExpiredSpeakingAudios(
       state.submissions,
@@ -1917,7 +1971,11 @@ export function App() {
           <LearningPath
             currentUser={currentUser}
             teacherName={state.teacherName}
-            assignedTeacherName={assignedTeacher?.name}
+            assignedTeacherName={
+              assignedTeacher
+                ? getTeacherDisplayName(assignedTeacher, state.teacherName)
+                : undefined
+            }
             activeCourse={activeCourse}
             activeDialect={activeDialect}
             classNameLabel={userClassName}
@@ -2035,6 +2093,9 @@ export function App() {
               onCreatePost={handleCreateCommunityPost}
               onReplyPost={handleReplyCommunityPost}
               onToggleLikePost={handleToggleLikePost}
+              onToggleReaction={handleToggleCommunityReaction}
+              onAcceptCorrection={handleAcceptCommunityCorrection}
+              onClaimChallenge={handleClaimMonthlyChallenge}
               onDeletePost={handleDeleteCommunityPost}
             />
           )}
@@ -2052,7 +2113,7 @@ export function App() {
             />
           )}
 
-          {activeView === 'tips' && (
+          {(activeView === 'tips' || activeView === 'immersion') && (
             <TipsLibrary
               topics={courseTopics}
               languageCode={activeLanguage}
@@ -2067,6 +2128,7 @@ export function App() {
                 setActiveTopic(null);
                 setActiveView('tutor');
               }}
+              initialViewMode={activeView === 'immersion' ? 'podcasts' : 'tips'}
             />
           )}
 
@@ -2102,7 +2164,19 @@ export function App() {
               onAddCustomTopic={handleAddCustomTopic}
               onDeleteCustomTopic={handleDeleteCustomTopic}
               onUpdateSettings={(settings) => {
-                setState((prev) => ({ ...prev, ...settings }));
+                setState((prev) => ({
+                  ...prev,
+                  schoolName: settings.schoolName,
+                  teacherName:
+                    currentUser.isMasterAdmin || prev.users.filter((u) => u.role === 'teacher').length <= 1
+                      ? settings.teacherName
+                      : prev.teacherName,
+                  users: prev.users.map((u) =>
+                    u.id === currentUser.id
+                      ? { ...u, teacherDisplayName: settings.teacherName }
+                      : u,
+                  ),
+                }));
                 showToast('Configurações da escola atualizadas!');
               }}
               onUpdateCloudConfig={(cloudConfig: CloudConfig) =>

@@ -10,6 +10,7 @@ import {
   FileCheck2,
   Flame,
   GraduationCap,
+  Headphones,
   Lightbulb,
   LogOut,
   Menu,
@@ -59,6 +60,7 @@ export type NavView =
   | 'exams'
   | 'community'
   | 'live'
+  | 'immersion'
   | 'tips'
   | 'certificates'
   | 'teacher'
@@ -223,9 +225,15 @@ export function Sidebar({
       Icon: Video,
     },
     {
+      id: 'immersion',
+      label: tUi(uiLocale, 'nav.immersion'),
+      shortLabel: 'Imersão',
+      Icon: Headphones,
+    },
+    {
       id: 'tips',
       label: tUi(uiLocale, 'nav.tips'),
-      shortLabel: 'Imersão',
+      shortLabel: 'Guias',
       Icon: Lightbulb,
     },
     {
@@ -685,7 +693,7 @@ export function Sidebar({
           data-testid="mobile-more-trigger"
           onClick={() => setMobileMoreOpen((v) => !v)}
           className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-semibold ${
-            mobileMoreOpen || ['community', 'live', 'tips', 'certificates', 'teacher', 'admin'].includes(activeView)
+            mobileMoreOpen || ['community', 'live', 'immersion', 'tips', 'certificates', 'teacher', 'admin'].includes(activeView)
               ? 'text-blue-600'
               : 'text-slate-500'
           }`}

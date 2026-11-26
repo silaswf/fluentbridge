@@ -59,6 +59,31 @@ export async function reportClientError(
     if (!res.ok) {
       await enqueueOfflineMutation('telemetry', payload);
     }
+    const sentryDsn = (
+      import.meta as unknown as { env?: Record<string, string | undefined> }
+    ).env?.VITE_SENTRY_DSN;
+    if (sentryDsn && typeof sentryDsn === 'string' && sentryDsn.startsWith('https://')) {
+      try {
+        const parsed = new URL(sentryDsn);
+        const projectId = parsed.pathname.replace(/^\/+/, '');
+        const publicKey = parsed.username;
+        if (projectId && publicKey) {
+          const envelopeUrl = `${parsed.protocol}//${parsed.host}/api/${projectId}/envelope/?sentry_key=${publicKey}&sentry_version=7`;
+          const event = {
+            event_id: crypto.randomUUID?.().replace(/-/g, '') || `${Date.now()}`,
+            timestamp: Date.now() / 1000,
+            platform: 'javascript',
+            release: `fluentbridge@${APP_VERSION}`,
+            exception: { values: [{ type: 'ClientError', value: payload.message }] },
+            tags: { route: payload.route, appPlatform: payload.platform },
+          };
+          const envelope = `${JSON.stringify({ event_id: event.event_id, sent_at: new Date().toISOString() })}\n${JSON.stringify({ type: 'event' })}\n${JSON.stringify(event)}`;
+          void fetch(envelopeUrl, { method: 'POST', body: envelope }).catch(() => {});
+        }
+      } catch {
+        // Ignore invalid optional VITE_SENTRY_DSN
+      }
+    }
   } catch {
     await enqueueOfflineMutation('telemetry', payload);
   }

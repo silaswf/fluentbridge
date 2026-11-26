@@ -3,6 +3,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   Clock,
+  Headphones,
   List,
   RotateCw,
   Search,
@@ -29,6 +30,7 @@ import {
   toJapaneseKana,
   type JapaneseScriptMode,
 } from '../utils/japaneseKana';
+import { HandsFreeAudioModal } from './HandsFreeAudioModal';
 import { DualAudioButtons } from './DualAudioButtons';
 import { MistakeNotebookView } from './MistakeNotebookView';
 
@@ -86,6 +88,7 @@ export function VocabReview({
   const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
     loadJapaneseScriptMode(),
   );
+  const [handsFreeOpen, setHandsFreeOpen] = useState(false);
 
   const unlockedIdSet = useMemo(() => new Set(vocab.map((c) => c.id)), [vocab]);
   const activeSourceVocab =
@@ -324,6 +327,15 @@ export function VocabReview({
             >
               <List className="h-4 w-4" />
               <span>Lista ({deck.length})</span>
+            </button>
+            <button
+              type="button"
+              data-testid="open-hands-free-btn"
+              onClick={() => setHandsFreeOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 cursor-pointer"
+            >
+              <Headphones className="h-4 w-4" />
+              <span>Hands-Free</span>
             </button>
             {languageCode === 'ja' && (
               <button
@@ -879,6 +891,13 @@ export function VocabReview({
       )}
         </>
       )}
+      <HandsFreeAudioModal
+        open={handsFreeOpen}
+        cards={deck.length > 0 ? deck : activeSourceVocab}
+        languageCode={languageCode}
+        dialectCode={languageCode}
+        onClose={() => setHandsFreeOpen(false)}
+      />
     </div>
   );
 }

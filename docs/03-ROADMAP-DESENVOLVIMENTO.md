@@ -1,6 +1,6 @@
-# 03 — Roadmap de Desenvolvimento até a Completude (`v1.0.0` → `v8.2.0`)
+# 03 — Roadmap de Desenvolvimento até a Completude (`v1.0.0` → `v8.4.0`)
 
-Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** até o marco atual **`v8.2.0`** (`1.236` unidades em `12` idiomas com módulos desdobráveis e `>= 10` cards coesos em 100% das unidades, `49` sotaques regionais, ruído ambiente Web Audio, Writing Diff linha a linha, fila offline *Outbox*, Privacidade & LGPD, Health Checks sintéticos, `80` simulados incl. DET, `60` podcasts e `36` vídeos com checkpoints, além de builds Web/PWA, Windows `.exe` e Android `.apk`).
+Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** até o marco atual **`v8.4.0`** (`1.236` unidades em `12` idiomas, `49` sotaques regionais com vozes neurais e cache R2, `76` simulados oficiais, Dark Mode híbrido WCAG AA, aba dedicada **Imersão**, **Modo Hands-Free**, `phonemeBreakdown` nos 12 idiomas, Comunidade 2.0 com moderação e Desafio do Mês, cotas persistentes no R2, streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, e builds Web/PWA incl. iPhone Safari gratuito, Windows `.exe` e Android `.apk`).
 
 ---
 

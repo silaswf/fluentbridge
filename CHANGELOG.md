@@ -4,6 +4,26 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.4.0`] — 2026-11-26
+### Dark Mode Híbrido, Imersão Dedicada, Hands-Free, Comunidade 2.0, Cotas R2, Vídeo Range & Correção do Nome do Professor
+- **Correção de Bug (Nome do Professor):** Adicionado `teacherDisplayName` em `UserProfile` e helper `getTeacherDisplayName()` (`src/utils/teacherDisplay.ts`). Agora o nome definido em *Estúdio do Professor → Nuvem, IA & Escola* (ex.: `Silas Wagner`) é exibido corretamente no dropdown de atribuição do `AdminPanel` e em `TeacherLinkModal`, usando o nome de cadastro apenas como fallback.
+- **UI/UX, Acessibilidade & iOS PWA (`Q-01`, `Q-02`, `Q-03`):**
+  - `src/index.css`: `@custom-variant dark` + regras `:where(html.dark)` sem `!important` nos fundos principais (`.bg-white`, `.bg-slate-50*`, `.bg-[#F7F9FC]`) e classes semânticas `.fb-card-primary` / `.fb-card-secondary`.
+  - Novo componente `EmptyStateCard.tsx` (aplicado em `LiveClassroomView` e `CommunityHub`) e pulso visual `+XP` em tempo real no topo de `LessonPlayer.tsx`.
+  - Aba dedicada **Imersão (Áudio & Vídeo)** na `Sidebar` (`PT/EN/ES`), separando Imersão de **Guias & Gramática**.
+  - Suporte **iOS Safari PWA ($0/ano)**: `apple-mobile-web-app-title`, `public/apple-touch-icon.svg` e card explicativo de instalação no iPhone/iPad em `AppDownloadGateway.tsx`.
+- **Arquitetura & Edge Security (`Q-04`, `Q-05`, `Q-07`, `Q-13`):**
+  - Extraído `src/components/teacher/SchoolSettingsTab.tsx` de `TeacherStudio.tsx` (`2.253 → 1.834` LOC).
+  - `vite.config.ts` com `build.sourcemap: 'hidden'` e `'**/*.map'` em `globIgnores`; `telemetry.ts` com encaminhamento opcional para `VITE_SENTRY_DSN`.
+  - `cloudflare-worker/worker.js` (`v8.4.0`): cotas diárias persistentes no R2 (`quotas/YYYY-MM-DD/...` para STT 200/dia e Gemini 250/dia), leitura `/api/telemetry` protegida em modo estrito e `scripts/prewarm-r2-tts.mjs` com suporte a `--exams` e `--limit`.
+- **Pedagogia, Voz & Comunidade (`Q-08`, `Q-09`, `Q-11`):**
+  - Descoberta automática de vídeos R2 (`GET /api/media/list`), streaming com HTTP `Range` (`206 Partial Content` para Safari/iOS) e sincronismo de `playbackRate` em `InteractiveVideoView.tsx`.
+  - Chips de `phonemeBreakdown` nos 12 idiomas (`phoneticFeedback.ts` + `LessonPlayer.tsx`) e novo **Modo Hands-Free** em loop (`HandsFreeAudioModal.tsx` em `VocabReview.tsx`).
+  - `CommunityHub.tsx`: filtro anti-spam/links/palavrões (`moderateCommunityText`), **Desafio do Mês (+80 XP)**, reações rápidas (`👏🔥💡🎯`), áudio em snippets (`DualAudioButtons`), *diff* visual e aceite de correção (`+10 XP`) e categoria *Parceiro de Estudo*.
+- **Verificação:** `node --check cloudflare-worker/worker.js`, `tsc --noEmit` (0 erros), `vitest` (`22` suítes / `77` testes verdes), `playwright` (`14/14` fluxos E2E incluindo auditoria de contraste WCAG AA Light/Dark), deploy live Worker `v8.4.0` + Pages e pré-aquecimento de 18 frases no R2.
+
+---
+
 ## [`v8.3.0`] — 2026-11-26
 ### Vozes Neurais Naturais em Tudo + Execução Integral do Plano 09 (P0, P1 e P2)
 - **Vozes Neurais Naturais (`cloudflare-worker/worker.js` `8.3.0`, `src/utils/speech.ts`, `DualAudioButtons.tsx`, `MockExamHub.tsx`, `GradedReadersView.tsx`):**

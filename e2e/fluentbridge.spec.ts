@@ -78,7 +78,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
   }) => {
     await loginAsMasterAdmin(page);
     await page.getByRole('button', { name: /^Tema/i }).click();
-    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
+    await page.getByRole('button', { name: /Guias & Gramática|Imersão & Guias|Central & Guia/i }).click();
 
     const warningBox = page.getByTestId('tip-warning-box').first();
     await expect(warningBox).toBeVisible();
@@ -98,7 +98,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await loginAsMasterAdmin(page);
 
     await selectLanguage(page, 'ja');
-    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
+    await page.getByRole('button', { name: /Guias & Gramática|Imersão & Guias|Central & Guia/i }).click();
     await page.getByRole('button', { name: /Escrita & Traços/i }).click();
     await expect(page.getByText(/Hiragana \(46\)/i)).toBeVisible();
 
@@ -180,7 +180,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await expect(page.getByTestId('vocab-mode-cloze')).toBeVisible();
 
     // Grammar Drills & Graded Readers in TipsLibrary
-    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
+    await page.getByRole('button', { name: /Guias & Gramática|Imersão & Guias|Central & Guia/i }).click();
     await page.getByTestId('tips-tab-drills').click();
     await expect(page.getByTestId('grammar-drill-lab')).toBeVisible();
     await page.getByTestId('tips-tab-readers').click();

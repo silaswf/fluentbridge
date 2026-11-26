@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -165,29 +166,38 @@ html.dark .tip-warning-box .tip-warning-icon {
   color: #FDA4AF !important;
 }
 
-/* Dark Mode (Phase 7 & Visual Overhaul) */
+/* Hybrid Dark Mode surfaces (low-specificity :where fallback + semantic classes) */
+.fb-card-primary {
+  background-color: var(--bg-surface);
+  border-color: var(--border-subtle);
+}
+.fb-card-secondary {
+  background-color: var(--bg-surface-muted);
+  border-color: var(--border-subtle);
+}
+
 html.dark body {
   background-color: #0B1120;
   color: #F1F5F9;
 }
-html.dark aside,
-html.dark .lg\:bg-white,
-html.dark .bg-white,
-html.dark .bg-white\/95 {
-  background-color: #111827 !important;
+:where(html.dark) aside,
+:where(html.dark) .lg\:bg-white,
+:where(html.dark) .bg-white,
+:where(html.dark) .bg-white\/95 {
+  background-color: #111827;
 }
-html.dark .bg-\[\#F7F9FC\] {
-  background-color: #0B1120 !important;
+:where(html.dark) .bg-\[\#F7F9FC\] {
+  background-color: #0B1120;
 }
-html.dark .bg-slate-50,
-html.dark .bg-slate-50\/50,
-html.dark .bg-slate-50\/60,
-html.dark .bg-slate-50\/70,
-html.dark .bg-slate-50\/80,
-html.dark .bg-slate-50\/90,
-html.dark .bg-slate-100,
-html.dark .bg-slate-100\/70 {
-  background-color: #1E293B !important;
+:where(html.dark) .bg-slate-50,
+:where(html.dark) .bg-slate-50\/50,
+:where(html.dark) .bg-slate-50\/60,
+:where(html.dark) .bg-slate-50\/70,
+:where(html.dark) .bg-slate-50\/80,
+:where(html.dark) .bg-slate-50\/90,
+:where(html.dark) .bg-slate-100,
+:where(html.dark) .bg-slate-100\/70 {
+  background-color: #1E293B;
 }
 
 /* Reading step passage & clickable glossary contrast (Light + Dark across Web, Windows, Android) */

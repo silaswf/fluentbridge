@@ -462,11 +462,13 @@ export interface CommunityPost {
   authorAvatarColor: string;
   authorRole: UserRole;
   level: CEFRLevel;
-  category: 'question' | 'correction' | 'culture' | 'milestone';
+  category: 'question' | 'correction' | 'culture' | 'milestone' | 'study_partner';
   title: string;
   body: string;
   targetSnippet?: string;
   likes: string[];
+  reactions?: Record<string, string[]>;
+  acceptedReplyId?: string;
   replies: CommunityReply[];
   pinned?: boolean;
   createdAt: string;
@@ -494,6 +496,7 @@ export interface LiveSessionRecord {
 export interface UserProfile {
   id: string;
   name: string;
+  teacherDisplayName?: string;
   email: string;
   password: string;
   role: UserRole;
@@ -532,6 +535,7 @@ export interface UserProfile {
   vocab: VocabCard[];
   issuedCertificates: CertificateRecord[];
   dailyQuests: DailyQuestsProgress;
+  claimedChallengeIds?: string[];
   streakFreezes?: number;
   lastStudyDate?: string;
   themeMode?: 'light' | 'dark' | 'system';

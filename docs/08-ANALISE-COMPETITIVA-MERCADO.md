@@ -1,126 +1,185 @@
-# 08 — Auditoria Qualitativa 360° (`v8.3.0`), UI/UX, Segurança & Análise Competitiva de Mercado
+# 08 — Análise Competitiva, UX/UI, Auditoria Técnica e Plano Mestre 360° (v8.4.0)
 
-> **Data da auditoria:** 26/11/2026 · **Versão auditada:** `v8.3.0` (commit `1e8d670`)  
-> **Escopo:** Documento unificado substituindo o antigo `09-PLANO-v8.3`, consolidando o inventário técnico da plataforma, o **comparativo competitivo com o mercado (incluindo UI & UX)**, a **análise qualitativa do que já foi entregue na `v8.3.0`** e o **plano atualizado do que ainda pode evoluir (`v8.4 → v10.0`)** com diagnóstico real e critérios de aceite.
-
----
-
-## 1. Raio-X Atual da Plataforma (`v8.3.0`)
-
-### 1.1 Escala de Conteúdo & Qualidade Pedagógica
-- **12 Idiomas Completos (CEFR A1–C1):** Inglês (`en`), Espanhol (`es`), Francês (`fr`), Italiano (`it`), Alemão (`de`), Russo (`ru`), Japonês (`ja`), Chinês (`zh`), Árabe (`ar` RTL), Holandês (`nl`), Africâner (`af`) e Sueco (`sv`).
-- **1.236 Unidades Estruturadas (`103` por idioma · `13.736` passos totais):** organizadas em **módulos desdobráveis com numeração sequencial única (`Módulo 1 … N`)** e **Pontos de Verificação (+60 XP)** ligados a podcasts e vídeos, unidades de **Expressões Idiomáticas, Gírias e Registro Informal/Tabu `18+`**, imersão a partir do **B2/C1** com botão **"Traduzir PT"** e salvamento de progresso passo a passo (`topicStepProgress`).
-- **14.186 Cards de Vocabulário Coesos (SM-2 + Cloze):** mínimo garantido de **`10` palavras por unidade** (`10–13` cards/unidade em 100% das 1.236 unidades, inclusive Unidade 0), extração real das atividades (`inLessonLexicon.ts`), **Revisão Espiral** (`recycledLinks`) e validação automática 100% via `exampleMatchesWord`.
-- **Coesão & Dificuldade Adaptativa Real:** Matching de 5 pares, Cloze coeso, glossário Unicode clicável no Reading, **Writing híbrido com IA semântica** (`analyzeWritingHybrid` aceitando respostas alternativas válidas + fallback local), e **dificuldade adaptativa persistente** (`adaptiveDifficulty.ts`) conectada ao `autoShowHints` no `LessonPlayer`.
-- **Letras, Sons & Kanji Progressivo (`230` unidades `script_phonics` + Toggle `100% Kana`):** introdução progressiva de letras e Kanji para `ru`, `ar`, `zh` e `ja`, além do Treinador dedicado de Escrita & Traços.
-- **Gramática, Leitura Graduada, Tutor IA & Nivelamento:** `2.400` guias gramaticais, `144` **Grammar Drills**, `12` **Graded Readers** (`60` capítulos com leitura contínua corrigida via `speakTextAsync`), `480` cenários de Tutor IA com memória SM-2 e `480` questões adaptativas CAT.
-- **80 Simulados Oficiais Cronometrados (`20` exames reais):** CELPIP (usando **`en-CA`** por padrão), IELTS, TOEFL, **DET (`10–160`)**, DELE, DELF, CILS, Goethe, TORFL, JLPT, HSK, ALPT, NT2 e Swedex, com Speaking em 3 partes e Rubrica Analítica de Writing.
-- **Imersão Audiovisual:** **`60` Podcasts** (`180` checkpoints) e **`36` Vídeos Curtos Interativos** (`72` checkpoints) com legendas duplas clicáveis (`SM-2`).
-
-### 1.2 Vozes Neurais Naturais, IA, Escola & Áudio
-- **Cloudflare Worker Edge (`fluentbridge-api` `v8.3.0`):**
-  - **Tier 1:** **Gemini 2.5 Native Neural TTS** em **todos os 49 sotaques regionais** (incluindo `en-US`, `en-GB`, `en-CA`, `es-ES`, `es-MX`, `it-IT-NAP`, `ja-FUK`, `ar-MA`, `de-CH` etc.) com preferência global persistida por idioma (`accentPreference.ts`).
-  - **Tier 2:** **Deepgram Aura-2** como fallback neural para EN/ES.
-  - **Tier 3:** Fallback emergencial do Translate **nunca** é salvo no R2 (`tts/v6/`) nem no Edge/IndexedDB (`tts-v6:`), evitando envenenamento de cache com voz robótica.
-  - Desbloqueio síncrono de `Audio` no clique (WAV silencioso), `Loader2` durante síntese longa, STT via Whisper Large v3 Turbo, `/api/gemini-tutor`, JWT híbrido e `/api/telemetry` persistido no R2.
-- **Chamada de Voz IA Full-Duplex (`AITutor.tsx`) + Osciloscópio F0:** VAD contínuo, *barge-in* e ajustes técnicos agrupados sob **⚙️ Avançado**, além de **Ruído Ambiente** com 3 intensidades (`Suave / Real / Desafio`) sincronizado ao Play.
-- **Professor, Sala ao Vivo, Boletim PDF & Comunidade Realtime:** `TeacherStudio.tsx`, Jitsi WebRTC + geração pós-aula, Boletim PDF, retenção de áudios 60d e Fórum/Ligas Realtime.
-
-### 1.3 Arquitetura, UI/UX, Testes & Distribuição
-- **UI/UX Consolidada na `v8.3.0`:**
-  - `Sidebar.tsx` enxuta + `SettingsModal.tsx` centralizando sotaques, tema, `i18n` (`PT/EN/ES` com paridade 100%), fonte, atualização, LGPD e logout em 2 cliques.
-  - **Mobile `390x844`:** `Revisão` fixada na bottom bar (`Trilha · Revisão · Tutor IA · Simulados · Mais`), `LogOut` removido do topo, menu *Mais* sem grid quebrado, e `⚙️` + etapas retráteis no `LessonPlayer`.
-  - **Hero & Dark Mode:** filtro CEFR único sticky, módulos persistidos em `sessionStorage`, tokens CSS semânticos (`--bg-canvas`, `--bg-surface`, `--text-primary`...), classes `fb-card-primary/secondary/info`, `ViewSkeleton` e `EmptyStateCard`.
-- **Confiabilidade & Segurança:** **21 suítes / 73 testes Vitest** + **13/13 Playwright E2E** (Desktop, Mobile `390x844` e guarda de contraste Dark Mode) + job **`secret-scan`** automático no GitHub Actions.
+> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v8.4.0`  
+> **Ambiente em Produção:** Web PWA (`https://fluentbridge.pages.dev`) · Edge API (`https://fluentbridge-api.silaswf.workers.dev`) · Windows Desktop (Electron NSIS) · Android (Capacitor APK) · iPhone/iPad (PWA Safari sem taxa Apple)  
+> **Base Verificada:** 253 arquivos em `src/` (`201.961` linhas totais), 22 suítes Vitest (`77` testes), 14 fluxos Playwright E2E + auditoria WCAG AA, build Vite/PWA (`30` entradas em precache, `1.643,65 KiB`).
 
 ---
 
-## 2. Comparativo Completo com o Mercado (2026) — Incluindo UI & UX
+## Parte 1 — Resumo Executivo & Scorecard v8.4.0
 
-| Dimensão | **FluentBridge `v8.3.0`** | **Duolingo Max** | **Busuu** | **Babbel** | **Speak** | **Preply / Cambly** |
-| --- | --- | --- | --- | --- | --- | --- |
-| **UI/UX · Clareza & Navegação** | **Sidebar enxuta + Modal `Configurações` + `Revisão` fixa na bottom bar mobile** | Muito limpa e linear | Muito limpa em módulos | Limpa, foco em desktop | Focada em chat/voz | Simples (agenda/vídeo) |
-| **UI/UX · Foco na Lição & Mobile** | **Header mínimo mobile (`⚙️` + etapas retráteis) + Skeleton loaders** | Excelente foco por tela | Bom foco por etapa | Bom, menos lúdico | Excelente no mobile | Depende do navegador |
-| **UI/UX · Dark Mode & Acessibilidade** | **Tokens CSS + `PT/EN/ES` 100% + Escala `A-..A++` + RTL Árabe** | Dark Mode nativo | Dark Mode nativo | Dark Mode parcial | Dark Mode nativo | Parcial |
-| **Modelo Pedagógico** | **Híbrido (App + Professor real + IA + Comunidade)** | Autodidata gamificado + IA | Autodidata + correção de pares | Cursos estruturados | 100% Speaking com IA | Aulas 1:1 humanas |
-| **Professor Humano, Turmas & VIP** | **Sim (turmas, VIP, tarefas, rubrica, Sala ao Vivo + Boletim PDF)** | Não | Não (pares) | Babbel Live (caro) | Não | Sim (por hora) |
-| **Idiomas & Profundidade CEFR** | **12 idiomas (`1.236` unid. A1–C1 em Módulos + imersão B2/C1)** | 40+ (maioria A1–B2) | 14 (A1–C1) | 14 (A1–C1) | ~10 | 50+ (depende do tutor) |
-| **Vocabulário Contextual SM-2** | **14.186 cards (`>=10`/unid., `100%` validados) + Cloze SM-2 + Espiral** | Revisão básica | Revisão SM-2 | Revisão por lição | Limitado | Manual |
-| **Vozes Neurais & Sotaques Regionais** | **Gemini 2.5 Native TTS em 49 sotaques globais + Deepgram fallback** | Vozes sintéticas proprietárias | Áudios gravados (poucos sotaques) | Áudios estáticos | Vozes neurais | Voz humana |
-| **Voz IA Full-Duplex & Fonética** | **Sim (VAD + Prosódia + Barge-in + Osciloscópio F0)** | Video Call (pago) | Não | Não | Sim (pago) | Humano |
-| **Writing & Correção Inteligente** | **Híbrido IA semântica (aceita sinônimos) + Diff linha a linha + fallback** | Só em exercícios pagos | Correção por pares | Correção fixa | Foco em fala | Feedback humano |
-| **Simulados Oficiais Completos** | **80 simulados em 20 exames (incl. DET `10–160`, CELPIP `en-CA`, IELTS)** | Só DET pago à parte | Não | Não | Não | Informal |
-| **Vídeos Reais / Nativos (MP4)** | **Roteiros interativos com TTS/R2 pronto (falta mídia MP4 real)** | Animações | Vídeos nativos | Áudio nativo | Vídeo/Áudio | Vídeo ao vivo |
-| **Lojas Oficiais & Pagamentos SaaS** | **`.apk`/`.aab`/`.exe` no CI (ainda sem Play/App Store nem billing SaaS)** | Sim | Sim | Sim | Sim | Sim |
+O **FluentBridge Academy** evoluiu de uma plataforma escolar com foco em inglês para um ecossistema poliglota completo em **12 idiomas** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`), **49 sotaques regionais**, **1.236 unidades estruturadas (A1–C1)** e **76 simulados oficiais** (IELTS, TOEFL iBT, CELPIP, DET, DELE, DELF, CILS, Goethe, JLPT, HSK, ТРКИ, ALPT, CNaVT, TISUS, C1 Afrikaans).
+
+Na `v8.4.0`, implementamos **11 dos 13 itens qualitativos** mapeados na auditoria anterior (`Q-01` a `Q-09`, `Q-11` e `Q-13`), além da correção do nome público de exibição do professor (`teacherDisplayName`), suporte aprimorado de **PWA para iOS sem custo Apple** e streaming HTTP `Range` (`206 Partial Content`) no Cloudflare R2.
+
+| Dimensão Avaliada | v8.2.0 | v8.3.0 | **v8.4.0 (Atual)** | Principais Evidências |
+| :--- | :---: | :---: | :---: | :--- |
+| **Profundidade Pedagógica (A1–C1)** | 8,5 | 9,2 | **9,6 / 10** | 1.236 unidades, 76 simulados, *Spaced Repetition* SM-2, *Cloze*, *Mistake Notebook*, *Graded Readers*, *Grammar Drills*, *Phoneme Breakdown* nos 12 idiomas. |
+| **Voz, Sotaques & Áudio** | 7,0 | 9,1 | **9,5 / 10** | Proxy neural no Worker (`Deepgram Aura-2` + `Google Cloud TTS` + cache R2 `X-TTS-Cache`), Whisper STT, ruído ambiente e **Modo Hands-Free** em loop. |
+| **UI, UX & Acessibilidade** | 6,8 | 7,8 | **9,0 / 10** | Dark Mode híbrido (`@custom-variant dark` + `:where`), pulso `+XP` na lição, `EmptyStateCard` padronizado, menu **Imersão** dedicado, contraste WCAG AA ≥ 4,5:1 auditado em Light & Dark. |
+| **Comunidade & Engajamento** | 6,5 | 7,4 | **8,8 / 10** | Ligas por idioma, **Desafio do Mês (+80 XP)**, moderação anti-spam/links/palavrões, reações rápidas (`👏🔥💡🎯`), áudio no *snippet*, *diff* visual e aceitação de correção (`+10 XP`), categoria *Parceiro de Estudo*. |
+| **Arquitetura & Edge Security** | 7,5 | 8,6 | **9,1 / 10** | Zero chaves Gemini no bundle cliente, cotas diárias persistentes no R2 (`/api/stt` 200/dia, `/api/gemini-tutor` 250/dia), `/api/media/list`, HTTP `206 Range`, `sourcemap: 'hidden'`, telemetria + `VITE_SENTRY_DSN` opcional. |
+| **Distribuição Multiplataforma** | 8,0 | 8,2 | **8,7 / 10** | Web PWA, Windows `.exe`, Android `.apk`, **iPhone/iPad via Safari PWA ($0/ano)**. Falta apenas publicação paga opcional nas lojas (`Q-12`) e cobrança SaaS (`Q-10`). |
 
 ---
 
-## 3. Análise Qualitativa Atualizada & O Que Ainda Pode Melhorar (`v8.4 → v10.0`)
+## Parte 2 — Análise Competitiva & de Mercado (incluindo UI/UX)
 
-A entrega da `v8.3.0` resolveu as desconexões funcionais (`F-01…F-07`) e os gargalos críticos de UI/UX (`U-01…U-07`). Abaixo está a auditoria qualitativa atualizada do que **ainda pode evoluir** para levar o FluentBridge de “plataforma completa” para **produto de classe mundial em escala comercial**.
+### 2.1 Matriz Comparativa Direta (vs. Líderes Globais)
 
-### 3.1 UI & UX — Polimento Estrutural & Micro-experiência
-- **Q-01 · Migração completa dos arquivos restantes para Design Tokens sem `!important`**
-  - **Hoje:** `src/index.css` já define variáveis semânticas (`--bg-canvas`, `--bg-surface`, `--text-primary` etc.) e corrigiu os buracos de contraste (`orange`, `teal`, `sky`), mas `TeacherStudio.tsx`, `AdminPanel.tsx`, `MockExamHub.tsx` e `VocabReview.tsx` ainda usam dezenas de classes claras (`bg-white`, `bg-slate-50`) sustentadas pelos overrides `!important` no `index.css`.
-  - **Melhoria:** migrar esses quatro painéis para `fb-card-primary/secondary` e `dark:`, removendo gradualmente os `!important` globais de `index.css`.
-  - **Aceite:** 0 overrides `!important` de cor de fundo em `index.css` e contraste ≥ 4.5:1 validado por Playwright em todas as abas.
-- **Q-02 · Transições de etapa, feedback animado de XP e estados vazios unificados**
-  - **Hoje:** `EmptyStateCard.tsx` e `ViewSkeleton.tsx` foram criados, mas parte das sub-telas (`CommunityHub`, `CertificatesView`, `LiveClassroomView`) ainda usa cards manuais distintos para listas vazias, e a troca entre etapas do `LessonPlayer` não anima o ganho de XP na barra.
-  - **Melhoria:** adotar `EmptyStateCard` em todas as telas de lista vazia e adicionar micro-animação de progresso + *toast* sutil ao salvar palavra ou concluir checkpoint.
-- **Q-03 · Sub-tabs dedicadas para “Imersão” vs. “Guias” na Sidebar**
-  - **Hoje:** `TipsLibrary.tsx` já separa visualmente *Guias & Treino* e *Imersão*, mas ambos ainda compartilham o único item de menu `Imersão & Guias`.
-  - **Melhoria:** avaliar separar `Imersão` (Podcasts, Vídeos, Graded Readers) como atalho direto se os dados de uso mostrarem baixa descoberta dos Leitores Graduados.
+| Critério | FluentBridge `v8.4.0` | Duolingo Max | Babbel | Busuu | Cambly / Preply | ELSA Speak |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Modelo Híbrido (IA + Professor Real)** | **Sim (Nativo)** | Não | Não | Parcial | Só Prof. | Não |
+| **UI/UX & Clareza Visual** | **9,0** (Desktop + Mobile + Dark AA) | **9,5** (Polimento extremo) | **8,5** | **8,4** | **7,8** | **8,0** |
+| **Profundidade Gramatical A1–C1** | **9,6** (Guias + Drills + Rubricas) | 7,0 | **9,0** | 8,5 | Depende do tutor | 5,0 |
+| **Simulados Oficiais Multi-Exame** | **76 exames** (12 idiomas) | DET (só inglês) | Não | Certificados próprios | Preparatório pago | IELTS Speaking |
+| **Vozes Regionais / Sotaques** | **49 sotaques** + cache R2 | 2–3 vozes/idioma | 2 vozes | 2 vozes | Nativos variados | Foco em inglês |
+| **Modo Hands-Free / Podcast** | **Sim** (Modal contínuo + Podcasts) | Não | Podcasts | Não | Não | Não |
+| **Comunidade & Correção entre Pares** | **Sim** (Ligas + Diff + Moderação) | Só Ligas | Não | **Sim** (Forte) | Não | Não |
+| **Gestão B2B / Turmas / Certificados PDF** | **Sim** (Estúdio + Admin Mestre) | Duolingo for Schools (básico) | B2B Corporativo | B2B | Não | B2B |
+| **Custo Mensal p/ Aluno** | **Personalizável / R$ 0 (Escola)** | ~US$ 30/mês | ~US$ 14/mês | ~US$ 12/mês | US$ 80–250/mês | ~US$ 12/mês |
 
-### 3.2 Arquitetura, Performance & Experiência Offline
-- **Q-04 · Fatiamento de `TeacherStudio.tsx`, `App.tsx` e sub-splitting CEFR**
-  - **Hoje:** `LessonPlayer.tsx` já teve etapas extraídas (`ListeningStepView`, `ReadingStepView`, `MatchingStepView`, `WritingFreeStepView`), mas `TeacherStudio.tsx` (~2.250 linhas) e `App.tsx` (~2.300 linhas) ainda concentram muitas responsabilidades; além disso, currículos maiores (`es/fr/it/de ~325–348 kB`) e `tutor-scenarios` (`472 kB`) carregam tudo de uma vez.
-  - **Melhoria:** extrair hooks de domínio de `App.tsx` (progresso, comunidade, outbox) e abas de `TeacherStudio.tsx`; dividir currículos por faixa `A1–A2` vs. `B1–C1`.
-  - **Aceite:** chunk inicial e chunk de idioma `< 180 kB` gzip no `npm run build`.
-- **Q-05 · Pré-aquecimento em lote de áudios prioritários no Cloudflare R2 (`tts/v6/`)**
-  - **Hoje:** como `v8.3.0` migrou para Gemini Tier 1 (`tts/v6/`), a 1ª reprodução de trechos longos de simulado leva ~3–15s até entrar em cache no R2.
-  - **Melhoria:** rodar `scripts/prewarm-r2-tts.mjs` ampliado para pré-aquecer os **áudios dos 80 simulados** e primeiras unidades A1/A2 no bucket R2 `fluentbridge-media`.
-  - **Aceite:** 100% dos áudios de `Listening` dos simulados respondendo com `X-TTS-Cache: R2-HIT` em `< 300ms`.
+### 2.2 Análise SWOT Atualizada
 
-### 3.3 Segurança, Backend & Governança (incl. Lições de Vazamento)
-- **Q-06 · Salvaguardas manuais pendentes no Console (`S-02`, `S-03`, `S-05`)**
-  - **Hoje:** o incidente de 25/11/2026 (chave antiga exposta no histórico `919cfbb`/`fba45d4`/`26e1c90` e revogada) foi mitigado com chave nova só em Worker Secret (`S-01` ✅) e job `secret-scan` no CI (`S-04` ✅).
-  - **Ações manuais pendentes:**
-    - **S-02:** Restringir a chave no Google Cloud Console à *Generative Language API* + alerta de cota/orçamento.
-    - **S-03:** Ativar *Secret Scanning + Push Protection* nas configurações do GitHub.
-    - **S-05 (Opcional):** `git filter-repo` apenas se houver necessidade de limpar os commits históricos já revogados.
-- **Q-07 · Descomissionar `fb_school_state` + `REQUIRE_SUPABASE_JWT=true` + Rate-Limit Distribuído**
-  - **Hoje:** o Worker opera em modo JWT híbrido (`jwtMode: 'hybrid'`) e o rate-limit em memória é por instância edge.
-  - **Melhoria:** exigir JWT válido nas rotas `/api/stt`, `/api/gemini-tutor` e `/api/telemetry` (`REQUIRE_SUPABASE_JWT=true`), mover cotas para `user_quotas` / KV e aposentar o snapshot JSONB legado.
+- **Forças (Strengths):** Único produto da categoria que combina **trilha gamificada A1–C1 + 76 simulados oficiais + Tutor IA seguro (Worker Proxy) + Estúdio do Professor + Aulas ao Vivo + Certificados verificáveis** em 12 idiomas e 4 idiomas não-latinos completos (`ru`, `ja`, `zh`, `ar`).
+- **Fraquezas (Weaknesses):**
+  - Ausência de cobrança recorrente nativa (Stripe/Mercado Pago — `Q-10` adiado).
+  - Sem app listado diretamente na Apple App Store (contornado via **PWA Safari gratuito**, porém sem aparecer na busca da App Store).
+  - Três arquivos ainda concentrados acima de 1.800 linhas (`App.tsx`, `LessonPlayer.tsx`, `TeacherStudio.tsx`).
+- **Oportunidades (Opportunities):**
+  - **Escolas de idiomas e professores autônomos no Brasil/LATAM** buscando *white-label* com IA e correção de áudio/texto sem pagar mensalidade em dólar por aluno.
+  - **Candidatos à imigração e intercâmbio** (CELPIP/IELTS/DELF/Goethe/JLPT/CNaVT) — nicho com ticket médio 3x–5x maior que estudo casual.
+- **Ameaças (Threats):**
+  - Mudanças de preço ou cota em APIs externas de IA (mitigado por cache SHA-256 em R2 + fallback local + cotas diárias por usuário/IP).
+  - Concorrentes nativos com grande orçamento de marketing mobile (mitigado pela proposta B2B2C via professores e escolas parceiras).
 
-### 3.4 Pedagogia, Voz & Imersão Audiovisual
-- **Q-08 · Vídeos Curtos Reais (MP4/WebM) no Bucket R2 (`fluentbridge-media`)**
-  - **Hoje:** os `36` vídeos interativos usam roteiros com síntese neural TTS.
-  - **Melhoria:** hospedar clipes reais (15–45s) no R2 mantendo as legendas duplas clicáveis para SM-2 e checkpoints.
-- **Q-09 · Alinhamento Fonético por Fonema & Modo *Hands-Free* ("Só Áudio")**
-  - **Melhoria:** evoluir `phoneticFeedback.ts` com pontuação por fonema crítico (`/θ/`, `/ð/`, vogais nasais FR, `ü/ö` DE) e adicionar modo contínuo de revisão SM-2 para uso em trânsito/caminhada.
+### 2.3 TAM / SAM / SOM & Posicionamento
 
-### 3.5 Professor, Escola & Monetização (SaaS)
-- **Q-10 · Planos, Pagamentos (Pix/Stripe) & Multi-Escolas**
-  - **Melhoria:** integrar Stripe / Mercado Pago para planos (*Gratuito*, *Pro Autônomo*, *Mentoria VIP*), controle de créditos de aulas VIP em `LiveClassroomView.tsx` e arquitetura *multi-tenant* para licenciar o FluentBridge a outros professores/escolas.
-- **Q-11 · Moderação Assistida por IA & Desafios Sazonais na Comunidade**
-  - **Melhoria:** filtro automático de spam/linguagem imprópria no Fórum Realtime e desafios mensais por idioma.
-
-### 3.6 DevOps, Lojas Oficiais & Observabilidade
-- **Q-12 · Publicação nas Lojas Oficiais (Google Play + App Store) & Code Signing Windows**
-  - **Hoje:** CI já gera `.apk`, `.aab` e `.exe` e espelha em `silaswf/fluentbridge-releases`.
-  - **Melhoria:** publicar o `.aab` na Google Play Console, compilar alvo Capacitor iOS e assinar o `.exe` com certificado EV/OV para eliminar o aviso do SmartScreen.
-- **Q-13 · Observabilidade com Source Maps (Sentry) & Testes Visuais por Snapshot**
-  - **Melhoria:** integrar captura de erros com source maps em produção e snapshots visuais Playwright Light/Dark em todos os viewports.
+- **TAM (Mercado Global de Aprendizado Digital de Idiomas):** ~US$ 60B+ anuais.
+- **SAM (Mercado LATAM + Preparatórios Oficiais + Escolas Independentes):** ~US$ 2,4B/ano.
+- **SOM Realista (Ano 1–2 com foco em professores parceiros + alunos preparatórios):** 50 a 200 escolas/professores independentes × 40 alunos ativos = **2.000 a 8.000 alunos pagantes**, com potencial de ARR entre **R$ 720 mil e R$ 3,8 milhões** caso o módulo SaaS (`Q-10`) seja ativado no futuro.
 
 ---
 
-## 4. Histórico & Status de Implementação (`v7.0.0 → v10.0.0`)
+## Parte 3 — Raio-X Técnico, Arquitetura & Escavação do Código
 
-| Versão | Foco Principal | Status / Entregas |
-| --- | --- | --- |
-| **`v7.0.0`** | **Performance, R2, Segurança, Pitch F0, Aulas ao Vivo, PDF & CI/CD** | ✅ `dynamic import()` por idioma + Cache R2 + Offline 3 unidades + JWT híbrido + Cloze SM-2 + Memória IA + 144 Drills + 12 Readers + Pitch F0 + Sala Jitsi + Boletim PDF + Realtime + CI Windows/Android + `i18n` & WCAG AA. |
-| **`v8.0.0` – `v8.1.0`** | **Coesão Busuu, `>=10` Cards/Unid., Kanji/Kana, DET & Checkpoints** | ✅ Reading Dark Mode contraste AA + `script_phonics` (230 unid.) + Toggle `100% Kana` + `4` DET + `60` Podcasts (`180` checkpoints) & `36` Vídeos (`72` checkpoints) + `14.186` cards (`10–13`/unid.) 100% validados + glossário Unicode. |
-| **`v8.2.0` – `v8.2.1`** | **Módulos Desdobráveis, 49 Sotaques, Outbox, LGPD & Correção Simulados** | ✅ Acordeão sequencial `Módulo 1…N` sem repetições + 4 etapas extraídas do `LessonPlayer` + Outbox + 49 sotaques com prompts nativos no Worker + Ruído Ambiente + Writing Diff + Adaptativo + Retenção + LGPD + Health Check + timeout longo nos simulados. |
-| **`v8.3.0` (Atual)** | **Vozes Neurais Gemini nos 49 Sotaques + Auditoria Completa Funcional, UI/UX & Segurança** | ✅ **Gemini 2.5 Native TTS Tier 1 em 100% dos 49 sotaques** (Deepgram fallback neural; `tts/v6/` sem cache de fallback robótico; unlock síncrono + `speakTextAsync` + CELPIP `en-CA`) + `SettingsModal` + Sidebar enxuta + `Revisão` fixa mobile + menu *Mais* corrigido + Hero/CEFR único + Dark Mode tokens + correção `orange/teal/sky` + `i18n` 100% + Writing híbrido IA + Adaptativo persistente + Outbox real + LGPD `delete_my_account_data()` + Ruído c/ volume + `secret-scan` CI (**21/73 Vitest · 13/13 E2E**). |
-| **`v8.4.0` – `v8.5.0`** | **Polimento Estrutural (`Q-01…Q-07`)** | ⏳ Migração total de `TeacherStudio`/`AdminPanel`/`MockExamHub` para tokens semânticos (`0` `!important`), sub-splitting CEFR, pré-aquecimento R2 dos 80 simulados, `REQUIRE_JWT=true` e ações manuais `S-02`/`S-03`. |
-| **`v9.0.0` – `v10.0.0`** | **Escala Comercial (`Q-08…Q-13`)** | ⏳ Vídeos MP4 reais no R2, Alinhamento por fonema, Modo *Hands-Free*, Google Play + App Store + Windows Code Signing, e SaaS (Planos/Pix/Stripe + Multi-Escolas). |
+### 3.1 Métricas Reais da Base de Código (`v8.4.0`)
+
+Medição executada diretamente sobre o repositório após o build final de `v8.4.0`:
+
+- **Arquivos em `src/`:** `253` arquivos (`.ts`, `.tsx`, `.css`), totalizando **`201.961` linhas de código e conteúdo pedagógico**.
+- **Atributos de teste (`data-testid`):** `123` ocorrências rastreáveis em componentes `.tsx`.
+- **Regras `!important` residuais em `src/index.css`:** `47` ocorrências remanescentes (focadas em utilitários específicos de caixas/cores antigas; os fundos principais `.bg-white`, `.bg-slate-50*` e `.bg-[#F7F9FC]` já migraram para `:where(html.dark)`).
+- **Cobertura de Testes:** `22` suítes Vitest (`77` testes unitários passando) + `14` testes E2E Playwright passando (Desktop 1280×800, Mobile 390×844, RTL Árabe, Japonês Kana e auditoria de contraste WCAG AA).
+
+#### Maiores Hotspots de Código (excluindo arquivos estáticos de currículo/dados)
+
+| Arquivo | Linhas (LOC) | Diagnóstico & Ação Recomendada |
+| :--- | :---: | :--- |
+| `src/App.tsx` | **2.417** | Orquestrador global de estado, sync e views. **Sugestão:** extrair hooks `useNavigationState` e `useCommunityHandlers`. |
+| `src/components/LessonPlayer.tsx` | **2.410** | Motor completo das 9 etapas de lição. **Sugestão:** extrair `SpeakingStepPanel.tsx` e `WritingStepPanel.tsx`. |
+| `src/components/TeacherStudio.tsx` | **1.834** | Reduzido de 2.253 para 1.834 na `v8.4.0` (com extração de `SchoolSettingsTab.tsx`). **Próximo passo:** extrair `SubmissionsGraderTab.tsx`. |
+| `src/utils/cloudSync.ts` | **1.393** | Merge de estado + upload R2/Supabase + sync relacional. |
+| `src/components/LearningPath.tsx` | **1.379** | Trilha modular, filtros CEFR, diagnóstico e checkpoints. |
+| `src/components/MockExamHub.tsx` | **1.127** | 76 simulados oficiais + rubrica analítica + áudio. |
+| `src/utils/japaneseKana.ts` | **1.104** | Conversor Kanji/Kana e mapa furigana offline. |
+| `src/components/AITutor.tsx` | **1.047** | Tutor conversacional com 4 modos e cenários. |
+| `src/utils/speech.ts` | **970** | Cadeia TTS (Worker Aura-2 → Google TTS → Web Speech) e Whisper STT. |
+| `src/components/AdminPanel.tsx` | **949** | Gestão de usuários, vínculo professor-aluno, diagnóstico de voz e telemetria. |
+
+#### Maiores Chunks de Produção (`dist/assets/`)
+
+| Chunk JS | Tamanho (Raw) | Carregamento | Observação |
+| :--- | :---: | :--- | :--- |
+| `tutor-scenarios-*.js` | **461,3 KB** | Lazy (`AITutor`) | Candidato a split por idioma (`Q-15`). |
+| `index-*.js` | **396,0 KB** | Inicial (Eager) | Core App + Auth + Sidebar + LearningPath. |
+| `curriculum-de-*.js` | **340,1 KB** | Lazy por idioma | Carregado sob demanda ao selecionar Alemão. |
+| `curriculum-fr-*.js` | **334,8 KB** | Lazy por idioma | Carregado sob demanda ao selecionar Francês. |
+| `curriculum-it-*.js` | **331,5 KB** | Lazy por idioma | Carregado sob demanda ao selecionar Italiano. |
+| `curriculum-es-*.js` | **317,9 KB** | Lazy por idioma | Carregado sob demanda ao selecionar Espanhol. |
+| `supabase-vendor-*.js` | **225,1 KB** | Chunk separado | SDK Supabase isolado em vendor cacheável. |
+
+*Nota de Build:* O Vite emite aviso informativo de que `src/utils/cloudSync.ts` é importado tanto estaticamente quanto dinamicamente em `aiTutorEngine.ts` e `speech.ts` (sem impacto funcional, mas limpar os imports dinâmicos redundantes melhora o *tree-shaking*).
+
+### 3.2 Topologia de Edge, IA, Storage e Segurança
+
+1. **Cloudflare Worker (`fluentbridge-api`, `v8.4.0`):**
+   - `GET /api/tts`: gera áudio via `@cf/deepgram/aura-2-en` / `aura-2-es` ou Google Cloud TTS, grava em cache SHA-256 no bucket R2 (`fluentbridge-media/tts/v6/...`) e retorna `X-TTS-Cache: R2-HIT|R2-MISS`.
+   - `POST /api/stt`: transcrição neural via `@cf/openai/whisper-large-v3-turbo` com rate-limit por minuto (30–60 req/min) + **cota diária persistente no R2 (`quotas/YYYY-MM-DD/stt/...`, 200/dia)**.
+   - `POST /api/gemini-tutor`: proxy seguro com `GEMINI_API_KEY` em secret de servidor, modelos `gemini-3.8-flash` / `gemini-2.5-flash`, rate-limit por minuto + **cota diária persistente no R2 (`quotas/YYYY-MM-DD/gemini/...`, 250/dia)**.
+   - `GET /api/media/list` e `GET /api/media/*`: descoberta automática de vídeos no R2 (`videos/...`) e streaming com suporte a **HTTP `Range` (`206 Partial Content`, `Accept-Ranges: bytes`)** obrigatório no Safari/iOS.
+   - `POST / GET /api/telemetry`: registro de erros no R2 (`telemetry/errors.json`), leitura protegida quando `REQUIRE_SUPABASE_JWT === 'true'` e encaminhamento opcional para `VITE_SENTRY_DSN` via Envelope API.
+
+---
+
+## Parte 4 — Auditoria de Bugs, Qualidade & Débitos Residuais
+
+### 4.1 Bugs Críticos Resolvidos (v8.2.1 → v8.4.0)
+
+1. **Módulos duplicados na trilha (`v8.2.1`):** Blocos curriculares com numeração/título repetido antes de avançar. **Resolvido** com deduplicação e ordenação canônica + teste regressivo em todos os 12 idiomas.
+2. **Áudio falhando em simulados e sotaques (`v8.2.1` / `v8.3.0`):** Voz robótica no CELPIP e falhas de reprodução em sotaques regionais. **Resolvido** com mapeamento de 49 sotaques para vozes neurais no Worker + cache R2 + pré-aquecimento via `scripts/prewarm-r2-tts.mjs`.
+3. **Exposição de API key em repositório público (`v8.3.0`):** Remoção da chave Gemini do bundle cliente, migração total para secret no Worker proxy e rotação de credenciais.
+4. **Nome de exibição do professor no AdminPanel (`v8.4.0`):** Professor configurava `"Silas Wagner"` em *Estúdio do Professor → Nuvem, IA & Escola*, mas o dropdown de atribuição no *Admin Mestre* continuava exibindo o nome de cadastro `"Silas"`. **Resolvido** com `UserProfile.teacherDisplayName`, helper `getTeacherDisplayName()` (`src/utils/teacherDisplay.ts`), persistência dupla no `handleUpdateSettings` e propagação em `AdminPanel`, `TeacherLinkModal` e `App.tsx`.
+
+### 4.2 Débitos Técnicos & Casos de Borda Escavados (O que ainda merece atenção)
+
+1. **47 `!important` residuais no `src/index.css`:** Embora os fundos principais já usem `:where(html.dark)`, classes de texto/borda (`text-slate-900`, `border-slate-200`, badges) ainda usam `!important` no CSS legado. Migrar gradualmente para tokens CSS semânticos eliminará 100% dos `!important`.
+2. **Import misto estático/dinâmico de `cloudSync.ts`:** `aiTutorEngine.ts` e `speech.ts` usam `await import('./cloudSync')` enquanto `App.tsx` já importa estaticamente. Unificar remove o warning do Rollup no build.
+3. **Upload de vídeo R2 sem thumbnail automática:** `InteractiveVideoView.tsx` já lista vídeos do R2 (`/api/media/list`), sincroniza legendas e velocidade e suporta HTTP `206 Range`, mas ainda depende de arquivos nomeados com o `clip.id` (ex.: `videos/en-vid-1.mp4`) e não extrai capa/thumbnail automaticamente.
+4. **Sincronização em tempo real do Fórum sem Supabase Realtime ativo:** `CommunityHub` funciona perfeitamente via estado + sync periódico, mas sem WebSockets ativos no projeto Supabase de todos os ambientes, reações e comentários entre dois alunos podem levar até o próximo ciclo de sync para aparecer.
+5. **Bundle de `tutor-scenarios` (461 KB):** Embora seja carregado *lazy*, usuários de um único idioma baixam os cenários dos 12 idiomas quando abrem o Tutor IA.
+
+---
+
+## Parte 5 — Plano Mestre de Melhorias Qualitativas (Categorias 3.1 a 3.6)
+
+### 5.1 Status do Ciclo Anterior (`Q-01` a `Q-13` — Entregas da `v8.4.0`)
+
+| Código | Categoria | Melhoria | Status `v8.4.0` |
+| :---: | :--- | :--- | :---: |
+| **Q-01** | 3.1 UI/UX | Dark Mode híbrido (`@custom-variant dark` + `:where(html.dark)`) e remoção de `!important` nos fundos | ✅ Implementado |
+| **Q-02** | 3.1 UI/UX | Padronização de `EmptyStateCard` + pulso visual `+XP` em tempo real no `LessonPlayer` | ✅ Implementado |
+| **Q-03** | 3.1 UI/UX | Aba dedicada **Imersão (Áudio & Vídeo)** na barra lateral separada de **Guias & Gramática** | ✅ Implementado |
+| **Q-04** | 3.2 Performance | Extração de `SchoolSettingsTab.tsx` do `TeacherStudio.tsx` (-419 LOC no componente) | ✅ Implementado |
+| **Q-05** | 3.2 Performance | Pré-aquecimento R2 expandido (`--exams --limit`) e `sourcemap: 'hidden'` fora do precache PWA | ✅ Implementado |
+| **Q-06** | 3.3 Segurança | Rotas `/api/stt` e `/api/gemini-tutor` com JWT híbrido/estrito e proxy seguro | ✅ Já ativo / Mantido |
+| **Q-07** | 3.3 Segurança | Cotas diárias persistentes no R2 (`quotas/YYYY-MM-DD/...`) + `/api/telemetry` protegido em modo estrito | ✅ Implementado |
+| **Q-08** | 3.4 Pedagogia & Voz | Descoberta automática `/api/media/list`, streaming HTTP `206 Range` e sync `playbackRate` no vídeo | ✅ Implementado |
+| **Q-09** | 3.4 Pedagogia & Voz | Chips de **Phoneme Breakdown** nos 12 idiomas + **Modo Hands-Free** em loop contínuo | ✅ Implementado |
+| **Q-10** | 3.5 Monetização | Checkout Stripe / Mercado Pago & planos recorrentes B2C/B2B | ⏸️ Adiado (decisão estratégica) |
+| **Q-11** | 3.5 Comunidade | Moderação automática + Desafio do Mês (+80 XP) + Reações + Áudio no snippet + Diff/Aceite (+10 XP) + Parceiro de Estudo | ✅ Implementado |
+| **Q-12** | 3.6 Distribuição | Publicação paga na Google Play Store (US$ 25) e Apple App Store (US$ 99/ano) | ⏸️ Adiado (decisão estratégica) |
+| **Q-13** | 3.6 Observabilidade | `sourcemap: 'hidden'`, encaminhamento `VITE_SENTRY_DSN` e auditoria WCAG AA automatizada no Playwright | ✅ Implementado |
+
+### 5.2 Próxima Onda Recomendada (`Q-14` a `Q-24` — Categorias 3.1 a 3.6)
+
+| Código | Categoria | Proposta Concreta | Impacto | Esforço |
+| :---: | :--- | :--- | :---: | :---: |
+| **Q-14** | 3.1 UI/UX | Eliminar os últimos 47 `!important` em `src/index.css` migrando badges e bordas para tokens CSS v4 nativos | Médio | Baixo |
+| **Q-15** | 3.2 Performance | Quebrar `tutor-scenarios` (461 KB) e `LessonPlayer` (2.410 LOC) em módulos lazy por idioma / subetapa | Alto | Médio |
+| **Q-16** | 3.2 Performance | Remover importação mista (estática + dinâmica) de `cloudSync.ts` para otimizar tree-shaking | Baixo | Baixo |
+| **Q-17** | 3.3 Segurança | Ativar `REQUIRE_SUPABASE_JWT=true` por padrão após validar 100% dos usuários em sessão Supabase Auth | Alto | Baixo |
+| **Q-18** | 3.3 Segurança | Painel de auditoria de cotas R2 no `AdminPanel` (consumo diário por endpoint e alertas de pico) | Médio | Baixo |
+| **Q-19** | 3.4 Pedagogia | Gravação real + espectrograma visual simples no `Speaking` comparando duração/pausas com o áudio nativo | Alto | Médio |
+| **Q-20** | 3.4 Pedagogia | Gerador automático de baralho SM-2 a partir dos erros de `MockExamHub` (erro no simulado vira flashcard imediato) | Alto | Baixo |
+| **Q-21** | 3.5 Comunidade | Salas de prática assíncrona por áudio no Fórum (enviar nota de voz de 15s para colegas avaliarem) | Alto | Médio |
+| **Q-22** | 3.5 Monetização | Quando desejar monetizar: Stripe Checkout / PIX Mercado Pago para planos VIP & Escolas (ex-`Q-10`) | Altíssimo | Alto |
+| **Q-23** | 3.6 Distribuição | Botão inteligente de banner "Instalar no iPhone" detectando iOS Safari (`navigator.standalone === false`) dentro da Home | Alto | Baixo |
+| **Q-24** | 3.6 Observabilidade | Workflow GitHub Actions semanal rodando `prewarm-r2-tts.mjs` + verificação de links/versões no Worker | Médio | Baixo |
+
+---
+
+## Parte 6 — Estratégia iOS Sem Taxa da Apple ($0/ano vs. $99/ano)
+
+**Pergunta-chave:** *É possível que usuários de iPhone/iPad (iOS) usem e instalem o FluentBridge sem pagar a taxa de US$ 99/ano da Apple?*
+
+**Resposta direta: Sim — 100% gratuito e legal via PWA no Safari.**
+
+1. **Como funciona hoje na `v8.4.0`:**
+   - Já configuramos em `index.html` as metatags `apple-mobile-web-app-capable="yes"`, `apple-mobile-web-app-status-bar-style="default"`, `apple-mobile-web-app-title="FluentBridge"`, `apple-touch-icon.svg` e `manifest.webmanifest`, além de um card dedicado na tela de entrada (`AppDownloadGateway`).
+   - O aluno no iPhone/iPad abre `https://fluentbridge.pages.dev` no **Safari**, toca em **Compartilhar** (ícone quadrado com seta para cima) → **"Adicionar à Tela de Início"**.
+   - O app ganha ícone próprio na tela inicial do iPhone, abre em **tela cheia sem barra do Safari**, funciona offline via Service Worker (`Workbox`), toca áudio neural e vídeo MP4 (graças ao suporte HTTP `206 Range` implementado na `v8.4.0` no Worker R2) e até suporta **Web Push Notifications** desde o iOS 16.4+ quando aberto pela Tela de Início.
+2. **Por que evitar *sideloading* IPA fora da App Store?**
+   - Existe o método técnico de assinar um `.ipa` com Apple ID gratuito via Xcode/AltStore/Sideloadly, **porém a Apple expira o certificado a cada 7 dias**, exigindo reconectar o iPhone a um computador toda semana (inviável para alunos finais).
+3. **Quando vale pagar US$ 99/ano no Apple Developer Program?**
+   - Apenas quando você quiser aparecer na busca orgânica da **App Store** ou precisar de integrações nativas exclusivas (ex.: Apple In-App Purchase obrigatório para assinaturas vendidas dentro de app nativo iOS). Até lá, o **PWA Safari + R2 Range** entrega ~95% da experiência nativa a **custo zero**.

@@ -20,9 +20,17 @@ export interface PhoneticWordDetail {
   confidence?: number;
 }
 
+export interface PhonemeItem {
+  symbol: string;
+  word: string;
+  status: 'ok' | 'focus';
+  hintPt: string;
+}
+
 export interface PhoneticFeedbackResult {
   score: number;
   words: PhoneticWordDetail[];
+  phonemeBreakdown: PhonemeItem[];
   phoneticTips: PhoneticTipItem[];
   targetedDrills: PhoneticDrillItem[];
   summaryPt: string;
@@ -239,6 +247,24 @@ export function analyzePhoneticFeedback(
 
   const targetedDrills = missedWords.length > 0 ? (DRILL_BY_LANG[languageCode] ?? []) : [];
 
+  const phonemeBreakdown: PhonemeItem[] = [];
+  for (const w of words) {
+    if (phonemeBreakdown.length >= 6) break;
+    const matchedRule = PHONETIC_RULES.find(
+      (r) => r.languages.includes(languageCode) && r.pattern.test(w.word),
+    );
+    const symbolMatch = matchedRule?.ruleTitle.match(/(\/[^/]+\/)/);
+    const symbol = symbolMatch
+      ? symbolMatch[1]
+      : `/${w.syllables[0]?.slice(0, 3).toLowerCase() || w.word.slice(0, 2).toLowerCase()}/`;
+    phonemeBreakdown.push({
+      symbol,
+      word: w.word,
+      status: w.matched ? 'ok' : 'focus',
+      hintPt: matchedRule?.tipPt ?? 'Articule com clareza e ritmo natural.',
+    });
+  }
+
   let summaryPt = '';
   if (base.score >= 90) {
     summaryPt =
@@ -252,6 +278,7 @@ export function analyzePhoneticFeedback(
   return {
     score: base.score,
     words,
+    phonemeBreakdown,
     phoneticTips: tips,
     targetedDrills,
     summaryPt,

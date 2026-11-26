@@ -83,6 +83,38 @@ export function InteractiveVideoView({
   );
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    const loadR2Catalog = async () => {
+      try {
+        const res = await fetch(`${DEFAULT_BACKEND_API_URL}/api/media/list`);
+        if (!res.ok) return;
+        const data = (await res.json()) as { ok?: boolean; items?: Array<{ key: string; url: string }> };
+        if (!active || !data.ok || !Array.isArray(data.items)) return;
+        const mapped: Record<string, string> = {};
+        for (const item of data.items) {
+          const base = item.key.replace(/^videos\//, '').replace(/\.(mp4|webm)$/i, '');
+          if (base) mapped[base] = item.url;
+        }
+        if (Object.keys(mapped).length > 0) {
+          setR2VideoMap((prev) => ({ ...mapped, ...prev }));
+        }
+      } catch {
+        // Offline or worker unavailable — keep local gradient player
+      }
+    };
+    void loadR2Catalog();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+    }
+  }, [speed, selectedId, r2VideoMap]);
+
   const cancelRef = useRef(false);
   const loopRef = useRef(loopLine);
   loopRef.current = loopLine;

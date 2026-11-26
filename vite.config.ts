@@ -15,6 +15,7 @@ export default defineConfig(({ command }) => ({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
         globIgnores: [
+          '**/*.map',
           '**/curriculum-*.js',
           '**/vocab-exp-*.js',
           '**/grammar-*.js',
@@ -41,6 +42,7 @@ export default defineConfig(({ command }) => ({
     }),
   ],
   build: {
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         manualChunks(id) {

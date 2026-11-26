@@ -323,4 +323,72 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await expect(page.getByText(/Ops! Algo saiu do esperado/i)).toBeHidden();
     expect(errors).toEqual([]);
   });
+
+  test('Human Journey 4 (v8.4.0 Features & WCAG AA Contrast): Imersão, Hands-Free, Community, Teacher Display Name & Contrast', async ({
+    page,
+  }) => {
+    const errors = await attachErrorGuards(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await loginAsHumanStudent(page);
+
+    // 1. Dedicated Imersão view
+    await page.getByRole('button', { name: /Imersão \(Áudio & Vídeo\)/i }).click();
+    await expect(page.getByText(/Podcasts & Imersão|Episódio/i).first()).toBeVisible({ timeout: 8000 });
+
+    // 2. Hands-Free mode in Revisão & Vocab
+    await page.getByRole('button', { name: /Revisão & Vocab/i }).click();
+    await page.getByTestId('open-hands-free-btn').click();
+    await expect(page.getByTestId('hands-free-modal')).toBeVisible();
+    await page.getByTestId('close-hands-free-btn').click();
+
+    // 3. Community: Desafio do Mês + moderation + emoji reaction
+    await page.getByRole('button', { name: /Comunidade & Ligas/i }).click();
+    await expect(page.getByTestId('monthly-challenge-card')).toBeVisible();
+    await page.getByTestId('community-tab-forum').click();
+    await page.getByTestId('reaction-btn-🔥').first().click();
+    await page.getByTestId('community-new-post-btn').click();
+    await page.getByTestId('community-post-title').fill('Teste moderação');
+    await page.getByTestId('community-post-body').fill('Veja https://spam.example.com');
+    await page.getByTestId('community-publish-btn').click();
+    await expect(page.getByTestId('community-moderation-error')).toBeVisible();
+
+    // 4. Teacher Display Name propagation (TeacherStudio -> AdminPanel)
+    await page.getByRole('button', { name: /Estúdio do Professor/i }).click();
+    await page.getByRole('button', { name: /Nuvem, IA & Escola/i }).click();
+    await page.getByTestId('teacher-display-name-input').fill('Silas Wagner');
+    await page.getByTestId('save-teacher-settings-btn').click();
+    await page.getByRole('button', { name: /Admin Mestre|Painel Admin/i }).click();
+    await expect(page.locator('select').filter({ hasText: 'Sem professor' }).first()).toContainText(/Prof\. Silas Wagner/);
+
+    // 5. WCAG AA Contrast Check in Light & Dark modes on main headings
+    const checkContrast = async () =>
+      page.evaluate(() => {
+        const parseRgb = (str: string) => {
+          const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : [0, 0, 0];
+        };
+        const luminance = ([r, g, b]: number[]) => {
+          const a = [r, g, b].map((v) => {
+            const c = v / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        };
+        const h1 = document.querySelector('main h1') as HTMLElement | null;
+        if (!h1) return 21;
+        const fg = parseRgb(getComputedStyle(h1).color);
+        const bg = parseRgb(getComputedStyle(document.body).backgroundColor);
+        const l1 = luminance(fg);
+        const l2 = luminance(bg);
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+      });
+
+    expect(await checkContrast()).toBeGreaterThanOrEqual(4.5);
+    await page.evaluate(() => document.documentElement.classList.add('dark'));
+    expect(await checkContrast()).toBeGreaterThanOrEqual(4.5);
+    await page.evaluate(() => document.documentElement.classList.remove('dark'));
+
+    await expect(page.getByText(/Ops! Algo saiu do esperado/i)).toBeHidden();
+    expect(errors).toEqual([]);
+  });
 });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calendar, ExternalLink, Plus, Sparkles, Video } from 'lucide-react';
+import { EmptyStateCard } from './EmptyStateCard';
 import type {
   ClassGroup,
   LanguageCode,
@@ -233,9 +234,12 @@ export function LiveClassroomView({
 
       <div className="space-y-3">
         {visibleSessions.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-xs text-slate-500">
-            Nenhuma aula ao vivo agendada para este idioma ainda.
-          </div>
+          <EmptyStateCard
+            icon={Video}
+            title="Nenhuma aula ao vivo agendada"
+            description="As sessões ao vivo com seu professor para este idioma aparecerão aqui com link direto da sala e notas pós-aula."
+            testId="empty-live-sessions"
+          />
         ) : (
           visibleSessions.map((sess) => (
             <div

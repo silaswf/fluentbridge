@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowRight,
@@ -54,6 +54,14 @@ interface TipsLibraryProps {
   onEarnXp?: (xp: number) => void;
   onPracticeTopic: (topic: Topic) => void;
   onPracticeTopicWithAI?: (topic: Topic) => void;
+  initialViewMode?:
+    | 'tips'
+    | 'guide'
+    | 'drills'
+    | 'readers'
+    | 'scripts'
+    | 'podcasts'
+    | 'videos';
 }
 
 interface TipEntry {
@@ -79,10 +87,15 @@ export function TipsLibrary({
   onEarnXp,
   onPracticeTopic,
   onPracticeTopicWithAI,
+  initialViewMode = 'tips',
 }: TipsLibraryProps) {
   const [viewMode, setViewMode] = useState<
     'tips' | 'guide' | 'drills' | 'readers' | 'scripts' | 'podcasts' | 'videos'
-  >('tips');
+  >(initialViewMode);
+
+  useEffect(() => {
+    setViewMode(initialViewMode);
+  }, [initialViewMode]);
   const [showB2C1Translation, setShowB2C1Translation] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<'all' | TipCategory>('all');

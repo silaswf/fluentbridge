@@ -161,3 +161,89 @@ export function getStarterPostsForLanguage(languageCode: LanguageCode): Communit
     },
   ];
 }
+
+export interface ModerationResult {
+  allowed: boolean;
+  reasonPt?: string;
+}
+
+const BLOCKED_TERMS_PATTERN =
+  /\b(idiota|burro|imbecil|otario|otário|merda|porra|caralho|puta|viado|arrombado|fuck|shit|bitch|asshole|spam|t\.me\/|wa\.me\/|bit\.ly\/|tinyurl\.com)\b/i;
+
+export function moderateCommunityText(text: string): ModerationResult {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return { allowed: false, reasonPt: 'Escreva uma mensagem antes de publicar.' };
+  }
+  if (/https?:\/\/\S+/i.test(trimmed) || /www\.\S+/i.test(trimmed)) {
+    return {
+      allowed: false,
+      reasonPt: 'Links externos não são permitidos no fórum para segurança da comunidade.',
+    };
+  }
+  if (BLOCKED_TERMS_PATTERN.test(trimmed)) {
+    return {
+      allowed: false,
+      reasonPt: 'Sua mensagem contém termos inadequados ou bloqueados pela moderação.',
+    };
+  }
+  const letters = trimmed.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+  if (letters.length >= 15) {
+    const upper = letters.replace(/[^A-ZÀ-Ý]/g, '').length;
+    if (upper / letters.length > 0.78) {
+      return {
+        allowed: false,
+        reasonPt: 'Evite escrever quase tudo em MAIÚSCULAS para manter a leitura agradável.',
+      };
+    }
+  }
+  if (/(.)\1{6,}/.test(trimmed)) {
+    return {
+      allowed: false,
+      reasonPt: 'Texto identificado como repetição excessiva (anti-spam).',
+    };
+  }
+  return { allowed: true };
+}
+
+export interface MonthlyChallenge {
+  id: string;
+  languageCode: LanguageCode;
+  monthKey: string;
+  title: string;
+  description: string;
+  goalXp: number;
+  xpReward: number;
+  badgeLabel: string;
+}
+
+export function getMonthlyChallengeForLanguage(
+  languageCode: LanguageCode,
+  date = new Date(),
+): MonthlyChallenge {
+  const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+  const titles: Record<LanguageCode, string> = {
+    en: 'Sprint de Fluência em Inglês',
+    es: 'Maratón de Conversación en Español',
+    fr: 'Défi Culture & Dialogue en Français',
+    it: 'Sfida Parliamo Italiano',
+    de: 'Deutsch im Alltag Challenge',
+    ru: 'Челлендж Русского Языка',
+    ja: '日本語 毎日チャレンジ',
+    zh: '中文口语与汉字挑战',
+    ar: 'تحدي اللغة العربية اليومي',
+    nl: 'Nederlands Spreek-Sprint',
+    af: 'Afrikaans Praat-Uitdaging',
+    sv: 'Svenska Samtalsutmaning',
+  };
+  return {
+    id: `challenge-${monthKey}-${languageCode}`,
+    languageCode,
+    monthKey,
+    title: titles[languageCode] ?? `Desafio do Mês (${languageCode.toUpperCase()})`,
+    description: 'Acumule 150 XP semanais neste idioma para desbloquear o selo mensal e +80 XP bônus.',
+    goalXp: 150,
+    xpReward: 80,
+    badgeLabel: `Embaixador ${languageCode.toUpperCase()} ${monthKey}`,
+  };
+}

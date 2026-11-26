@@ -65,7 +65,7 @@ export function AppDownloadGateway({
         </div>
       </div>
 
-      <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
         {/* Windows Desktop */}
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50/70 p-5 transition hover:border-blue-300">
           <div>
@@ -144,6 +144,42 @@ export function AppDownloadGateway({
             <Download className="h-4 w-4" />
             <span>Baixar APK Android</span>
           </a>
+        </div>
+
+        {/* iPhone / iPad (PWA Safari - Zero Taxa Apple) */}
+        <div
+          data-testid="ios-pwa-card"
+          className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50/70 p-5 transition hover:border-indigo-300"
+        >
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-display text-base font-bold text-slate-900">
+                  iPhone / iPad (iOS)
+                </h2>
+                <p className="text-xs text-slate-500">
+                  App Web Instalável (PWA) · 100% Gratuito
+                </p>
+              </div>
+            </div>
+            <ol className="mt-4 space-y-1.5 text-xs text-slate-600 list-decimal pl-4">
+              <li>Abra o site pelo <strong>Safari</strong> no iPhone/iPad.</li>
+              <li>Toque no botão <strong>Compartilhar</strong> (quadrado com seta).</li>
+              <li>Escolha <strong>&ldquo;Adicionar à Tela de Início&rdquo;</strong>.</li>
+            </ol>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onContinueWeb(rememberWeb)}
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-700 cursor-pointer"
+          >
+            <Globe className="h-4 w-4" />
+            <span>Instalar via Safari (Web)</span>
+          </button>
         </div>
       </div>
 

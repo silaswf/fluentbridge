@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import type { UserProfile } from '../types/learning';
+import { getTeacherDisplayName } from '../utils/teacherDisplay';
 
 interface TeacherLinkModalProps {
   open: boolean;
@@ -141,6 +142,7 @@ export function TeacherLinkModal({
                 <div className="mt-2 space-y-2">
                   {teachers.map((t) => {
                     const active = selectedTeacherId === t.id && !teacherCode.trim();
+                    const teacherDisplay = getTeacherDisplayName(t);
                     return (
                       <button
                         key={t.id}
@@ -161,11 +163,11 @@ export function TeacherLinkModal({
                             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
                             style={{ backgroundColor: t.avatarColor }}
                           >
-                            {t.name.slice(0, 2).toUpperCase()}
+                            {teacherDisplay.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
                             <p className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                              <span>{t.name}</span>
+                              <span>{teacherDisplay}</span>
                               {t.isMasterAdmin && (
                                 <Crown className="h-3.5 w-3.5 text-amber-500" />
                               )}

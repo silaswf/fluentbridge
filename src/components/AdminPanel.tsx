@@ -37,6 +37,7 @@ import {
   type SyntheticHealthResult,
   type TelemetryErrorLog,
 } from '../utils/telemetry';
+import { getTeacherDisplayName } from '../utils/teacherDisplay';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface AdminPanelProps {
@@ -500,9 +501,12 @@ export function AdminPanel({
                         value={u.assignedTeacherId ?? ''}
                         onChange={(e) => {
                           const nextTeacherId = e.target.value;
-                          const nextTeacherName = state.users.find(
+                          const nextTeacherObj = state.users.find(
                             (t) => t.id === nextTeacherId,
-                          )?.name;
+                          );
+                          const nextTeacherName = nextTeacherObj
+                            ? getTeacherDisplayName(nextTeacherObj, state.teacherName)
+                            : undefined;
                           setPendingConfirm({
                             tone: nextTeacherId ? 'primary' : 'warning',
                             title: nextTeacherId
@@ -534,7 +538,7 @@ export function AdminPanel({
                           .filter((t) => t.role === 'teacher')
                           .map((t) => (
                             <option key={t.id} value={t.id}>
-                              Prof. {t.name}
+                              Prof. {getTeacherDisplayName(t, state.teacherName)}
                             </option>
                           ))}
                       </select>

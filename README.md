@@ -1,6 +1,6 @@
-# FluentBridge Academy (`v5.0.0`)
+# FluentBridge Academy (`v8.4.0`)
 
-Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco)** de **A1 a C1** (**`1.200` unidades = `100` por idioma, `20` por nível CEFR**), com **Gateway de Download Multiplataforma na Web**, **72 Simulados Cronometrados Oficiais** com escalas e tabelas reais, **Comunidade por Idioma (Ligas Semanais + Fórum com Correções)**, **Treinador de Escrita & Traços com Alfabetos 100% Completos** (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe com 4 formas RTL, `40` Hanzi + 4 Tons), **Histórico de Pronúncia**, **Feedback Fonético Silábico**, **Modo Shadowing**, **Caderno de Erros**, **60 Podcasts Curtos**, **Suíte E2E Playwright** e **Estúdio do Professor + Admin Mestre**, desenvolvida para o **Prof. Silas**.
+Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco)** de **A1 a C1** (**`1.236` unidades**, **`49` sotaques regionais com vozes neurais**, **76 Simulados Cronometrados Oficiais**, **Comunidade 2.0 com Ligas, Desafio do Mês, Moderação e Diff de Correções**, **Modo Hands-Free**, **Aba Dedicada de Imersão**, **Phoneme Breakdown nos 12 Idiomas**, **Gateway Web / Windows / Android / iOS Safari PWA ($0/ano)**, **Suíte Vitest + E2E Playwright com Auditoria WCAG AA** e **Estúdio do Professor + Admin Mestre**), desenvolvida para o **Prof. Silas Wagner**.
 
 ---
 
@@ -15,15 +15,13 @@ Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Ital
 
 ---
 
-## Números Atuais (`v5.0.0`)
+## Números Atuais (`v8.4.0`)
 
-- **1.200 Unidades CEFR (A1–C1) em 12 Idiomas**: **100 unidades por idioma** (`20` por nível A1–C1 em `EN, ES, FR, IT, DE, RU, JA, ZH, AR, NL, AF, SV`) com imersão B2/C1 e botão `🌐 Traduzir PT`
-- **72 Simulados Cronometrados Oficiais (Fase 11)**: **4 simulados por exame** (IELTS, TOEFL, Cambridge, DELE, SIELE, DELF, TCF, CILS, CELI, Goethe, TestDaF, TORFL, JLPT, HSK, ALPT, NT2, Taaltoets, Swedex) com cálculo na escala oficial e tabela de equivalência CEFR
-- **Comunidade por Idioma**: Ligas Semanais (Bronze → Diamante) + Fórum com dúvidas, pedidos de correção e sugestões entre alunos/professores (`+5 XP`)
-- **Central, Guia, Escrita Completa & Podcasts**: **`2.400` Tabelas Gramaticais (`200`/idioma)**, **Alfabetos Completos (`46` Hiragana, `46` Katakana, `30` Kanji, `33` Cirílico, `28` Árabe RTL, `40` Hanzi)** e **`60` Podcasts Curtos Multi-Voz**
-- **Nivelamento Adaptativo (CAT) nos 12 Idiomas**: **`480` questões 100% no idioma-alvo** (`40` por idioma · `8` por nível A1–C1)
-- **Tutor IA Dinâmico**: **`480` Situações Reais (`40`/idioma)** + **`12.000` Combinações Dinâmicas por Unidade**
-- **Qualidade Garantida**: `38/38` testes **Vitest** (`14` suítes) + **`7/7` testes E2E Playwright** aprovados · `0` erros TypeScript · Compactação esparsa (~95%) · RLS Relacional v5.0
+- **1.236 Unidades CEFR (A1–C1) em 12 Idiomas**: módulos desdobráveis sem duplicação + `>= 10` flashcards coesos por unidade, RTL nativo em Árabe e botão `🌐 Traduzir PT`
+- **49 Sotaques Regionais & Vozes Neurais**: Cloudflare Workers AI + cache SHA-256 em R2 + **Modo Hands-Free** em áudio contínuo + **Phoneme Breakdown** nos 12 idiomas
+- **76 Simulados Cronometrados Oficiais**: escalas e tabelas reais (IELTS, TOEFL, CELPIP, DET, DELE, DELF, CILS, Goethe, JLPT, HSK, ТРКИ, ALPT, CNaVT, TISUS e mais)
+- **Comunidade 2.0**: Ligas Semanais, **Desafio do Mês (+80 XP)**, moderação anti-spam/links/palavrões, reações rápidas, áudio em *snippets*, *diff* visual e aceite de correção (`+10 XP`)
+- **Qualidade Garantida**: `77/77` testes **Vitest** (`22` suítes) + **`14/14` testes E2E Playwright** (incl. auditoria WCAG AA Light/Dark) · `0` erros TypeScript · Edge API `v8.4.0` com cotas R2 e HTTP `206 Range`
 
 ---
 

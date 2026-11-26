@@ -22,10 +22,14 @@ import {
   computeLanguageLeaderboard,
   getCurrentWeekKey,
   getLeagueForWeeklyXp,
+  getMonthlyChallengeForLanguage,
   getStarterPostsForLanguage,
   LEAGUES,
+  moderateCommunityText,
 } from '../utils/communityEngine';
 import { isMasterAdminEmail } from '../config/appConfig';
+import { DualAudioButtons } from './DualAudioButtons';
+import { EmptyStateCard } from './EmptyStateCard';
 
 interface CommunityHubProps {
   currentUser: UserProfile;
@@ -43,6 +47,9 @@ interface CommunityHubProps {
   }) => void;
   onReplyPost: (postId: string, content: string, correctionSuggestion?: string) => void;
   onToggleLikePost: (postId: string) => void;
+  onToggleReaction?: (postId: string, emoji: string) => void;
+  onAcceptCorrection?: (postId: string, replyId: string) => void;
+  onClaimChallenge?: (challengeId: string, xpReward: number) => void;
   onDeletePost: (postId: string) => void;
 }
 
@@ -51,7 +58,10 @@ const CATEGORY_LABELS: Record<CommunityPost['category'], string> = {
   correction: 'Correção de Texto',
   culture: 'Cultura & Dica',
   milestone: 'Conquista',
+  study_partner: 'Parceiro de Estudo',
 };
+
+const QUICK_REACTIONS = ['👏', '🔥', '💡', '🎯'] as const;
 
 export function CommunityHub({
   currentUser,
@@ -62,6 +72,9 @@ export function CommunityHub({
   onCreatePost,
   onReplyPost,
   onToggleLikePost,
+  onToggleReaction,
+  onAcceptCorrection,
+  onClaimChallenge,
   onDeletePost,
 }: CommunityHubProps) {
   const [tab, setTab] = useState<'leagues' | 'forum'>('leagues');
@@ -76,6 +89,15 @@ export function CommunityHub({
 
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [correctionDrafts, setCorrectionDrafts] = useState<Record<string, string>>({});
+  const [moderationError, setModerationError] = useState<string | null>(null);
+
+  const monthlyChallenge = useMemo(
+    () => getMonthlyChallengeForLanguage(activeCourse.code),
+    [activeCourse.code],
+  );
+  const challengeClaimed = Boolean(
+    currentUser.claimedChallengeIds?.includes(monthlyChallenge.id),
+  );
 
   const weekKey = getCurrentWeekKey();
   const myWeeklyXp =
@@ -106,6 +128,12 @@ export function CommunityHub({
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newBody.trim()) return;
+    const modCheck = moderateCommunityText(`${newTitle} ${newBody} ${newSnippet}`);
+    if (!modCheck.allowed) {
+      setModerationError(modCheck.reasonPt ?? 'Conteúdo bloqueado pela moderação.');
+      return;
+    }
+    setModerationError(null);
     onCreatePost({
       languageCode: activeCourse.code,
       level: newLevel,
@@ -124,6 +152,12 @@ export function CommunityHub({
     const text = (replyDrafts[postId] ?? '').trim();
     if (!text) return;
     const correction = (correctionDrafts[postId] ?? '').trim() || undefined;
+    const modCheck = moderateCommunityText(`${text} ${correction ?? ''}`);
+    if (!modCheck.allowed) {
+      setModerationError(modCheck.reasonPt ?? 'Resposta bloqueada pela moderação.');
+      return;
+    }
+    setModerationError(null);
     onReplyPost(postId, text, correction);
     setReplyDrafts((prev) => ({ ...prev, [postId]: '' }));
     setCorrectionDrafts((prev) => ({ ...prev, [postId]: '' }));
@@ -243,6 +277,54 @@ export function CommunityHub({
             </div>
           </div>
 
+          {/* Desafio do Mês */}
+          <div
+            data-testid="monthly-challenge-card"
+            className="fb-card-primary rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-blue-50/80 p-5 shadow-2xs dark:border-indigo-900 dark:from-indigo-950/50 dark:to-slate-900"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-800 dark:bg-indigo-900/70 dark:text-indigo-200">
+                  <Trophy className="h-3 w-3" /> Desafio do Mês · {monthlyChallenge.badgeLabel}
+                </span>
+                <h3 className="mt-1.5 font-display text-base font-extrabold text-slate-900 dark:text-slate-100">
+                  {monthlyChallenge.title}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  {monthlyChallenge.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">
+                  {Math.min(myWeeklyXp, monthlyChallenge.goalXp)} / {monthlyChallenge.goalXp} XP
+                </span>
+                {onClaimChallenge && (
+                  <button
+                    type="button"
+                    data-testid="claim-monthly-challenge-btn"
+                    disabled={challengeClaimed || myWeeklyXp < monthlyChallenge.goalXp}
+                    onClick={() => onClaimChallenge(monthlyChallenge.id, monthlyChallenge.xpReward)}
+                    className={`rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                      challengeClaimed
+                        ? 'bg-emerald-100 text-emerald-800 cursor-default'
+                        : myWeeklyXp >= monthlyChallenge.goalXp
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                          : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {challengeClaimed ? 'Resgatado ✓' : `Resgatar +${monthlyChallenge.xpReward} XP`}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
+              <div
+                className="h-full rounded-full bg-indigo-600 transition-all"
+                style={{ width: `${Math.min(100, Math.round((myWeeklyXp / monthlyChallenge.goalXp) * 100))}%` }}
+              />
+            </div>
+          </div>
+
           {/* Leaderboard Table */}
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xs">
             <div className="border-b border-slate-100 px-5 py-3.5">
@@ -307,7 +389,7 @@ export function CommunityHub({
           {/* Forum Controls */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-1.5">
-              {(['ALL', 'question', 'correction', 'culture', 'milestone'] as const).map((cat) => (
+              {(['ALL', 'question', 'correction', 'culture', 'milestone', 'study_partner'] as const).map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -349,6 +431,7 @@ export function CommunityHub({
                   <option value="correction">Pedir Correção de Texto</option>
                   <option value="culture">Cultura &amp; Dica</option>
                   <option value="milestone">Conquista</option>
+                  <option value="study_partner">Parceiro de Estudo</option>
                 </select>
                 <select
                   value={newLevel}
@@ -406,8 +489,34 @@ export function CommunityHub({
             </form>
           )}
 
+          {moderationError && (
+            <div
+              data-testid="community-moderation-error"
+              className="flex items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-800"
+            >
+              <span>🛡️ {moderationError}</span>
+              <button
+                type="button"
+                onClick={() => setModerationError(null)}
+                className="text-[11px] font-bold underline cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+          )}
+
           {/* Posts List */}
           <div className="space-y-4">
+            {langPosts.length === 0 && (
+              <EmptyStateCard
+                icon={MessageSquare}
+                title="Nenhuma publicação nesta categoria"
+                description="Seja o primeiro(a) a iniciar uma conversa, pedir correção de frase ou procurar um parceiro de estudo!"
+                actionLabel="Criar publicação"
+                onAction={() => setShowComposer(true)}
+                testId="empty-community-posts"
+              />
+            )}
             {langPosts.map((post) => {
               const likedByMe = post.likes.includes(currentUser.id);
               const canDelete =
@@ -468,13 +577,18 @@ export function CommunityHub({
                   {post.targetSnippet && (
                     <div
                       dir={activeCourse.code === 'ar' ? 'rtl' : 'ltr'}
-                      className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5 text-sm font-semibold text-indigo-950"
+                      className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5 text-sm font-semibold text-indigo-950"
                     >
-                      “{post.targetSnippet}”
+                      <span>“{post.targetSnippet}”</span>
+                      <DualAudioButtons
+                        text={post.targetSnippet}
+                        languageCode={post.languageCode}
+                        size="xs"
+                      />
                     </div>
                   )}
 
-                  <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3">
+                  <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
                     <button
                       type="button"
                       onClick={() => onToggleLikePost(post.id)}
@@ -489,28 +603,78 @@ export function CommunityHub({
                       <MessageSquare className="h-3.5 w-3.5" />
                       <span>{post.replies.length} respostas</span>
                     </span>
+                    {onToggleReaction && (
+                      <div className="flex flex-wrap items-center gap-1">
+                        {QUICK_REACTIONS.map((emoji) => {
+                          const usersForEmoji = post.reactions?.[emoji] ?? [];
+                          const activeReact = usersForEmoji.includes(currentUser.id);
+                          return (
+                            <button
+                              key={emoji}
+                              type="button"
+                              data-testid={`reaction-btn-${emoji}`}
+                              onClick={() => onToggleReaction(post.id, emoji)}
+                              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold transition cursor-pointer ${
+                                activeReact
+                                  ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span>{emoji}</span>
+                              {usersForEmoji.length > 0 && <span>{usersForEmoji.length}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Replies */}
                   {post.replies.length > 0 && (
                     <div className="mt-3 space-y-2 border-l-2 border-slate-200 pl-3">
-                      {post.replies.map((rep) => (
+                      {post.replies.map((rep) => {
+                        const isAccepted = post.acceptedReplyId === rep.id;
+                        return (
                         <div key={rep.id} className="rounded-xl bg-slate-50 p-3 text-xs">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <span className="font-bold text-slate-900">
                               {rep.authorName}
                               {rep.authorRole === 'teacher' ? ' (Prof.)' : ''}
+                              {isAccepted && (
+                                <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                                  Aceita ✓
+                                </span>
+                              )}
                             </span>
                             <span className="text-[10px] text-slate-400">{rep.createdAt}</span>
                           </div>
                           <p className="mt-1 text-slate-700">{rep.content}</p>
                           {rep.correctionSuggestion && (
-                            <p className="mt-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-900">
-                              ✍️ Sugestão: {rep.correctionSuggestion}
-                            </p>
+                            <div className="mt-1.5 space-y-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-emerald-950">
+                              {post.targetSnippet && (
+                                <p className="text-[11px] text-rose-700 line-through">
+                                  {post.targetSnippet}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <p className="font-semibold">
+                                  ✍️ Sugestão: {rep.correctionSuggestion}
+                                </p>
+                                {onAcceptCorrection && post.authorId === currentUser.id && !isAccepted && (
+                                  <button
+                                    type="button"
+                                    onClick={() => onAcceptCorrection(post.id, rep.id)}
+                                    className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 cursor-pointer"
+                                  >
+                                    Aceitar correção (+10 XP)
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 

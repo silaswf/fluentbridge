@@ -426,6 +426,7 @@ export function LessonPlayer({
   // Step check & feedback state
   const [checkedStatus, setCheckedStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const [earnedXp, setEarnedXp] = useState(0);
+  const [xpPulse, setXpPulse] = useState<number | null>(null);
 
   const currentStep: LessonStep | undefined = steps[stepIdx];
   const progressPct = isCompletedScreen
@@ -551,7 +552,10 @@ export function LessonPlayer({
     setSessionCorrectCount((c) => c + 1);
     recordAdaptiveAttempt(studentName, langKey, true);
     const comboBonus = nextCombo >= 3 ? 5 : 0;
-    setEarnedXp((prev) => prev + baseXp + comboBonus);
+    const delta = baseXp + comboBonus;
+    setEarnedXp((prev) => prev + delta);
+    setXpPulse(delta);
+    window.setTimeout(() => setXpPulse(null), 1200);
   };
 
   const registerMistake = () => {
@@ -569,6 +573,8 @@ export function LessonPlayer({
       setShowHint(true);
     }
     setEarnedXp((prev) => prev + 6);
+    setXpPulse(6);
+    window.setTimeout(() => setXpPulse(null), 1200);
     if (!relaxedMode) {
       setHearts((prev) => {
         const next = Math.max(0, prev - 1);
@@ -1241,6 +1247,14 @@ export function LessonPlayer({
           </div>
 
           <div className="flex items-center gap-1.5">
+            {xpPulse !== null && (
+              <span
+                data-testid="lesson-xp-pulse"
+                className="animate-fade-up inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 font-mono text-[11px] font-extrabold text-amber-800 shadow-xs"
+              >
+                <Zap className="h-3 w-3 text-amber-600" />+{xpPulse} XP
+              </span>
+            )}
             {combo >= 2 && (
               <span className="hidden items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 font-mono text-[11px] font-extrabold text-orange-700 sm:inline-flex">
                 <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-600" />
@@ -1956,6 +1970,25 @@ export function LessonPlayer({
                       </span>
                     ))}
                   </div>
+                  {speakingEval.phonemeBreakdown.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase">Fonemas:</span>
+                      {speakingEval.phonemeBreakdown.map((ph, phIdx) => (
+                        <span
+                          key={`${ph.word}-${phIdx}`}
+                          data-testid="phoneme-chip"
+                          title={`${ph.word}: ${ph.hintPt}`}
+                          className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-bold ${
+                            ph.status === 'ok'
+                              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                              : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+                          }`}
+                        >
+                          {ph.symbol} · {ph.word}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {speakingEval.phoneticTips.length > 0 && (
                     <div className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">
                       {speakingEval.phoneticTips.map((pt, pIdx) => (

@@ -1,61 +1,44 @@
 import type { LucideIcon } from 'lucide-react';
 
 interface EmptyStateCardProps {
-  Icon: LucideIcon;
+  icon: LucideIcon;
   title: string;
   description: string;
-  primaryLabel?: string;
-  onPrimary?: () => void;
-  secondaryLabel?: string;
-  onSecondary?: () => void;
+  actionLabel?: string;
+  onAction?: () => void;
   testId?: string;
 }
 
 export function EmptyStateCard({
-  Icon,
+  icon: Icon,
   title,
   description,
-  primaryLabel,
-  onPrimary,
-  secondaryLabel,
-  onSecondary,
+  actionLabel,
+  onAction,
   testId,
 }: EmptyStateCardProps) {
   return (
     <div
       data-testid={testId}
-      className="fb-card-primary p-8 text-center sm:p-10"
+      className="fb-card-primary rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-xs dark:border-slate-700 dark:bg-slate-900/70"
     >
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
         <Icon className="h-6 w-6" />
       </div>
-      <h3 className="mt-3 font-display text-lg font-bold text-slate-900">
+      <h3 className="mt-3 font-display text-base font-bold text-slate-900 dark:text-slate-100">
         {title}
       </h3>
-      <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-slate-600">
+      <p className="mx-auto mt-1 max-w-md text-xs text-slate-600 dark:text-slate-400">
         {description}
       </p>
-      {(primaryLabel || secondaryLabel) && (
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {primaryLabel && onPrimary && (
-            <button
-              type="button"
-              onClick={onPrimary}
-              className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
-            >
-              {primaryLabel}
-            </button>
-          )}
-          {secondaryLabel && onSecondary && (
-            <button
-              type="button"
-              onClick={onSecondary}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
-            >
-              {secondaryLabel}
-            </button>
-          )}
-        </div>
+      {actionLabel && onAction && (
+        <button
+          type="button"
+          onClick={onAction}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 cursor-pointer"
+        >
+          {actionLabel}
+        </button>
       )}
     </div>
   );
