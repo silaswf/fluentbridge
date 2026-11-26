@@ -4,6 +4,18 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.3.0`] — 2026-11-26
+### Vozes Neurais Naturais em Tudo + Execução Integral do Plano 09 (P0, P1 e P2)
+- **Vozes Neurais Naturais (`cloudflare-worker/worker.js` `8.3.0`, `src/utils/speech.ts`, `DualAudioButtons.tsx`, `MockExamHub.tsx`, `GradedReadersView.tsx`):**
+  - Todos os **49 sotaques** (incluindo `en-US`, `en-GB`, `es-ES`, `es-MX`) elevados para **Gemini 2.5 Native Neural TTS** como Tier 1, com **Deepgram Aura-2** como Tier 2 fallback neural para EN/ES; Tier 3 (`google-tts-fallback`) nunca é salvo em R2/Edge Cache (`Cache-Control: no-store`, `X-TTS-Fallback: true`). Cache invalidado para `tts/v6/` (R2 e Edge) e `tts-v6:` (IndexedDB).
+  - Desbloqueio síncrono de `Audio` (WAV silencioso) preservando gesto do usuário mesmo quando a síntese neural demora; estado de carregamento `Loader2` em `DualAudioButtons`; `speakTextAsync` corrigindo leitura contínua em `GradedReadersView`; **CELPIP** usando `en-CA` por padrão quando aplicável.
+- **Funcional (`F-01…F-07`):** preferência global de sotaques regionais (`accentPreference.ts` + globo acessível também em `size="xs"`), `analyzeWritingHybrid` com IA semântica preservando intenção do aluno + fallback local, `adaptiveDifficulty` persistente com `autoShowHints` conectado, `flushProgressOutbox` ligado a lição/SRS/checkpoint, ruído ambiente com 3 intensidades + sincronismo ao Play, `deleteMyCloudAccount()` invocando `delete_my_account_data()` na LGPD, retenção expansível + notificações nativas, `TipsLibrary` organizado em *Guias & Treino* vs *Imersão* e `AITutor` com engrenagem *⚙️ Avançado* na chamada.
+- **UI/UX (`U-01…U-07`):** `SettingsModal.tsx` consolidando preferências/LGPD/update/download/logout em 2 cliques; `Sidebar.tsx` enxuta no desktop, `Revisão` fixa na bottom bar mobile, remoção de `LogOut` acidental no topo mobile e fim do grid quebrado no menu *Mais*; `LearningPath.tsx` com Hero limpo, barra CEFR única sticky e persistência de módulos; `LessonPlayer.tsx` com `⚙️` mobile e etapas retráteis; `index.css` com tokens semânticos, sistema de cards (`fb-card-*`) e correção de `bg-orange-*` + `text-teal/sky/orange-800..950` no Dark Mode; `i18n.ts` com paridade 100% `PT/EN/ES`; `ViewSkeleton.tsx` e `EmptyStateCard.tsx`.
+- **Segurança CI (`S-04`):** job `secret-scan` em `.github/workflows/build-android-apk.yml` bloqueando vazamentos antes do build.
+- **Verificação:** `tsc --noEmit` (0 erros), `vitest` (21 suítes / 73 testes verdes), build PWA limpo e 13/13 testes E2E Playwright (Desktop + Mobile `390x844` + guarda Dark Mode).
+
+---
+
 ## [`v8.2.1`] — 2026-11-26
 ### Correção: módulos "duplicados" na trilha, áudios dos simulados e sotaques regionais
 - **Trilha (`src/utils/courseCohesion.ts`):** a `v8.2.0` agrupava cada nível em blocos de 5 unidades mas só tinha **3 títulos por nível**; do 4º bloco em diante o título voltava ao do 1º ("Módulo 1/2/3" reaparecendo antes do "Módulo 4"). Eram unidades **diferentes** (103 ids únicos por idioma), mas com título repetido — o que também gerava `key` duplicada no React e fazia blocos distintos abrirem/fecharem juntos. Agora há 6 temas por nível e a numeração é **sequencial e global** (`Módulo 1 … N`), sem repetições, nos 12 idiomas. `moduleIndex` e os ids de checkpoint foram preservados (progresso e checkpoints concluídos não se perdem).

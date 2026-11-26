@@ -60,7 +60,7 @@ async function buildR2TtsKey(locale, speaker, text) {
   const data = new TextEncoder().encode(`${locale}|${speaker}|${text}`);
   const digest = await crypto.subtle.digest('SHA-256', data);
   const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
-  return `tts/v5/${locale}/${hex}.audio`;
+  return `tts/v6/${locale}/${hex}.audio`;
 }
 
 function checkRateLimit(request, routeKey, maxPerMinute, userId = null) {
@@ -154,10 +154,16 @@ function resolveTtsConfig(rawLang, rawVoice) {
 
   if (lower === 'en-gb' || lower === 'uk') {
     return {
-      engine: 'deepgram',
+      engine: 'gemini-tts',
       locale: 'en-GB',
-      model: '@cf/deepgram/aura-2-en',
-      speaker: isMale ? 'draco' : 'pandora',
+      bcp47: 'en-GB',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Read only the following text aloud in natural British English (London RP), clear and expressive, no commentary:',
+      quoteOpen: '"',
+      quoteClose: '"',
+      fallbackModel: '@cf/deepgram/aura-2-en',
+      fallbackSpeaker: isMale ? 'draco' : 'pandora',
       googleLang: 'en-GB',
     };
   }
@@ -171,6 +177,8 @@ function resolveTtsConfig(rawLang, rawVoice) {
       promptPrefix: 'Read only the following text aloud with a natural Scottish English (Edinburgh) accent, no commentary:',
       quoteOpen: '"',
       quoteClose: '"',
+      fallbackModel: '@cf/deepgram/aura-2-en',
+      fallbackSpeaker: isMale ? 'draco' : 'pandora',
       googleLang: 'en-GB',
     };
   }
@@ -192,15 +200,23 @@ function resolveTtsConfig(rawLang, rawVoice) {
       promptPrefix: `Read only the following text aloud as a native ${r.label} speaker, without commentary:`,
       quoteOpen: '"',
       quoteClose: '"',
+      fallbackModel: '@cf/deepgram/aura-2-en',
+      fallbackSpeaker: lower === 'en-ie' ? (isMale ? 'draco' : 'pandora') : (isMale ? 'apollo' : 'thalia'),
       googleLang: r.bcp47,
     };
   }
   if (lower === 'es-es') {
     return {
-      engine: 'deepgram',
+      engine: 'gemini-tts',
       locale: 'es-ES',
-      model: '@cf/deepgram/aura-2-es',
-      speaker: isMale ? 'nestor' : 'carina',
+      bcp47: 'es-ES',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Charon' : 'Aoede',
+      promptPrefix: 'Lee únicamente en voz alta el siguiente texto como hablante nativo de español de Madrid (España), con entonación natural y sin comentarios:',
+      quoteOpen: '«',
+      quoteClose: '»',
+      fallbackModel: '@cf/deepgram/aura-2-es',
+      fallbackSpeaker: isMale ? 'nestor' : 'carina',
       googleLang: 'es-ES',
     };
   }
@@ -221,15 +237,23 @@ function resolveTtsConfig(rawLang, rawVoice) {
       promptPrefix: `Lee únicamente en voz alta el siguiente texto como hablante nativo de ${r.label}, sin comentarios:`,
       quoteOpen: '«',
       quoteClose: '»',
+      fallbackModel: '@cf/deepgram/aura-2-es',
+      fallbackSpeaker: isMale ? 'javier' : 'estrella',
       googleLang: r.bcp47,
     };
   }
   if (lower.startsWith('es')) {
     return {
-      engine: 'deepgram',
+      engine: 'gemini-tts',
       locale: 'es-MX',
-      model: '@cf/deepgram/aura-2-es',
-      speaker: isMale ? 'javier' : 'estrella',
+      bcp47: 'es-MX',
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? 'Puck' : 'Zephyr',
+      promptPrefix: 'Lee únicamente en voz alta el siguiente texto como hablante nativo de español mexicano natural, sin comentarios:',
+      quoteOpen: '«',
+      quoteClose: '»',
+      fallbackModel: '@cf/deepgram/aura-2-es',
+      fallbackSpeaker: isMale ? 'javier' : 'estrella',
       googleLang: 'es',
     };
   }
@@ -513,10 +537,16 @@ function resolveTtsConfig(rawLang, rawVoice) {
     };
   }
   return {
-    engine: 'deepgram',
+    engine: 'gemini-tts',
     locale: 'en-US',
-    model: '@cf/deepgram/aura-2-en',
-    speaker: isMale ? 'apollo' : 'thalia',
+    bcp47: 'en-US',
+    model: 'gemini-2.5-flash-preview-tts',
+    speaker: isMale ? 'Puck' : 'Zephyr',
+    promptPrefix: 'Read only the following text aloud in natural American English, clear and expressive, no commentary:',
+    quoteOpen: '"',
+    quoteClose: '"',
+    fallbackModel: '@cf/deepgram/aura-2-en',
+    fallbackSpeaker: isMale ? 'apollo' : 'thalia',
     googleLang: 'en-US',
   };
 }
@@ -693,7 +723,7 @@ async function handleTtsRequest(request, env, ctx) {
   const clippedText = text.slice(0, MAX_TTS_CHARS);
   const cfg = resolveTtsConfig(lang, voice);
   const cacheUrl = new URL(
-    `https://fluentbridge-tts-cache.internal/v4/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(cfg.speaker)}/${encodeURIComponent(clippedText)}`,
+    `https://fluentbridge-tts-cache.internal/v6/${encodeURIComponent(cfg.locale)}/${encodeURIComponent(cfg.speaker)}/${encodeURIComponent(clippedText)}`,
   );
   const cacheKey = new Request(cacheUrl.toString(), { method: 'GET' });
   const cache = typeof caches !== 'undefined' ? caches.default : null;
@@ -740,7 +770,9 @@ async function handleTtsRequest(request, env, ctx) {
   let audioBuffer = null;
   let contentType = 'audio/mpeg';
   let provider = 'none';
+  let isEmergencyFallback = false;
 
+  // Tier 1: Gemini 2.5 Native Neural TTS (prosódia natural em todos os 49 sotaques)
   if (cfg.engine === 'gemini-tts') {
     const gem = await synthesizeGeminiNeuralTts(clippedText, cfg, env);
     if (gem && gem.buffer && gem.buffer.byteLength > 200) {
@@ -748,28 +780,33 @@ async function handleTtsRequest(request, env, ctx) {
       contentType = gem.contentType;
       provider = gem.provider;
     }
-  } else if (cfg.model && env.AI) {
+  }
+
+  // Tier 2: Deepgram Aura-2 Neural (fallback neural para EN/ES ou quando engine === 'deepgram')
+  const dgModel = cfg.fallbackModel || (cfg.engine === 'deepgram' ? cfg.model : null);
+  const dgSpeaker = cfg.fallbackSpeaker || cfg.speaker;
+  if (!audioBuffer && dgModel && env.AI) {
     try {
-      const aiResult = await env.AI.run(cfg.model, {
+      const aiResult = await env.AI.run(dgModel, {
         text: clippedText,
-        speaker: cfg.speaker,
+        speaker: dgSpeaker,
         encoding: 'mp3',
       });
       const buf = await aiResultToArrayBuffer(aiResult);
       if (buf && buf.byteLength > 200) {
         audioBuffer = buf;
-        provider = `deepgram-aura-2:${cfg.speaker}`;
+        provider = `deepgram-aura-2:${dgSpeaker}`;
       }
     } catch (err) {
       try {
-        const retryResult = await env.AI.run(cfg.model, {
+        const retryResult = await env.AI.run(dgModel, {
           text: clippedText,
-          speaker: cfg.speaker,
+          speaker: dgSpeaker,
         });
         const retryBuf = await aiResultToArrayBuffer(retryResult);
         if (retryBuf && retryBuf.byteLength > 200) {
           audioBuffer = retryBuf;
-          provider = `deepgram-aura-2:${cfg.speaker}`;
+          provider = `deepgram-aura-2:${dgSpeaker}`;
         }
       } catch {
         console.warn('Workers AI TTS error:', err instanceof Error ? err.message : String(err));
@@ -777,11 +814,13 @@ async function handleTtsRequest(request, env, ctx) {
     }
   }
 
+  // Tier 3: Emergencial (nunca gravar no R2 nem no Edge Cache para não envenenar o cache com voz robótica)
   if (!audioBuffer) {
     audioBuffer = await fetchGoogleTtsFallback(clippedText, cfg.googleLang);
     if (audioBuffer) {
       contentType = 'audio/mpeg';
       provider = 'google-tts-fallback';
+      isEmergencyFallback = true;
     }
   }
 
@@ -791,14 +830,15 @@ async function handleTtsRequest(request, env, ctx) {
 
   const responseHeaders = {
     'Content-Type': contentType,
-    'Cache-Control': 'public, max-age=604800',
+    'Cache-Control': isEmergencyFallback ? 'no-store' : 'public, max-age=604800',
     'X-TTS-Provider': provider,
     'X-TTS-Locale': cfg.locale,
-    'X-TTS-Cache': 'MISS',
+    'X-TTS-Cache': isEmergencyFallback ? 'BYPASS' : 'MISS',
+    ...(isEmergencyFallback ? { 'X-TTS-Fallback': 'true' } : {}),
     ...CORS_HEADERS,
   };
 
-  if (cache && ctx && typeof ctx.waitUntil === 'function') {
+  if (!isEmergencyFallback && cache && ctx && typeof ctx.waitUntil === 'function') {
     const toCache = new Response(audioBuffer.slice(0), {
       status: 200,
       headers: {
@@ -811,7 +851,7 @@ async function handleTtsRequest(request, env, ctx) {
     ctx.waitUntil(cache.put(cacheKey, toCache));
   }
 
-  if (env.MEDIA_BUCKET && r2Key && ctx && typeof ctx.waitUntil === 'function') {
+  if (!isEmergencyFallback && env.MEDIA_BUCKET && r2Key && ctx && typeof ctx.waitUntil === 'function') {
     ctx.waitUntil(
       env.MEDIA_BUCKET.put(r2Key, audioBuffer.slice(0), {
         httpMetadata: { contentType },
@@ -1156,7 +1196,7 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '8.2.1',
+        version: '8.3.0',
         accentCount: 49,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
         endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],

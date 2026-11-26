@@ -101,3 +101,61 @@ export async function requestAndSendBrowserNotification(
     };
   }
 }
+
+export async function scheduleNativeRetentionNotifications(
+  alerts: RetentionAlert[],
+): Promise<{ ok: boolean; scheduledCount: number; message: string }> {
+  if (alerts.length === 0) {
+    return { ok: true, scheduledCount: 0, message: 'Nenhum alerta pendente.' };
+  }
+
+  try {
+    const cap = (
+      globalThis as unknown as {
+        Capacitor?: {
+          isNativePlatform?: () => boolean;
+          Plugins?: {
+            LocalNotifications?: {
+              requestPermissions?: () => Promise<{ display?: string }>;
+              schedule?: (opts: {
+                notifications: Array<{
+                  id: number;
+                  title: string;
+                  body: string;
+                  schedule: { at: Date };
+                }>;
+              }) => Promise<void>;
+            };
+          };
+        };
+      }
+    ).Capacitor;
+
+    const localPlugin = cap?.Plugins?.LocalNotifications;
+    if (cap?.isNativePlatform?.() && localPlugin?.schedule) {
+      await localPlugin.requestPermissions?.();
+      const nowMs = Date.now();
+      const notifications = alerts.slice(0, 3).map((al, idx) => ({
+        id: 8300 + idx,
+        title: `FluentBridge · ${al.titlePt}`,
+        body: al.bodyPt,
+        schedule: { at: new Date(nowMs + (idx + 1) * 60 * 60 * 1000) },
+      }));
+      await localPlugin.schedule({ notifications });
+      return {
+        ok: true,
+        scheduledCount: notifications.length,
+        message: `${notifications.length} lembrete(s) nativo(s) agendado(s) no dispositivo.`,
+      };
+    }
+  } catch {
+    // Fallback to browser Notification API below
+  }
+
+  const webRes = await requestAndSendBrowserNotification(alerts[0]);
+  return {
+    ok: webRes.ok,
+    scheduledCount: webRes.ok ? 1 : 0,
+    message: webRes.message,
+  };
+}

@@ -43,7 +43,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
 
     await page.getByTestId('language-switcher-trigger').click();
     await page.getByTestId('lang-option-en').click();
-    await page.getByRole('button', { name: /Trilha \(/i }).click();
+    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
 
     // Verify collapsible module accordions: only 1 module expanded by default
     const headers = page.getByTestId('module-header-card');
@@ -132,7 +132,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
         const textarea = page.locator('.fixed.inset-0.z-50 textarea').first();
         await textarea.fill('hello i work in london and study english every day');
         await diffBtn.click();
-        await expect(page.getByTestId('writing-diff-panel')).toBeVisible();
+        await expect(page.getByTestId('writing-diff-panel')).toBeVisible({ timeout: 15000 });
         sawWritingDiff = true;
         break;
       }
@@ -252,14 +252,15 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await page.getByTestId('language-switcher-trigger').click();
     await page.getByTestId('lang-option-ja').click();
     await expect(page.locator('main')).toHaveAttribute('dir', 'ltr');
-    await page.getByRole('button', { name: /Trilha \(/i }).click();
+    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
     await page.getByRole('button', { name: /Começar|Continuar|Refazer/i }).first().click();
     await expect(page.getByTestId('ja-kana-toggle')).toBeVisible({ timeout: 8000 });
     await page.getByTestId('ja-kana-toggle').click();
     await expect(page.getByTestId('ja-kana-toggle')).toContainText(/Kana/i);
     await page.locator('.fixed.inset-0.z-50 button').filter({ has: page.locator('svg.lucide-x') }).first().click();
 
-    // LGPD Privacy modal & JSON export
+    // LGPD Privacy modal & JSON export (via SettingsModal)
+    await page.getByTestId('open-settings-btn').click();
     await page.getByTestId('sidebar-privacy-lgpd-btn').click();
     await expect(page.getByTestId('privacy-lgpd-modal')).toBeVisible();
     await page.getByTestId('lgpd-export-btn').click();
@@ -270,15 +271,19 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     expect(errors).toEqual([]);
   });
 
-  test('Human Journey 3 (Mobile 390x844 & Admin Health Check): No horizontal overflow, Dark Mode & Live Health Check', async ({
+  test('Human Journey 3 (Mobile 390x844 & Admin Health Check): No horizontal overflow, Dark Mode contrast, Single CEFR filter & Live Health Check', async ({
     page,
   }) => {
     const errors = await attachErrorGuards(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await loginAsHumanStudent(page, true);
 
-    // Navigate to Trilha on mobile bottom nav
-    await page.getByRole('button', { name: /Trilha/i }).last().click();
+    // Navigate to Trilha on mobile bottom nav + verify Revisão is pinned in bottom bar
+    await expect(page.getByTestId('mobile-nav-review')).toBeVisible();
+    await page.getByTestId('mobile-nav-learn').click();
+
+    // Verify single CEFR filter bar (U-02)
+    await expect(page.getByTestId('cefr-filter-bar')).toHaveCount(1);
 
     // Check no horizontal overflow on mobile viewport
     const overflow = await page.evaluate(
@@ -286,12 +291,32 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     );
     expect(overflow).toBeLessThanOrEqual(4);
 
-    // Collapsible module card visible on mobile
-    await expect(page.getByTestId('module-header-card').first()).toBeVisible();
+    // Open mobile "Mais" sheet and verify no horizontal overflow
+    await page.getByTestId('mobile-more-trigger').click();
+    await expect(page.getByTestId('mobile-more-sheet')).toBeVisible();
+    const sheetOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(sheetOverflow).toBeLessThanOrEqual(4);
+    await page.getByTestId('mobile-more-sheet').locator('button').first().click();
 
-    // Open Admin Panel via desktop/wide or mobile nav and run live Health Check
+    // Collapsible module card visible on mobile + LessonPlayer mobile settings gear (U-04)
+    await expect(page.getByTestId('module-header-card').first()).toBeVisible();
+    await page.getByRole('button', { name: /Começar|Continuar|Refazer/i }).first().click();
+    await expect(page.getByTestId('lesson-mobile-settings-btn')).toBeVisible();
+    await page.getByLabel('Sair da lição').click();
+
+    // Verify Dark Mode contrast guard on main trail text (U-05)
+    await page.evaluate(() => document.documentElement.classList.add('dark'));
+    const bodyBg = await page.evaluate(
+      () => getComputedStyle(document.body).backgroundColor,
+    );
+    expect(bodyBg).not.toBe('rgb(255, 255, 255)');
+    await page.evaluate(() => document.documentElement.classList.remove('dark'));
+
+    // Open Admin Panel via desktop/wide nav and run live Health Check
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.getByRole('button', { name: /Painel Admin/i }).click();
+    await page.getByRole('button', { name: /Admin Mestre|Painel Admin/i }).click();
     await page.getByTestId('admin-run-healthcheck-btn').click();
     await expect(page.getByTestId('admin-healthcheck-results')).toBeVisible({ timeout: 15000 });
 

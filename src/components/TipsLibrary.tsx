@@ -168,109 +168,122 @@ export function TipsLibrary({
           </p>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex flex-wrap items-center gap-2 self-start">
-          <div className="inline-flex flex-wrap rounded-2xl border border-slate-200 bg-white p-1 shadow-2xs">
-            <button
-              type="button"
-              onClick={() => setViewMode('tips')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'tips'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Lightbulb className="h-3.5 w-3.5" />
-              <span>Dicas ({allTips.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('guide')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'guide'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              <span>Guia ({grammarGuide.length})</span>
-            </button>
-            <button
-              type="button"
-              data-testid="tips-tab-drills"
-              onClick={() => setViewMode('drills')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'drills'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <span>Treino Gramatical</span>
-            </button>
-            <button
-              type="button"
-              data-testid="tips-tab-readers"
-              onClick={() => setViewMode('readers')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'readers'
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <span>Leitura Graduada</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('scripts')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'scripts'
-                  ? 'bg-cyan-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <PenTool className="h-3.5 w-3.5" />
-              <span>Escrita &amp; Traços</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('podcasts')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'podcasts'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Headphones className="h-3.5 w-3.5" />
-              <span>Podcasts</span>
-            </button>
-            <button
-              type="button"
-              data-testid="tips-tab-videos"
-              onClick={() => setViewMode('videos')}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                viewMode === 'videos'
-                  ? 'bg-violet-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Clapperboard className="h-3.5 w-3.5" />
-              <span>Vídeos</span>
-            </button>
+        {/* Mode Toggle: 2 grupos claros (Guias & Treino vs Imersão Audiovisual) */}
+        <div className="flex flex-col gap-2 self-start">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase">
+              Guias &amp; Treino
+            </span>
+            <div className="inline-flex flex-wrap rounded-2xl border border-slate-200 bg-white p-1 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('tips')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'tips'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Lightbulb className="h-3.5 w-3.5" />
+                <span>Dicas ({allTips.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('guide')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'guide'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Guia ({grammarGuide.length})</span>
+              </button>
+              <button
+                type="button"
+                data-testid="tips-tab-drills"
+                onClick={() => setViewMode('drills')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'drills'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <span>Treino Gramatical</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('scripts')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'scripts'
+                    ? 'bg-cyan-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <PenTool className="h-3.5 w-3.5" />
+                <span>Escrita &amp; Traços</span>
+              </button>
+            </div>
           </div>
 
-          {(viewMode === 'tips' || viewMode === 'guide') && (
-            <button
-              type="button"
-              onClick={() => setShowB2C1Translation((v) => !v)}
-              className={`rounded-xl border px-3 py-2 text-xs font-bold transition cursor-pointer ${
-                showB2C1Translation
-                  ? 'border-indigo-400 bg-indigo-100 text-indigo-900'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              🌐 {showB2C1Translation ? 'Ocultar Tradução B2/C1' : 'Mostrar Tradução PT (B2/C1)'}
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-extrabold tracking-wider text-indigo-500 uppercase">
+              Imersão
+            </span>
+            <div className="inline-flex flex-wrap rounded-2xl border border-indigo-200/80 bg-indigo-50/40 p-1 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('podcasts')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'podcasts'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-slate-700 hover:bg-white'
+                }`}
+              >
+                <Headphones className="h-3.5 w-3.5" />
+                <span>Podcasts</span>
+              </button>
+              <button
+                type="button"
+                data-testid="tips-tab-videos"
+                onClick={() => setViewMode('videos')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'videos'
+                    ? 'bg-violet-600 text-white'
+                    : 'text-slate-700 hover:bg-white'
+                }`}
+              >
+                <Clapperboard className="h-3.5 w-3.5" />
+                <span>Vídeos</span>
+              </button>
+              <button
+                type="button"
+                data-testid="tips-tab-readers"
+                onClick={() => setViewMode('readers')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  viewMode === 'readers'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-slate-700 hover:bg-white'
+                }`}
+              >
+                <span>Leitura Graduada</span>
+              </button>
+            </div>
+
+            {(viewMode === 'tips' || viewMode === 'guide') && (
+              <button
+                type="button"
+                onClick={() => setShowB2C1Translation((v) => !v)}
+                className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                  showB2C1Translation
+                    ? 'border-indigo-400 bg-indigo-100 text-indigo-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                🌐 {showB2C1Translation ? 'Ocultar Tradução B2/C1' : 'Mostrar Tradução PT (B2/C1)'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

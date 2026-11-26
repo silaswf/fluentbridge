@@ -10,6 +10,7 @@ interface SpeakOptions {
   langCode?: string;
   voice?: 'female' | 'male';
   rate?: number;
+  onLoading?: (loading: boolean) => void;
   onStart?: () => void;
   onEnd?: () => void;
 }
@@ -215,7 +216,7 @@ export async function fetchNeuralTtsBlob(
 
   const normLocale = normalizeTtsLocale(targetLocale);
   const voiceTag = voice === 'male' ? 'male' : 'default';
-  const cacheId = `tts-v4:${normLocale}:${voiceTag}:${cleanText.length}:${hashTtsKey(cleanText)}`;
+  const cacheId = `tts-v6:${normLocale}:${voiceTag}:${cleanText.length}:${hashTtsKey(cleanText)}`;
 
   const cachedBlob = await getAudioClip(cacheId);
   if (cachedBlob && cachedBlob.size > 200) {
@@ -229,7 +230,6 @@ export async function fetchNeuralTtsBlob(
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     // A síntese neural de trechos longos (ex.: áudios de simulados com 200–500
     // caracteres) leva 11–20 s na primeira geração (depois fica em cache R2).
-    // O limite antigo de 9 s abortava a requisição e o áudio nunca tocava.
     const timeoutMs = Math.min(70000, 15000 + cleanText.length * 100);
     const timeoutId =
       controller !== null
@@ -241,16 +241,27 @@ export async function fetchNeuralTtsBlob(
       const endpoint = `${apiBase}/api/tts?lang=${encodeURIComponent(normLocale)}${voiceQuery}&text=${encodeURIComponent(
         cleanText,
       )}`;
-      const response = await fetch(endpoint, {
+      let response = await fetch(endpoint, {
         method: 'GET',
         signal: controller?.signal,
       });
+      if (!response.ok && response.status >= 500 && !controller?.signal.aborted) {
+        await new Promise((r) => globalThis.setTimeout(r, 400));
+        response = await fetch(endpoint, {
+          method: 'GET',
+          signal: controller?.signal,
+        });
+      }
       if (!response.ok) return null;
 
+      const isEmergencyFallback =
+        response.headers?.get?.('X-TTS-Fallback') === 'true';
       const blob = await response.blob();
       if (!blob || blob.size <= 200) return null;
 
-      void saveAudioClip(cacheId, blob);
+      if (!isEmergencyFallback) {
+        void saveAudioClip(cacheId, blob);
+      }
       return blob;
     } catch {
       return null;
@@ -270,8 +281,8 @@ export function getSelectedVoiceLabels(): { us: string; uk: string } {
   const apiBase = DEFAULT_BACKEND_API_URL.trim();
   if (apiBase) {
     return {
-      us: 'Deepgram Aura-2 · Thalia / Apollo (Neural US)',
-      uk: 'Deepgram Aura-2 · Pandora / Draco (Neural UK)',
+      us: 'Gemini 2.5 Native TTS · Zephyr / Puck (Neural US)',
+      uk: 'Gemini 2.5 Native TTS · Aoede / Charon (Neural UK)',
     };
   }
   const voices = refreshVoices();
@@ -285,10 +296,10 @@ export function getSelectedVoiceLabels(): { us: string; uk: string } {
 
 export function getAllVoiceProviderLabels() {
   return {
-    enUs: 'Deepgram Aura-2 · Thalia / Apollo (US)',
-    enGb: 'Deepgram Aura-2 · Pandora / Draco (UK)',
-    esEs: 'Deepgram Aura-2 · Nestor / Carina (ES)',
-    esMx: 'Deepgram Aura-2 · Estrella / Javier (MX)',
+    enUs: 'Gemini 2.5 Native TTS (en-US) · Zephyr / Puck (US)',
+    enGb: 'Gemini 2.5 Native TTS (en-GB) · Aoede / Charon (UK)',
+    esEs: 'Gemini 2.5 Native TTS (es-ES) · Aoede / Charon (ES)',
+    esMx: 'Gemini 2.5 Native TTS (es-MX) · Zephyr / Puck (MX)',
     frFr: 'Gemini 2.5 Native TTS (fr-FR) · Aoede / Charon (Paris)',
     frCa: 'Gemini 2.5 Native TTS (fr-CA) · Zephyr / Puck (Canadá)',
     itIt: 'Gemini 2.5 Native TTS (it-IT) · Leda / Orus (Itália)',
@@ -421,12 +432,58 @@ function speakWithBrowserSynthesis(
   }
 }
 
+const SILENT_WAV_DATA_URI =
+  'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+let sharedUnlockedAudio: HTMLAudioElement | null = null;
+
+function getOrUnlockAudioElement(): HTMLAudioElement | null {
+  if (typeof Audio === 'undefined') return null;
+  if (!sharedUnlockedAudio) {
+    try {
+      sharedUnlockedAudio = new Audio();
+    } catch {
+      return null;
+    }
+  }
+  try {
+    // Desbloqueio síncrono durante o clique do usuário para evitar NotAllowedError
+    // caso a síntese neural leve >5 segundos antes de iniciar o áudio.
+    if (sharedUnlockedAudio.paused) {
+      sharedUnlockedAudio.src = SILENT_WAV_DATA_URI;
+      sharedUnlockedAudio.muted = true;
+      const p = sharedUnlockedAudio.play();
+      if (p && typeof p.then === 'function') {
+        void p
+          .then(() => {
+            if (sharedUnlockedAudio?.src === SILENT_WAV_DATA_URI) {
+              sharedUnlockedAudio.pause();
+            }
+          })
+          .catch(() => undefined);
+      }
+    }
+  } catch {
+    // Ignore autoplay unlock errors
+  }
+  return sharedUnlockedAudio;
+}
+
 export function speakText(text: string, options: SpeakOptions = {}): void {
-  const { accent = 'en-US', langCode, voice, rate = 1, onStart, onEnd } = options;
+  const {
+    accent = 'en-US',
+    langCode,
+    voice,
+    rate = 1,
+    onLoading,
+    onStart,
+    onEnd,
+  } = options;
   const targetLocale = langCode ?? accent;
   const cleanText = text.trim();
 
   if (!cleanText) {
+    onLoading?.(false);
     onEnd?.();
     return;
   }
@@ -438,6 +495,7 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
   const finish = () => {
     if (ended) return;
     ended = true;
+    onLoading?.(false);
     if (activeFinishCallback === finish) {
       activeFinishCallback = null;
     }
@@ -451,20 +509,27 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
     return;
   }
 
-  onStart?.();
+  const unlockedAudio = getOrUnlockAudioElement();
+  onLoading?.(true);
 
   void (async () => {
     const neuralBlob = await fetchNeuralTtsBlob(cleanText, targetLocale, voice);
-    if (myToken !== activePlayToken) return;
+    if (myToken !== activePlayToken) {
+      onLoading?.(false);
+      return;
+    }
 
     if (neuralBlob && typeof Audio !== 'undefined' && typeof URL !== 'undefined') {
       try {
         const objectUrl = URL.createObjectURL(neuralBlob);
         if (myToken !== activePlayToken) {
           URL.revokeObjectURL(objectUrl);
+          onLoading?.(false);
           return;
         }
-        const audio = new Audio(objectUrl);
+        const audio = unlockedAudio ?? new Audio();
+        audio.muted = false;
+        audio.src = objectUrl;
         audio.playbackRate = Math.max(0.65, Math.min(1.5, rate));
         if ('preservesPitch' in audio) {
           audio.preservesPitch = true;
@@ -492,9 +557,13 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
             URL.revokeObjectURL(objectUrl);
             activeObjectUrl = null;
           }
+          onLoading?.(false);
+          onStart?.();
           speakWithBrowserSynthesis(cleanText, targetLocale, rate, myToken, finish);
         };
 
+        onLoading?.(false);
+        onStart?.();
         await audio.play();
         return;
       } catch {
@@ -502,8 +571,22 @@ export function speakText(text: string, options: SpeakOptions = {}): void {
       }
     }
 
+    onLoading?.(false);
+    onStart?.();
     speakWithBrowserSynthesis(cleanText, targetLocale, rate, myToken, finish);
   })();
+}
+
+export function speakTextAsync(
+  text: string,
+  options: Omit<SpeakOptions, 'onEnd'> = {},
+): Promise<void> {
+  return new Promise((resolve) => {
+    speakText(text, {
+      ...options,
+      onEnd: () => resolve(),
+    });
+  });
 }
 
 export function speakEnglish(text: string, options: SpeakOptions = {}): void {

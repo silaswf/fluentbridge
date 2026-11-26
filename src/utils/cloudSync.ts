@@ -1355,3 +1355,39 @@ export async function syncRelationalTablesBestEffort(
     // Non-blocking best-effort relational sync
   }
 }
+
+export async function deleteMyCloudAccount(
+  cloudConfig?: CloudConfig,
+  clientOverride?: SupabaseClient,
+): Promise<{ ok: boolean; cloudDeleted: boolean; error?: string }> {
+  const cfg = getEffectiveSupabaseConfig(cloudConfig);
+  if (!clientOverride && (!cfg.url || !cfg.anonKey)) {
+    return { ok: true, cloudDeleted: false };
+  }
+
+  try {
+    const client = clientOverride ?? getSupabaseClient(cfg.url, cfg.anonKey);
+    const { data: sessionData } = await client.auth.getSession();
+    if (!sessionData?.session?.user) {
+      return { ok: true, cloudDeleted: false };
+    }
+
+    const { error } = await client.rpc('delete_my_account_data');
+    if (error) {
+      return {
+        ok: false,
+        cloudDeleted: false,
+        error: error.message || 'Falha ao excluir dados na nuvem.',
+      };
+    }
+
+    await client.auth.signOut().catch(() => undefined);
+    return { ok: true, cloudDeleted: true };
+  } catch (err) {
+    return {
+      ok: false,
+      cloudDeleted: false,
+      error: err instanceof Error ? err.message : 'Erro ao excluir conta na nuvem.',
+    };
+  }
+}

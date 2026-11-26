@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, HelpCircle, Send, Sparkles } from 'lucide-react';
+import { CheckCircle2, HelpCircle, Loader2, Send, Sparkles } from 'lucide-react';
 import type { LanguageCode, WritingFreeStep } from '../../types/learning';
 import {
-  analyzeWritingLineByLine,
-  type WritingLineFeedback,
+  analyzeWritingHybrid,
+  type HybridWritingLineFeedback,
 } from '../../utils/writingDiffGrader';
 import { DualAudioButtons } from '../DualAudioButtons';
 
 interface WritingFreeStepViewProps {
   step: WritingFreeStep;
   languageCode?: LanguageCode;
+  preferredAccent?: string;
+  onSelectAccent?: (accentCode: string) => void;
   freeText: string;
   setFreeText: (val: string) => void;
   freeWordCount: number;
@@ -32,6 +34,8 @@ interface WritingFreeStepViewProps {
 export function WritingFreeStepView({
   step,
   languageCode = 'en',
+  preferredAccent,
+  onSelectAccent,
   freeText,
   setFreeText,
   freeWordCount,
@@ -43,11 +47,13 @@ export function WritingFreeStepView({
   onToggleModelAnswer,
   onSaveMistakesToBank,
 }: WritingFreeStepViewProps) {
-  const [diffFeedback, setDiffFeedback] = useState<WritingLineFeedback | null>(null);
+  const [diffFeedback, setDiffFeedback] = useState<HybridWritingLineFeedback | null>(null);
+  const [isAnalyzingDiff, setIsAnalyzingDiff] = useState(false);
   const [savedMistakes, setSavedMistakes] = useState(false);
 
   useEffect(() => {
     setDiffFeedback(null);
+    setIsAnalyzingDiff(false);
     setSavedMistakes(false);
   }, [step.id]);
 
@@ -140,21 +146,35 @@ export function WritingFreeStepView({
           <button
             type="button"
             data-testid="analyze-writing-diff-btn"
-            disabled={freeText.trim().length < 3}
+            disabled={freeText.trim().length < 3 || isAnalyzingDiff}
             onClick={() => {
-              const feedback = analyzeWritingLineByLine(
+              setIsAnalyzingDiff(true);
+              setSavedMistakes(false);
+              void analyzeWritingHybrid(
                 freeText,
                 step.modelAnswer,
                 step.checklist,
                 languageCode,
-              );
-              setDiffFeedback(feedback);
-              setSavedMistakes(false);
+                step.promptPt,
+                step.scenarioPt,
+              )
+                .then((feedback) => {
+                  setDiffFeedback(feedback);
+                })
+                .finally(() => {
+                  setIsAnalyzingDiff(false);
+                });
             }}
             className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-xs font-bold text-indigo-800 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Analisar Gramática &amp; Diff</span>
+            {isAnalyzingDiff ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            <span>
+              {isAnalyzingDiff ? 'Analisando com IA...' : 'Analisar Gramática & Diff'}
+            </span>
           </button>
         </div>
 
@@ -174,9 +194,14 @@ export function WritingFreeStepView({
           className="animate-fade-up space-y-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 text-xs"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-bold text-indigo-950">
-              Análise Linha a Linha (Score estimado: {diffFeedback.score}%)
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-indigo-950">
+                Análise Linha a Linha (Score estimado: {diffFeedback.score}%)
+              </span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200">
+                {diffFeedback.source === 'ai' ? 'IA Semântica' : 'Análise Local'}
+              </span>
+            </div>
             {onSaveMistakesToBank && diffFeedback.mistakeItems.length > 0 && (
               <button
                 type="button"
@@ -211,6 +236,12 @@ export function WritingFreeStepView({
             ))}
           </div>
 
+          {diffFeedback.cefrFeedbackPt && (
+            <p className="rounded-xl bg-white/80 px-3 py-2 text-[11px] font-medium text-indigo-900">
+              {diffFeedback.cefrFeedbackPt}
+            </p>
+          )}
+
           <ul className="space-y-1 text-indigo-950">
             {diffFeedback.suggestionsPt.map((sug, i) => (
               <li key={i}>• {sug}</li>
@@ -232,6 +263,8 @@ export function WritingFreeStepView({
           <DualAudioButtons
             text={step.modelAnswer}
             languageCode={languageCode}
+            preferredAccent={preferredAccent}
+            onSelectAccent={onSelectAccent}
             size="xs"
           />
         </div>

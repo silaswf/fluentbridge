@@ -1,4 +1,5 @@
 export type AmbientNoisePreset = 'clean' | 'cafe' | 'station' | 'phone';
+export type AmbientNoiseIntensity = 'soft' | 'real' | 'challenge';
 
 export interface AmbientNoiseOption {
   id: AmbientNoisePreset;
@@ -6,6 +7,25 @@ export interface AmbientNoiseOption {
   badge: string;
   descriptionPt: string;
 }
+
+export const AMBIENT_INTENSITY_OPTIONS: Array<{
+  id: AmbientNoiseIntensity;
+  labelPt: string;
+  multiplier: number;
+}> = [
+  { id: 'soft', labelPt: 'Suave', multiplier: 0.5 },
+  { id: 'real', labelPt: 'Real', multiplier: 1.0 },
+  { id: 'challenge', labelPt: 'Desafio', multiplier: 1.6 },
+];
+
+const BASE_PRESET_GAIN: Record<Exclude<AmbientNoisePreset, 'clean'>, number> = {
+  cafe: 0.06,
+  station: 0.08,
+  phone: 0.05,
+};
+
+let activePresetRef: AmbientNoisePreset = 'clean';
+let activeIntensityRef: AmbientNoiseIntensity = 'real';
 
 export const AMBIENT_NOISE_OPTIONS: AmbientNoiseOption[] = [
   {
@@ -59,12 +79,31 @@ export function stopAmbientNoise(): void {
   activeAudioCtx = null;
 }
 
+function getIntensityMultiplier(intensity: AmbientNoiseIntensity): number {
+  return (
+    AMBIENT_INTENSITY_OPTIONS.find((opt) => opt.id === intensity)?.multiplier ?? 1.0
+  );
+}
+
+export function setAmbientNoiseIntensity(intensity: AmbientNoiseIntensity): void {
+  activeIntensityRef = intensity;
+  if (activeGainNode && activePresetRef !== 'clean') {
+    activeGainNode.gain.value =
+      BASE_PRESET_GAIN[activePresetRef] * getIntensityMultiplier(intensity);
+  }
+}
+
 /**
  * Gera um som ambiente suave e sintético via Web Audio API para treinar
  * escuta realista em níveis intermediários e avançados, sem depender de MP3 externo.
  */
-export function startAmbientNoise(preset: AmbientNoisePreset): void {
+export function startAmbientNoise(
+  preset: AmbientNoisePreset,
+  intensity: AmbientNoiseIntensity = activeIntensityRef,
+): void {
   stopAmbientNoise();
+  activePresetRef = preset;
+  activeIntensityRef = intensity;
   if (preset === 'clean' || typeof window === 'undefined') return;
 
   const AudioCtx =
@@ -93,22 +132,23 @@ export function startAmbientNoise(preset: AmbientNoisePreset): void {
 
     const filter = ctx.createBiquadFilter();
     const gain = ctx.createGain();
+    const mult = getIntensityMultiplier(intensity);
 
     if (preset === 'cafe') {
       filter.type = 'lowpass';
       filter.frequency.value = 650;
-      gain.gain.value = 0.06;
+      gain.gain.value = BASE_PRESET_GAIN.cafe * mult;
     } else if (preset === 'station') {
       filter.type = 'bandpass';
       filter.frequency.value = 420;
       filter.Q.value = 0.7;
-      gain.gain.value = 0.08;
+      gain.gain.value = BASE_PRESET_GAIN.station * mult;
     } else {
       // phone line hum/bandpass
       filter.type = 'bandpass';
       filter.frequency.value = 1400;
       filter.Q.value = 1.8;
-      gain.gain.value = 0.05;
+      gain.gain.value = BASE_PRESET_GAIN.phone * mult;
     }
 
     source.connect(filter);

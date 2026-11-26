@@ -74,8 +74,9 @@ import {
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import {
   computeRetentionAlerts,
-  requestAndSendBrowserNotification,
+  scheduleNativeRetentionNotifications,
 } from '../utils/retentionNotifications';
+import { tUi, type UiLocale } from '../utils/i18n';
 import { ModuleAccordionHeader } from './trail/ModuleAccordionHeader';
 import {
   downloadNextUnitsOffline,
@@ -97,6 +98,8 @@ interface LearningPathProps {
   onChangeDailyGoal: (minutes: number) => void;
   onToggleReminder?: () => void;
   onStartTopic: (topic: Topic) => void;
+  onGoToReview?: () => void;
+  uiLocale?: UiLocale;
   onPracticeTopicWithAI?: (topic: Topic) => void;
   reviewedSubmissions: StudentSubmission[];
   assignments?: TeacherAssignment[];
@@ -202,6 +205,8 @@ export function LearningPath({
   onChangeDailyGoal,
   onToggleReminder,
   onStartTopic,
+  onGoToReview,
+  uiLocale = 'pt',
   onPracticeTopicWithAI,
   reviewedSubmissions,
   assignments = [],
@@ -226,9 +231,40 @@ export function LearningPath({
     if (typeof window === 'undefined') return true;
     return window.localStorage.getItem('fluentbridge_right_panel_open') !== '0';
   });
-  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const raw = window.sessionStorage.getItem(`fb_expanded_modules_v1:${activeCourse.code}`);
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+    } catch {
+      return {};
+    }
+  });
   const [expandAllModules, setExpandAllModules] = useState(false);
   const [retentionNoticeMsg, setRetentionNoticeMsg] = useState('');
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.sessionStorage.getItem(`fb_expanded_modules_v1:${activeCourse.code}`);
+      setExpandedModules(raw ? (JSON.parse(raw) as Record<string, boolean>) : {});
+    } catch {
+      setExpandedModules({});
+    }
+  }, [activeCourse.code]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(
+        `fb_expanded_modules_v1:${activeCourse.code}`,
+        JSON.stringify(expandedModules),
+      );
+    } catch {
+      // Ignore storage errors
+    }
+  }, [expandedModules, activeCourse.code]);
 
   const toggleRightPanel = () => {
     setIsRightPanelOpen((prev) => {
@@ -367,7 +403,7 @@ export function LearningPath({
                   <span>
                     {completedTopicIds.includes(nextTopic.id)
                       ? `Revisar: ${nextTopic.titlePt}`
-                      : `Continuar (${nextTopic.level}): ${nextTopic.titlePt}`}
+                      : `${tUi(uiLocale, 'trail.continueLesson')} (${nextTopic.level}): ${nextTopic.titlePt}`}
                   </span>
                 </button>
               )}
@@ -378,10 +414,10 @@ export function LearningPath({
                 className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
               >
                 <Compass className="h-4 w-4" />
-                <span>Teste de Nivelamento Adaptativo (15 questões)</span>
+                <span>{tUi(uiLocale, 'trail.placementTest')}</span>
               </button>
 
-              {onSaveLearningGoal && (
+              {onSaveLearningGoal && !currentUser.learningGoal && (
                 <button
                   type="button"
                   data-testid="goal-onboarding-btn"
@@ -389,43 +425,9 @@ export function LearningPath({
                   className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
                 >
                   <Target className="h-4 w-4" />
-                  <span>
-                    {currentUser.learningGoal ? 'Editar Plano Semanal' : 'Definir Objetivo'}
-                  </span>
+                  <span>{tUi(uiLocale, 'trail.setGoal')}</span>
                 </button>
               )}
-
-              <button
-                type="button"
-                data-testid="download-offline-pack-btn"
-                disabled={downloadingOffline}
-                onClick={() => {
-                  setDownloadingOffline(true);
-                  setOfflineStatus('Preparando pacote offline...');
-                  void downloadNextUnitsOffline(
-                    topics,
-                    currentUser.vocab,
-                    completedTopicIds,
-                    activeDialect,
-                    3,
-                    (done, total, title) =>
-                      setOfflineStatus(`Baixando ${done}/${total}: ${title}`),
-                  ).then(({ cachedTopicIds, audioCount }) => {
-                    setOfflineIds((prev) =>
-                      Array.from(new Set([...prev, ...cachedTopicIds])),
-                    );
-                    setOfflineStatus(
-                      `${cachedTopicIds.length} unidades (${audioCount} áudios) salvas offline!`,
-                    );
-                    setDownloadingOffline(false);
-                  });
-                }}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 disabled:opacity-60 cursor-pointer"
-              >
-                <span>
-                  {downloadingOffline ? offlineStatus : 'Baixar próximas 3 unidades offline'}
-                </span>
-              </button>
             </div>
             {offlineStatus && !downloadingOffline && (
               <p className="text-[11px] font-bold text-emerald-200">{offlineStatus}</p>
@@ -475,61 +477,12 @@ export function LearningPath({
                 <Snowflake className="h-3.5 w-3.5 text-sky-200" />
                 <span>{currentUser.streakFreezes ?? 1} proteção(ões)</span>
               </span>
-              {onToggleReminder && (
-                <button
-                  type="button"
-                  onClick={onToggleReminder}
-                  className="inline-flex items-center gap-1 rounded-md bg-white/15 px-2 py-0.5 font-semibold text-white hover:bg-white/25 cursor-pointer"
-                >
-                  {currentUser.reminderEnabled ? (
-                    <>
-                      <Bell className="h-3 w-3 text-emerald-300" />
-                      <span>Lembrete ON</span>
-                    </>
-                  ) : (
-                    <>
-                      <BellOff className="h-3 w-3 text-blue-200" />
-                      <span>Lembrete</span>
-                    </>
-                  )}
-                </button>
-              )}
+              <span className="font-mono text-[10px] font-bold text-blue-100">
+                {Math.round(goalPct)}% hoje
+              </span>
             </div>
           </div>
         </div>
-
-        {/* CEFR Level Progress Chips */}
-        {topics.length > 0 && (
-          <div className="relative z-10 mt-5 grid grid-cols-5 gap-2 border-t border-white/15 pt-4">
-            {ALL_LEVELS.map((lvl) => {
-              const lvlTopics = topics.filter((t) => t.level === lvl);
-              const done = lvlTopics.filter((t) =>
-                completedTopicIds.includes(t.id),
-              ).length;
-              return (
-                <button
-                  key={lvl}
-                  type="button"
-                  onClick={() =>
-                    setSelectedLevel((cur) => (cur === lvl ? 'ALL' : lvl))
-                  }
-                  className={`rounded-xl px-2 py-2 text-center transition cursor-pointer ${selectedLevel === lvl
-                    ? 'bg-white text-blue-700 shadow-xs'
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
-                >
-                  <p className="font-mono text-xs font-extrabold">{lvl}</p>
-                  <p
-                    className={`text-[10px] font-semibold ${selectedLevel === lvl ? 'text-blue-600' : 'text-blue-100'
-                      }`}
-                  >
-                    {done}/{lvlTopics.length} unid.
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        )}
       </section>
 
       {/* Unlinked / Independent student restriction banner */}
@@ -619,30 +572,71 @@ export function LearningPath({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         {/* Left: Connected Lesson Path */}
         <div className={`space-y-4 ${isRightPanelOpen ? 'xl:col-span-8' : 'xl:col-span-12'}`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="sticky top-0 z-20 -mx-1 rounded-2xl bg-[#F7F9FC]/95 px-1 py-2 backdrop-blur-xs flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-display text-lg font-bold text-slate-900">
-                Jornada {activeCourse.namePt} ({filteredTopics.length} unidades)
+                {tUi(uiLocale, 'trail.journeyTitle')} {activeCourse.namePt} ({filteredTopics.length} {tUi(uiLocale, 'trail.unitsLabel')})
               </h2>
               <p className="text-xs text-slate-500">
                 Unidades contextuais com vocabulário, gramática e prática nas 4 habilidades
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              {(['ALL', ...ALL_LEVELS] as const).map((lvl) => (
-                <button
-                  key={lvl}
-                  type="button"
-                  onClick={() => setSelectedLevel(lvl)}
-                  className={`rounded-full px-3 py-1 text-xs font-bold transition cursor-pointer ${selectedLevel === lvl
-                    ? 'bg-slate-900 text-white'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
-                >
-                  {lvl === 'ALL' ? 'Todos' : lvl}
-                </button>
-              ))}
+            <div data-testid="cefr-filter-bar" className="flex flex-wrap items-center gap-1.5">
+              {(['ALL', ...ALL_LEVELS] as const).map((lvl) => {
+                const lvlTopics = lvl === 'ALL' ? topics : topics.filter((t) => t.level === lvl);
+                const done = lvlTopics.filter((t) => completedTopicIds.includes(t.id)).length;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => {
+                      setSelectedLevel(lvl);
+                      globalThis.setTimeout(() => {
+                        document
+                          .querySelector('[data-testid="module-header-card"]')
+                          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                      }, 60);
+                    }}
+                    className={`rounded-full px-3 py-1 text-xs font-bold transition cursor-pointer ${selectedLevel === lvl
+                      ? 'bg-slate-900 text-white'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    {lvl === 'ALL' ? tUi(uiLocale, 'trail.allLevels') : `${lvl} (${done}/${lvlTopics.length})`}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                data-testid="download-offline-pack-btn"
+                disabled={downloadingOffline}
+                onClick={() => {
+                  setDownloadingOffline(true);
+                  setOfflineStatus('Preparando pacote offline...');
+                  void downloadNextUnitsOffline(
+                    topics,
+                    currentUser.vocab,
+                    completedTopicIds,
+                    activeDialect,
+                    3,
+                    (done, total, title) =>
+                      setOfflineStatus(`Baixando ${done}/${total}: ${title}`),
+                  ).then(({ cachedTopicIds, audioCount }) => {
+                    setOfflineIds((prev) =>
+                      Array.from(new Set([...prev, ...cachedTopicIds])),
+                    );
+                    setOfflineStatus(
+                      `${cachedTopicIds.length} unidades (${audioCount} áudios) salvas offline!`,
+                    );
+                    setDownloadingOffline(false);
+                  });
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60 cursor-pointer"
+                title="Baixar próximas 3 unidades para estudo offline"
+              >
+                <span>{downloadingOffline ? offlineStatus : tUi(uiLocale, 'trail.downloadOffline')}</span>
+              </button>
               {moduleGroups.length > 1 && (
                 <button
                   type="button"
@@ -650,7 +644,7 @@ export function LearningPath({
                   onClick={() => setExpandAllModules((v) => !v)}
                   className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
                 >
-                  {expandAllModules ? 'Só o módulo atual' : 'Expandir todos'}
+                  {expandAllModules ? tUi(uiLocale, 'trail.onlyCurrent') : tUi(uiLocale, 'trail.expandAll')}
                 </button>
               )}
               <button
@@ -680,30 +674,79 @@ export function LearningPath({
               className="rounded-2xl border border-indigo-200/80 bg-indigo-50/60 p-3.5 shadow-2xs"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-indigo-950">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-indigo-950">
                   <Bell className="h-4 w-4 text-indigo-600" />
                   <span>{retentionAlerts[0].titlePt}</span>
                   {retentionAlerts.length > 1 && (
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200">
-                      +{retentionAlerts.length - 1} alerta(s)
-                    </span>
+                    <button
+                      type="button"
+                      data-testid="expand-retention-alerts-btn"
+                      onClick={() => setAlertsExpanded((v) => !v)}
+                      className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-100 cursor-pointer"
+                    >
+                      {alertsExpanded
+                        ? tUi(uiLocale, 'trail.hideAlerts')
+                        : `+${retentionAlerts.length - 1} alerta(s) · ${tUi(uiLocale, 'trail.viewAllAlerts')}`}
+                    </button>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    void requestAndSendBrowserNotification(retentionAlerts[0]).then((r) =>
-                      setRetentionNoticeMsg(r.message),
-                    )
-                  }
-                  className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 cursor-pointer"
-                >
-                  Ativar lembrete
-                </button>
+                <div className="flex items-center gap-1.5">
+                  {onToggleReminder && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onToggleReminder();
+                        void scheduleNativeRetentionNotifications(retentionAlerts).then((r) =>
+                          setRetentionNoticeMsg(r.message),
+                        );
+                      }}
+                      className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                    >
+                      {currentUser.reminderEnabled ? 'Lembrete ON' : 'Ativar lembrete'}
+                    </button>
+                  )}
+                  {!onToggleReminder && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void scheduleNativeRetentionNotifications(retentionAlerts).then((r) =>
+                          setRetentionNoticeMsg(r.message),
+                        )
+                      }
+                      className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                    >
+                      Ativar lembrete
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="mt-1 text-[11px] text-indigo-900">
                 {retentionNoticeMsg || retentionAlerts[0].bodyPt}
               </p>
+              {alertsExpanded && retentionAlerts.length > 1 && (
+                <ul className="mt-2.5 space-y-1.5 border-t border-indigo-200/70 pt-2">
+                  {retentionAlerts.slice(1).map((al) => (
+                    <li
+                      key={al.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/80 px-3 py-2 text-[11px] text-indigo-950"
+                    >
+                      <div>
+                        <p className="font-bold">{al.titlePt}</p>
+                        <p className="text-indigo-800">{al.bodyPt}</p>
+                      </div>
+                      {al.kind === 'srs_due' && onGoToReview && (
+                        <button
+                          type="button"
+                          onClick={onGoToReview}
+                          className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-indigo-700 cursor-pointer"
+                        >
+                          Revisar agora
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

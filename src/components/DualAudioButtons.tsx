@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronDown, Globe2, Turtle, Volume2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronDown, Globe2, Loader2, Turtle, Volume2 } from 'lucide-react';
 import { getLanguageCourseMeta as getLanguageCourse } from '../data/platformDefaults';
 import { getRegionalAccents } from '../data/regionalAccents';
 import type { LanguageCode } from '../types/learning';
@@ -8,6 +8,8 @@ import { speakText } from '../utils/speech';
 interface DualAudioButtonsProps {
   text: string;
   languageCode?: LanguageCode;
+  preferredAccent?: string;
+  onSelectAccent?: (accentCode: string) => void;
   showSlow?: boolean;
   size?: 'xs' | 'sm' | 'md';
   stopPropagation?: boolean;
@@ -20,6 +22,8 @@ interface DualAudioButtonsProps {
 export function DualAudioButtons({
   text,
   languageCode = 'en',
+  preferredAccent,
+  onSelectAccent,
   showSlow = false,
   size = 'sm',
   stopPropagation = true,
@@ -32,11 +36,23 @@ export function DualAudioButtons({
   const dialects = course.dialects;
   const regionalAccents = getRegionalAccents(languageCode);
   const extraAccentsCount = Math.max(0, regionalAccents.length - dialects.length);
-  const [activeCode, setActiveCode] = useState<string>(
-    dialects[0]?.code ?? 'en-US',
-  );
+  const resolvedPreferred =
+    preferredAccent && regionalAccents.some((a) => a.code === preferredAccent)
+      ? preferredAccent
+      : dialects[0]?.code ?? 'en-US';
+  const [activeCode, setActiveCode] = useState<string>(resolvedPreferred);
+  const [loadingCode, setLoadingCode] = useState<string | null>(null);
   const [playingCode, setPlayingCode] = useState<string | null>(null);
   const [accentsOpen, setAccentsOpen] = useState(false);
+
+  useEffect(() => {
+    setActiveCode(resolvedPreferred);
+  }, [resolvedPreferred]);
+
+  const preferredCustomObj =
+    resolvedPreferred && !dialects.some((d) => d.code === resolvedPreferred)
+      ? regionalAccents.find((a) => a.code === resolvedPreferred)
+      : undefined;
 
   const handlePlay = (
     e: React.MouseEvent,
@@ -49,11 +65,16 @@ export function DualAudioButtons({
     speakText(text, {
       langCode,
       rate: Math.max(0.65, Math.min(1.25, rate * rateMultiplier)),
+      onLoading: (isLoading) => {
+        setLoadingCode((cur) => (isLoading ? tag : cur === tag ? null : cur));
+      },
       onStart: () => {
+        setLoadingCode((cur) => (cur === tag ? null : cur));
         setPlayingCode(tag);
         onPlayStart?.();
       },
       onEnd: () => {
+        setLoadingCode((cur) => (cur === tag ? null : cur));
         setPlayingCode((cur) => (cur === tag ? null : cur));
         onPlayEnd?.();
       },
@@ -76,32 +97,58 @@ export function DualAudioButtons({
             : dial.code === 'en-GB'
               ? 'UK'
               : dial.code.split('-')[1] ?? dial.label;
-        const isPlaying = playingCode === dial.code;
-        const primary = idx === 0;
+            const isPlaying = playingCode === dial.code;
+            const isLoading = loadingCode === dial.code;
+            const primary = idx === 0 && !preferredCustomObj;
 
-        return (
-          <button
-            key={dial.code}
-            type="button"
-            onClick={(e) => handlePlay(e, dial.code, 1, dial.code)}
-            title={`Ouvir em ${dial.label} (${dial.code})`}
-            aria-label={`Ouvir em ${dial.label}: ${text}`}
-            className={`inline-flex items-center font-bold transition cursor-pointer ${btnSizing} ${
-              isPlaying
-                ? 'bg-blue-700 text-white ring-2 ring-blue-300'
-                : primary
-                  ? 'bg-blue-600 text-white shadow-2xs hover:bg-blue-700'
-                  : 'border border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100'
-            }`}
-          >
+            return (
+              <button
+                key={dial.code}
+                type="button"
+                onClick={(e) => handlePlay(e, dial.code, 1, dial.code)}
+                title={`Ouvir em ${dial.label} (${dial.code})`}
+                aria-label={`Ouvir em ${dial.label}: ${text}`}
+                className={`inline-flex items-center font-bold transition cursor-pointer ${btnSizing} ${
+                  isPlaying || isLoading
+                    ? 'bg-blue-700 text-white ring-2 ring-blue-300'
+                    : primary
+                      ? 'bg-blue-600 text-white shadow-2xs hover:bg-blue-700'
+                      : 'border border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100'
+                }`}
+              >
+                {isLoading ? (
+                  <Loader2 className={`${size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} animate-spin`} />
+                ) : (
+                  <Volume2 className={size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+                )}
+                <span>{dial.flag}</span>
+                <span>{shortTag}</span>
+              </button>
+            );
+          })}
+
+      {preferredCustomObj && (
+        <button
+          type="button"
+          onClick={(e) => handlePlay(e, preferredCustomObj.code, 1, preferredCustomObj.code)}
+          title={`Sotaque preferido: ${preferredCustomObj.regionPt}`}
+          className={`inline-flex items-center font-bold transition cursor-pointer ${btnSizing} ${
+            playingCode === preferredCustomObj.code || loadingCode === preferredCustomObj.code
+              ? 'bg-indigo-700 text-white ring-2 ring-indigo-300'
+              : 'bg-indigo-600 text-white shadow-2xs hover:bg-indigo-700'
+          }`}
+        >
+          {loadingCode === preferredCustomObj.code ? (
+            <Loader2 className={`${size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} animate-spin`} />
+          ) : (
             <Volume2 className={size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
-            <span>{dial.flag}</span>
-            <span>{shortTag}</span>
-          </button>
-        );
-      })}
+          )}
+          <span>{preferredCustomObj.flag}</span>
+          <span>{preferredCustomObj.shortLabel}</span>
+        </button>
+      )}
 
-      {size !== 'xs' && regionalAccents.length > 2 && (
+      {regionalAccents.length > 2 && (
         <button
           type="button"
           data-testid="more-accents-trigger"
@@ -113,8 +160,10 @@ export function DualAudioButtons({
           title={`Explorar todos os ${regionalAccents.length} sotaques regionais`}
           className={`inline-flex items-center border border-slate-200 bg-white font-bold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer ${btnSizing}`}
         >
-          <Globe2 className="h-3.5 w-3.5 text-indigo-600" />
-          <span>+{extraAccentsCount > 0 ? extraAccentsCount : regionalAccents.length} sotaques</span>
+          <Globe2 className={`${size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-indigo-600`} />
+          {size !== 'xs' && (
+            <span>+{extraAccentsCount > 0 ? extraAccentsCount : regionalAccents.length} sotaques</span>
+          )}
           <ChevronDown className={`h-3 w-3 transition-transform ${accentsOpen ? 'rotate-180' : ''}`} />
         </button>
       )}
@@ -156,6 +205,7 @@ export function DualAudioButtons({
                   type="button"
                   data-testid={`accent-option-${acc.code}`}
                   onClick={(e) => {
+                    onSelectAccent?.(acc.code);
                     handlePlay(e, acc.code, 1, acc.code);
                     setAccentsOpen(false);
                   }}

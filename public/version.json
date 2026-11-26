@@ -1,8 +1,8 @@
 {
-  "version": "8.2.1",
+  "version": "8.3.0",
   "publishedAt": "2026-11-26",
-  "releaseNotes": "FluentBridge Academy v8.2.1 — corrige módulos duplicados na trilha e áudios/sotaques dos simulados",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.1/FluentBridge-Setup-8.2.1.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.1/FluentBridge-v8.2.1.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.2.1"
+  "releaseNotes": "FluentBridge Academy v8.3.0 — vozes neurais naturais Gemini em todos os 49 sotaques + auditoria completa funcional e UI/UX",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.3.0/FluentBridge-Setup-8.3.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.3.0/FluentBridge-v8.3.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.3.0"
 }

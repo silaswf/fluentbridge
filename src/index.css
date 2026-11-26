@@ -7,10 +7,30 @@
 }
 
 @layer base {
+  :root {
+    --bg-canvas: #F7F9FC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-muted: #F8FAFC;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+    --border-subtle: #E2E8F0;
+  }
+
+  html.dark {
+    --bg-canvas: #0B1120;
+    --bg-surface: #111827;
+    --bg-surface-muted: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #E2E8F0;
+    --text-muted: #94A3B8;
+    --border-subtle: #334155;
+  }
+
   body {
     font-family: var(--font-sans);
-    background-color: #F7F9FC;
-    color: #0F172A;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
   }
 
   h1, h2, h3, h4, .font-display {
@@ -283,6 +303,29 @@ html.dark .bg-rose-50\/40,
 html.dark .bg-rose-100 {
   background-color: rgba(136, 19, 55, 0.42) !important;
 }
+/* Card hierarchy system (U-07) */
+.fb-card-primary {
+  border-radius: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.fb-card-secondary {
+  border-radius: 1.25rem;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface-muted);
+  color: var(--text-primary);
+}
+
+.fb-card-info {
+  border-radius: 1rem;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface-muted);
+  color: var(--text-secondary);
+}
+
 html.dark .bg-violet-50,
 html.dark .bg-violet-50\/50,
 html.dark .bg-purple-50,
@@ -294,11 +337,13 @@ html.dark .bg-indigo-50\/60,
 html.dark .bg-indigo-50\/50,
 html.dark .bg-indigo-50\/40,
 html.dark .bg-indigo-50\/30,
-html.dark .bg-indigo-100,
+html.dark .bg-indigo-100 {
+  background-color: rgba(49, 46, 129, 0.35) !important;
+}
 html.dark .bg-orange-50,
 html.dark .bg-orange-50\/70,
 html.dark .bg-orange-100 {
-  background-color: rgba(49, 46, 129, 0.35) !important;
+  background-color: rgba(124, 45, 18, 0.38) !important;
 }
 html.dark .border-amber-200,
 html.dark .border-amber-200\/70,
@@ -333,10 +378,15 @@ html.dark .text-blue-800,
 html.dark .text-blue-700 {
   color: #93C5FD !important;
 }
+html.dark .text-sky-950,
 html.dark .text-sky-900,
+html.dark .text-sky-800,
 html.dark .text-sky-700 {
   color: #7DD3FC !important;
 }
+html.dark .text-teal-950,
+html.dark .text-teal-900,
+html.dark .text-teal-800,
 html.dark .text-teal-700 {
   color: #5EEAD4 !important;
 }
@@ -361,6 +411,9 @@ html.dark .text-violet-700,
 html.dark .text-purple-700 {
   color: #C4B5FD !important;
 }
+html.dark .text-orange-950,
+html.dark .text-orange-900,
+html.dark .text-orange-800,
 html.dark .text-orange-700,
 html.dark .text-orange-600 {
   color: #FDBA74 !important;

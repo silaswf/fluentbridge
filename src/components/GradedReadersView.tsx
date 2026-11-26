@@ -8,7 +8,7 @@ import {
   toJapaneseKana,
   type JapaneseScriptMode,
 } from '../utils/japaneseKana';
-import { speakText, stopSpeaking } from '../utils/speech';
+import { speakText, speakTextAsync, stopSpeaking } from '../utils/speech';
 
 interface GradedReadersViewProps {
   languageCode: LanguageCode;
@@ -52,7 +52,7 @@ export function GradedReadersView({
     setIsPlayingAll(true);
     for (let i = 0; i < chapter.sentences.length; i++) {
       setActiveSentenceIdx(i);
-      await speakText(chapter.sentences[i].target, { langCode: dialectCode, rate: 0.95 });
+      await speakTextAsync(chapter.sentences[i].target, { langCode: dialectCode, rate: 0.95 });
     }
     setIsPlayingAll(false);
     setActiveSentenceIdx(null);

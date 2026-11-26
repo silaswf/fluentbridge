@@ -18,6 +18,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   RefreshCw,
+  Settings,
   ShieldAlert,
   ShieldCheck,
   Snowflake,
@@ -33,6 +34,7 @@ import { LANGUAGE_COURSES_META as LANGUAGE_COURSES } from '../data/platformDefau
 import type { LanguageCode, LanguageCourse, UserProfile } from '../types/learning';
 import type { ThemeMode } from '../utils/theme';
 import type { FontScale } from '../utils/accessibility';
+import { getAccentDisplayMeta } from '../utils/accentPreference';
 import { tUi, type UiLocale } from '../utils/i18n';
 
 const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string }> = {
@@ -82,6 +84,7 @@ interface SidebarProps {
   onOpenDownloadModal?: () => void;
   onOpenUpdateModal?: () => void;
   onOpenPrivacyLgpd?: () => void;
+  onOpenSettings?: () => void;
   pendingOutboxCount?: number;
   onFlushOutbox?: () => void;
   hasAppUpdate?: boolean;
@@ -113,6 +116,7 @@ export function Sidebar({
   onOpenDownloadModal,
   onOpenUpdateModal,
   onOpenPrivacyLgpd,
+  onOpenSettings,
   pendingOutboxCount = 0,
   onFlushOutbox,
   hasAppUpdate,
@@ -182,28 +186,28 @@ export function Sidebar({
   }[] = [
     {
       id: 'learn',
-      label: `Trilha (${topicsCount} unid.)`,
-      shortLabel: 'Trilha',
+      label: `${tUi(uiLocale, 'nav.learn')} (${topicsCount})`,
+      shortLabel: uiLocale === 'pt' ? 'Trilha' : tUi(uiLocale, 'nav.learn'),
       Icon: Compass,
     },
     {
       id: 'tutor',
-      label: 'Conversação IA',
-      shortLabel: 'Tutor IA',
+      label: tUi(uiLocale, 'nav.tutor'),
+      shortLabel: uiLocale === 'pt' ? 'Tutor IA' : 'AI Tutor',
       Icon: Bot,
     },
     {
       id: 'review',
-      label: `Revisão (${vocabCount} cards)`,
-      shortLabel: 'Revisão',
+      label: `${tUi(uiLocale, 'nav.review')} (${vocabCount})`,
+      shortLabel: uiLocale === 'pt' ? 'Revisão' : 'Review',
       Icon: BrainCircuit,
       badge: dueVocabCount > 0 ? dueVocabCount : undefined,
       badgeColor: 'bg-indigo-100 text-indigo-700',
     },
     {
       id: 'exams',
-      label: 'Simulados Oficiais',
-      shortLabel: 'Simulados',
+      label: tUi(uiLocale, 'nav.exams'),
+      shortLabel: uiLocale === 'pt' ? 'Simulados' : 'Exams',
       Icon: FileCheck2,
     },
     {
@@ -220,13 +224,13 @@ export function Sidebar({
     },
     {
       id: 'tips',
-      label: uiLocale === 'pt' ? 'Central & Guia' : tUi(uiLocale, 'nav.tips'),
-      shortLabel: 'Dicas',
+      label: tUi(uiLocale, 'nav.tips'),
+      shortLabel: 'Imersão',
       Icon: Lightbulb,
     },
     {
       id: 'certificates',
-      label: 'Certificados CEFR',
+      label: tUi(uiLocale, 'nav.certificates'),
       shortLabel: 'Certs',
       Icon: Award,
       badge:
@@ -239,7 +243,7 @@ export function Sidebar({
       ? [
           {
             id: 'teacher' as NavView,
-            label: 'Modo Professor',
+            label: tUi(uiLocale, 'nav.teacher'),
             shortLabel: 'Professor',
             Icon: GraduationCap,
             badge:
@@ -252,7 +256,7 @@ export function Sidebar({
       ? [
           {
             id: 'admin' as NavView,
-            label: 'Painel Admin',
+            label: tUi(uiLocale, 'nav.admin'),
             shortLabel: 'Admin',
             Icon: ShieldAlert,
           },
@@ -267,9 +271,13 @@ export function Sidebar({
     onChangeDialect(next.code);
   };
 
-  const activeDialectObj =
-    activeCourse.dialects.find((d) => d.code === activeDialect) ??
-    activeCourse.dialects[0];
+  const activeDialectMeta = getAccentDisplayMeta(activeCourse.code, activeDialect);
+  const activeDialectObj = {
+    code: activeDialectMeta.code,
+    flag: activeDialectMeta.flag,
+    label: activeDialectMeta.shortLabel,
+    regionPt: activeDialectMeta.regionPt,
+  };
 
   return (
     <>
@@ -504,179 +512,53 @@ export function Sidebar({
           })}
         </nav>
 
-        {/* Dynamic Dialect & Theme Selector right below navigation */}
+        {/* Compact Settings & Quick Theme Footer (fits 1080p without clutter) */}
         {!isCollapsed ? (
-          <div className="mt-4 space-y-2.5 border-t border-slate-200/70 pt-4">
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5">
-              <p className="text-xs font-semibold text-slate-700">
-                Sotaque ({activeCourse.namePt})
-              </p>
-              <div className="mt-2 grid grid-cols-2 gap-1.5">
-                {activeCourse.dialects.map((dial) => (
-                  <button
-                    key={dial.code}
-                    type="button"
-                    onClick={() => onChangeDialect(dial.code)}
-                    className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                      activeDialect === dial.code
-                        ? 'bg-white text-blue-700 shadow-xs ring-1 ring-blue-200'
-                        : 'text-slate-600 hover:bg-white/60'
-                    }`}
-                  >
-                    {dial.flag} {dial.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="mt-4 space-y-2 border-t border-slate-200/70 pt-4">
+            <button
+              type="button"
+              data-testid="open-settings-btn"
+              onClick={onOpenSettings}
+              className="flex w-full items-center justify-between rounded-2xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-100 cursor-pointer"
+            >
+              <span className="flex items-center gap-2.5">
+                <Settings className="h-4 w-4 text-blue-600" />
+                <span>{tUi(uiLocale, 'nav.settings')}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
+                  {activeDialectObj.flag} {activeDialectObj.label}
+                </span>
+                {(hasAppUpdate || pendingOutboxCount > 0) && (
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                )}
+              </span>
+            </button>
 
             <button
               type="button"
               onClick={onCycleTheme}
-              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               <span className="flex items-center gap-2">
                 <ThemeIcon className="h-3.5 w-3.5 text-blue-600" />
-                <span>Tema da interface</span>
+                <span>{tUi(uiLocale, 'settings.themeLabel')}</span>
               </span>
-              <span className="rounded-md bg-white px-2 py-0.5 font-mono text-[11px] text-slate-600 ring-1 ring-slate-200">
+              <span className="rounded-md bg-slate-50 px-2 py-0.5 font-mono text-[11px] text-slate-600 ring-1 ring-slate-200">
                 {themeLabel}
               </span>
             </button>
-
-            {(onChangeUiLocale || onChangeFontScale) && (
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
-                {onChangeUiLocale && (
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {tUi(uiLocale, 'a11y.uiLang')}
-                    </span>
-                    <div className="flex gap-1">
-                      {(['pt', 'en', 'es'] as const).map((loc) => (
-                        <button
-                          key={loc}
-                          type="button"
-                          data-testid={`ui-locale-${loc}`}
-                          onClick={() => onChangeUiLocale(loc)}
-                          className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase cursor-pointer ${
-                            uiLocale === loc
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
-                          }`}
-                        >
-                          {loc}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {onChangeFontScale && (
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {tUi(uiLocale, 'a11y.fontScale')}
-                    </span>
-                    <div className="flex gap-1">
-                      {(
-                        [
-                          { id: 'sm', label: 'A-' },
-                          { id: 'md', label: 'A' },
-                          { id: 'lg', label: 'A+' },
-                          { id: 'xl', label: 'A++' },
-                        ] as const
-                      ).map((sc) => (
-                        <button
-                          key={sc.id}
-                          type="button"
-                          data-testid={`font-scale-${sc.id}`}
-                          onClick={() => onChangeFontScale(sc.id)}
-                          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold cursor-pointer ${
-                            fontScale === sc.id
-                              ? 'bg-slate-900 text-white'
-                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
-                          }`}
-                        >
-                          {sc.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {onOpenUpdateModal && (
-              <button
-                type="button"
-                data-testid="sidebar-update-app-btn"
-                onClick={onOpenUpdateModal}
-                className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2 text-xs font-bold cursor-pointer ${
-                  hasAppUpdate
-                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-800 hover:bg-emerald-100'
-                    : 'border-slate-200/80 bg-slate-50/70 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <RefreshCw className={`h-3.5 w-3.5 ${hasAppUpdate ? 'text-emerald-600' : 'text-blue-600'}`} />
-                  <span>Atualizar App</span>
-                </span>
-                {hasAppUpdate && latestAppVersion && (
-                  <span className="rounded-full bg-emerald-600 px-2 py-0.5 font-mono text-[10px] font-bold text-white">
-                    v{latestAppVersion}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {pendingOutboxCount > 0 && onFlushOutbox && (
-              <button
-                type="button"
-                data-testid="sidebar-flush-outbox-btn"
-                onClick={onFlushOutbox}
-                className="flex w-full items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 cursor-pointer"
-              >
-                <span>Sincronizar fila offline</span>
-                <span className="rounded-full bg-amber-600 px-2 py-0.5 font-mono text-[10px] text-white">
-                  {pendingOutboxCount}
-                </span>
-              </button>
-            )}
-
-            {onOpenPrivacyLgpd && (
-              <button
-                type="button"
-                data-testid="sidebar-privacy-lgpd-btn"
-                onClick={onOpenPrivacyLgpd}
-                className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Privacidade &amp; LGPD</span>
-                </span>
-              </button>
-            )}
-
-            {onOpenDownloadModal && (
-              <button
-                type="button"
-                data-testid="sidebar-download-app-btn"
-                onClick={onOpenDownloadModal}
-                className="flex w-full items-center justify-between rounded-xl border border-blue-200/80 bg-blue-50/70 px-3.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100/70 cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Baixar App (Win/Android)</span>
-                </span>
-              </button>
-            )}
           </div>
         ) : (
           <div className="mt-4 flex flex-col items-center gap-2 border-t border-slate-200/70 pt-4">
             <button
               type="button"
-              onClick={cycleMobileDialect}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm cursor-pointer"
-              title={`Sotaque: ${activeDialectObj?.label ?? activeDialect}`}
+              data-testid="open-settings-btn"
+              onClick={onOpenSettings}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer"
+              title={tUi(uiLocale, 'nav.settings')}
             >
-              {activeDialectObj?.flag ?? '🌐'}
+              <Settings className="h-4 w-4" />
             </button>
             <button
               type="button"
@@ -751,30 +633,35 @@ export function Sidebar({
           >
             <ThemeIcon className="h-3.5 w-3.5" />
           </button>
-          <button
-            type="button"
-            onClick={onLogout}
-            className="rounded-lg border border-slate-200 p-1.5 text-slate-500"
-            aria-label="Sair"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-          </button>
+          {onOpenSettings && (
+            <button
+              type="button"
+              data-testid="open-settings-btn-mobile"
+              onClick={onOpenSettings}
+              className="rounded-lg border border-slate-200 p-1.5 text-slate-600"
+              title={tUi(uiLocale, 'nav.settings')}
+              aria-label={tUi(uiLocale, 'nav.settings')}
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Mobile Bottom Tab Bar (5 slots limpos + Menu Mais) */}
+      {/* Mobile Bottom Tab Bar (4 hábitos principais incl. Revisão + Menu Mais) */}
       <nav
         className="safe-pb-nav fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-slate-200 bg-white/95 px-1 pt-1.5 backdrop-blur-sm lg:hidden"
         aria-label="Navegação mobile"
       >
         {navItems
-          .filter((item) => ['learn', 'tutor', 'exams', 'community'].includes(item.id))
+          .filter((item) => ['learn', 'review', 'tutor', 'exams'].includes(item.id))
           .map(({ id, shortLabel, Icon, badge }) => {
             const active = activeView === id;
             return (
               <button
                 key={id}
                 type="button"
+                data-testid={`mobile-nav-${id}`}
                 onClick={() => {
                   setMobileMoreOpen(false);
                   onChangeView(id);
@@ -795,15 +682,16 @@ export function Sidebar({
           })}
         <button
           type="button"
+          data-testid="mobile-more-trigger"
           onClick={() => setMobileMoreOpen((v) => !v)}
           className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-semibold ${
-            mobileMoreOpen || ['review', 'tips', 'certificates', 'teacher', 'admin'].includes(activeView)
+            mobileMoreOpen || ['community', 'live', 'tips', 'certificates', 'teacher', 'admin'].includes(activeView)
               ? 'text-blue-600'
               : 'text-slate-500'
           }`}
         >
           {mobileMoreOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
-          <span className="truncate">Mais</span>
+          <span className="truncate">{tUi(uiLocale, 'nav.more')}</span>
         </button>
       </nav>
 
@@ -813,11 +701,14 @@ export function Sidebar({
           onClick={() => setMobileMoreOpen(false)}
         >
           <div
-            className="safe-bottom w-full rounded-t-3xl border-t border-slate-200 bg-white p-5 shadow-2xl"
+            data-testid="mobile-more-sheet"
+            className="safe-bottom max-h-[85vh] w-full overflow-y-auto rounded-t-3xl border-t border-slate-200 bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
-              <p className="font-display text-sm font-bold text-slate-900">Mais Módulos</p>
+              <p className="font-display text-sm font-bold text-slate-900">
+                {tUi(uiLocale, 'nav.moreModules')}
+              </p>
               <button
                 type="button"
                 onClick={() => setMobileMoreOpen(false)}
@@ -828,7 +719,7 @@ export function Sidebar({
             </div>
             <div className="grid grid-cols-2 gap-2">
               {navItems
-                .filter((item) => !['learn', 'tutor', 'exams', 'community'].includes(item.id))
+                .filter((item) => !['learn', 'review', 'tutor', 'exams'].includes(item.id))
                 .map(({ id, label, Icon, badge }) => (
                   <button
                     key={id}
@@ -843,9 +734,9 @@ export function Sidebar({
                         : 'border-slate-200 bg-slate-50 text-slate-700'
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <Icon className="h-4 w-4" />
-                      <span>{label}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{label}</span>
                     </span>
                     {badge !== undefined && (
                       <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] text-white">
@@ -854,131 +745,154 @@ export function Sidebar({
                     )}
                   </button>
                 ))}
-              {(onChangeUiLocale || onChangeFontScale) && (
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
-                {onChangeUiLocale && (
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {tUi(uiLocale, 'a11y.uiLang')}
-                    </span>
-                    <div className="flex gap-1">
-                      {(['pt', 'en', 'es'] as const).map((loc) => (
-                        <button
-                          key={loc}
-                          type="button"
-                          data-testid={`ui-locale-${loc}`}
-                          onClick={() => onChangeUiLocale(loc)}
-                          className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase cursor-pointer ${
-                            uiLocale === loc
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
-                          }`}
-                        >
-                          {loc}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {onChangeFontScale && (
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-semibold text-slate-600">
-                      {tUi(uiLocale, 'a11y.fontScale')}
-                    </span>
-                    <div className="flex gap-1">
-                      {(
-                        [
-                          { id: 'sm', label: 'A-' },
-                          { id: 'md', label: 'A' },
-                          { id: 'lg', label: 'A+' },
-                          { id: 'xl', label: 'A++' },
-                        ] as const
-                      ).map((sc) => (
-                        <button
-                          key={sc.id}
-                          type="button"
-                          data-testid={`font-scale-${sc.id}`}
-                          onClick={() => onChangeFontScale(sc.id)}
-                          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold cursor-pointer ${
-                            fontScale === sc.id
-                              ? 'bg-slate-900 text-white'
-                              : 'bg-white text-slate-600 ring-1 ring-slate-200'
-                          }`}
-                        >
-                          {sc.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            </div>
 
-            {onOpenUpdateModal && (
+            {/* Seção de largura total (fora do grid de 2 colunas) */}
+            <div className="mt-4 space-y-2.5 border-t border-slate-200/80 pt-4">
+              {onOpenSettings && (
                 <button
                   type="button"
-                  data-testid="mobile-update-app-btn"
                   onClick={() => {
                     setMobileMoreOpen(false);
-                    onOpenUpdateModal();
+                    onOpenSettings();
                   }}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800"
+                  className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-800"
                 >
                   <span className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    <span>Atualizar App</span>
+                    <Settings className="h-4 w-4 text-blue-600" />
+                    <span>{tUi(uiLocale, 'settings.title')}</span>
                   </span>
-                  {hasAppUpdate && latestAppVersion && (
-                    <span className="rounded-full bg-emerald-600 px-1.5 py-0.5 font-mono text-[9px] text-white">
-                      v{latestAppVersion}
-                    </span>
-                  )}
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    {activeDialectObj.flag} {activeDialectObj.label}
+                  </span>
                 </button>
               )}
 
-            {pendingOutboxCount > 0 && onFlushOutbox && (
-              <button
-                type="button"
-                data-testid="mobile-flush-outbox-btn"
-                onClick={() => {
-                  setMobileMoreOpen(false);
-                  onFlushOutbox();
-                }}
-                className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-xs font-bold text-amber-800"
-              >
-                <span>Sincronizar fila offline</span>
-                <span className="rounded-full bg-amber-600 px-2 py-0.5 font-mono text-[10px] text-white">
-                  {pendingOutboxCount}
-                </span>
-              </button>
-            )}
+              {(onChangeUiLocale || onChangeFontScale) && (
+                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 space-y-2">
+                  {onChangeUiLocale && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-600">
+                        {tUi(uiLocale, 'a11y.uiLang')}
+                      </span>
+                      <div className="flex gap-1">
+                        {(['pt', 'en', 'es'] as const).map((loc) => (
+                          <button
+                            key={loc}
+                            type="button"
+                            onClick={() => onChangeUiLocale(loc)}
+                            className={`rounded-md px-2.5 py-1 text-[10px] font-bold uppercase cursor-pointer ${
+                              uiLocale === loc
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                            }`}
+                          >
+                            {loc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {onChangeFontScale && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-600">
+                        {tUi(uiLocale, 'a11y.fontScale')}
+                      </span>
+                      <div className="flex gap-1">
+                        {(
+                          [
+                            { id: 'sm', label: 'A-' },
+                            { id: 'md', label: 'A' },
+                            { id: 'lg', label: 'A+' },
+                            { id: 'xl', label: 'A++' },
+                          ] as const
+                        ).map((sc) => (
+                          <button
+                            key={sc.id}
+                            type="button"
+                            onClick={() => onChangeFontScale(sc.id)}
+                            className={`rounded-md px-2 py-1 text-[10px] font-bold cursor-pointer ${
+                              fontScale === sc.id
+                                ? 'bg-slate-900 text-white'
+                                : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                            }`}
+                          >
+                            {sc.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {onOpenPrivacyLgpd && (
+              <div className="grid grid-cols-2 gap-2">
+                {onOpenUpdateModal && (
+                  <button
+                    type="button"
+                    data-testid="mobile-update-app-btn"
+                    onClick={() => {
+                      setMobileMoreOpen(false);
+                      onOpenUpdateModal();
+                    }}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-bold text-emerald-800"
+                  >
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4" />
+                      <span>{tUi(uiLocale, 'nav.updateApp')}</span>
+                    </span>
+                    {hasAppUpdate && latestAppVersion && (
+                      <span className="rounded-full bg-emerald-600 px-1.5 py-0.5 font-mono text-[9px] text-white">
+                        v{latestAppVersion}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {onOpenPrivacyLgpd && (
+                  <button
+                    type="button"
+                    data-testid="mobile-privacy-lgpd-btn"
+                    onClick={() => {
+                      setMobileMoreOpen(false);
+                      onOpenPrivacyLgpd();
+                    }}
+                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700"
+                  >
+                    <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                    <span>{tUi(uiLocale, 'settings.lgpd')}</span>
+                  </button>
+                )}
+              </div>
+
+              {pendingOutboxCount > 0 && onFlushOutbox && (
                 <button
                   type="button"
-                  data-testid="mobile-privacy-lgpd-btn"
+                  data-testid="mobile-flush-outbox-btn"
                   onClick={() => {
                     setMobileMoreOpen(false);
-                    onOpenPrivacyLgpd();
+                    onFlushOutbox();
                   }}
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700"
+                  className="flex w-full items-center justify-between rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2.5 text-xs font-bold text-amber-800"
                 >
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                  <span>Privacidade &amp; LGPD</span>
+                  <span>{tUi(uiLocale, 'settings.syncOffline')}</span>
+                  <span className="rounded-full bg-amber-600 px-2 py-0.5 font-mono text-[10px] text-white">
+                    {pendingOutboxCount}
+                  </span>
                 </button>
               )}
 
-            {onOpenDownloadModal && (
+              {onOpenDownloadModal && (
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMoreOpen(false);
                     onOpenDownloadModal();
                   }}
-                  className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2.5 text-xs font-bold text-blue-700"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Baixar App</span>
+                  <span>{tUi(uiLocale, 'nav.downloadApp')}</span>
                 </button>
               )}
             </div>

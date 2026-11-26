@@ -7,12 +7,15 @@ import {
 } from './config/appConfig';
 import { getAudioClip } from './utils/audioDb';
 import {
+  deleteMyCloudAccount,
+  pushStateToCloud,
   registerNativeOAuthListener,
   signInWithSupabaseEmail,
   signInWithSupabaseGoogle,
   signOutSupabase,
   signUpWithSupabaseEmail,
   subscribeSupabaseAuthChanges,
+  syncRelationalTablesBestEffort,
   uploadSpeakingAudioToCloud,
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
@@ -20,10 +23,13 @@ import { AppDownloadGateway } from './components/AppDownloadGateway';
 import { AppUpdateModal } from './components/AppUpdateModal';
 import { AuthScreen } from './components/AuthScreen';
 import { PrivacyLgpdModal } from './components/PrivacyLgpdModal';
+import { SettingsModal } from './components/SettingsModal';
+import { ViewSkeleton } from './components/ViewSkeleton';
 import { checkForAppUpdate, type AppUpdateInfo } from './utils/appUpdater';
 import {
   clearOfflineOutbox,
-  flushOfflineOutbox,
+  enqueueOfflineMutation,
+  flushProgressOutbox,
   getPendingOutboxCount,
 } from './utils/offlineOutbox';
 import { reportClientError } from './utils/telemetry';
@@ -198,6 +204,7 @@ export function App() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
   const [appUpdateInfo, setAppUpdateInfo] = useState<AppUpdateInfo | null>(null);
   const [pathFilterLevel, setPathFilterLevel] = useState<'ALL' | CEFRLevel>('ALL');
@@ -838,6 +845,14 @@ export function App() {
       }),
     }));
 
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      void enqueueOfflineMutation('lesson_complete', {
+        topicId: result.topicId,
+        xpEarned: result.xpEarned,
+        minutesSpent: result.minutesSpent,
+      }).then(() => getPendingOutboxCount().then(setPendingOutboxCount));
+    }
+
     if (unlockedLevel) {
       showToast(
         `Parabéns! Você desbloqueou o Certificado CEFR ${unlockedLevel}!`,
@@ -1047,6 +1062,11 @@ export function App() {
         },
       };
     });
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      void enqueueOfflineMutation('srs_review', { cardId, rating }).then(() =>
+        getPendingOutboxCount().then(setPendingOutboxCount),
+      );
+    }
   };
 
   const handleTutorSessionComplete = (xpEarned: number) => {
@@ -1447,15 +1467,30 @@ export function App() {
   };
 
   const handleFlushOfflineOutbox = async () => {
-    const res = await flushOfflineOutbox(async (item) => {
-      if (item.kind === 'telemetry') {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      showToast('Sem conexão: itens permanecerão na fila offline.');
+      return;
+    }
+    const res = await flushProgressOutbox({
+      onTelemetry: async (item) => {
         await reportClientError(
           String(item.payload.message ?? 'Offline telemetry'),
           String(item.payload.route ?? '/'),
         );
         return true;
-      }
-      return true;
+      },
+      onSyncProgressBatch: async () => {
+        if (isCloudConfigured) {
+          const pushRes = await pushStateToCloud(state);
+          if (!pushRes.ok) return false;
+          await syncRelationalTablesBestEffort(
+            state,
+            effectiveSupabase.url,
+            effectiveSupabase.anonKey,
+          );
+        }
+        return true;
+      },
     });
     setPendingOutboxCount(res.remaining);
     if (res.flushed > 0) {
@@ -1865,6 +1900,7 @@ export function App() {
         onOpenDownloadModal={() => setShowDownloadModal(true)}
         onOpenUpdateModal={() => setShowUpdateModal(true)}
         onOpenPrivacyLgpd={() => setShowPrivacyModal(true)}
+        onOpenSettings={() => setShowSettingsModal(true)}
         pendingOutboxCount={pendingOutboxCount}
         onFlushOutbox={() => void handleFlushOfflineOutbox()}
         hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
@@ -1911,10 +1947,18 @@ export function App() {
                   completedCheckpoints: [...prev, checkpointId],
                 };
               });
+              if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                void enqueueOfflineMutation('checkpoint', {
+                  checkpointId,
+                  scorePercent,
+                }).then(() => getPendingOutboxCount().then(setPendingOutboxCount));
+              }
               showToast(`Ponto de verificação concluído (${scorePercent}%)! +60 XP`);
             }}
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
+            onGoToReview={() => setActiveView('review')}
+            uiLocale={uiLocale}
             onPracticeTopicWithAI={(topic) => {
               setTutorTargetTopic(topic);
               setActiveTopic(null);
@@ -1933,13 +1977,7 @@ export function App() {
           />
         )}
 
-        <Suspense
-          fallback={
-            <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm font-semibold text-slate-500">
-              Carregando módulo...
-            </div>
-          }
-        >
+        <Suspense fallback={<ViewSkeleton />}>
           {activeView === 'tutor' && (
             <AITutor
               accent={currentUser.accent}
@@ -2180,6 +2218,7 @@ export function App() {
               getLanguageCourse(activeTopic.languageCode ?? activeLanguage).dialects
             }
             studentName={currentUser.name}
+            uiLocale={uiLocale}
             hasLinkedTeacher={hasLinkedTeacher}
             onRequestTeacherLink={() => {
               setActiveTopic(null);
@@ -2235,16 +2274,55 @@ export function App() {
         onClose={() => setShowUpdateModal(false)}
       />
 
+      <SettingsModal
+        open={showSettingsModal}
+        user={currentUser}
+        activeCourse={activeCourse}
+        activeDialect={activeDialect}
+        themeMode={themeMode}
+        uiLocale={uiLocale}
+        fontScale={fontScale}
+        pendingOutboxCount={pendingOutboxCount}
+        hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
+        latestAppVersion={appUpdateInfo?.latestVersion}
+        onClose={() => setShowSettingsModal(false)}
+        onChangeDialect={(langCode, dialectCode) => {
+          updateCurrentUser((u) => ({
+            ...u,
+            accent: langCode === 'en' && (dialectCode === 'en-US' || dialectCode === 'en-GB')
+              ? dialectCode
+              : u.accent,
+            dialectByLanguage: {
+              ...(u.dialectByLanguage ?? {}),
+              [langCode]: dialectCode,
+            },
+          }));
+        }}
+        onCycleTheme={handleCycleTheme}
+        onChangeUiLocale={setUiLocale}
+        onChangeFontScale={setFontScale}
+        onFlushOutbox={() => void handleFlushOfflineOutbox()}
+        onOpenUpdateModal={() => setShowUpdateModal(true)}
+        onOpenPrivacyLgpd={() => setShowPrivacyModal(true)}
+        onOpenDownloadModal={() => setShowDownloadModal(true)}
+        onLogout={handleLogout}
+      />
+
       <PrivacyLgpdModal
         open={showPrivacyModal}
         user={currentUser}
         onClose={() => setShowPrivacyModal(false)}
         onDeleteAccount={async () => {
+          const cloudRes = await deleteMyCloudAccount(state.cloudConfig);
+          if (!cloudRes.ok) {
+            return { ok: false, error: cloudRes.error };
+          }
           await clearOfflineOutbox();
           setPendingOutboxCount(0);
           handleDeleteUser(currentUser.id);
           setShowPrivacyModal(false);
           handleLogout();
+          return { ok: true };
         }}
       />
 

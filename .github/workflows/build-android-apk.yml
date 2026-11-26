@@ -17,7 +17,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Scan tracked files for leaked API keys or secrets (S-04)
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const cp = require('node:child_process');
+            const files = cp.execSync('git ls-files').toString().trim().split('\n').filter(Boolean);
+            const patterns = [
+              /AQ\.Ab8[A-Za-z0-9_-]{20,}/,
+              /AIza[0-9A-Za-z_-]{30,}/,
+              /ghp_[A-Za-z0-9]{30,}/,
+              /github_pat_[A-Za-z0-9_]{30,}/,
+              /sk-[A-Za-z0-9]{32,}/,
+              /cfut_[A-Za-z0-9]{20,}/
+            ];
+            let found = 0;
+            for (const f of files) {
+              if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) continue;
+              const txt = fs.readFileSync(f, 'utf8');
+              for (const re of patterns) {
+                if (re.test(txt)) {
+                  console.error('SECRET LEAK DETECTED in', f, 'matching', re);
+                  found++;
+                }
+              }
+            }
+            if (found > 0) process.exit(1);
+            console.log('Secret scan clean across', files.length, 'tracked files.');
+          "
+
   build-apk:
+    needs: secret-scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

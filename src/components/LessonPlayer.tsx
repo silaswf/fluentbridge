@@ -15,6 +15,7 @@ import {
   Radio,
   RotateCcw,
   Send,
+  Settings,
   Sparkles,
   Square,
   Volume2,
@@ -64,8 +65,13 @@ import { WritingFreeStepView } from './steps/WritingFreeStepView';
 import { PitchOscilloscope } from './PitchOscilloscope';
 import {
   computeAdaptiveProfile,
+  loadAdaptiveHistory,
+  recordAdaptiveAttempt,
+  saveAdaptiveOverride,
   type AdaptiveDifficultyMode,
 } from '../utils/adaptiveDifficulty';
+import { getRegionalAccents } from '../data/regionalAccents';
+import { tUi, type UiLocale } from '../utils/i18n';
 import {
   loadJapaneseScriptMode,
   saveJapaneseScriptMode,
@@ -83,6 +89,7 @@ interface LessonPlayerProps {
   dialectCode: string;
   dialects: LanguageDialect[];
   studentName: string;
+  uiLocale?: UiLocale;
   hasLinkedTeacher?: boolean;
   onRequestTeacherLink?: () => void;
   onChangeDialect: (dialectCode: string) => void;
@@ -284,6 +291,7 @@ export function LessonPlayer({
   dialectCode,
   dialects,
   studentName,
+  uiLocale = 'pt',
   hasLinkedTeacher = true,
   onRequestTeacherLink,
   onChangeDialect,
@@ -343,10 +351,18 @@ export function LessonPlayer({
   const [hearts, setHearts] = useState(5);
   const [relaxedMode, setRelaxedMode] = useState(false);
   const [combo, setCombo] = useState(0);
-  const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
-  const [sessionWrongCount, setSessionWrongCount] = useState(0);
+  const langKey = topic.languageCode ?? 'en';
+  const [adaptiveSeed] = useState(() => loadAdaptiveHistory(studentName, langKey));
+  const [sessionCorrectCount, setSessionCorrectCount] = useState(
+    () => adaptiveSeed.recent.filter(Boolean).length,
+  );
+  const [sessionWrongCount, setSessionWrongCount] = useState(
+    () => adaptiveSeed.recent.filter((v) => !v).length,
+  );
   const [adaptiveOverride, setAdaptiveOverride] =
-    useState<AdaptiveDifficultyMode | null>(null);
+    useState<AdaptiveDifficultyMode | null>(() => adaptiveSeed.manualOverride);
+  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
+  const [mobileStepsExpanded, setMobileStepsExpanded] = useState(false);
   const [muted, setMuted] = useState(() => isSoundMuted());
   const [showHeartRecovery, setShowHeartRecovery] = useState(false);
 
@@ -533,6 +549,7 @@ export function LessonPlayer({
     const nextCombo = combo + 1;
     setCombo(nextCombo);
     setSessionCorrectCount((c) => c + 1);
+    recordAdaptiveAttempt(studentName, langKey, true);
     const comboBonus = nextCombo >= 3 ? 5 : 0;
     setEarnedXp((prev) => prev + baseXp + comboBonus);
   };
@@ -541,6 +558,16 @@ export function LessonPlayer({
     playSound('wrong');
     setCombo(0);
     setSessionWrongCount((c) => c + 1);
+    const updatedAdaptive = recordAdaptiveAttempt(studentName, langKey, false);
+    const nextProfile = computeAdaptiveProfile(
+      updatedAdaptive.recent.filter(Boolean).length,
+      updatedAdaptive.recent.filter((v) => !v).length,
+      0,
+      adaptiveOverride,
+    );
+    if (nextProfile.autoShowHints) {
+      setShowHint(true);
+    }
     setEarnedXp((prev) => prev + 6);
     if (!relaxedMode) {
       setHearts((prev) => {
@@ -1262,21 +1289,36 @@ export function LessonPlayer({
             <button
               type="button"
               data-testid="adaptive-difficulty-badge"
-              onClick={() =>
-                setAdaptiveOverride((prev) =>
-                  prev === null
-                    ? 'guided'
-                    : prev === 'guided'
-                      ? 'immersive'
-                      : prev === 'immersive'
-                        ? 'balanced'
-                        : null,
-                )
-              }
+              onClick={() => {
+                setAdaptiveOverride((prev) => {
+                  const next =
+                    prev === null
+                      ? 'guided'
+                      : prev === 'guided'
+                        ? 'immersive'
+                        : prev === 'immersive'
+                          ? 'balanced'
+                          : null;
+                  saveAdaptiveOverride(studentName, langKey, next);
+                  if (next === 'guided') setShowHint(true);
+                  return next;
+                });
+              }}
               title={adaptiveProfile.summaryPt}
               className="hidden rounded-xl border border-indigo-200 bg-indigo-50/70 px-2.5 py-1.5 text-[11px] font-bold text-indigo-800 hover:bg-indigo-100 md:inline-flex cursor-pointer"
             >
               ⚡ {adaptiveProfile.labelPt}
+            </button>
+
+            <button
+              type="button"
+              data-testid="lesson-mobile-settings-btn"
+              onClick={() => setMobileSettingsOpen((v) => !v)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 md:hidden cursor-pointer"
+              aria-label={tUi(uiLocale, 'lesson.settingsTitle')}
+              title={tUi(uiLocale, 'lesson.settingsTitle')}
+            >
+              <Settings className="h-4 w-4" />
             </button>
 
             {isImmersionLevel(topic.level) && (
@@ -1346,8 +1388,95 @@ export function LessonPlayer({
           </div>
         </div>
 
-        {/* Busuu-style Subunit / Stage Navigation Strip */}
-        <div className="mx-auto mt-2.5 flex max-w-4xl items-center gap-1.5 overflow-x-auto pb-0.5">
+        {/* Mobile Lesson Settings Drawer */}
+        {mobileSettingsOpen && (
+          <div
+            data-testid="lesson-mobile-settings-panel"
+            className="mx-auto mt-2.5 max-w-4xl rounded-2xl border border-slate-200 bg-slate-50 p-3 space-y-2.5 md:hidden"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={toggleSound}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 cursor-pointer"
+              >
+                {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                <span>{muted ? 'Som OFF' : 'Som ON'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRelaxedMode((v) => !v)}
+                className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-xs font-bold cursor-pointer ${
+                  relaxedMode
+                    ? 'border-blue-200 bg-blue-50 text-blue-700'
+                    : 'border-slate-200 bg-white text-slate-700'
+                }`}
+              >
+                <Heart className="h-3.5 w-3.5 text-rose-500" />
+                <span>{relaxedMode ? 'Sem Pressão ∞' : '5 Vidas'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAdaptiveOverride((prev) => {
+                    const next =
+                      prev === null
+                        ? 'guided'
+                        : prev === 'guided'
+                          ? 'immersive'
+                          : prev === 'immersive'
+                            ? 'balanced'
+                            : null;
+                    saveAdaptiveOverride(studentName, langKey, next);
+                    if (next === 'guided') setShowHint(true);
+                    return next;
+                  });
+                }}
+                className="rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-[11px] font-bold text-indigo-800 cursor-pointer"
+              >
+                ⚡ {adaptiveProfile.labelPt}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold text-slate-600">Sotaque:</span>
+              <select
+                value={dialectCode}
+                onChange={(e) => onChangeDialect(e.target.value)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800"
+              >
+                {getRegionalAccents(langKey).map((acc) => (
+                  <option key={acc.code} value={acc.code}>
+                    {acc.flag} {acc.regionPt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile compact steps toggle + Desktop stage strip */}
+        <div className="mx-auto mt-2 flex max-w-4xl items-center justify-between sm:hidden">
+          <button
+            type="button"
+            data-testid="mobile-steps-toggle"
+            onClick={() => setMobileStepsExpanded((v) => !v)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold text-slate-700 cursor-pointer"
+          >
+            <span>
+              Etapa {stepIdx + 1}/{steps.length} · {getStepStageMeta(currentStep).label}{' '}
+              {mobileStepsExpanded ? '▴' : '▾'}
+            </span>
+          </button>
+        </div>
+
+        <div
+          className={`mx-auto mt-2.5 max-w-4xl items-center gap-1.5 overflow-x-auto pb-0.5 ${
+            mobileStepsExpanded ? 'flex' : 'hidden sm:flex'
+          }`}
+        >
           {steps.map((s, idx) => {
             const stage = getStepStageMeta(s);
             const isCurrent = idx === stepIdx;
@@ -1565,6 +1694,9 @@ export function LessonPlayer({
             <ListeningStepView
               step={currentStep}
               languageCode={topic.languageCode}
+              level={topic.level}
+              preferredAccent={dialectCode}
+              onSelectAccent={onChangeDialect}
               isPlayingAudio={isPlayingAudio}
               setIsPlayingAudio={setIsPlayingAudio}
               showTranscript={showTranscript}
@@ -2013,6 +2145,8 @@ export function LessonPlayer({
             <WritingFreeStepView
               step={currentStep}
               languageCode={topic.languageCode}
+              preferredAccent={dialectCode}
+              onSelectAccent={onChangeDialect}
               freeText={freeText}
               setFreeText={setFreeText}
               freeWordCount={freeWordCount}

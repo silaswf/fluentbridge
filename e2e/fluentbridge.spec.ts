@@ -39,12 +39,15 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await expect(page.getByTestId('download-windows-link')).toBeVisible();
   });
 
-  test('2. Login, in-app Download App modal & in-app Updater modal from Sidebar', async ({ page }) => {
+  test('2. Login, in-app Download App modal & in-app Updater modal from Settings', async ({ page }) => {
     await loginAsMasterAdmin(page);
+    await page.getByTestId('open-settings-btn').click();
+    await expect(page.getByTestId('settings-modal')).toBeVisible();
     await page.getByTestId('sidebar-update-app-btn').click();
     await expect(page.getByTestId('app-update-modal')).toBeVisible();
     await page.getByLabel('Fechar atualizador').click();
 
+    await page.getByTestId('open-settings-btn').click();
     await page.getByTestId('sidebar-download-app-btn').click();
     await expect(page.getByTestId('download-windows-link')).toBeVisible();
     await page.getByTestId('continue-web-btn').click();
@@ -57,25 +60,25 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
 
     await selectLanguage(page, 'ar');
     await expect(page.locator('main')).toHaveAttribute('dir', 'rtl');
-    await expect(page.getByText(/Trilha \(103 unid\.\)/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
 
     await selectLanguage(page, 'nl');
     await expect(page.locator('main')).toHaveAttribute('dir', 'ltr');
-    await expect(page.getByText(/Trilha \(103 unid\.\)/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
 
     await selectLanguage(page, 'af');
-    await expect(page.getByText(/Trilha \(103 unid\.\)/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
 
     await selectLanguage(page, 'sv');
-    await expect(page.getByText(/Trilha \(103 unid\.\)/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
   });
 
   test('4. Dark mode warning box has high contrast and Interactive Short Videos save words to SM-2', async ({
     page,
   }) => {
     await loginAsMasterAdmin(page);
-    await page.getByRole('button', { name: /Tema da interface/i }).click();
-    await page.getByRole('button', { name: /Central & Guia/i }).click();
+    await page.getByRole('button', { name: /^Tema/i }).click();
+    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
 
     const warningBox = page.getByTestId('tip-warning-box').first();
     await expect(warningBox).toBeVisible();
@@ -95,7 +98,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await loginAsMasterAdmin(page);
 
     await selectLanguage(page, 'ja');
-    await page.getByRole('button', { name: /Central & Guia/i }).click();
+    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
     await page.getByRole('button', { name: /Escrita & Traços/i }).click();
     await expect(page.getByText(/Hiragana \(46\)/i)).toBeVisible();
 
@@ -113,13 +116,13 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     page.on('pageerror', (err) => errors.push(err.message));
 
     await loginAsMasterAdmin(page);
-    await page.getByRole('button', { name: /Painel Admin/i }).click();
+    await page.getByRole('button', { name: /Admin Mestre|Painel Admin/i }).click();
     await expect(page.getByTestId('admin-voice-health-panel')).toBeVisible();
     for (const code of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv']) {
       await expect(page.getByTestId(`voice-health-${code}`)).toBeVisible();
     }
 
-    await page.getByRole('button', { name: /Trilha \(/i }).click();
+    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
     const startBtn6 = page.getByRole('button', { name: /^Começar$/i }).first();
     if (!(await startBtn6.isVisible({ timeout: 2000 }).catch(() => false))) {
       await page.getByTestId('toggle-all-modules-btn').click();
@@ -172,12 +175,12 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await loginAsMasterAdmin(page);
 
     // Cloze mode in VocabReview
-    await page.getByRole('button', { name: /Revisão \(/i }).click();
+    await page.getByRole('button', { name: /Revisão.*\(/i }).click();
     await page.getByTestId('vocab-mode-cloze').click();
     await expect(page.getByTestId('vocab-mode-cloze')).toBeVisible();
 
     // Grammar Drills & Graded Readers in TipsLibrary
-    await page.getByRole('button', { name: /Central & Guia/i }).click();
+    await page.getByRole('button', { name: /Imersão & Guias|Central & Guia/i }).click();
     await page.getByTestId('tips-tab-drills').click();
     await expect(page.getByTestId('grammar-drill-lab')).toBeVisible();
     await page.getByTestId('tips-tab-readers').click();
@@ -187,20 +190,23 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.getByRole('button', { name: /Aulas ao Vivo/i }).click();
     await expect(page.getByTestId('live-classroom-view')).toBeVisible();
 
-    // Accessibility Font Scale & i18n toggle
+    // Accessibility Font Scale & i18n toggle inside SettingsModal
+    await page.getByTestId('open-settings-btn').click();
+    await expect(page.getByTestId('settings-modal')).toBeVisible();
     await page.getByTestId('font-scale-lg').click();
     await expect(page.locator('html')).toHaveAttribute('data-font-scale', 'lg');
     await page.getByTestId('font-scale-md').click();
 
     await page.getByTestId('ui-locale-en').click();
     await page.getByTestId('ui-locale-pt').click();
+    await page.getByLabel('Fechar').click();
   });
 
   test('10. v8.0.0 Dark Mode Reading contrast, Japanese Kana toggle, DET Mock Exam & Trail Checkpoint work', async ({
     page,
   }) => {
     await loginAsMasterAdmin(page);
-    await page.getByRole('button', { name: /Trilha \(/i }).click();
+    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
 
     // 1) Busuu-style Module Header & Trail Checkpoint Modal on LearningPath
     await expect(page.getByTestId('module-header-card').first()).toBeVisible();
@@ -212,7 +218,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     // 2) Dark mode Reading passage contrast
     await selectLanguage(page, 'en');
     await expect(page.getByText(/Inglês · .*103 unidades/i)).toBeVisible({ timeout: 8000 });
-    await page.getByRole('button', { name: /Tema da interface/i }).click();
+    await page.getByRole('button', { name: /^Tema/i }).click();
     const startBtn10 = page.getByRole('button', { name: /^Começar$/i }).first();
     if (!(await startBtn10.isVisible({ timeout: 2000 }).catch(() => false))) {
       await page.getByTestId('toggle-all-modules-btn').click();

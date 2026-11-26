@@ -6,11 +6,14 @@ import {
   Volume2,
   XCircle,
 } from 'lucide-react';
-import type { LanguageCode, ListeningStep } from '../../types/learning';
+import type { CEFRLevel, LanguageCode, ListeningStep } from '../../types/learning';
 import {
+  AMBIENT_INTENSITY_OPTIONS,
   AMBIENT_NOISE_OPTIONS,
+  setAmbientNoiseIntensity,
   startAmbientNoise,
   stopAmbientNoise,
+  type AmbientNoiseIntensity,
   type AmbientNoisePreset,
 } from '../../utils/ambientNoiseEngine';
 import { DualAudioButtons } from '../DualAudioButtons';
@@ -18,6 +21,9 @@ import { DualAudioButtons } from '../DualAudioButtons';
 interface ListeningStepViewProps {
   step: ListeningStep;
   languageCode?: LanguageCode;
+  level?: CEFRLevel;
+  preferredAccent?: string;
+  onSelectAccent?: (accentCode: string) => void;
   isPlayingAudio: boolean;
   setIsPlayingAudio: (val: boolean) => void;
   showTranscript: boolean;
@@ -32,6 +38,9 @@ interface ListeningStepViewProps {
 export function ListeningStepView({
   step,
   languageCode,
+  level,
+  preferredAccent,
+  onSelectAccent,
   isPlayingAudio,
   setIsPlayingAudio,
   showTranscript,
@@ -43,8 +52,11 @@ export function ListeningStepView({
   unitVocabInUseNode,
 }: ListeningStepViewProps) {
   const [ambientPreset, setAmbientPreset] = useState<AmbientNoisePreset>('clean');
+  const [ambientIntensity, setAmbientIntensity] = useState<AmbientNoiseIntensity>('real');
+  const [previewingAmbient, setPreviewingAmbient] = useState(false);
 
   useEffect(() => {
+    setPreviewingAmbient(false);
     return () => {
       stopAmbientNoise();
     };
@@ -58,38 +70,84 @@ export function ListeningStepView({
             <p className="text-xs font-bold text-indigo-600">{step.speakerLabel}</p>
             <p className="mt-1 text-sm text-slate-600">{step.contextPt}</p>
           </div>
-          <div
-            data-testid="ambient-noise-selector"
-            className="flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1"
-            title="Simular ambiente real de escuta"
-          >
-            <Volume2 className="ml-1 h-3.5 w-3.5 text-slate-400" />
-            {AMBIENT_NOISE_OPTIONS.map((opt) => {
-              const active = ambientPreset === opt.id;
-              return (
+          <div className="flex flex-col items-end gap-1.5">
+            <div
+              data-testid="ambient-noise-selector"
+              className="flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1"
+              title="Simular ambiente real de escuta (inicia ao tocar o áudio)"
+            >
+              <Volume2 className="ml-1 h-3.5 w-3.5 text-slate-400" />
+              {(level === 'A1' || level === 'A2') && (
+                <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-800">
+                  Desafio B1+
+                </span>
+              )}
+              {AMBIENT_NOISE_OPTIONS.map((opt) => {
+                const active = ambientPreset === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    data-testid={`ambient-preset-${opt.id}`}
+                    onClick={() => {
+                      setAmbientPreset(opt.id);
+                      if (opt.id === 'clean') {
+                        setPreviewingAmbient(false);
+                        stopAmbientNoise();
+                      } else if (isPlayingAudio || previewingAmbient) {
+                        startAmbientNoise(opt.id, ambientIntensity);
+                      }
+                    }}
+                    title={opt.descriptionPt}
+                    className={`rounded-lg px-2 py-0.5 text-[10px] font-bold transition cursor-pointer ${
+                      active
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:bg-white'
+                    }`}
+                  >
+                    {opt.badge}
+                  </button>
+                );
+              })}
+            </div>
+
+            {ambientPreset !== 'clean' && (
+              <div className="flex flex-wrap items-center gap-1">
+                {AMBIENT_INTENSITY_OPTIONS.map((intOpt) => (
+                  <button
+                    key={intOpt.id}
+                    type="button"
+                    data-testid={`ambient-intensity-${intOpt.id}`}
+                    onClick={() => {
+                      setAmbientIntensity(intOpt.id);
+                      setAmbientNoiseIntensity(intOpt.id);
+                    }}
+                    className={`rounded-md px-2 py-0.5 text-[10px] font-bold transition cursor-pointer ${
+                      ambientIntensity === intOpt.id
+                        ? 'bg-slate-900 text-white'
+                        : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {intOpt.labelPt}
+                  </button>
+                ))}
                 <button
-                  key={opt.id}
                   type="button"
-                  data-testid={`ambient-preset-${opt.id}`}
                   onClick={() => {
-                    setAmbientPreset(opt.id);
-                    if (opt.id === 'clean') {
+                    if (previewingAmbient) {
+                      setPreviewingAmbient(false);
                       stopAmbientNoise();
                     } else {
-                      startAmbientNoise(opt.id);
+                      setPreviewingAmbient(true);
+                      startAmbientNoise(ambientPreset, ambientIntensity);
                     }
                   }}
-                  title={opt.descriptionPt}
-                  className={`rounded-lg px-2 py-0.5 text-[10px] font-bold transition cursor-pointer ${
-                    active
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'text-slate-600 hover:bg-white'
-                  }`}
+                  className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 cursor-pointer"
                 >
-                  {opt.badge}
+                  {previewingAmbient ? 'Parar fundo' : 'Testar fundo'}
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -117,17 +175,20 @@ export function ListeningStepView({
           <DualAudioButtons
             text={step.audioText}
             languageCode={languageCode}
+            preferredAccent={preferredAccent}
+            onSelectAccent={onSelectAccent}
             showSlow
             size="md"
             rateMultiplier={rateMultiplier}
             onPlayStart={() => {
               setIsPlayingAudio(true);
               if (ambientPreset !== 'clean') {
-                startAmbientNoise(ambientPreset);
+                startAmbientNoise(ambientPreset, ambientIntensity);
               }
             }}
             onPlayEnd={() => {
               setIsPlayingAudio(false);
+              setPreviewingAmbient(false);
               stopAmbientNoise();
             }}
           />

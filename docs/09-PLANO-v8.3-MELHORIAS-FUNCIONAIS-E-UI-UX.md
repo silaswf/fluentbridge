@@ -1,6 +1,6 @@
 # 09 — Plano de Melhorias `v8.3.0`: Auditoria Qualitativa Funcional, UI/UX & Segurança
 
-> **Data:** 25/11/2026 · **Base auditada:** `v8.2.0` (commit `2a5a6c4`) · **Tipo:** documento de planejamento (nenhum item abaixo está implementado ainda, exceto onde marcado ✅).
+> **Data:** 25/11/2026 · **Atualizado em:** 26/11/2026 · **Status:** ✅ **Entregue na `v8.3.0`** (todos os itens P0, P1 e P2 de código `F-01…F-07`, `U-01…U-07`, `S-01`, `S-04` + upgrade global Gemini 2.5 Neural TTS nos 49 sotaques; restam apenas ações manuais de console `S-02`, `S-03`, `S-05`).
 > **Origem:** auditoria de código somente-leitura feita após a entrega da `v8.2.0`, seguindo a estrutura de [08 — Análise Competitiva](./08-ANALISE-COMPETITIVA-MERCADO.md), que cobria funcionalidades de mercado mas **não avaliava UI/UX nem a qualidade de configuração das funções já existentes**.
 > **Premissa:** o app já tem volume pedagógico superior ao de vários concorrentes pagos. O gargalo agora é **conexão entre funções** (recursos entregues "meio ligados"), **densidade visual** e **ergonomia mobile/Dark Mode**.
 

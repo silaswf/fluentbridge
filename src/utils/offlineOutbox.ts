@@ -171,3 +171,28 @@ export async function flushOfflineOutbox(
 
   return { flushed, remaining: failed.length };
 }
+
+export async function flushProgressOutbox(handlers: {
+  onTelemetry: (item: OutboxItem) => Promise<boolean>;
+  onSyncProgressBatch: (items: OutboxItem[]) => Promise<boolean>;
+}): Promise<{ flushed: number; remaining: number }> {
+  const items = await listOutboxItems();
+  if (items.length === 0) return { flushed: 0, remaining: 0 };
+
+  const progressItems = items.filter((i) => i.kind !== 'telemetry');
+  let progressBatchOk = true;
+  if (progressItems.length > 0) {
+    try {
+      progressBatchOk = await handlers.onSyncProgressBatch(progressItems);
+    } catch {
+      progressBatchOk = false;
+    }
+  }
+
+  return flushOfflineOutbox(async (item) => {
+    if (item.kind === 'telemetry') {
+      return handlers.onTelemetry(item);
+    }
+    return progressBatchOk;
+  });
+}

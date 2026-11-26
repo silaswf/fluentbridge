@@ -6,7 +6,7 @@ interface PrivacyLgpdModalProps {
   open: boolean;
   user: UserProfile;
   onClose: () => void;
-  onDeleteAccount: () => Promise<void>;
+  onDeleteAccount: () => Promise<{ ok: boolean; error?: string } | void>;
 }
 
 export function PrivacyLgpdModal({
@@ -18,6 +18,7 @@ export function PrivacyLgpdModal({
   const [exportedDone, setExportedDone] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   if (!open) return null;
 
@@ -65,8 +66,18 @@ export function PrivacyLgpdModal({
   const handleConfirmDelete = async () => {
     if (confirmText.trim().toUpperCase() !== 'EXCLUIR') return;
     setDeleting(true);
+    setDeleteError('');
     try {
-      await onDeleteAccount();
+      const res = await onDeleteAccount();
+      if (res && res.ok === false) {
+        setDeleteError(
+          res.error || 'Não foi possível excluir os dados na nuvem. Tente novamente.',
+        );
+      }
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : 'Erro ao excluir conta na nuvem.',
+      );
     } finally {
       setDeleting(false);
     }
@@ -155,6 +166,14 @@ export function PrivacyLgpdModal({
                 <span>{deleting ? 'Excluindo...' : 'Excluir Minha Conta'}</span>
               </button>
             </div>
+            {deleteError && (
+              <p
+                data-testid="lgpd-delete-error"
+                className="mt-2 rounded-lg bg-rose-100 px-3 py-1.5 text-xs font-semibold text-rose-900"
+              >
+                {deleteError}
+              </p>
+            )}
           </div>
         </div>
       </div>

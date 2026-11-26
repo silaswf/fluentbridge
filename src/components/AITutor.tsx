@@ -105,6 +105,7 @@ export function AITutor({
   const [audioBars, setAudioBars] = useState<number[]>(Array(12).fill(12));
   const [bargeInEnabled, setBargeInEnabled] = useState(true);
   const [vadSilenceMs, setVadSilenceMs] = useState<700 | 950 | 1400>(950);
+  const [vadAdvancedOpen, setVadAdvancedOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
@@ -807,32 +808,49 @@ export function AITutor({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            {([700, 950, 1400] as const).map((ms) => (
-              <button
-                key={ms}
-                type="button"
-                onClick={() => setVadSilenceMs(ms)}
-                className={`rounded-lg px-2 py-1 font-mono text-[10px] font-bold cursor-pointer ${
-                  vadSilenceMs === ms
-                    ? 'bg-emerald-700 text-white'
-                    : 'bg-white text-emerald-800 ring-1 ring-emerald-200'
-                }`}
-              >
-                {ms === 700 ? 'Rápido' : ms === 950 ? 'Normal' : 'Calmo'}
-              </button>
-            ))}
             <button
               type="button"
-              onClick={() => setBargeInEnabled((v) => !v)}
-              className={`rounded-lg px-2 py-1 text-[10px] font-bold cursor-pointer ${
-                bargeInEnabled
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-slate-600 ring-1 ring-slate-200'
+              data-testid="vad-advanced-toggle"
+              onClick={() => setVadAdvancedOpen((v) => !v)}
+              className={`rounded-lg px-2.5 py-1 text-[10px] font-bold cursor-pointer ${
+                vadAdvancedOpen
+                  ? 'bg-emerald-700 text-white'
+                  : 'bg-white text-emerald-800 ring-1 ring-emerald-200'
               }`}
-              title="Permite interromper a fala da IA ao começar a falar"
+              title="Ajustes avançados de microfone e interrupção"
             >
-              Interromper IA: {bargeInEnabled ? 'ON' : 'OFF'}
+              ⚙️ Avançado
             </button>
+            {vadAdvancedOpen && (
+              <>
+                {([700, 950, 1400] as const).map((ms) => (
+                  <button
+                    key={ms}
+                    type="button"
+                    onClick={() => setVadSilenceMs(ms)}
+                    className={`rounded-lg px-2 py-1 font-mono text-[10px] font-bold cursor-pointer ${
+                      vadSilenceMs === ms
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-white text-emerald-800 ring-1 ring-emerald-200'
+                    }`}
+                  >
+                    {ms === 700 ? 'Rápido' : ms === 950 ? 'Normal' : 'Calmo'}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setBargeInEnabled((v) => !v)}
+                  className={`rounded-lg px-2 py-1 text-[10px] font-bold cursor-pointer ${
+                    bargeInEnabled
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-slate-600 ring-1 ring-slate-200'
+                  }`}
+                  title="Permite interromper a fala da IA ao começar a falar"
+                >
+                  Interromper IA: {bargeInEnabled ? 'ON' : 'OFF'}
+                </button>
+              </>
+            )}
             <button
               type="button"
               onClick={() => setCallMode(false)}

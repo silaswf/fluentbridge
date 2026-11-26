@@ -770,6 +770,12 @@ export function MockExamHub({
                           <DualAudioButtons
                             text={q.audioText}
                             languageCode={activeCourse.code}
+                            preferredAccent={
+                              activeMeta?.id === 'celpip' &&
+                              (!activeDialect || activeDialect === 'en-US')
+                                ? 'en-CA'
+                                : effectiveDialect
+                            }
                             size="sm"
                             onPlayStart={() =>
                               setAudioPlays((prev) => ({
