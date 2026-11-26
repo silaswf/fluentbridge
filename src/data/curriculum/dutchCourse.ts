@@ -1504,7 +1504,7 @@ const DUTCH_BASE_BLUEPRINTS: RichLanguageBlueprint[] = [
       { word: 'door ... te', ipa: '/doːr ... tə/', pt: 'ao / por meio de', cat: 'Gramática' },
       { word: 'zonder ... te', ipa: '/ˈzɔndər ... tə/', pt: 'sem', cat: 'Gramática' },
       { word: 'uitbreiden', ipa: '/ˈœytbrɛidə(n)/', pt: 'ampliar / expandir', cat: 'Verbos' },
-      { word: 'de woordenschat', ipa: '/də ˈʋoːrdə(n)sxɑt/', pt: 'o vocabulário', cat: 'Idioma' },
+      { word: 'de woordenschat', ipa: '/də ˈʋoːrdə(n)sxɑt/', pt: 'o vocabulário', cat: 'Idioma', exampleTarget: 'Dagelijks lezen vergroot je Nederlandse woordenschat snel.', examplePt: 'Ler diariamente amplia rapidamente o seu vocabulário em holandês.' },
     ],
   },
   {

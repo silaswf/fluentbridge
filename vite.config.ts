@@ -151,6 +151,14 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/vocabExpansion/vocabExpAf')) return 'vocab-exp-af';
           if (id.includes('/curriculum/vocabExpansion/vocabExpSv')) return 'vocab-exp-sv';
           if (id.includes('/curriculum/swedishExpansion')) return 'curriculum-sv-exp';
+          if (id.includes('/curriculum/turkishCourse') || id.includes('/curriculum/turkishExpansion')) return 'curriculum-tr';
+          if (id.includes('/curriculum/hebrewCourse') || id.includes('/curriculum/hebrewExpansion')) return 'curriculum-he';
+          if (id.includes('/curriculum/norwegianCourse') || id.includes('/curriculum/norwegianExpansion')) return 'curriculum-nb';
+          if (id.includes('/curriculum/danishCourse') || id.includes('/curriculum/danishExpansion')) return 'curriculum-da';
+          if (id.includes('/curriculum/expansionV9/expV9_en') || id.includes('/curriculum/expansionV9/expV9_es') || id.includes('/curriculum/expansionV9/expV9_fr')) return 'curriculum-v9-en-es-fr';
+          if (id.includes('/curriculum/expansionV9/expV9_it') || id.includes('/curriculum/expansionV9/expV9_de') || id.includes('/curriculum/expansionV9/expV9_ru')) return 'curriculum-v9-it-de-ru';
+          if (id.includes('/curriculum/expansionV9/expV9_ja') || id.includes('/curriculum/expansionV9/expV9_zh') || id.includes('/curriculum/expansionV9/expV9_ar')) return 'curriculum-v9-ja-zh-ar';
+          if (id.includes('/curriculum/expansionV9/expV9_nl') || id.includes('/curriculum/expansionV9/expV9_af') || id.includes('/curriculum/expansionV9/expV9_sv')) return 'curriculum-v9-nl-af-sv';
           if (id.includes('/grammar/enGrammarExtra') || id.includes('/grammar/enGrammarV4')) return 'grammar-en';
           if (id.includes('/grammar/esGrammarExtra') || id.includes('/grammar/esGrammarV4')) return 'grammar-es';
           if (id.includes('/grammar/frGrammarExtra') || id.includes('/grammar/frGrammarV4')) return 'grammar-fr';
@@ -163,6 +171,11 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/grammar/nlGrammarGuide')) return 'grammar-nl';
           if (id.includes('/grammar/afGrammarGuide')) return 'grammar-af';
           if (id.includes('/grammar/svGrammarGuide')) return 'grammar-sv';
+          if (id.includes('/grammar/trGrammarGuide')) return 'grammar-tr';
+          if (id.includes('/grammar/heGrammarGuide')) return 'grammar-he';
+          if (id.includes('/grammar/nbGrammarGuide')) return 'grammar-nb';
+          if (id.includes('/grammar/daGrammarGuide')) return 'grammar-da';
+          if (id.includes('/data/exams/examsNordicSemitic')) return 'exams-nordic-semitic';
           if (id.includes('/data/exams/examsEnglish')) return 'exams-en';
           if (id.includes('/data/exams/examsCelpip')) return 'exams-celpip';
           if (id.includes('/data/exams/examEnrichment')) return 'exams-enrichment';

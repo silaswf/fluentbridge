@@ -10,6 +10,7 @@ import {
   Repeat,
   Volume2,
   X,
+  Youtube,
 } from 'lucide-react';
 import {
   getInteractiveVideosByLanguage,
@@ -21,6 +22,7 @@ import {
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { LanguageCode } from '../types/learning';
 import { getSupabaseAccessToken } from '../utils/cloudSync';
+import { YouTubeStudyLab } from './YouTubeStudyLab';
 import type { ImmersionCheckpoint } from '../utils/immersionExpander';
 import {
   loadJapaneseScriptMode,
@@ -61,6 +63,7 @@ export function InteractiveVideoView({
     clips.find((c) => c.id === selectedId) ?? clips[0];
 
   const [currentLineIdx, setCurrentLineIdx] = useState(0);
+  const [videoTabMode, setVideoTabMode] = useState<'curated' | 'youtube'>('curated');
   const [isPlaying, setIsPlaying] = useState(false);
   const [loopLine, setLoopLine] = useState(false);
   const [showPtSubtitle, setShowPtSubtitle] = useState(true);
@@ -244,6 +247,47 @@ export function InteractiveVideoView({
 
   return (
     <div className="space-y-5">
+      {/* Mode Switch: Curated Clips vs YouTube Study Lab */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          data-testid="tab-curated-videos"
+          onClick={() => setVideoTabMode('curated')}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+            videoTabMode === 'curated'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <Clapperboard className="h-4 w-4" />
+          <span>Vídeos Curados</span>
+        </button>
+        <button
+          type="button"
+          data-testid="tab-youtube-study"
+          onClick={() => {
+            pausePlayback();
+            setVideoTabMode('youtube');
+          }}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+            videoTabMode === 'youtube'
+              ? 'bg-rose-600 text-white shadow-xs'
+              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <Youtube className="h-4 w-4" />
+          <span>Estudar com YouTube</span>
+        </button>
+      </div>
+
+      {videoTabMode === 'youtube' ? (
+        <YouTubeStudyLab
+          languageCode={languageCode}
+          savedWords={savedWords}
+          onSaveWordToDeck={onSaveWordToDeck}
+        />
+      ) : (
+        <>
       {/* Header Banner */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
         <div>
@@ -671,6 +715,8 @@ export function InteractiveVideoView({
           );
         })}
       </div>
+        </>
+      )}
     </div>
   );
 }

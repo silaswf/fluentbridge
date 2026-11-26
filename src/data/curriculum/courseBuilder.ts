@@ -424,6 +424,30 @@ function buildContextualFallbackExample(
       { en: `Kom ihåg „${cleanWord}“ när du pratar om ${topicTarget.toLowerCase()}.`, pt: `Lembre-se de "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
       { en: `Uttrycket „${cleanWord}“ passar utmärkt i den här situationen.`, pt: `A expressão "${cleanWord}" (${pt}) encaixa perfeitamente nesta situação.` },
     ],
+    tr: [
+      { en: `Günlük hayatta bu bağlamda „${cleanWord}“ ifadesi sıkça kullanılır.`, pt: `No dia a dia usa-se muito "${cleanWord}" (${pt}) neste contexto.` },
+      { en: `„${cleanWord}“ ile açık ve doğal bir cümle kurabilir misin?`, pt: `Você consegue montar uma frase natural com "${cleanWord}" (${pt})?` },
+      { en: `${topicTarget} hakkında konuşurken „${cleanWord}“ ifadesini hatırla.`, pt: `Lembre-se de "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
+      { en: `„${cleanWord}“ ifadesi bu duruma çok yakışıyor.`, pt: `A expressão "${cleanWord}" (${pt}) combina muito bem com esta situação.` },
+    ],
+    he: [
+      { en: `בחיי היומיום משתמשים הרבה בביטוי "${cleanWord}" בהקשר הזה.`, pt: `No dia a dia usa-se muito "${cleanWord}" (${pt}) neste contexto.` },
+      { en: `אפשר להרכיב משפט טבעי עם "${cleanWord}"?`, pt: `Você consegue formar uma frase natural com "${cleanWord}" (${pt})?` },
+      { en: `זכרו להשתמש ב-"${cleanWord}" כשמדברים על ${topicTarget}.`, pt: `Lembre-se de usar "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
+      { en: `הביטוי "${cleanWord}" מתאים מאוד למצב הזה.`, pt: `A expressão "${cleanWord}" (${pt}) combina muito bem com esta situação.` },
+    ],
+    nb: [
+      { en: `I hverdagen bruker man ofte «${cleanWord}» i denne sammenhengen.`, pt: `No dia a dia usa-se muito "${cleanWord}" (${pt}) neste contexto.` },
+      { en: `Kan du lage en tydelig setning med «${cleanWord}»?`, pt: `Você consegue formar uma frase clara com "${cleanWord}" (${pt})?` },
+      { en: `Husk «${cleanWord}» når du snakker om ${topicTarget.toLowerCase()}.`, pt: `Lembre-se de "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
+      { en: `Uttrykket «${cleanWord}» passer utmerket i denne situasjonen.`, pt: `A expressão "${cleanWord}" (${pt}) encaixa perfeitamente nesta situação.` },
+    ],
+    da: [
+      { en: `I hverdagen bruger man ofte „${cleanWord}“ i denne sammenhæng.`, pt: `No dia a dia usa-se muito "${cleanWord}" (${pt}) neste contexto.` },
+      { en: `Kan du danne en tydelig sætning med „${cleanWord}“?`, pt: `Você consegue formar uma frase clara com "${cleanWord}" (${pt})?` },
+      { en: `Husk „${cleanWord}“, når du taler om ${topicTarget.toLowerCase()}.`, pt: `Lembre-se de "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
+      { en: `Udtrykket „${cleanWord}“ passer rigtig godt til denne situation.`, pt: `A expressão "${cleanWord}" (${pt}) encaixa perfeitamente nesta situação.` },
+    ],
   };
   const list = templates[lang] ?? templates.en;
   return list[idx % list.length];

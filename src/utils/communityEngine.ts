@@ -123,6 +123,10 @@ export function getStarterPostsForLanguage(languageCode: LanguageCode): Communit
     nl: { name: 'Holandês', sample: 'Ik wil graag een kopje koffie bestellen.', tip: 'Pratique os ditongos "ij" e "ui" em voz alta no Modo Shadowing!' },
     af: { name: 'Africâner', sample: 'Ek praat nog nie vlot Afrikaans nie.', tip: 'Não esqueça de fechar a frase negativa com o segundo "nie"!' },
     sv: { name: 'Sueco', sample: 'Jag skulle vilja ta en fika efter jobbet.', tip: 'Fika é muito mais que café: é uma pausa social essencial na Suécia.' },
+    tr: { name: 'Turco', sample: 'Merhaba! Bir Türk kahvesi alabilir miyim, lütfen?', tip: 'Os sufixos em turco seguem a harmonia vocálica da última vogal da raiz!' },
+    he: { name: 'Hebraico', sample: 'שָׁלוֹם! אֶפְשָׁר בְּבַקָּשָׁה כּוֹס קָפֶה?', tip: 'Use o alternador Niqqud/Moderno para treinar leitura com e sem vogais (RTL).' },
+    nb: { name: 'Norueguês', sample: 'Hei! Kan jeg få en kaffe og en bolle, takk?', tip: 'Lembre-se da regra V2: o verbo conjugado ocupa sempre a 2ª posição.' },
+    da: { name: 'Dinamarquês', sample: 'Hej! Må jeg bede om en kop kaffe, tak?', tip: 'Ouça em 0.75x para perceber o stød e o "d" suave (blødt d) no final das palavras.' },
   };
   const info = labels[languageCode];
   return [
@@ -235,6 +239,10 @@ export function getMonthlyChallengeForLanguage(
     nl: 'Nederlands Spreek-Sprint',
     af: 'Afrikaans Praat-Uitdaging',
     sv: 'Svenska Samtalsutmaning',
+    tr: 'Türkçe Akıcılık Maratonu',
+    he: 'אתגר הדיבור בעברית',
+    nb: 'Norsk Hverdagssprint',
+    da: 'Dansk Samtaleudfordring',
   };
   return {
     id: `challenge-${monthKey}-${languageCode}`,

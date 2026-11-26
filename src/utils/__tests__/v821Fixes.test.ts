@@ -11,7 +11,7 @@ vi.mock('../audioDb', () => ({
 }));
 
 const LANGS: LanguageCode[] = [
-  'en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv',
+  'en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da',
 ];
 
 describe('v8.2.1 — módulos da trilha sem repetição', () => {
@@ -44,10 +44,10 @@ describe('v8.2.1 — áudio: sotaques regionais e timeout', () => {
   );
   const BASE_DEFAULTS = new Set([
     'en-US', 'es-MX', 'fr-FR', 'it-IT', 'de-DE', 'ru-RU', 'ja-JP', 'zh-CN',
-    'ar-SA', 'nl-NL', 'af-ZA', 'sv-SE',
+    'ar-SA', 'nl-NL', 'af-ZA', 'sv-SE', 'tr-TR', 'he-IL', 'nb-NO', 'da-DK',
   ]);
 
-  it('o Worker tem configuração própria para TODOS os 49 sotaques (nenhum cai no padrão do idioma)', () => {
+  it('o Worker tem configuração própria para TODOS os 61 sotaques (nenhum cai no padrão do idioma)', () => {
     const missing: string[] = [];
     for (const accents of Object.values(REGIONAL_ACCENTS_BY_LANGUAGE)) {
       for (const acc of accents) {

@@ -1,8 +1,8 @@
-# 08 — Análise Competitiva, UX/UI, Auditoria Técnica e Plano Mestre 360° (v8.4.0)
+# 08 — Análise Competitiva, UX/UI, Auditoria Técnica e Plano Mestre 360° (v9.0.0)
 
-> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v8.4.0`  
+> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v9.0.0`  
 > **Ambiente em Produção:** Web PWA (`https://fluentbridge.pages.dev`) · Edge API (`https://fluentbridge-api.silaswf.workers.dev`) · Windows Desktop (Electron NSIS) · Android (Capacitor APK) · iPhone/iPad (PWA Safari sem taxa Apple)  
-> **Base Verificada:** 253 arquivos em `src/` (`201.961` linhas totais), 22 suítes Vitest (`77` testes), 14 fluxos Playwright E2E + auditoria WCAG AA, build Vite/PWA (`30` entradas em precache, `1.643,65 KiB`).
+> **Base Verificada (`v9.0.0`):** **16 idiomas** (`2.400` unidades = `150` por idioma), **`61` sotaques neurais**, **`800` cenários IA**, **`96` simulados oficiais**, **`3.200` guias gramaticais**, **`640` questões CAT**, **YouTube Study Lab**, `23` suítes Vitest (`81` testes verdes) e `15` fluxos Playwright E2E + auditoria WCAG AA.
 
 ---
 

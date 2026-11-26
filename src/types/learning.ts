@@ -18,7 +18,11 @@ export type LanguageCode =
   | 'ar'
   | 'nl'
   | 'af'
-  | 'sv';
+  | 'sv'
+  | 'tr'
+  | 'he'
+  | 'nb'
+  | 'da';
 
 export type UserRole = 'teacher' | 'student';
 
@@ -251,7 +255,7 @@ export interface ScriptPhonicsStep {
   stageLabelPt?: string;
   categoryTitlePt: string;
   introPt: string;
-  languageCode: 'ru' | 'ar' | 'ja' | 'zh';
+  languageCode: 'ru' | 'ar' | 'ja' | 'zh' | 'he';
   items: ScriptPhonicsChar[];
   soundQuiz: {
     promptPt: string;
@@ -290,6 +294,8 @@ export interface Topic {
   isCustom?: boolean;
   moduleIndex?: number;
   moduleTitlePt?: string;
+  conceptKey?: string;
+  prerequisiteConcepts?: string[];
   recycledLinks?: Array<{ topicId: string; titlePt: string; words: string[] }>;
   topicTipsSummary: string[];
   steps: LessonStep[];

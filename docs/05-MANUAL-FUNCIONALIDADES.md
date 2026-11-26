@@ -1,6 +1,6 @@
-# 05 — Manual Completo de Funcionalidades (`v8.4.0`)
+# 05 — Manual Completo de Funcionalidades (`v9.0.0`)
 
-Guia prático cobrindo todas as telas e fluxos do **FluentBridge Academy** em **12 idiomas (`1.236` unidades, `49` sotaques regionais com vozes neurais, Nivelamento Adaptativo de `15` questões, `76` Simulados Cronometrados Oficiais, Comunidade com Ligas + Desafio do Mês + Moderação + Diff de Correções, Modo Hands-Free em áudio contínuo, Aba dedicada de Imersão, Gateway Web/Win/Android/iOS Safari PWA, Alfabetos Completos, Histórico de Pronúncia & Phoneme Breakdown, Caderno de Erros e `2.400` guias gramaticais)** para alunos (Turma, VIP ou Autônomo), professores e o **Painel Admin Mestre** do **Prof. Silas Wagner**.
+Guia prático cobrindo todas as telas e fluxos do **FluentBridge Academy** em **16 idiomas (`2.400` unidades — `150` por idioma, `61` sotaques regionais com vozes neurais, Nivelamento Adaptativo com `640` questões, `96` Simulados Cronometrados Oficiais, `800` cenários de Tutor IA, YouTube Study Lab com legendas interativas + notas gramaticais, Comunidade 2.0, Modo Hands-Free, RTL + Niqqud em Hebraico, Gateway Web/Win/Android/iOS Safari PWA, Alfabetos Completos, Histórico de Pronúncia & Phoneme Breakdown, Caderno de Erros e `3.200` guias gramaticais)** para alunos (Turma, VIP ou Autônomo), professores e o **Painel Admin Mestre** do **Prof. Silas Wagner**.
 
 ---
 

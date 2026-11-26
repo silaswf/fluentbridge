@@ -661,6 +661,193 @@ PACKS.sv = buildGenericPack(
   'Bör städer satsa mer på kollektivtrafik än på nya motorvägar? Motivera ditt svar.',
 );
 
+PACKS.tr = buildGenericPack(
+  'tr',
+  'Metnin ana fikri nedir?',
+  'Ek Okuma — Sürdürülebilir Şehirler',
+  'Birçok belediye, hava kirliliğini azaltmak ve ulaşımı kolaylaştırmak için şehir merkezlerinde yeni tramvay ve bisiklet hatları açmaktadır.',
+  'Belediyeler neden yeni tramvay ve bisiklet hatları açıyor?',
+  'Hava kirliliğini azaltmak ve ulaşımı kolaylaştırmak için.',
+  'Şehir merkezindeki tüm parkları kapatmak için.',
+  'İstasyon duyurusu: İzmir treni beş dakika içinde 4. perondan değil, 7. perondan hareket edecektir.',
+  'İzmir treni hangi perondan hareket edecektir?',
+  '7. perondan',
+  '4. perondan',
+  'Doğru eki seçin: "Yarın arkadaşlarımla sinemaya gid___."',
+  'eceğim',
+  'dim',
+  'Hangi bağlaç zıtlık bildirir?',
+  'Buna rağmen',
+  'Bu nedenle',
+  'Günlük rutininizden ve neden Türkçe öğrendiğinizden kısaca bahsedin.',
+  'Modern şirketlerde uzaktan çalışmanın avantajlarını ve dezavantajlarını tartışın.',
+  'Sizce büyük şehirlerde toplu taşıma tamamen ücretsiz olmalı mı? Görüşünüzü açıklayın.',
+);
+
+PACKS.he = buildGenericPack(
+  'he',
+  'מהו המסר המרכזי של הקטע?',
+  'קריאה מורחבת — תחבורה ירוקה',
+  'עיריות רבות מרחיבות את שבילי האופניים ואת קווי הרכבת הקלה כדי להפחית את הפקקים ולשפר את איכות האוויר בעיר.',
+  'מדוע העיריות מרחיבות את שבילי האופניים?',
+  'כדי להפחית פקקים ולשפר את איכות האוויר.',
+  'כדי לסגור את תחנות הרכבת.',
+  'הודעה בתחנה: הרכבת לחיפה תצא בעוד חמש דקות מרציף 5 במקום מרציף 2.',
+  'מאיזה רציף תצא הרכבת לחיפה?',
+  'מרציף 5',
+  'מרציף 2',
+  'בחרו את המילה הנכונה: "מחר אנחנו ___ את המצגת החדשה."',
+  'נציג',
+  'הצגנו',
+  'איזו מילת קישור מביעה ניגוד?',
+  'אף על פי כן',
+  'לפיכך',
+  'ספרו בקצרה על השגרה שלכם ומדוע אתם לומדים עברית.',
+  'דונו ביתרונות ובחסרונות של עבודה מהבית בחברות מודרניות.',
+  'האם לדעתכם תחבורה ציבורית צריכה להיות חינמית בערים גדולות? נמקו.',
+);
+
+PACKS.nb = buildGenericPack(
+  'nb',
+  'Hva er hovedbudskapet i teksten?',
+  'Utvidet lesetekst — Grønn mobilitet',
+  'Flere norske kommuner bygger trygge sykkelveier og styrker kollektivtilbudet for å gjøre hverdagsreiser raskere og mer miljøvennlige.',
+  'Hvorfor bygger kommunene flere sykkelveier?',
+  'For å gjøre hverdagsreiser raskere og mer miljøvennlige.',
+  'For å stenge togstasjonene i sentrum.',
+  'Melding på stasjonen: Toget til Trondheim går om åtte minutter fra spor 9 i stedet for spor 4.',
+  'Hvilket spor går toget til Trondheim fra?',
+  'Spor 9',
+  'Spor 4',
+  'Velg riktig ordstilling (V2): "I dag ___ jeg norsk i to timer."',
+  'studerer',
+  'jeg studerer',
+  'Hvilket bindeord uttrykker motsetning?',
+  'Likevel',
+  'Derfor',
+  'Fortell kort om hverdagen din og hvorfor du lærer norsk.',
+  'Drøft fordeler og ulemper ved hjemmekontor i moderne bedrifter.',
+  'Bør byer satse mer på kollektivtrafikk enn på nye motorveier? Begrunn svaret ditt.',
+);
+
+PACKS.da = buildGenericPack(
+  'da',
+  'Hvad er tekstens hovedbudskab?',
+  'Udvidet læsetekst — Bæredygtig bytrafik',
+  'Flere danske kommuner udvider cykelstierne og forbedrer togforbindelserne for at gøre pendlingen grønnere og hurtigere.',
+  'Hvorfor udvider kommunerne cykelstierne?',
+  'For at gøre pendlingen grønnere og hurtigere.',
+  'For at nedlægge den offentlige transport.',
+  'Meddelelse på stationen: Toget mod Odense afgår om fem minutter fra spor 7 i stedet for spor 3.',
+  'Fra hvilket spor afgår toget mod Odense?',
+  'Spor 7',
+  'Spor 3',
+  'Vælg rigtig ordstilling (V2): "I morgen ___ vi det nye projekt."',
+  'præsenterer',
+  'vi præsenterer',
+  'Hvilket bindeord viser en modsætning?',
+  'Ikke desto mindre',
+  'Derfor',
+  'Fortæl kort om din hverdag, og hvorfor du lærer dansk.',
+  'Diskuter fordele og ulemper ved hjemmearbejde i moderne virksomheder.',
+  'Bør storbyer prioritere offentlig transport frem for nye motorveje? Begrund din holdning.',
+);
+
+const EXTRA_NORDIC_SEMITIC_QUESTIONS: Partial<Record<LanguageCode, (exam: MockExam) => ExamQuestion[]>> = {
+  tr: (exam) => [
+    {
+      id: `${exam.id}-xb1`,
+      section: 'language_use',
+      prompt: 'Aşağıdaki cümlelerden hangisi dil bilgisi açısından doğrudur?',
+      options: [
+        'Proje toplantısı saat üçte başlayacak.',
+        'Proje toplantısı saat üç başlayacak.',
+        'Proje toplantısı saat üçten başlayacak.',
+        'Proje toplantısı saat üçü başlayacak.',
+      ],
+      correctIndex: 0,
+      explanation: 'Horários exatos em turco usam o caso locativo -DA ("saat üçte").',
+    },
+    {
+      id: `${exam.id}-xb2`,
+      section: 'language_use',
+      prompt: 'Boşluğu uygun ekle doldurun: "İstanbul’da beş yıl___ yaşıyorum."',
+      options: ['dır', 'dan', 'ta', 'la'],
+      correctIndex: 0,
+      explanation: 'Duração contínua até o presente usa -DIr ("beş yıldır").',
+    },
+  ],
+  he: (exam) => [
+    {
+      id: `${exam.id}-xb1`,
+      section: 'language_use',
+      prompt: 'בחרו את המשפט התקני בעברית:',
+      options: [
+        'הפגישה תתקיים מחר בשעה עשר בבוקר.',
+        'הפגישה תתקיים מחר שעה עשר בבוקר.',
+        'הפגישה תתקיים מחר לעשר בבוקר.',
+        'הפגישה תתקיים מחר מעשר בבוקר.',
+      ],
+      correctIndex: 0,
+      explanation: 'Horários em hebraico levam a preposição ב־ ("בשעה עשר").',
+    },
+    {
+      id: `${exam.id}-xb2`,
+      section: 'language_use',
+      prompt: 'השלימו את המשפט: "יש לי הרבה ספרים ___ לקרוא בסוף השבוע."',
+      options: ['כדי', 'בגלל', 'למרות', 'אלא'],
+      correctIndex: 0,
+      explanation: '"כדי + פועל" expressa finalidade ("para ler").',
+    },
+  ],
+  nb: (exam) => [
+    {
+      id: `${exam.id}-xb1`,
+      section: 'language_use',
+      prompt: 'Velg setningen med riktig norsk ordstilling:',
+      options: [
+        'Vanligvis spiser vi middag klokken seks.',
+        'Vanligvis vi spiser middag klokken seks.',
+        'Vanligvis middag spiser vi klokken seks.',
+        'Spiser vanligvis vi middag klokken seks.',
+      ],
+      correctIndex: 0,
+      explanation: 'Pela regra V2 do norueguês, o verbo conjugado ("spiser") vem em 2ª posição.',
+    },
+    {
+      id: `${exam.id}-xb2`,
+      section: 'language_use',
+      prompt: 'Fyll inn riktig preposisjon: "Jeg har bodd i Bergen ___ tre år."',
+      options: ['i', 'på', 'om', 'til'],
+      correctIndex: 0,
+      explanation: 'Duração contínua no presente/passado usa "i" ("i tre år").',
+    },
+  ],
+  da: (exam) => [
+    {
+      id: `${exam.id}-xb1`,
+      section: 'language_use',
+      prompt: 'Vælg sætningen med korrekt dansk ordstilling:',
+      options: [
+        'Normalt drikker vi kaffe om morgenen.',
+        'Normalt vi drikker kaffe om morgenen.',
+        'Normalt kaffe drikker vi om morgenen.',
+        'Drikker normalt vi kaffe om morgenen.',
+      ],
+      correctIndex: 0,
+      explanation: 'Pela regra V2 do dinamarquês, o verbo ("drikker") ocupa a 2ª posição.',
+    },
+    {
+      id: `${exam.id}-xb2`,
+      section: 'language_use',
+      prompt: 'Vælg den rigtige præposition: "Vi mødes ___ fem minutter."',
+      options: ['om', 'i', 'på', 'fra'],
+      correctIndex: 0,
+      explanation: 'Tempo futuro ("daqui a 5 minutos") usa "om" em dinamarquês.',
+    },
+  ],
+};
+
 export function enrichMockExams(exams: MockExam[]): MockExam[] {
   return exams.map((exam) => {
     const pack = (PACKS[exam.languageCode] ?? PACKS.en)!;
@@ -670,11 +857,27 @@ export function enrichMockExams(exams: MockExam[]): MockExam[] {
       ...pack.extraListening(exam),
       ...pack.extraLangUse(exam),
     ];
+    if (questions.length < 12) {
+      const bonus = EXTRA_NORDIC_SEMITIC_QUESTIONS[exam.languageCode]?.(exam) ?? [];
+      questions.push(...bonus);
+    }
+    const defaultSpeaking = pack.speakingTask(exam);
+    const speakingTask = !exam.speakingTask
+      ? defaultSpeaking
+      : exam.speakingTask.parts.length >= 3
+        ? exam.speakingTask
+        : {
+            ...exam.speakingTask,
+            parts: [
+              ...exam.speakingTask.parts,
+              ...defaultSpeaking.parts.slice(exam.speakingTask.parts.length),
+            ],
+          };
     return {
       ...exam,
       durationMinutes: Math.max(45, exam.durationMinutes),
       questions,
-      speakingTask: exam.speakingTask ?? pack.speakingTask(exam),
+      speakingTask,
     };
   });
 }

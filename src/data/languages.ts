@@ -28,6 +28,22 @@ import { ARABIC_100_TOPICS, ARABIC_100_VOCAB } from './curriculum/arabicExpansio
 import { DUTCH_100_TOPICS, DUTCH_100_VOCAB } from './curriculum/dutchExpansion';
 import { AFRIKAANS_100_TOPICS, AFRIKAANS_100_VOCAB } from './curriculum/afrikaansExpansion';
 import { SWEDISH_100_TOPICS, SWEDISH_100_VOCAB } from './curriculum/swedishExpansion';
+import { TURKISH_150_TOPICS, TURKISH_150_VOCAB } from './curriculum/turkishExpansion';
+import { HEBREW_150_TOPICS, HEBREW_150_VOCAB } from './curriculum/hebrewExpansion';
+import { NORWEGIAN_150_TOPICS, NORWEGIAN_150_VOCAB } from './curriculum/norwegianExpansion';
+import { DANISH_150_TOPICS, DANISH_150_VOCAB } from './curriculum/danishExpansion';
+import { EN_V9_TOPICS, EN_V9_VOCAB } from './curriculum/expansionV9/expV9_en';
+import { ES_V9_TOPICS, ES_V9_VOCAB } from './curriculum/expansionV9/expV9_es';
+import { FR_V9_TOPICS, FR_V9_VOCAB } from './curriculum/expansionV9/expV9_fr';
+import { IT_V9_TOPICS, IT_V9_VOCAB } from './curriculum/expansionV9/expV9_it';
+import { DE_V9_TOPICS, DE_V9_VOCAB } from './curriculum/expansionV9/expV9_de';
+import { RU_V9_TOPICS, RU_V9_VOCAB } from './curriculum/expansionV9/expV9_ru';
+import { JA_V9_TOPICS, JA_V9_VOCAB } from './curriculum/expansionV9/expV9_ja';
+import { ZH_V9_TOPICS, ZH_V9_VOCAB } from './curriculum/expansionV9/expV9_zh';
+import { AR_V9_TOPICS, AR_V9_VOCAB } from './curriculum/expansionV9/expV9_ar';
+import { NL_V9_TOPICS, NL_V9_VOCAB } from './curriculum/expansionV9/expV9_nl';
+import { AF_V9_TOPICS, AF_V9_VOCAB } from './curriculum/expansionV9/expV9_af';
+import { SV_V9_TOPICS, SV_V9_VOCAB } from './curriculum/expansionV9/expV9_sv';
 import {
   IDIOMS_SLANG_TOPICS_BY_LANG,
   IDIOMS_SLANG_VOCAB_BY_LANG,
@@ -451,6 +467,7 @@ export const ENGLISH_ALL_TOPICS: Topic[] = [
   ...TOPICS_EN_SPECIAL,
   ...TOPICS_EN_EXPANSION,
   ...EN_V4_TOPICS,
+  ...EN_V9_TOPICS,
   ...IDIOMS_SLANG_TOPICS_BY_LANG.en,
 ]
   .map((t) => ({ ...t, languageCode: t.languageCode ?? ('en' as LanguageCode) }))
@@ -470,6 +487,7 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = mergeCourseVocab(
     ...VOCAB_EN_SPECIAL,
     ...VOCAB_EN_EXPANSION,
     ...EN_V4_VOCAB,
+    ...EN_V9_VOCAB,
     ...IDIOMS_SLANG_VOCAB_BY_LANG.en,
   ].map((v) => ({ ...v, languageCode: v.languageCode ?? ('en' as LanguageCode) })),
   VOCAB_EXP_EN,
@@ -479,29 +497,37 @@ export const ENGLISH_ALL_VOCAB: VocabCard[] = mergeCourseVocab(
 const sortByLevel = (list: Topic[]) =>
   [...list].sort((a, b) => (LEVEL_ORDER[a.level] ?? 9) - (LEVEL_ORDER[b.level] ?? 9));
 
-export const SPANISH_100_TOPICS: Topic[] = sortByLevel([...SPANISH_ALL_TOPICS, ...SPANISH_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.es]);
-export const SPANISH_100_VOCAB: VocabCard[] = mergeCourseVocab('es', [...SPANISH_ALL_VOCAB, ...SPANISH_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.es], VOCAB_EXP_ES, VOCAB_FIXES_ES);
-export const FRENCH_100_TOPICS: Topic[] = sortByLevel([...FRENCH_ALL_TOPICS, ...FRENCH_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.fr]);
-export const FRENCH_100_VOCAB: VocabCard[] = mergeCourseVocab('fr', [...FRENCH_ALL_VOCAB, ...FRENCH_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.fr], VOCAB_EXP_FR, VOCAB_FIXES_FR);
-export const ITALIAN_100_TOPICS: Topic[] = sortByLevel([...ITALIAN_ALL_TOPICS, ...ITALIAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.it]);
-export const ITALIAN_100_VOCAB: VocabCard[] = mergeCourseVocab('it', [...ITALIAN_ALL_VOCAB, ...ITALIAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.it], VOCAB_EXP_IT, VOCAB_FIXES_IT);
-export const GERMAN_100_TOPICS: Topic[] = sortByLevel([...GERMAN_ALL_TOPICS, ...GERMAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.de]);
-export const GERMAN_100_VOCAB: VocabCard[] = mergeCourseVocab('de', [...GERMAN_ALL_VOCAB, ...GERMAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.de], VOCAB_EXP_DE, VOCAB_FIXES_DE);
-export const RUSSIAN_100_TOPICS: Topic[] = sortByLevel([...RUSSIAN_ALL_TOPICS, ...RUSSIAN_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ru]);
-export const RUSSIAN_100_VOCAB: VocabCard[] = mergeCourseVocab('ru', [...RUSSIAN_ALL_VOCAB, ...RUSSIAN_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ru], VOCAB_EXP_RU, VOCAB_FIXES_RU);
-export const JAPANESE_100_TOPICS: Topic[] = sortByLevel([...JAPANESE_ALL_TOPICS, ...JAPANESE_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ja]);
-export const JAPANESE_100_VOCAB: VocabCard[] = mergeCourseVocab('ja', [...JAPANESE_ALL_VOCAB, ...JAPANESE_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ja], VOCAB_EXP_JA, VOCAB_FIXES_JA);
-export const CHINESE_100_TOPICS: Topic[] = sortByLevel([...CHINESE_ALL_TOPICS, ...CHINESE_V4_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.zh]);
-export const CHINESE_100_VOCAB: VocabCard[] = mergeCourseVocab('zh', [...CHINESE_ALL_VOCAB, ...CHINESE_V4_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.zh], VOCAB_EXP_ZH, VOCAB_FIXES_ZH);
+export const SPANISH_100_TOPICS: Topic[] = sortByLevel([...SPANISH_ALL_TOPICS, ...SPANISH_V4_TOPICS, ...ES_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.es]);
+export const SPANISH_100_VOCAB: VocabCard[] = mergeCourseVocab('es', [...SPANISH_ALL_VOCAB, ...SPANISH_V4_VOCAB, ...ES_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.es], VOCAB_EXP_ES, VOCAB_FIXES_ES);
+export const FRENCH_100_TOPICS: Topic[] = sortByLevel([...FRENCH_ALL_TOPICS, ...FRENCH_V4_TOPICS, ...FR_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.fr]);
+export const FRENCH_100_VOCAB: VocabCard[] = mergeCourseVocab('fr', [...FRENCH_ALL_VOCAB, ...FRENCH_V4_VOCAB, ...FR_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.fr], VOCAB_EXP_FR, VOCAB_FIXES_FR);
+export const ITALIAN_100_TOPICS: Topic[] = sortByLevel([...ITALIAN_ALL_TOPICS, ...ITALIAN_V4_TOPICS, ...IT_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.it]);
+export const ITALIAN_100_VOCAB: VocabCard[] = mergeCourseVocab('it', [...ITALIAN_ALL_VOCAB, ...ITALIAN_V4_VOCAB, ...IT_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.it], VOCAB_EXP_IT, VOCAB_FIXES_IT);
+export const GERMAN_100_TOPICS: Topic[] = sortByLevel([...GERMAN_ALL_TOPICS, ...GERMAN_V4_TOPICS, ...DE_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.de]);
+export const GERMAN_100_VOCAB: VocabCard[] = mergeCourseVocab('de', [...GERMAN_ALL_VOCAB, ...GERMAN_V4_VOCAB, ...DE_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.de], VOCAB_EXP_DE, VOCAB_FIXES_DE);
+export const RUSSIAN_100_TOPICS: Topic[] = sortByLevel([...RUSSIAN_ALL_TOPICS, ...RUSSIAN_V4_TOPICS, ...RU_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ru]);
+export const RUSSIAN_100_VOCAB: VocabCard[] = mergeCourseVocab('ru', [...RUSSIAN_ALL_VOCAB, ...RUSSIAN_V4_VOCAB, ...RU_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ru], VOCAB_EXP_RU, VOCAB_FIXES_RU);
+export const JAPANESE_100_TOPICS: Topic[] = sortByLevel([...JAPANESE_ALL_TOPICS, ...JAPANESE_V4_TOPICS, ...JA_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ja]);
+export const JAPANESE_100_VOCAB: VocabCard[] = mergeCourseVocab('ja', [...JAPANESE_ALL_VOCAB, ...JAPANESE_V4_VOCAB, ...JA_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ja], VOCAB_EXP_JA, VOCAB_FIXES_JA);
+export const CHINESE_100_TOPICS: Topic[] = sortByLevel([...CHINESE_ALL_TOPICS, ...CHINESE_V4_TOPICS, ...ZH_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.zh]);
+export const CHINESE_100_VOCAB: VocabCard[] = mergeCourseVocab('zh', [...CHINESE_ALL_VOCAB, ...CHINESE_V4_VOCAB, ...ZH_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.zh], VOCAB_EXP_ZH, VOCAB_FIXES_ZH);
 
-const ARABIC_ALL_WITH_CULTURE = sortByLevel([...ARABIC_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ar]);
-const ARABIC_VOCAB_WITH_CULTURE = mergeCourseVocab('ar', [...ARABIC_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ar], VOCAB_EXP_AR, VOCAB_FIXES_AR);
-const DUTCH_ALL_WITH_CULTURE = sortByLevel([...DUTCH_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.nl]);
-const DUTCH_VOCAB_WITH_CULTURE = mergeCourseVocab('nl', [...DUTCH_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.nl], VOCAB_EXP_NL, VOCAB_FIXES_NL);
-const AFRIKAANS_ALL_WITH_CULTURE = sortByLevel([...AFRIKAANS_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.af]);
-const AFRIKAANS_VOCAB_WITH_CULTURE = mergeCourseVocab('af', [...AFRIKAANS_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.af], VOCAB_EXP_AF, VOCAB_FIXES_AF);
-const SWEDISH_ALL_WITH_CULTURE = sortByLevel([...SWEDISH_100_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.sv]);
-const SWEDISH_VOCAB_WITH_CULTURE = mergeCourseVocab('sv', [...SWEDISH_100_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.sv], VOCAB_EXP_SV, VOCAB_FIXES_SV);
+const ARABIC_ALL_WITH_CULTURE = sortByLevel([...ARABIC_100_TOPICS, ...AR_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.ar]);
+const ARABIC_VOCAB_WITH_CULTURE = mergeCourseVocab('ar', [...ARABIC_100_VOCAB, ...AR_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.ar], VOCAB_EXP_AR, VOCAB_FIXES_AR);
+const DUTCH_ALL_WITH_CULTURE = sortByLevel([...DUTCH_100_TOPICS, ...NL_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.nl]);
+const DUTCH_VOCAB_WITH_CULTURE = mergeCourseVocab('nl', [...DUTCH_100_VOCAB, ...NL_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.nl], VOCAB_EXP_NL, VOCAB_FIXES_NL);
+const AFRIKAANS_ALL_WITH_CULTURE = sortByLevel([...AFRIKAANS_100_TOPICS, ...AF_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.af]);
+const AFRIKAANS_VOCAB_WITH_CULTURE = mergeCourseVocab('af', [...AFRIKAANS_100_VOCAB, ...AF_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.af], VOCAB_EXP_AF, VOCAB_FIXES_AF);
+const SWEDISH_ALL_WITH_CULTURE = sortByLevel([...SWEDISH_100_TOPICS, ...SV_V9_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.sv]);
+const SWEDISH_VOCAB_WITH_CULTURE = mergeCourseVocab('sv', [...SWEDISH_100_VOCAB, ...SV_V9_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.sv], VOCAB_EXP_SV, VOCAB_FIXES_SV);
+const TURKISH_ALL_WITH_CULTURE = sortByLevel([...TURKISH_150_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.tr]);
+const TURKISH_VOCAB_WITH_CULTURE = [...TURKISH_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.tr];
+const HEBREW_ALL_WITH_CULTURE = sortByLevel([...HEBREW_150_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.he]);
+const HEBREW_VOCAB_WITH_CULTURE = [...HEBREW_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.he];
+const NORWEGIAN_ALL_WITH_CULTURE = sortByLevel([...NORWEGIAN_150_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.nb]);
+const NORWEGIAN_VOCAB_WITH_CULTURE = [...NORWEGIAN_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.nb];
+const DANISH_ALL_WITH_CULTURE = sortByLevel([...DANISH_150_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.da]);
+const DANISH_VOCAB_WITH_CULTURE = [...DANISH_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.da];
 
 export {
   SPANISH_ALL_TOPICS,
@@ -526,6 +552,14 @@ export {
   AFRIKAANS_VOCAB_WITH_CULTURE as AFRIKAANS_100_VOCAB,
   SWEDISH_ALL_WITH_CULTURE as SWEDISH_100_TOPICS,
   SWEDISH_VOCAB_WITH_CULTURE as SWEDISH_100_VOCAB,
+  TURKISH_ALL_WITH_CULTURE as TURKISH_150_TOPICS,
+  TURKISH_VOCAB_WITH_CULTURE as TURKISH_150_VOCAB,
+  HEBREW_ALL_WITH_CULTURE as HEBREW_150_TOPICS,
+  HEBREW_VOCAB_WITH_CULTURE as HEBREW_150_VOCAB,
+  NORWEGIAN_ALL_WITH_CULTURE as NORWEGIAN_150_TOPICS,
+  NORWEGIAN_VOCAB_WITH_CULTURE as NORWEGIAN_150_VOCAB,
+  DANISH_ALL_WITH_CULTURE as DANISH_150_TOPICS,
+  DANISH_VOCAB_WITH_CULTURE as DANISH_150_VOCAB,
 };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
@@ -563,7 +597,15 @@ export function getCourseTopics(
                           ? AFRIKAANS_ALL_WITH_CULTURE
                           : languageCode === 'sv'
                             ? SWEDISH_ALL_WITH_CULTURE
-                            : [];
+                            : languageCode === 'tr'
+                              ? TURKISH_ALL_WITH_CULTURE
+                              : languageCode === 'he'
+                                ? HEBREW_ALL_WITH_CULTURE
+                                : languageCode === 'nb'
+                                  ? NORWEGIAN_ALL_WITH_CULTURE
+                                  : languageCode === 'da'
+                                    ? DANISH_ALL_WITH_CULTURE
+                                    : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

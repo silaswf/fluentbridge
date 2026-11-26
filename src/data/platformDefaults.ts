@@ -15,7 +15,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇬🇧',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em inglês), 200 guias gramaticais, ditado, pares mínimos, histórias e Tutor IA.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em inglês), 200 guias gramaticais, ditado, pares mínimos, histórias e Tutor IA.',
     dialects: [
       { code: 'en-US', label: 'Americano', flag: '🇺🇸' },
       { code: 'en-GB', label: 'Britânico', flag: '🇬🇧' },
@@ -28,7 +28,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇪🇸',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em espanhol), 200 guias gramaticais, vozes neurais (ES/MX) e combate ao portunhol.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em espanhol), 200 guias gramaticais, vozes neurais (ES/MX) e combate ao portunhol.',
     dialects: [
       { code: 'es-ES', label: 'Espanha', flag: '🇪🇸' },
       { code: 'es-MX', label: 'México', flag: '🇲🇽' },
@@ -41,7 +41,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇫🇷',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em francês), 200 guias gramaticais, vozes neurais Gemini (FR/CA) e ligações fonéticas.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em francês), 200 guias gramaticais, vozes neurais Gemini (FR/CA) e ligações fonéticas.',
     dialects: [
       { code: 'fr-FR', label: 'França', flag: '🇫🇷' },
       { code: 'fr-CA', label: 'Canadá', flag: '🇨🇦' },
@@ -54,7 +54,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇮🇹',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em italiano), 200 guias gramaticais, vozes neurais Gemini (IT/CH) e falsos amigos BR.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em italiano), 200 guias gramaticais, vozes neurais Gemini (IT/CH) e falsos amigos BR.',
     dialects: [
       { code: 'it-IT', label: 'Itália', flag: '🇮🇹' },
       { code: 'it-CH', label: 'Suíça (IT)', flag: '🇨🇭' },
@@ -67,7 +67,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇩🇪',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em alemão), 200 guias gramaticais, vozes neurais Gemini (DE/AT) e casos/TeKaMoLo.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em alemão), 200 guias gramaticais, vozes neurais Gemini (DE/AT) e casos/TeKaMoLo.',
     dialects: [
       { code: 'de-DE', label: 'Alemanha', flag: '🇩🇪' },
       { code: 'de-AT', label: 'Áustria', flag: '🇦🇹' },
@@ -80,7 +80,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇷🇺',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em russo), 200 guias gramaticais, vozes neurais Gemini (Moscou/S. Petersburgo), cirílico e os 6 casos.',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em russo), 200 guias gramaticais, vozes neurais Gemini (Moscou/S. Petersburgo), cirílico e os 6 casos.',
     dialects: [
       { code: 'ru-RU', label: 'Moscou', flag: '🇷🇺' },
       { code: 'ru-SPB', label: 'S. Petersburgo', flag: '🏛️' },
@@ -93,7 +93,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇯🇵',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 (JLPT N5–N1) com 103 unidades (imersão B2/C1 em japonês), 200 guias gramaticais, vozes neurais Gemini (Tóquio/Kansai) e Keigo.',
+      'Curso completo CEFR A1–C1 (JLPT N5–N1) com 150 unidades (imersão B2/C1 em japonês), 200 guias gramaticais, vozes neurais Gemini (Tóquio/Kansai) e Keigo.',
     dialects: [
       { code: 'ja-JP', label: 'Tóquio', flag: '🇯🇵' },
       { code: 'ja-KANSAI', label: 'Kansai', flag: '🏯' },
@@ -106,7 +106,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇨🇳',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 (HSK 1–6) com 103 unidades (imersão B2/C1 em mandarim), 200 guias gramaticais, vozes neurais Gemini (Pequim/Taiwan), tons e Pinyin.',
+      'Curso completo CEFR A1–C1 (HSK 1–6) com 150 unidades (imersão B2/C1 em mandarim), 200 guias gramaticais, vozes neurais Gemini (Pequim/Taiwan), tons e Pinyin.',
     dialects: [
       { code: 'zh-CN', label: 'Mandarim (CN)', flag: '🇨🇳' },
       { code: 'zh-TW', label: 'Taiwan (TW)', flag: '🇹🇼' },
@@ -119,7 +119,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇸🇦',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em árabe, escrita RTL), 200 guias gramaticais, alfabeto árabe completo e vozes neurais (SA/EG).',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em árabe, escrita RTL), 200 guias gramaticais, alfabeto árabe completo e vozes neurais (SA/EG).',
     dialects: [
       { code: 'ar-SA', label: 'Padrão (MSA)', flag: '🇸🇦' },
       { code: 'ar-EG', label: 'Egito (EG)', flag: '🇪🇬' },
@@ -132,7 +132,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇳🇱',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em holandês), 200 guias gramaticais, ordem V2, ditongos UI/IJ e vozes neurais (NL/BE).',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em holandês), 200 guias gramaticais, ordem V2, ditongos UI/IJ e vozes neurais (NL/BE).',
     dialects: [
       { code: 'nl-NL', label: 'Holanda (NL)', flag: '🇳🇱' },
       { code: 'nl-BE', label: 'Bélgica (BE)', flag: '🇧🇪' },
@@ -145,7 +145,7 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇿🇦',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em africâner), 200 guias gramaticais, dupla negação (nie...nie), STOMPI e vozes neurais (ZA/NA).',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em africâner), 200 guias gramaticais, dupla negação (nie...nie), STOMPI e vozes neurais (ZA/NA).',
     dialects: [
       { code: 'af-ZA', label: 'África do Sul', flag: '🇿🇦' },
       { code: 'af-NA', label: 'Namíbia (NA)', flag: '🇳🇦' },
@@ -158,10 +158,62 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
     flag: '🇸🇪',
     available: true,
     descriptionPt:
-      'Curso completo CEFR A1–C1 com 103 unidades (imersão B2/C1 em sueco), 200 guias gramaticais, regra V2/BIFF, fika e vozes neurais (SE/FI).',
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em sueco), 200 guias gramaticais, regra V2/BIFF, fika e vozes neurais (SE/FI).',
     dialects: [
       { code: 'sv-SE', label: 'Suécia (SE)', flag: '🇸🇪' },
       { code: 'sv-FI', label: 'Finlândia (FI)', flag: '🇫🇮' },
+    ],
+  },
+  {
+    code: 'tr',
+    namePt: 'Turco',
+    nativeName: 'Türkçe',
+    flag: '🇹🇷',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em turco), 200+ guias gramaticais, harmonia vocálica, aglutinação e sotaques (TR/CY).',
+    dialects: [
+      { code: 'tr-TR', label: 'Istambul (TR)', flag: '🇹🇷' },
+      { code: 'tr-TR-ANK', label: 'Ancara (TR)', flag: '🏛️' },
+    ],
+  },
+  {
+    code: 'he',
+    namePt: 'Hebraico',
+    nativeName: 'עברית',
+    flag: '🇮🇱',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 150 unidades (escrita RTL, Alefbet completo, alternador Niqqud/Moderno), 200+ guias e vozes neurais (Tel Aviv/Jerusalém).',
+    dialects: [
+      { code: 'he-IL', label: 'Tel Aviv (IL)', flag: '🇮🇱' },
+      { code: 'he-IL-JER', label: 'Jerusalém', flag: '🕊️' },
+    ],
+  },
+  {
+    code: 'nb',
+    namePt: 'Norueguês',
+    nativeName: 'Norsk (Bokmål)',
+    flag: '🇳🇴',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 150 unidades em Bokmål (imersão B2/C1), 200+ guias gramaticais, ordem V2, notas de Nynorsk e vozes (Oslo/Bergen).',
+    dialects: [
+      { code: 'nb-NO', label: 'Oslo (NO)', flag: '🇳🇴' },
+      { code: 'nb-NO-BGO', label: 'Bergen (NO)', flag: '⛰️' },
+    ],
+  },
+  {
+    code: 'da',
+    namePt: 'Dinamarquês',
+    nativeName: 'Dansk',
+    flag: '🇩🇰',
+    available: true,
+    descriptionPt:
+      'Curso completo CEFR A1–C1 com 150 unidades (imersão B2/C1 em dinamarquês), 200+ guias gramaticais, stød, vogais suaves e vozes (Copenhague/Aarhus).',
+    dialects: [
+      { code: 'da-DK', label: 'Copenhague (DK)', flag: '🇩🇰' },
+      { code: 'da-DK-AAR', label: 'Aarhus (DK)', flag: '⛵' },
     ],
   },
 ];

@@ -219,6 +219,50 @@ const SV_DRILLS: CompactDrill[] = [
   ['C1', 'S-passiv i Preteritum', 'Passiva no passado:', 'Avtalet ', ' av båda parter i fredags.', ['undertecknades', 'undertecknade', 'undertecknas', 'har undertecknat'], 0, 'Passado passivo sintético termina em "-ades/-des/-tes".'],
 ];
 
+const TR_DRILLS: CompactDrill[] = [
+  ['A1', 'Ünlü Uyumu (Harmonia Vocálica)', 'Locativo correto após "İstanbul":', 'Ben İstanbul’', ' yaşıyorum.', ['da', 'de', 'ta', 'te'], 0, 'A última vogal de "İstanbul" é "u" (posterior), logo o sufixo locativo é "-da".'],
+  ['A1', 'Şimdiki Zaman (-iyor)', 'Presente contínuo na 1ª pessoa do singular:', 'Şimdi Türkçe kitap oku', '.', ['yorum', 'yorsun', 'yor', 'yoruz'], 0, 'Raiz "oku-" + "-yor" + sufixo pessoal "-um" = "okuyorum".'],
+  ['A2', 'Belirtme Durumu (Acusativo)', 'Objeto direto definido ("o livro"):', 'Dün bu kitab', ' bitirdim.', ['ı', 'i', 'u', 'ü'], 0, 'Em "kitab-" (k->b por abrandamento, última vogal "a"), o acusativo é "-ı" ("kitabı").'],
+  ['A2', 'Gelecek Zaman (-ecek/-acak)', 'Futuro na 1ª pessoa do plural:', 'Yarın İzmir’e gid', '.', ['eceğiz', 'iyoruz', 'dik', 'eriz'], 0, '"git-" abranda para "gid-" antes de vogal; com "e" anterior, usa-se "-eceğiz".'],
+  ['B1', 'Sıfat-Fiil (-dik)', 'Particípio relativo ("o filme que assistimos"):', 'Dün akşam ', ' film çok güzeldi.', ['izlediğimiz', 'izlemek', 'izleyeceğiz', 'izler'], 0, 'Para orações relativas no passado/presente usa-se "-dik + possessivo" ("izlediğimiz").'],
+  ['B1', 'Edatlar (-a rağmen)', 'Concessão ("apesar da chuva"):', 'Yağmura ', ' yürüyüşe çıktık.', ['rağmen', 'göre', 'kadar', 'doğru'], 0, 'Dativo + "rağmen" equivale a "apesar de".'],
+  ['B2', 'Edilgen Çatı (Passiva)', 'Voz passiva no futuro:', 'Yeni proje gelecek ay ', '.', ['başlatılacak', 'başlatacak', 'başlamış', 'başlıyor'], 0, 'Passiva de "başlatmak" adiciona "-ıl-" antes do tempo: "başlatılacak".'],
+  ['C1', 'Dolaylı Anlatım (-eceğini)', 'Discurso indireto futuro:', 'Müdür, toplantının yarın yapıl', ' söyledi.', ['acağını', 'dığı', 'makla', 'dıkça'], 0, 'Em discurso indireto com referência futura usa-se "-acağını/-eceğini".'],
+];
+
+const HE_DRILLS: CompactDrill[] = [
+  ['A1', 'ה׳ הידיעה (Artigo Definido)', 'Artigo definido "o livro grande":', 'אני קורא את ', ' הגדול.', ['הספר', 'ספר', 'לספר', 'בספר'], 0, 'Em hebraico, tanto o substantivo quanto o adjetivo recebem "ה" quando definidos ("הספר הגדול").'],
+  ['A1', 'זמן הווה (Presente)', 'Concordância feminino singular:', 'שרה ', ' עברית כל יום.', ['לומדת', 'לומד', 'לומדים', 'לומדות'], 0, 'Sujeito feminino singular (שרה) exige particípio feminino ("לומדת").'],
+  ['A2', 'מילת היחס "את"', 'Marcador de objeto direto definido:', 'ראיתי ', ' הסרט החדש אתמול.', ['את', 'אל', 'על', 'של'], 0, 'Objeto direto definido ("הסרט החדש") exige obrigatoriamente a partícula "את".'],
+  ['A2', 'זמן עתיד (Futuro)', 'Futuro na 1ª pessoa do plural (אנחנו):', 'מחר אנחנו ', ' לירושלים.', ['ניסע', 'נסענו', 'נוסעים', 'נוסע'], 0, '1ª pessoa do plural no futuro começa com prefixo נ ("ניסע").'],
+  ['B1', 'סמיכות (Estado Construto)', 'Construção "estação de trem":', '', ' בתל אביב חדשה מאוד.', ['תחנת הרכבת', 'התחנה רכבת', 'תחנה הרכבת', 'התחנת רכבת'], 0, 'No Smikhut, o primeiro substantivo perde o artigo ה e muda ת final ("תחנת הרכבת").'],
+  ['B1', 'מילות קישור (למרות ש)', 'Concessão ("apesar de que"):', 'יצאנו לטיול ', ' היה קר.', ['למרות ש', 'כדי ש', 'מפני ש', 'לפיכך'], 0, '"למרות ש..." introduz uma oração concessiva ("apesar de que").'],
+  ['B2', 'בניין סביל (Voz Passiva)', 'Passiva no futuro feminino:', 'ההחלטה הסופית ', ' בשבוע הבא.', ['תתקבל', 'תקבל', 'קיבלה', 'מקבלת'], 0, 'Hitpa‘el / Nif‘al com sentido passivo futuro para feminino ("ההחלטה"): "תתקבל".'],
+  ['C1', 'משלב גבוה (קישור)', 'Conector formal de contraste:', 'התקציב היה מוגבל; ', ', הפרויקט הצליח.', ['אף על פי כן', 'לפיכך', 'משום כך', 'יתר על כן'], 0, '"אף על פי כן" é o conector formal C1 equivalente a "não obstante / ainda assim".'],
+];
+
+const NB_DRILLS: CompactDrill[] = [
+  ['A1', 'V2-regelen', 'Verbo sempre na 2ª posição:', 'I dag ', ' jeg norsk på kafeen.', ['studerer', 'studere', 'jeg studerer', 'studerte'], 0, 'Com advérbio no início ("I dag"), o verbo conjugado vem na 2ª posição ("studerer jeg").'],
+  ['A1', 'En / Ei / Et', 'Substantivo neutro ("ett hus"): ', 'Det er ', ' stort og fint hus.', ['et', 'en', 'ei', 'den'], 0, '"Hus" é neutro em Bokmål; o artigo indefinido é "et".'],
+  ['A2', 'Bestemt Form', 'Substantivo definido com sufixo:', 'Jeg kjøpte ', ' i bokhandelen i går.', ['boken', 'en bok', 'boket', 'bøker'], 0, '"En bok" definida recebe sufixo "-en" ("boken" ou "boka").'],
+  ['A2', 'Leddsetning (ikke før verb)', 'Em subordinadas, "ikke" vem ANTES do verbo:', 'Hun sa at hun ', ' komme i dag.', ['ikke kan', 'kan ikke', 'aldrig ikke', 'ei kan'], 0, 'Em subordinadas norueguesas ("at/fordi/hvis"), "ikke" precede o verbo ("ikke kan").'],
+  ['B1', 'Sin / Sitt / Sine', 'Possessivo reflexivo referente ao sujeito:', 'Henrik tok ', ' egen jakke og gikk.', ['sin', 'hans', 'sitt', 'sine'], 0, 'Quando o possuidor é o sujeito (Henrik) e "jakke" é masculino/feminino singular, usa-se "sin".'],
+  ['B1', 'Presens Perfektum', 'Auxiliar "har" + particípio:', 'Vi ', ' allerede sendt e-posten.', ['har', 'er', 'hadde', 'skal'], 0, 'O perfeito de ação usa "har" + particípio passado ("har sendt").'],
+  ['B2', 'S-passiv', 'Voz passiva habitual com -s:', 'Dørene ', ' klokken ni hver morgen.', ['åpnes', 'åpner', 'åpnet', 'er åpne'], 0, 'Passiva geral/habitual adiciona "-s" ao verbo ("åpnes").'],
+  ['C1', 'Formell Stil (Bergenstesten)', 'Conector formal de contraste:', 'Budsjettet var stramt; ', ' klarte teamet å levere.', ['likevel', 'derfor', 'nemlig', 'følgelig'], 0, '"likevel" indica concessão formal ("ainda assim").'],
+];
+
+const DA_DRILLS: CompactDrill[] = [
+  ['A1', 'V2-reglen', 'Verbo sempre na 2ª posição:', 'I dag ', ' jeg dansk med en ven.', ['studerer', 'studere', 'jeg studerer', 'studerede'], 0, 'Com "I dag" na 1ª posição, o verbo fica em 2º ("studerer jeg").'],
+  ['A1', 'En vs Et', 'Substantivo neutro ("et hus"): ', 'Det er ', ' stort og lyst værelse.', ['et', 'en', 'den', 'det'], 0, '"Værelse" (quarto) é neutro (et-ord), portanto usa "et".'],
+  ['A2', 'Bestemt Form', 'Artigo definido como sufixo (-en/-et):', 'Jeg købte ', ' i boghandlen i går.', ['bogen', 'en bog', 'boget', 'bøger'], 0, '"En bog" definida recebe o sufixo "-en" ("bogen").'],
+  ['A2', 'Ledsætning (ikke før verb)', 'Em subordinadas, "ikke" vem ANTES do verbo:', 'Hun sagde, at hun ', ' komme i dag.', ['ikke kan', 'kan ikke', 'aldrig ikke', 'ej kan'], 0, 'Em orações subordinadas dinamarquesas, "ikke" precede o verbo ("ikke kan").'],
+  ['B1', 'Sin / Sit / Sine', 'Possessivo reflexivo referente ao sujeito:', 'Kasper tog ', ' egen jakke og gik hjem.', ['sin', 'hans', 'sit', 'sine'], 0, 'Quando o possuidor é o sujeito (Kasper) e "jakke" é fælleskøn singular, usa-se "sin".'],
+  ['B1', 'Førnutid (har + participium)', 'Perfeito com auxiliar "har":', 'Vi ', ' allerede sendt mailen til kunden.', ['har', 'er', 'havde', 'skal'], 0, 'Verbos transitivos usam "har" + particípio ("har sendt").'],
+  ['B2', 'S-passiv', 'Voz passiva habitual com -s:', 'Dørene ', ' klokken ni hver morgen.', ['åbnes', 'åbner', 'åbnede', 'er åbne'], 0, 'Passiva habitual em dinamarquês adiciona "-s" ("åbnes").'],
+  ['C1', 'Formelt Bindeord (Studieprøven)', 'Conector formal de contraste:', 'Budgettet var begrænset; ', ' nåede holdet målet.', ['ikke desto mindre', 'derfor', 'nemlig', 'følgelig'], 0, '"ikke desto mindre" significa "não obstante / ainda assim" em registro C1.'],
+];
+
 export const GRAMMAR_DRILLS: GrammarDrillItem[] = [
   ...expandDrills('en', EN_DRILLS),
   ...expandDrills('es', ES_DRILLS),
@@ -232,6 +276,10 @@ export const GRAMMAR_DRILLS: GrammarDrillItem[] = [
   ...expandDrills('nl', NL_DRILLS),
   ...expandDrills('af', AF_DRILLS),
   ...expandDrills('sv', SV_DRILLS),
+  ...expandDrills('tr', TR_DRILLS),
+  ...expandDrills('he', HE_DRILLS),
+  ...expandDrills('nb', NB_DRILLS),
+  ...expandDrills('da', DA_DRILLS),
 ];
 
 export function getGrammarDrillsByLanguage(lang: LanguageCode): GrammarDrillItem[] {

@@ -296,9 +296,65 @@ export const ARABIC_ALPHABET: ScriptCharacterItem[] = [
   { char: 'ي', reading: 'y / ī (Yāʾ)', meaningPt: 'Som de Y / I longo', strokes: 3, direction: 'rtl', forms: { isolated: 'ي', initial: 'يـ', medial: 'ـيـ', final: 'ـي' }, strokeHints: ['1. S invertido com tigela final', '2. 2 pontos abaixo'], exampleWord: 'يوم (yawm)', examplePt: 'dia' },
 ];
 
+// Completo: 22 letras do Alefbet Hebraico + 5 formas finais (Sofit) = 27 itens (escrita RTL)
+export const HEBREW_ALEFBET: ScriptCharacterItem[] = [
+  { char: 'א', reading: 'ʾ (Álef)', meaningPt: 'Consoante silenciosa / suporte vocálico', strokes: 3, direction: 'rtl', strokeHints: ['1. Diagonal central da esquerda superior à direita inferior', '2. Traço curto superior direito', '3. Curva inferior esquerda'], exampleWord: 'אבא (ába)', examplePt: 'pai' },
+  { char: 'ב', reading: 'b / v (Bet / Vet)', meaningPt: 'B (com daguesh בּ) ou V (ב)', strokes: 2, direction: 'rtl', strokeHints: ['1. Topo horizontal dobrando para baixo à direita', '2. Base horizontal ultrapassando à direita'], exampleWord: 'בית (báyit)', examplePt: 'casa' },
+  { char: 'ג', reading: 'g (Guímel)', meaningPt: 'Som de G duro ("gato")', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto curto + haste descendo', '2. Perna curvada para a esquerda'], exampleWord: 'גדול (gadól)', examplePt: 'grande' },
+  { char: 'ד', reading: 'd (Dálet)', meaningPt: 'Consoante D', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto horizontal com leve saliência à direita', '2. Haste vertical descendo'], exampleWord: 'דלת (délet)', examplePt: 'porta' },
+  { char: 'ה', reading: 'h (He)', meaningPt: 'H aspirado leve (mudo no final)', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + haste direita', '2. Haste esquerda curta separada do teto'], exampleWord: 'הר (har)', examplePt: 'montanha' },
+  { char: 'ו', reading: 'v / o / u (Vav)', meaningPt: 'Consoante V ou vogal O/U (Mater Lectionis)', strokes: 1, direction: 'rtl', strokeHints: ['1. Pequeno gancho no topo + haste vertical reta'], exampleWord: 'ורד (véred)', examplePt: 'rosa' },
+  { char: 'ז', reading: 'z (Záyin)', meaningPt: 'Consoante Z ("zebra")', strokes: 1, direction: 'rtl', strokeHints: ['1. Coroa curta no topo + haste central descendo'], exampleWord: 'זמן (zman)', examplePt: 'tempo' },
+  { char: 'ח', reading: 'kh (Khet)', meaningPt: 'Som gutural forte ("carro")', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + haste direita', '2. Haste esquerda ligada ao teto (diferente de ה)'], exampleWord: 'חבר (khavér)', examplePt: 'amigo' },
+  { char: 'ט', reading: 't (Tet)', meaningPt: 'Consoante T', strokes: 2, direction: 'rtl', strokeHints: ['1. Haste esquerda curvando na base', '2. Gancho direito enrolando para dentro'], exampleWord: 'טוב (tov)', examplePt: 'bom' },
+  { char: 'י', reading: 'y / i (Yod)', meaningPt: 'Menor letra do alfabeto — som de Y ou I', strokes: 1, direction: 'rtl', strokeHints: ['1. Pequeno gancho suspenso na parte superior da linha'], exampleWord: 'יום (yom)', examplePt: 'dia' },
+  { char: 'כ', reading: 'k / kh (Kaf / Khaf)', meaningPt: 'K (כּ) ou RR gutural (כ)', strokes: 1, direction: 'rtl', forms: { isolated: 'כ', initial: 'כ', medial: 'כ', final: 'ך' }, strokeHints: ['1. Curva arredondada em C espelhado'], exampleWord: 'כלב (kélev)', examplePt: 'cachorro' },
+  { char: 'ך', reading: 'kh (Khaf Sofit)', meaningPt: 'Forma final de כ (desce abaixo da linha)', strokes: 1, direction: 'rtl', strokeHints: ['1. Teto horizontal + haste longa descendo abaixo da linha'], exampleWord: 'מלך (mélekh)', examplePt: 'rei', cursiveNote: 'Forma Sofit (apenas final de palavra)' },
+  { char: 'ל', reading: 'l (Lámed)', meaningPt: 'Consoante L (sobe acima da linha)', strokes: 2, direction: 'rtl', strokeHints: ['1. Pescoço alto acima da linha', '2. Corpo em S descendo para a esquerda'], exampleWord: 'לב (lev)', examplePt: 'coração' },
+  { char: 'מ', reading: 'm (Mem)', meaningPt: 'Consoante M', strokes: 2, direction: 'rtl', forms: { isolated: 'מ', initial: 'מ', medial: 'מ', final: 'ם' }, strokeHints: ['1. Arco direito aberto na base esquerda', '2. Traço curto superior esquerdo'], exampleWord: 'מים (máyim)', examplePt: 'água' },
+  { char: 'ם', reading: 'm (Mem Sofit)', meaningPt: 'Forma final de מ (quadrado fechado)', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + lado direito + base', '2. Lado esquerdo fechando o retângulo'], exampleWord: 'שלום (shalóm)', examplePt: 'paz / olá', cursiveNote: 'Forma Sofit (apenas final de palavra)' },
+  { char: 'נ', reading: 'n (Nun)', meaningPt: 'Consoante N', strokes: 1, direction: 'rtl', forms: { isolated: 'נ', initial: 'נ', medial: 'נ', final: 'ן' }, strokeHints: ['1. Teto curto + haste + base horizontal estreita'], exampleWord: 'נר (ner)', examplePt: 'vela' },
+  { char: 'ן', reading: 'n (Nun Sofit)', meaningPt: 'Forma final de נ (haste longa)', strokes: 1, direction: 'rtl', strokeHints: ['1. Pequeno topo + haste reta longa descendo abaixo da linha'], exampleWord: 'קטן (katán)', examplePt: 'pequeno', cursiveNote: 'Forma Sofit (apenas final de palavra)' },
+  { char: 'ס', reading: 's (Sámekh)', meaningPt: 'Consoante S ("sapo")', strokes: 1, direction: 'rtl', strokeHints: ['1. Teto plano + barriga arredondada fechando o círculo'], exampleWord: 'ספר (séfer)', examplePt: 'livro' },
+  { char: 'ע', reading: 'ʿ (Áyin)', meaningPt: 'Silenciosa moderna / gutural clássica', strokes: 2, direction: 'rtl', strokeHints: ['1. Diagonal curta esquerda descendo para a direita', '2. Haste direita curvando na base'], exampleWord: 'עיר (ir)', examplePt: 'cidade' },
+  { char: 'פ', reading: 'p / f (Pe / Fe)', meaningPt: 'P (פּ) ou F (פ)', strokes: 2, direction: 'rtl', forms: { isolated: 'פ', initial: 'פ', medial: 'פ', final: 'ף' }, strokeHints: ['1. Curva externa como כ', '2. Nariz interno curvado para dentro'], exampleWord: 'פה (pe)', examplePt: 'boca' },
+  { char: 'ף', reading: 'f (Fe Sofit)', meaningPt: 'Forma final de פ (desce abaixo da linha)', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + haste longa descendo', '2. Gancho interno à esquerda'], exampleWord: 'כסף (késef)', examplePt: 'dinheiro', cursiveNote: 'Forma Sofit (apenas final de palavra)' },
+  { char: 'צ', reading: 'ts (Tsádi)', meaningPt: 'Som de TS ("pizza")', strokes: 2, direction: 'rtl', forms: { isolated: 'צ', initial: 'צ', medial: 'צ', final: 'ץ' }, strokeHints: ['1. Diagonal dobrando em base horizontal', '2. Ramo superior direito'], exampleWord: 'צבע (tséva)', examplePt: 'cor' },
+  { char: 'ץ', reading: 'ts (Tsádi Sofit)', meaningPt: 'Forma final de צ (desce abaixo da linha)', strokes: 2, direction: 'rtl', strokeHints: ['1. Haste longa descendo em Y', '2. Ramo superior direito'], exampleWord: 'ארץ (érets)', examplePt: 'terra / país', cursiveNote: 'Forma Sofit (apenas final de palavra)' },
+  { char: 'ק', reading: 'k (Qof)', meaningPt: 'Consoante K (perna longa à esquerda)', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + curva direita', '2. Haste longa esquerda descendo abaixo da linha'], exampleWord: 'קפה (kafé)', examplePt: 'café' },
+  { char: 'ר', reading: 'r (Resh)', meaningPt: 'R gutural suave (estilo francês)', strokes: 1, direction: 'rtl', strokeHints: ['1. Curva contínua arredondada no canto superior direito'], exampleWord: 'ראש (rosh)', examplePt: 'cabeça' },
+  { char: 'ש', reading: 'sh / s (Shin / Sin)', meaningPt: 'SH (שׁ ponto direito) ou S (שׂ ponto esquerdo)', strokes: 3, direction: 'rtl', strokeHints: ['1. Lado esquerdo + base', '2. Haste direita', '3. Dente central em Y'], exampleWord: 'שמש (shémesh)', examplePt: 'sol' },
+  { char: 'ת', reading: 't (Tav)', meaningPt: 'Consoante T', strokes: 2, direction: 'rtl', strokeHints: ['1. Teto + haste direita', '2. Haste esquerda com pezinho para fora'], exampleWord: 'תודה (todá)', examplePt: 'obrigado(a)' },
+];
+
+export const HEBREW_NIQQUD: ScriptCharacterItem[] = [
+  { char: 'בַ / בָ', reading: 'a (Patakh / Kamats)', meaningPt: 'Vogal A abaixo da consoante', strokes: 1, direction: 'rtl', strokeHints: ['Traço horizontal (Patakh) ou em T (Kamats) sob a letra'], exampleWord: 'בַּיִת (báyit)', examplePt: 'casa' },
+  { char: 'בֶ / בֵ', reading: 'e (Segol / Tsere)', meaningPt: 'Vogal E abaixo da consoante', strokes: 2, direction: 'rtl', strokeHints: ['3 pontos em triângulo (Segol) ou 2 pontos horizontais (Tsere)'], exampleWord: 'סֵפֶר (séfer)', examplePt: 'livro' },
+  { char: 'בִ / בִי', reading: 'i (Hiriq)', meaningPt: 'Vogal I (ponto único abaixo)', strokes: 1, direction: 'rtl', strokeHints: ['1 ponto centralizado abaixo da consoante'], exampleWord: 'עִיר (ir)', examplePt: 'cidade' },
+  { char: 'בֹ / בוֹ', reading: 'o (Holam)', meaningPt: 'Vogal O (ponto acima ou sobre ו)', strokes: 1, direction: 'rtl', strokeHints: ['1 ponto no canto superior esquerdo ou acima do ו'], exampleWord: 'שָׁלוֹם (shalóm)', examplePt: 'paz / olá' },
+  { char: 'בֻ / בוּ', reading: 'u (Kubuts / Shuruk)', meaningPt: 'Vogal U (3 pontos diagonais ou ponto dentro do ו)', strokes: 3, direction: 'rtl', strokeHints: ['3 pontos em diagonal ou ponto no meio do ו'], exampleWord: 'שׁוּק (shuk)', examplePt: 'mercado' },
+  { char: 'בְ', reading: 'e / Ø (Shva)', meaningPt: 'Vogal neutra curta ou ausência de vogal', strokes: 2, direction: 'rtl', strokeHints: ['2 pontos verticais abaixo da consoante'], exampleWord: 'בְּבַקָּשָׁה', examplePt: 'por favor' },
+];
+
+export const TURKISH_SPECIAL_LETTERS: ScriptCharacterItem[] = [
+  { char: 'Ç ç', reading: 'tch (como "tchau")', meaningPt: 'C cedilha turco', strokes: 2, strokeHints: ['1. Curva C', '2. Cedilha abaixo'], exampleWord: 'çay', examplePt: 'chá' },
+  { char: 'Ğ ğ', reading: 'yumuşak g (alongamento)', meaningPt: 'G suave — nunca inicia palavra; alonga a vogal anterior', strokes: 3, strokeHints: ['1-2. Letra G', '3. Arco breve (˘) no topo'], exampleWord: 'dağ / yağmur', examplePt: 'montanha / chuva' },
+  { char: 'I ı', reading: 'ɨ (vogal posterior fechada)', meaningPt: 'I SEM ponto (maiúscula I, minúscula ı)', strokes: 1, strokeHints: ['1. Haste vertical SEM ponto'], exampleWord: 'ılık / kapı', examplePt: 'morno / porta' },
+  { char: 'İ i', reading: 'i (como "ida")', meaningPt: 'I COM ponto (mantém o ponto na maiúscula İ!)', strokes: 2, strokeHints: ['1. Haste vertical', '2. Ponto obrigatório acima mesmo em maiúscula'], exampleWord: 'İstanbul / iyi', examplePt: 'Istambul / bom' },
+  { char: 'Ö ö', reading: 'ø (como "eu" francês)', meaningPt: 'O com trema (vogal anterior arredondada)', strokes: 3, strokeHints: ['1. Oval O', '2-3. Dois pontos acima'], exampleWord: 'öğrenci', examplePt: 'estudante' },
+  { char: 'Ş ş', reading: 'sh (como "xícara")', meaningPt: 'S com cedilha turco', strokes: 2, strokeHints: ['1. Curva S', '2. Cedilha abaixo'], exampleWord: 'teşekkür', examplePt: 'agradecimento' },
+  { char: 'Ü ü', reading: 'y (como "u" francês)', meaningPt: 'U com trema (vogal anterior arredondada)', strokes: 3, strokeHints: ['1. Arco U', '2-3. Dois pontos acima'], exampleWord: 'günaydın', examplePt: 'bom dia' },
+];
+
+export const NORDIC_SPECIAL_LETTERS: ScriptCharacterItem[] = [
+  { char: 'Æ æ', reading: 'ɛ / æ (E bem aberto)', meaningPt: 'Ligadura Æ (norueguês e dinamarquês)', strokes: 3, strokeHints: ['1. A inclinado esquerdo', '2-3. E fundido à direita'], exampleWord: 'lærer / være', examplePt: 'professor / ser' },
+  { char: 'Ø ø', reading: 'ø (lábios em O, som de E)', meaningPt: 'O cortado (norueguês e dinamarquês)', strokes: 2, strokeHints: ['1. Oval O', '2. Diagonal cortando de cima-direita para baixo-esquerda'], exampleWord: 'øl / brød', examplePt: 'cerveja / pão' },
+  { char: 'Å å', reading: 'ɔː (O aberto longo)', meaningPt: 'A com anel superior (norueguês, dinamarquês e sueco)', strokes: 4, strokeHints: ['1-3. Letra A', '4. Pequeno círculo no topo'], exampleWord: 'år / gå', examplePt: 'ano / ir a pé' },
+];
+
 export function extractScriptCharsFromWord(
   word: string,
-  languageCode: 'ja' | 'zh' | 'ru' | 'ar',
+  languageCode: 'ja' | 'zh' | 'ru' | 'ar' | 'he' | 'tr' | 'nb' | 'da',
 ): ScriptCharacterItem[] {
   const bank =
     languageCode === 'ja'
@@ -307,7 +363,13 @@ export function extractScriptCharsFromWord(
         ? CHINESE_HANZI
         : languageCode === 'ar'
           ? ARABIC_ALPHABET
-          : RUSSIAN_CYRILLIC;
+          : languageCode === 'he'
+            ? HEBREW_ALEFBET
+            : languageCode === 'tr'
+              ? TURKISH_SPECIAL_LETTERS
+              : languageCode === 'nb' || languageCode === 'da'
+                ? NORDIC_SPECIAL_LETTERS
+                : RUSSIAN_CYRILLIC;
 
   const found: ScriptCharacterItem[] = [];
   for (const ch of Array.from(word)) {

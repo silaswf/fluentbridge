@@ -1,7 +1,7 @@
 import type { LanguageCode } from '../types/learning';
 
 const LEADING_DICTIONARY_MARKER_RE =
-  /^(to|att|a|an|the|el|la|los|las|un|una|unos|unas|le|les|l'|il|lo|i|gli|der|die|das|ein|eine|de|het|een|en|ett|'n|’n|sich|zich|se)\s+/i;
+  /^(to|att|å|at|et|a|an|the|el|la|los|las|un|una|unos|unas|le|les|l'|il|lo|i|gli|der|die|das|ein|eine|de|het|een|en|ett|'n|’n|sich|zich|se)\s+/i;
 
 const FUNCTION_STOPWORDS = new Set([
   'a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from',
@@ -82,6 +82,9 @@ const IRREGULAR_FORM_MAP: Record<string, string[]> = {
   komma: ['kommer', 'kom', 'kommit'],
   gora: ['gor', 'gjorde', 'gjort'],
   se: ['ser', 'sag', 'sett'],
+  vide: ['ved', 'vidste', 'vidst'],
+  vaere: ['er', 'var', 'vaeret'],
+  fortaelle: ['fortalte', 'fortalt', 'fortaeller'],
   'быть': ['был', 'была', 'были', 'есть', 'будет', 'будут'],
   'идти': ['иду', 'идешь', 'идет', 'идем', 'идут', 'шел', 'шла', 'шли'],
   'ехать': ['еду', 'едешь', 'едет', 'едем', 'едут', 'ехал'],
@@ -161,6 +164,9 @@ function normalizeArabicText(raw: string): string {
 function normalizeGeneralText(raw: string): string {
   return raw
     .normalize('NFKC')
+    .replace(/[\u0591-\u05c7]/g, '')
+    .replace(/İ/g, 'i')
+    .replace(/ı/g, 'i')
     .toLowerCase()
     .replace(/ё/g, 'е')
     .normalize('NFD')
@@ -193,21 +199,32 @@ function matchesLatinOrCyrillicToken(
 ): boolean {
   if (!token) return false;
 
-  // Exact word or embedded match for hyphenated/compound tokens
-  const wordRegex = new RegExp(`(?:^|\\s|-)${escapeRegExp(token)}(?:$|\\s|-)`);
+  // Exact word or embedded match for hyphenated/elided/compound tokens
+  const wordRegex = new RegExp(`(?:^|\\s|-|')${escapeRegExp(token)}(?:$|\\s|-|')`);
   if (wordRegex.test(exNorm)) return true;
 
   // Irregular forms
   const irregulars = IRREGULAR_FORM_MAP[token];
   if (irregulars) {
     for (const form of irregulars) {
-      const formRegex = new RegExp(`(?:^|\\s|-)${escapeRegExp(form)}(?:$|\\s|-)`);
+      const formRegex = new RegExp(`(?:^|\\s|-|')${escapeRegExp(form)}(?:$|\\s|-|')`);
       if (formRegex.test(exNorm)) return true;
     }
   }
 
-  // Inflectional stem match
-  if (token.length >= 6) {
+  // Inflectional stem match & compound/separable verb match
+  if (token.length >= 7) {
+    const stem = token.slice(0, token.length - 3);
+    if (exWords.some((w) => w.startsWith(stem) && w.length >= stem.length)) {
+      return true;
+    }
+    if (stem.length >= 5 && stem[stem.length - 1] === stem[stem.length - 2]) {
+      const singleStem = stem.slice(0, -1);
+      if (exWords.some((w) => w.startsWith(singleStem))) {
+        return true;
+      }
+    }
+  } else if (token.length >= 6) {
     const stem = token.slice(0, token.length - 2);
     if (exWords.some((w) => w.startsWith(stem) && w.length >= stem.length)) {
       return true;
@@ -217,6 +234,29 @@ function matchesLatinOrCyrillicToken(
     if (exWords.some((w) => w.startsWith(stem) && w.length >= stem.length)) {
       return true;
     }
+  }
+
+  // Compound nouns (e.g., vakantie -> zomervakantie)
+  if (token.length >= 6 && exWords.some((w) => w.endsWith(token))) {
+    return true;
+  }
+
+  // Dutch / Afrikaans / German separable verbs (e.g., terugkomen -> terug te komen, opvang -> op te vang)
+  const sepMatch = token.match(/^(aan|af|bij|door|in|mee|na|om|onder|op|over|terug|toe|uit|voor|weg)(.{4,})$/);
+  if (sepMatch) {
+    const [, prefix, base] = sepMatch;
+    const baseStem = base.length >= 5 ? base.slice(0, base.length - 2) : base;
+    if (
+      exWords.includes(prefix) &&
+      exWords.some((w) => w.startsWith(baseStem))
+    ) {
+      return true;
+    }
+  }
+
+  // Italian -porre / -urre / -crescere irregular stems
+  if (token.endsWith('porre') && exWords.some((w) => w.startsWith(token.slice(0, -5) + 'pon'))) {
+    return true;
   }
 
   return false;
@@ -243,6 +283,14 @@ function variantMatchesExample(
       .replace(/[\s\p{P}~～・]/gu, '');
     if (!cleaned) return false;
     if (exCompact.includes(cleaned)) return true;
+    if (
+      languageCode === 'ja' &&
+      cleaned.length >= 2 &&
+      /[うくぐすつぬぶむるい]$/.test(cleaned) &&
+      exCompact.includes(cleaned.slice(0, -1))
+    ) {
+      return true;
+    }
     // Also check kanji/kana/hanzi blocks (>= 2 chars or single >= 1 char if whole word is 1 char)
     const blocks = variant
       .normalize('NFKC')
@@ -282,12 +330,21 @@ function variantMatchesExample(
     );
   }
 
-  // Latin / Cyrillic
+  // Latin / Cyrillic / Hebrew
   const exNorm = normalizeGeneralText(exampleTarget);
   const exWords = exNorm
-    .split(/[\s-]+/)
+    .split(/[\s'-]+/)
     .map((w) => w.replace(/^'+|'+$/g, ''))
     .filter(Boolean);
+  if (languageCode === 'he') {
+    const extra: string[] = [];
+    for (const w of exWords) {
+      if (w.length > 2 && /^[הבלמוכש]/.test(w)) {
+        extra.push(w.slice(1));
+      }
+    }
+    exWords.push(...extra);
+  }
 
   let stripped = normalizeGeneralText(variant);
   // Strip leading dictionary marker repeatedly if stacked (e.g. "to be", "att ta")
@@ -306,12 +363,12 @@ function variantMatchesExample(
     );
   }
 
-  if (new RegExp(`(?:^|\\s|-)${escapeRegExp(stripped)}(?:$|\\s|-)`).test(exNorm)) {
+  if (new RegExp(`(?:^|\\s|-|')${escapeRegExp(stripped)}(?:$|\\s|-|')`).test(exNorm)) {
     return true;
   }
 
   const rawTokens = stripped
-    .split(/[\s-]+/)
+    .split(/[\s'-]+/)
     .map((t) => t.replace(/^'+|'+$/g, ''))
     .filter(Boolean);
 

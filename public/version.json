@@ -1,8 +1,8 @@
 {
-  "version": "8.4.0",
+  "version": "9.0.0",
   "publishedAt": "2026-11-26",
-  "releaseNotes": "FluentBridge Academy v8.4.0 — Dark Mode híbrido, Imersão dedicada, Hands-Free, fonemas 12 idiomas, moderação e desafios na Comunidade, R2 Range/quotas e observabilidade",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.4.0/FluentBridge-Setup-8.4.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.4.0/FluentBridge-v8.4.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.4.0"
+  "releaseNotes": "FluentBridge Academy v9.0.0 — 16 idiomas (Turco, Hebraico RTL, Norueguês Bokmål e Dinamarquês), 150 unidades coesas por idioma (2.400 unidades), 61 sotaques, 800 cenários de Tutor IA, 92 simulados oficiais e YouTube Study Lab",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-Setup-9.0.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-v9.0.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.0.0"
 }

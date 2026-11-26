@@ -365,6 +365,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     const errors = await attachErrorGuards(page);
     await page.setViewportSize({ width: 1280, height: 800 });
     await loginAsHumanStudent(page);
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
 
     // 1. Dedicated Imersão view
     await page.getByRole('button', { name: /Imersão \(Áudio & Vídeo\)/i }).click();
@@ -423,6 +424,46 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await page.waitForTimeout(250);
     expect(await checkContrast()).toBeGreaterThanOrEqual(4.5);
     await page.evaluate(() => document.documentElement.classList.remove('dark'));
+
+    await expect(page.getByText(/Ops! Algo saiu do esperado/i)).toBeHidden();
+    expect(errors).toEqual([]);
+  });
+
+  test('Human Journey 5 (v9.0.0: 16 Languages, TR/HE RTL/NB/DA 150 units & YouTube Study Lab)', async ({
+    page,
+  }) => {
+    const errors = await attachErrorGuards(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await loginAsHumanStudent(page);
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
+
+    // 1. Verify Turkish, Hebrew (RTL), Norwegian & Danish with 150 units each
+    for (const [code, expectRtl] of [
+      ['tr', false],
+      ['he', true],
+      ['nb', false],
+      ['da', false],
+    ] as const) {
+      await page.getByTestId('language-switcher-trigger').click();
+      await page.getByTestId(`lang-option-${code}`).click();
+      await expect(page.locator('main')).toHaveAttribute('dir', expectRtl ? 'rtl' : 'ltr');
+      await expect(page.getByText(/\(150 unidades\)/i)).toBeVisible({ timeout: 10000 });
+    }
+
+    // 2. YouTube Study Lab inside Imersão -> Vídeos
+    await page.getByRole('button', { name: /Imersão \(Áudio & Vídeo\)/i }).click();
+    await page.getByRole('button', { name: /Vídeos/i }).click();
+    await page.getByTestId('tab-youtube-study').click();
+    await expect(page.getByTestId('youtube-study-lab')).toBeVisible();
+    await page.getByRole('button', { name: /Carregar Exemplo/i }).click();
+    await page.getByTestId('yt-analyze-btn').click();
+    await expect(page.getByTestId('yt-subtitle-word').first()).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('yt-subtitle-word').first().click();
+    await expect(page.getByTestId('yt-word-popover')).toBeVisible();
+    await page.getByTestId('yt-save-sm2-btn').click();
+    await expect(page.getByTestId('yt-save-sm2-btn')).toContainText(/Salva no Deck SM-2/i);
+    await page.getByTestId('yt-tab-grammar').click();
+    await expect(page.getByTestId('yt-grammar-panel')).toBeVisible();
 
     await expect(page.getByText(/Ops! Algo saiu do esperado/i)).toBeHidden();
     expect(errors).toEqual([]);

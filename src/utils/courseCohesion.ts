@@ -83,7 +83,7 @@ export interface CourseModuleGroup {
   topics: Topic[];
 }
 
-const CJK_OR_ARABIC_RE = /[\u3040-\u30ff\u4e00-\u9fff\u0600-\u06ff]/;
+const CJK_OR_ARABIC_RE = /[\u3040-\u30ff\u4e00-\u9fff\u0600-\u06ff\u0590-\u05ff]/;
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

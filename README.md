@@ -1,13 +1,13 @@
-# FluentBridge Academy (`v8.4.0`)
+# FluentBridge Academy (`v9.0.0`)
 
-Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco)** de **A1 a C1** (**`1.236` unidades**, **`49` sotaques regionais com vozes neurais**, **76 Simulados Cronometrados Oficiais**, **Comunidade 2.0 com Ligas, Desafio do Mês, Moderação e Diff de Correções**, **Modo Hands-Free**, **Aba Dedicada de Imersão**, **Phoneme Breakdown nos 12 Idiomas**, **Gateway Web / Windows / Android / iOS Safari PWA ($0/ano)**, **Suíte Vitest + E2E Playwright com Auditoria WCAG AA** e **Estúdio do Professor + Admin Mestre**), desenvolvida para o **Prof. Silas Wagner**.
+Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner, Sueco, Turco, Hebraico, Norueguês e Dinamarquês)** de **A1 a C1** (**`2.400` unidades**, **`61` sotaques regionais com vozes neurais**, **`96` Simulados Cronometrados Oficiais**, **`800` cenários de Tutor IA**, **YouTube Study Lab com análise gramatical por IA**, **Comunidade 2.0**, **Modo Hands-Free**, **RTL nativo em Árabe e Hebraico com toggle de Niqqud**, **Gateway Web / Windows / Android / iOS Safari PWA ($0/ano)**, **Suíte Vitest + E2E Playwright com Auditoria WCAG AA** e **Estúdio do Professor + Admin Mestre**), desenvolvida para o **Prof. Silas Wagner**.
 
 ---
 
 ## Plataformas & Links Ativos
 
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
-- **Edge API (Cloudflare Workers AI + STT + Gemini)**: https://fluentbridge-api.silaswf.workers.dev
+- **Edge API (Cloudflare Workers AI + STT + Gemini + YouTube Study)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
 - **Windows Instalador Setup (NSIS)**: [`release/FluentBridge-Setup-5.0.0.exe`](./release/FluentBridge-Setup-5.0.0.exe)
 - **Android APK Assinado**: [`release/FluentBridge-v5.0.0.apk`](./release/FluentBridge-v5.0.0.apk)
@@ -15,13 +15,13 @@ Plataforma completa de ensino em **12 idiomas (Inglês, Espanhol, Francês, Ital
 
 ---
 
-## Números Atuais (`v8.4.0`)
+## Números Atuais (`v9.0.0`)
 
-- **1.236 Unidades CEFR (A1–C1) em 12 Idiomas**: módulos desdobráveis sem duplicação + `>= 10` flashcards coesos por unidade, RTL nativo em Árabe e botão `🌐 Traduzir PT`
-- **49 Sotaques Regionais & Vozes Neurais**: Cloudflare Workers AI + cache SHA-256 em R2 + **Modo Hands-Free** em áudio contínuo + **Phoneme Breakdown** nos 12 idiomas
-- **76 Simulados Cronometrados Oficiais**: escalas e tabelas reais (IELTS, TOEFL, CELPIP, DET, DELE, DELF, CILS, Goethe, JLPT, HSK, ТРКИ, ALPT, CNaVT, TISUS e mais)
-- **Comunidade 2.0**: Ligas Semanais, **Desafio do Mês (+80 XP)**, moderação anti-spam/links/palavrões, reações rápidas, áudio em *snippets*, *diff* visual e aceite de correção (`+10 XP`)
-- **Qualidade Garantida**: `77/77` testes **Vitest** (`22` suítes) + **`14/14` testes E2E Playwright** (incl. auditoria WCAG AA Light/Dark) · `0` erros TypeScript · Edge API `v8.4.0` com cotas R2 e HTTP `206 Range`
+- **2.400 Unidades CEFR (A1–C1) em 16 Idiomas (`150` por idioma)**: progressão espiralada sem repetição de títulos, RTL nativo em Árabe/Hebraico (com toggle de *Niqqud*) e `>= 10` flashcards coesos por unidade
+- **61 Sotaques Regionais & Vozes Neurais**: Gemini 2.5 Native Neural TTS + Deepgram Aura-2 + cache SHA-256 em R2 + **Modo Hands-Free** em áudio contínuo + **Phoneme Breakdown** nos 16 idiomas
+- **96 Simulados Cronometrados Oficiais (`24` formatos)**: IELTS, TOEFL, CELPIP, DET, DELE, DELF, CILS, Goethe, JLPT, HSK, ТРКИ, ALPT, CNaVT, TISUS, TÖMER, YAEL, Norskprøve, PD3 e mais
+- **YouTube Study Lab & Imersão**: estude qualquer vídeo do YouTube com legendas clicáveis para SM-2, explicações de *Gramática & Uso Real* e quiz, além de `80` podcasts e `48` vídeos interativos
+- **Qualidade Garantida**: `81/81` testes **Vitest** (`23` suítes) + **`15/15` testes E2E Playwright** (incl. auditoria WCAG AA Light/Dark e Jornada 5) · `0` erros TypeScript · Edge API `v9.0.0` com cotas R2 e HTTP `206 Range`
 
 ---
 

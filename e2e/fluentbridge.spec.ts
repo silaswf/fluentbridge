@@ -27,11 +27,11 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.2\.0\/FluentBridge-Setup-8\.2\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v9\.0\.0\/FluentBridge-Setup-9\.0\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v8\.2\.0\/FluentBridge-v8\.2\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v9\.0\.0\/FluentBridge-v9\.0\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -53,24 +53,24 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.getByTestId('continue-web-btn').click();
   });
 
-  test('3. Collapsible Language Dropdown switches Arabic (RTL), Dutch, Afrikaans & Swedish with 103 units each', async ({
+  test('3. Collapsible Language Dropdown switches Arabic (RTL), Dutch, Afrikaans & Swedish with 150 units each', async ({
     page,
   }) => {
     await loginAsMasterAdmin(page);
 
     await selectLanguage(page, 'ar');
     await expect(page.locator('main')).toHaveAttribute('dir', 'rtl');
-    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(150/i)).toBeVisible();
 
     await selectLanguage(page, 'nl');
     await expect(page.locator('main')).toHaveAttribute('dir', 'ltr');
-    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(150/i)).toBeVisible();
 
     await selectLanguage(page, 'af');
-    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(150/i)).toBeVisible();
 
     await selectLanguage(page, 'sv');
-    await expect(page.getByText(/Trilha.*\(103/i)).toBeVisible();
+    await expect(page.getByText(/Trilha.*\(150/i)).toBeVisible();
   });
 
   test('4. Dark mode warning box has high contrast and Interactive Short Videos save words to SM-2', async ({
@@ -217,7 +217,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
 
     // 2) Dark mode Reading passage contrast
     await selectLanguage(page, 'en');
-    await expect(page.getByText(/Inglês · .*103 unidades/i)).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Inglês · .*150 unidades/i)).toBeVisible({ timeout: 8000 });
     await page.getByRole('button', { name: /^Tema/i }).click();
     const startBtn10 = page.getByRole('button', { name: /^Começar$/i }).first();
     if (!(await startBtn10.isVisible({ timeout: 2000 }).catch(() => false))) {

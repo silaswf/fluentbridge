@@ -78,6 +78,12 @@ import {
   toJapaneseKana,
   type JapaneseScriptMode,
 } from '../utils/japaneseKana';
+import {
+  loadHebrewScriptMode,
+  saveHebrewScriptMode,
+  stripHebrewNiqqud,
+  type HebrewScriptMode,
+} from '../utils/hebrewNiqqud';
 import { getImmersionStrings, isImmersionLevel } from '../utils/immersion';
 import { analyzePhoneticFeedback } from '../utils/phoneticFeedback';
 
@@ -341,11 +347,16 @@ export function LessonPlayer({
   const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
     loadJapaneseScriptMode(),
   );
+  const [heScriptMode, setHeScriptMode] = useState<HebrewScriptMode>(() =>
+    loadHebrewScriptMode(),
+  );
   const [isCompletedScreen, setIsCompletedScreen] = useState(false);
   const jaText = (s: string) =>
     topic.languageCode === 'ja' && jaScriptMode === 'kana'
       ? toJapaneseKana(s)
-      : s;
+      : topic.languageCode === 'he' && heScriptMode === 'modern'
+        ? stripHebrewNiqqud(s)
+        : s;
 
   // Gamification: Hearts, Combo, Sound FX, Relaxed Mode
   const [hearts, setHearts] = useState(5);
@@ -1367,6 +1378,27 @@ export function LessonPlayer({
                 title="Alternar entre escrita padrão (Kanji + Kana) e 100% Hiragana/Katakana"
               >
                 <span>{jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}</span>
+              </button>
+            )}
+
+            {topic.languageCode === 'he' && (
+              <button
+                type="button"
+                data-testid="he-niqqud-toggle"
+                onClick={() => {
+                  const next: HebrewScriptMode =
+                    heScriptMode === 'niqqud' ? 'modern' : 'niqqud';
+                  setHeScriptMode(next);
+                  saveHebrewScriptMode(next);
+                }}
+                className={`inline-flex items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${
+                  heScriptMode === 'modern'
+                    ? 'border-blue-400 bg-blue-100 text-blue-900'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+                title="Alternar entre Hebraico com Niqqud (vogais) e escrita moderna sem vogais"
+              >
+                <span>{heScriptMode === 'modern' ? 'עב Moderno' : 'נִקּוּד Niqqud'}</span>
               </button>
             )}
 

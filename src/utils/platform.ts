@@ -19,5 +19,5 @@ export function isWebPlatform(): boolean {
 }
 
 export function isRtlLanguage(code?: LanguageCode): boolean {
-  return code === 'ar';
+  return code === 'ar' || code === 'he';
 }

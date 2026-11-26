@@ -1,6 +1,6 @@
-# Documentação de Desenvolvimento — FluentBridge (`v8.4.0`)
+# Documentação de Desenvolvimento — FluentBridge (`v9.0.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **12 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner e Sueco** de `A1` a `C1`, com **`1.236` unidades**, **`49` sotaques neurais**, **`2.400` guias gramaticais**, **`76` Simulados Cronometrados Oficiais**, **Comunidade 2.0**, **Modo Hands-Free**, **Aba Imersão Dedicada**, **Gateway Web/Win/Android/iOS PWA** e **Suíte Vitest + Playwright WCAG AA**).
+Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **16 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner, Sueco, Turco, Hebraico, Norueguês e Dinamarquês** de `A1` a `C1`, com **`2.400` unidades (`150` por idioma)**, **`61` sotaques neurais**, **`3.200` guias gramaticais**, **`96` Simulados Cronometrados Oficiais**, **`800` cenários IA**, **YouTube Study Lab**, **Comunidade 2.0**, **Modo Hands-Free**, **Gateway Web/Win/Android/iOS PWA** e **Suíte Vitest + Playwright WCAG AA**).
 
 ---
 
@@ -19,12 +19,12 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°
 
 ---
 
-## Resumo do Estado Atual (`v8.4.0`)
+## Resumo do Estado Atual (`v9.0.0`)
 
 | Aspecto | Estado Atual |
 | --- | --- |
-| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **iPhone/iPad Safari PWA ($0/ano)** + **Edge API `v8.4.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`.exe`) |
-| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito**, cotas diárias R2 (`200` STT / `250` Gemini), streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
-| **Currículo, Escrita Completa & CAT** | **`1.236` unidades** (`12` idiomas, RTL nativo em Árabe), **Alfabetos 100% Completos**, **`2.400` tabelas gramaticais**, **`480` questões CAT**, **`phonemeBreakdown` nos 12 idiomas** |
-| **Simulados, Comunidade & Voz/IA** | **`76` Simulados Cronometrados Oficiais**, **Comunidade 2.0 (Ligas + Desafio do Mês + Moderação + Diff/Aceite + Reações)**, **Modo Hands-Free**, **Aba Imersão Dedicada**, **Tutor IA** |
-| **Verificação & CI/CD** | `npm test` (`22` arquivos / `77` testes OK) · `npm run test:e2e` (`14/14` Playwright + WCAG AA OK) · `npx tsc --noEmit` (`0` erros) · Cloudflare Worker + Pages live |
+| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **iPhone/iPad Safari PWA ($0/ano)** + **Edge API `v9.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`.exe`) |
+| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito**, cotas diárias R2 (`200` STT / `250` Gemini / `100` YouTube), streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
+| **Currículo, Escrita Completa & CAT** | **`2.400` unidades** (`16` idiomas × `150` unidades, RTL em Árabe e Hebraico + *Niqqud*), **Alfabetos 100% Completos (incl. Alefbet)**, **`3.200` tabelas gramaticais**, **`640` questões CAT**, **`phonemeBreakdown` nos 16 idiomas** |
+| **Simulados, Comunidade & Imersão/IA** | **`96` Simulados Oficiais (`24` formatos)**, **YouTube Study Lab**, **`800` cenários IA**, **`80` podcasts**, **`48` vídeos interativos**, **Comunidade 2.0**, **Modo Hands-Free** |
+| **Verificação & CI/CD** | `npm test` (`23` arquivos / `81` testes OK) · `npm run test:e2e` (`15/15` Playwright + WCAG AA OK) · `npx tsc --noEmit` (`0` erros) · Cloudflare Worker + Pages live |

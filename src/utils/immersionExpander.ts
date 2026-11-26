@@ -474,6 +474,150 @@ const SNIPPETS: Record<LanguageCode, LangDialogSnippets> = {
     chk2Opts: ['Repetir em voz alta', 'Ler sem som', 'Pular revisão'],
     chk2Exp: 'Repetir em voz alta treina a melodia sueca.',
   },
+  tr: {
+    intro1: (s1, s2, t) => [
+      `FluentBridge Podcast'e hoş geldiniz! Ben ${s1}, bugün ${s2} ile "${t}" hakkında konuşuyoruz.`,
+      `Bem-vindos ao FluentBridge Podcast! Sou ${s1} e hoje falo com ${s2} sobre "${t}".`,
+    ],
+    intro2: () => [
+      'Herkese merhaba! Bu günlük konuşmayı dikkatle dinleyin.',
+      'Olá a todos! Ouçam com atenção esta conversa cotidiana.',
+    ],
+    reaction1: [
+      'Çok güzel bir nokta! En önemli ayrıntıyı tekrar eder misin?',
+      'Ótimo ponto! Pode repetir o detalhe mais importante mais uma vez?',
+    ],
+    clarify2: [
+      'Elbette! Türkçe ünlü uyumuna ve eklerin akışına dikkat edin.',
+      'Claro! Reparem na harmonia vocálica e no fluxo dos sufixos em turco.',
+    ],
+    detail1: [
+      'Bu ifadeler gerçek konuşmalarda her zaman kullanılır.',
+      'Essas expressões são usadas o tempo todo em conversas reais.',
+    ],
+    wrap2: [
+      'Kesinlikle! Yüksek sesle tekrar etmek telaffuzu çok geliştirir.',
+      'Com certeza! Repetir em voz alta melhora muito a pronúncia.',
+    ],
+    close1: [
+      'Dinlediğiniz için teşekkürler! Aşağıdaki son soruyu yanıtlayın.',
+      'Obrigado por ouvir! Respondam à última pergunta abaixo.',
+    ],
+    chk1Q: 'O que observar no turco falado neste episódio?',
+    chk1Opts: ['A harmonia vocálica e os sufixos', 'Apenas números', 'Nenhuma pausa'],
+    chk1Exp: 'A harmonia vocálica e a aglutinação são marcas centrais do turco.',
+    chk2Q: 'O que mais ajuda na pronúncia segundo o final?',
+    chk2Opts: ['Repetir em voz alta', 'Ler em silêncio', 'Pular revisão'],
+    chk2Exp: 'Repetir em voz alta consolida a entonação e a harmonia vocálica.',
+  },
+  he: {
+    intro1: (s1, s2, t) => [
+      `ברוכים הבאים לפודקאסט של FluentBridge! אני ${s1}, והיום אני משוחח עם ${s2} על "${t}".`,
+      `Bem-vindos ao FluentBridge Podcast! Sou ${s1} e hoje falo com ${s2} sobre "${t}".`,
+    ],
+    intro2: () => [
+      'שלום לכולם! האזינו היטב לשיחה היומיומית הזו.',
+      'Olá a todos! Ouçam com atenção esta conversa cotidiana.',
+    ],
+    reaction1: [
+      'נקודה מעולה! אפשר לחזור שוב על הפרט החשוב ביותר?',
+      'Ótimo ponto! Pode repetir o detalhe mais importante novamente?',
+    ],
+    clarify2: [
+      'בוודאי! שימו לב להטעמה ולזרימה הטבעית של המשפט בעברית.',
+      'Claro! Reparem na sílaba tônica e no fluxo natural do hebraico.',
+    ],
+    detail1: [
+      'הביטויים האלה חוזרים כל הזמן בשיחות אמיתיות.',
+      'Essas expressões aparecem o tempo todo em conversas reais.',
+    ],
+    wrap2: [
+      'לגמרי! חזרה בקול רם משפרת משמעותית את ההגייה.',
+      'Com certeza! Repetir em voz alta melhora muito a pronúncia.',
+    ],
+    close1: [
+      'תודה שהאזנתם! ענו על השאלה האחרונה למטה.',
+      'Obrigado por ouvir! Respondam à última pergunta abaixo.',
+    ],
+    chk1Q: 'O que observar no hebraico falado neste episódio?',
+    chk1Opts: ['A sílaba tônica e o ritmo natural', 'Apenas datas', 'Sem pausas'],
+    chk1Exp: 'A posição da tônica e o ritmo fluente dão naturalidade ao hebraico.',
+    chk2Q: 'Como consolidar a pronúncia segundo o diálogo?',
+    chk2Opts: ['Repetir em voz alta', 'Evitar falar', 'Pular lição'],
+    chk2Exp: 'Repetir em voz alta fixa a pronúncia moderna.',
+  },
+  nb: {
+    intro1: (s1, s2, t) => [
+      `Velkommen til FluentBridge Podcast! Jeg heter ${s1}, og i dag snakker jeg med ${s2} om "${t}".`,
+      `Bem-vindos ao FluentBridge Podcast! Sou ${s1} e hoje falo com ${s2} sobre "${t}".`,
+    ],
+    intro2: () => [
+      'Hei alle sammen! Lytt nøye til denne hverdagssamtalen.',
+      'Olá a todos! Ouçam com atenção esta conversa cotidiana.',
+    ],
+    reaction1: [
+      'Godt poeng! Kan du gjenta den viktigste detaljen en gang til?',
+      'Bom ponto! Pode repetir o detalhe mais importante mais uma vez?',
+    ],
+    clarify2: [
+      'Selvfølgelig! Legg merke til melodien og V2-ordstillingen på norsk.',
+      'Claro! Reparem na melodia e na ordem V2 do norueguês.',
+    ],
+    detail1: [
+      'Disse uttrykkene brukes hele tiden i ekte samtaler.',
+      'Essas expressões são usadas o tempo todo em conversas reais.',
+    ],
+    wrap2: [
+      'Nettopp! Å gjenta høyt gjør stor forskjell for uttalen.',
+      'Exato! Repetir em voz alta faz grande diferença na pronúncia.',
+    ],
+    close1: [
+      'Takk for at dere lyttet! Svar på det siste spørsmålet nedenfor.',
+      'Obrigado por ouvir! Respondam à última pergunta abaixo.',
+    ],
+    chk1Q: 'O que observar no norueguês falado neste episódio?',
+    chk1Opts: ['A melodia da frase e a ordem V2', 'Apenas números', 'Sem entonação'],
+    chk1Exp: 'A entonação melódica e o verbo em 2ª posição (V2) estruturam o norueguês.',
+    chk2Q: 'O que faz diferença na pronúncia segundo o final?',
+    chk2Opts: ['Repetir em voz alta', 'Ler sem som', 'Pular revisão'],
+    chk2Exp: 'Repetir em voz alta treina o ritmo e os tons do norueguês.',
+  },
+  da: {
+    intro1: (s1, s2, t) => [
+      `Velkommen til FluentBridge Podcast! Jeg hedder ${s1}, og i dag taler jeg med ${s2} om "${t}".`,
+      `Bem-vindos ao FluentBridge Podcast! Sou ${s1} e hoje falo com ${s2} sobre "${t}".`,
+    ],
+    intro2: () => [
+      'Hej alle sammen! Lyt godt efter denne hverdagssamtale.',
+      'Olá a todos! Ouçam com atenção esta conversa cotidiana.',
+    ],
+    reaction1: [
+      'God pointe! Kan du gentage den vigtigste detalje én gang til?',
+      'Bom ponto! Pode repetir o detalhe mais importante mais uma vez?',
+    ],
+    clarify2: [
+      'Selvfølgelig! Læg mærke til rytmen, stød og det bløde d på dansk.',
+      'Claro! Reparem no ritmo, no stød e no d suave do dinamarquês.',
+    ],
+    detail1: [
+      'De her udtryk bliver brugt hele tiden i virkelige samtaler.',
+      'Essas expressões são usadas o tempo todo em conversas reais.',
+    ],
+    wrap2: [
+      'Præcis! At gentage højt gør en stor forskel for udtalen.',
+      'Exato! Repetir em voz alta faz grande diferença na pronúncia.',
+    ],
+    close1: [
+      'Tak fordi I lyttede med! Besvar det sidste spørgsmål nedenfor.',
+      'Obrigado por ouvir! Respondam à última pergunta abaixo.',
+    ],
+    chk1Q: 'O que observar no dinamarquês falado neste episódio?',
+    chk1Opts: ['O ritmo, o stød e o d suave', 'Apenas datas', 'Nenhuma pausa'],
+    chk1Exp: 'O stød e o d suave (blødt d) são marcas essenciais da fala dinamarquesa.',
+    chk2Q: 'O que melhora a pronúncia segundo o diálogo?',
+    chk2Opts: ['Repetir em voz alta', 'Evitar ouvir áudio', 'Pular revisão'],
+    chk2Exp: 'Repetir em voz alta fixa as reduções vocálicas do dinamarquês.',
+  },
 };
 
 export interface ExpandableLine {

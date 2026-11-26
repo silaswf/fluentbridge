@@ -1039,7 +1039,7 @@ const JA_EXTRA_BLUEPRINTS: RichLanguageBlueprint[] = [
     vocab: [
       { word: '〜の末に', ipa: '/no sue ni/', pt: 'Ao final de / Após (longo processo)', cat: 'N1文法' },
       { word: '〜を余儀なくされる', ipa: '/o yoginaku sareru/', pt: 'Ser forçado a', cat: 'N1文法' },
-      { word: '撤退', ipa: '/tettai/', pt: 'Retirada / Saída (de mercado)', cat: 'ビジネス' },
+      { word: '撤退', ipa: '/tettai/', pt: 'Retirada / Saída (de mercado)', cat: 'ビジネス', exampleTarget: '採算が合わないため、その地域からの撤退を決めました。', examplePt: 'Como não era lucrativo, decidimos pela retirada daquela região.' },
     ],
   },
   {

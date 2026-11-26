@@ -23,17 +23,15 @@ import { AR_GRAMMAR_GUIDE } from './grammar/arGrammarGuide';
 import { NL_GRAMMAR_GUIDE } from './grammar/nlGrammarGuide';
 import { AF_GRAMMAR_GUIDE } from './grammar/afGrammarGuide';
 import { SV_GRAMMAR_GUIDE } from './grammar/svGrammarGuide';
+import { TR_GRAMMAR_GUIDE } from './grammar/trGrammarGuide';
+import { HE_GRAMMAR_GUIDE } from './grammar/heGrammarGuide';
+import { NB_GRAMMAR_GUIDE } from './grammar/nbGrammarGuide';
+import { DA_GRAMMAR_GUIDE } from './grammar/daGrammarGuide';
 
 export interface GrammarReferenceEntry {
   id: string;
   languageCode?: LanguageCode;
-  section:
-    | 'Tempos Verbais'
-    | 'Condicionais'
-    | 'Modais'
-    | 'Regras Extras'
-    | 'Voz Passiva & Relatos'
-    | 'Question Tags';
+  section: string;
   title: string;
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
   usage: string;
@@ -492,6 +490,10 @@ export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...NL_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'nl' as LanguageCode })),
   ...AF_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'af' as LanguageCode })),
   ...SV_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'sv' as LanguageCode })),
+  ...TR_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'tr' as LanguageCode })),
+  ...HE_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'he' as LanguageCode })),
+  ...NB_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'nb' as LanguageCode })),
+  ...DA_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'da' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

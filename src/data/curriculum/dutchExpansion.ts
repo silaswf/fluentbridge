@@ -777,7 +777,7 @@ const DUTCH_EXPANSION_BLUEPRINTS: RichLanguageBlueprint[] = [
       { word: 'snijden', ipa: '/ˈsnɛidə(n)/', pt: 'cortar / picar', cat: 'Cozinha' },
       { word: 'roeren', ipa: '/ˈruːrə(n)/', pt: 'mexer (com colher)', cat: 'Cozinha' },
       { word: 'toevoegen', ipa: '/ˈtuvuɣə(n)/', pt: 'adicionar', cat: 'Cozinha' },
-      { word: 'de eetlepel', ipa: '/də ˈeːtleːpəl/', pt: 'a colher de sopa', cat: 'Cozinha' },
+      { word: 'de eetlepel', ipa: '/də ˈeːtleːpəl/', pt: 'a colher de sopa', cat: 'Cozinha', exampleTarget: 'Voeg één eetlepel olijfolie toe aan de pan.', examplePt: 'Adicione uma colher de sopa de azeite à panela.' },
     ],
   },
   {
@@ -1770,7 +1770,7 @@ const DUTCH_EXPANSION_BLUEPRINTS: RichLanguageBlueprint[] = [
     vocab: [
       { word: 'de belastingaangifte', ipa: '/də bəˈlɑstɪŋˌaːnxɪftə/', pt: 'a declaração de imposto de renda', cat: 'Finanças' },
       { word: 'de toeslag', ipa: '/də ˈtuslɑx/', pt: 'o subsídio / auxílio financeiro', cat: 'Finanças' },
-      { word: 'in aanmerking komen', ipa: '/ɪn ˈaːnmɛrkɪŋ ˈkoːmə(n)/', pt: 'ser elegível / qualificar-se', cat: 'Formal' },
+      { word: 'in aanmerking komen', ipa: '/ɪn ˈaːnmɛrkɪŋ ˈkoːmə(n)/', pt: 'ser elegível / qualificar-se', cat: 'Formal', exampleTarget: 'Alleen vaste bewoners komen in aanmerking voor deze toeslag.', examplePt: 'Apenas residentes fixos são elegíveis para este subsídio.' },
       { word: 'beleggen', ipa: '/bəˈlɛɣə(n)/', pt: 'investir (financeiramente)', cat: 'Finanças' },
     ],
   },

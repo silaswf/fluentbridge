@@ -243,6 +243,18 @@ export function analyzePhoneticFeedback(
     ar: [
       { soundLabel: 'ح vs هـ / ق vs ك', contrastPair: 'قلب (coração) vs. كلب (cachorro)', practiceSentence: 'الحمد لله، قهوة الصباح جاهزة.' },
     ],
+    tr: [
+      { soundLabel: 'I /ı/ vs İ /i/ & Ğ', contrastPair: 'sık vs. sik · dağ (dā)', practiceSentence: 'Sabah kahvesi içmek için yağmurun dinmesini bekliyorum.' },
+    ],
+    he: [
+      { soundLabel: 'ח /χ/ vs ה /h/ & ר /ʁ/', contrastPair: 'חם (quente) vs. הם (eles)', practiceSentence: 'שלום חברים, היום נלמד עברית ביחד.' },
+    ],
+    nb: [
+      { soundLabel: 'KJ /ç/ vs SJ /ʃ/ & Y /y/', contrastPair: 'kylling vs. skilling · ny vs. nu', practiceSentence: 'Jeg kjøper fersk kaffe og ny avis i Oslo.' },
+    ],
+    da: [
+      { soundLabel: 'Blødt D /ð/ & Stød', contrastPair: 'mad (comida) vs. man · rød', practiceSentence: 'Jeg vil gerne bestille rød grød med fløde.' },
+    ],
   };
 
   const targetedDrills = missedWords.length > 0 ? (DRILL_BY_LANG[languageCode] ?? []) : [];

@@ -1,6 +1,6 @@
-# 03 — Roadmap de Desenvolvimento até a Completude (`v1.0.0` → `v8.4.0`)
+# 03 — Roadmap de Desenvolvimento até a Completude (`v1.0.0` → `v9.0.0`)
 
-Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** até o marco atual **`v8.4.0`** (`1.236` unidades em `12` idiomas, `49` sotaques regionais com vozes neurais e cache R2, `76` simulados oficiais, Dark Mode híbrido WCAG AA, aba dedicada **Imersão**, **Modo Hands-Free**, `phonemeBreakdown` nos 12 idiomas, Comunidade 2.0 com moderação e Desafio do Mês, cotas persistentes no R2, streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, e builds Web/PWA incl. iPhone Safari gratuito, Windows `.exe` e Android `.apk`).
+Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** até o marco atual **`v9.0.0`** (`2.400` unidades coesas em `16` idiomas — incluindo Turco, Hebraico RTL + Niqqud, Norueguês e Dinamarquês — `61` sotaques regionais com vozes neurais e cache R2, `96` simulados oficiais, `800` cenários de Tutor IA, **YouTube Study Lab** com legendas clicáveis para SM-2 e explicação gramatical por IA, Dark Mode WCAG AA, aba **Imersão**, **Modo Hands-Free**, Comunidade 2.0, cotas R2 e builds Web/PWA, Windows `.exe` e Android `.apk`).
 
 ---
 

@@ -4,6 +4,22 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v9.0.0`] — 2026-11-26
+### 16 Idiomas (Turco, Hebraico RTL + Niqqud, Norueguês & Dinamarquês), 150 Unidades Coesas por Idioma (2.400 Totais), +10 Cenários IA/Idioma (800) & YouTube Study Lab
+- **4 Novos Idiomas com Paridade 100% (`tr`, `he`, `nb`, `da`):**
+  - **Turco (`tr`)**, **Hebraico (`he` com RTL nativo + toggle de diacríticos *Niqqud*)**, **Norueguês Bokmål (`nb`)** e **Dinamarquês (`da`)**, cada um com **150 unidades CEFR A1–C1** (`30` por nível), **200 guias gramaticais**, **40 questões CAT**, **50 cenários de Tutor IA**, **4 simulados oficiais cada** (`TÖMER`, `YAEL`, `Norskprøve`, `PD3` — `16` novos simulados, `96` totais), podcasts (`80` totais), vídeos interativos (`48` totais), drills, readers e *Script Trainer* (Alefbet completo + letras especiais turcas e nórdicas).
+  - **+12 novos sotaques regionais** (`tr-IST`, `tr-ANK`, `tr-IZM`, `he-TLV`, `he-JRS`, `he-HFA`, `nb-OSL`, `nb-BGO`, `nb-TRD`, `da-CPH`, `da-AAR`, `da-ODE`), totalizando **61 sotaques neurais** no Worker `v9.0.0` e cliente.
+- **Expansão Espiralada para 150 Unidades em Todos os 16 Idiomas (`2.400` Unidades Totais):**
+  - Todos os **12 idiomas anteriores** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`) expandidos de `103 → 150` unidades (`+47` unidades inéditas por idioma em `src/data/curriculum/expansionV9/`), totalizando **`2.400` unidades** (`30` por nível CEFR) com `conceptKey` e `prerequisiteConcepts` sem repetição de títulos.
+  - **`+10` novos cenários de conversação IA por idioma** em `src/data/tutorScenariosV9/` (`800` cenários totais nos 16 idiomas).
+- **YouTube Study Lab (`POST /api/youtube-study` + `YouTubeStudyLab.tsx`):**
+  - Nova aba dentro de **Imersão → Vídeos** onde o aluno cola qualquer URL do YouTube (ou transcrição SRT/VTT/texto), gera legendas bilíngues clicáveis palavra a palavra com salvamento direto no deck SM-2, analisa **"Gramática & Uso Real"** (explicando *por que* o falante usou cada estrutura) e responde a checkpoints interativos (cota persistente de `100/dia` no R2 + modo offline).
+- **Correções de Interface & Qualidade (`Dark Mode` + `Mobile`):**
+  - Contraste do cabeçalho CEFR sticky e do card *Módulo Atual* no Dark Mode (`e495e14`) e trava de largura no seletor de idioma mobile (`Sidebar.tsx`) eliminando overflow horizontal em `390x844`.
+- **Verificação:** `node --check cloudflare-worker/worker.js`, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `81/81` testes verdes), `npm run build` (`7.03s`), `playwright test` (`15/15` E2E verdes incl. Jornada 5), deploy live Worker `v9.0.0` + Pages (`https://e99df26f.fluentbridge.pages.dev`) + pré-aquecimento R2 (`24` itens).
+
+---
+
 ## [`v8.4.0`] — 2026-11-26
 ### Dark Mode Híbrido, Imersão Dedicada, Hands-Free, Comunidade 2.0, Cotas R2, Vídeo Range & Correção do Nome do Professor
 - **Correção de Bug (Nome do Professor):** Adicionado `teacherDisplayName` em `UserProfile` e helper `getTeacherDisplayName()` (`src/utils/teacherDisplay.ts`). Agora o nome definido em *Estúdio do Professor → Nuvem, IA & Escola* (ex.: `Silas Wagner`) é exibido corretamente no dropdown de atribuição do `AdminPanel` e em `TeacherLinkModal`, usando o nome de cadastro apenas como fallback.

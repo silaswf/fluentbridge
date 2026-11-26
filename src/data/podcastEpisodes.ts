@@ -710,6 +710,218 @@ const SEEDS: EpSeed[] = [
     ],
     q: 'Vad kräver framtidens elnät enligt talaren?', opts: ['Smart styrning och långsiktiga investeringar', 'Mindre förnybar energi', 'Stoppad forskning'], ans: 0,
   },
+  // TR (A1-C1)
+  {
+    lang: 'tr', d1: 'tr-TR', s1: 'Emre', d2: 'tr-TR', s2: 'Selin', lvl: 'A1',
+    titlePt: 'Chá Turco e Simit em Kadıköy', titleTarget: 'Çay Bahçesinde',
+    themePt: 'Pedidos educados e vogais harmônicas no cotidiano.',
+    videoTipPt: 'Busque: "Turkish cafe ordering A1 listening".',
+    lines: [
+      [1, "Merhaba! Bir bardak sıcak çay ve bir taze simit alabilir miyim, lütfen?", "Olá! Posso pegar um copo de chá quente e um simit fresco, por favor?"],
+      [2, "Tabii ki, hemen getiriyorum! Afiyet olsun.", "Claro, trago já! Bom apetite."],
+    ],
+    q: 'Emre çay bahçesinde ne sipariş ediyor?', opts: ['Bir çay ve bir simit', 'Bir kahve ve bir pasta', 'Bir soğuk su'], ans: 0,
+  },
+  {
+    lang: 'tr', d1: 'tr-TR', s1: 'Emre', d2: 'tr-TR', s2: 'Selin', lvl: 'A2',
+    titlePt: 'Pegando o Marmaray em Istambul', titleTarget: 'Marmaray İstasyonunda',
+    themePt: 'Transporte público e direções entre Europa e Ásia.',
+    videoTipPt: 'Busque: "Istanbul Marmaray Turkish listening A2".',
+    lines: [
+      [2, "Affedersiniz, Kadıköy yönüne giden tren hangi perondan kalkıyor?", "Com licença, o trem que vai para Kadıköy sai de qual plataforma?"],
+      [1, "İkinci perondan kalkıyor, üç dakika içinde burada olacak.", "Sai da segunda plataforma, estará aqui em três minutos."],
+    ],
+    q: 'Tren hangi perondan kalkıyor?', opts: ['İkinci perondan', 'Dördüncü perondan', 'Beşinci perondan'], ans: 0,
+  },
+  {
+    lang: 'tr', d1: 'tr-TR', s1: 'Emre', d2: 'tr-TR', s2: 'Selin', lvl: 'B1',
+    titlePt: 'Marcando Consulta Médica', titleTarget: 'Doktor Randevusu',
+    themePt: 'Saúde e posposições temporais em turco.',
+    videoTipPt: 'Busque: "Turkish doctor appointment dialogue B1".',
+    lines: [
+      [1, "Üç gündür boğazım ağrıyor, yarın sabah için randevu alabilir miyim?", "Minha garganta dói há três dias, posso marcar uma consulta para amanhã de manhã?"],
+    ],
+    q: 'Emre’nin boğazı kaç gündür ağrıyor?', opts: ['Üç gündür', 'Bir haftadır', 'Sadece bugün'], ans: 0,
+  },
+  {
+    lang: 'tr', d1: 'tr-TR', s1: 'Emre', d2: 'tr-TR', s2: 'Selin', lvl: 'B2',
+    titlePt: 'Cultura de Trabalho & Hospitalidade', titleTarget: 'Türk İş Kültürü',
+    themePt: 'Imersão B2 sobre reuniões e relações profissionais.',
+    videoTipPt: 'Ouça podcasts da TRT Radyo ou Turkish Tea Time.',
+    lines: [
+      [2, "Türkiye’deki iş toplantılarında projeye geçmeden önce sıcak bir sohbetle güven kurmak çok önemlidir.", "Em reuniões de negócios na Turquia, construir confiança com uma conversa acolhedora antes do projeto é muito importante."],
+    ],
+    q: 'İş toplantılarından önce neye önem verilir?', opts: ['Sıcak bir sohbetle güven kurmaya', 'Hemen sözleşme imzalamaya', 'Hiç konuşmamaya'], ans: 0,
+  },
+  {
+    lang: 'tr', d1: 'tr-TR', s1: 'Emre', d2: 'tr-TR', s2: 'Selin', lvl: 'C1',
+    titlePt: 'Energia Limpa na Anatólia', titleTarget: 'Sürdürülebilir Dönüşüm',
+    themePt: 'Análise C1 com particípios e nominalizações.',
+    videoTipPt: 'Ouça boletins de economia e ciência da TRT Haber.',
+    lines: [
+      [1, "Güneş enerjisi yatırımları hızla artarken, şebeke istikrarının korunması akıllı depolama sistemlerine bağlıdır.", "Enquanto os investimentos em energia solar crescem rápido, manter a estabilidade da rede depende de sistemas inteligentes de armazenamento."],
+    ],
+    q: 'Şebeke istikrarının korunması neye bağlıdır?', opts: ['Akıllı depolama sistemlerine', 'Daha fazla kömür santraline', 'Yatırımları durdurmaya'], ans: 0,
+  },
+  // HE (A1-C1)
+  {
+    lang: 'he', d1: 'he-IL', s1: 'Noam', d2: 'he-IL', s2: 'Tamar', lvl: 'A1',
+    titlePt: 'Café da Manhã em Tel Aviv', titleTarget: 'בבית הקפה',
+    themePt: 'Pedidos simples em hebraico moderno.',
+    videoTipPt: 'Busque: "Ordering coffee in Hebrew Ulpan A1".',
+    lines: [
+      [1, "שלום! אפשר בבקשה קפה הפוך גדול ומאפה טרי?", "Olá! Posso pedir um café com leite grande e um folhado fresco, por favor?"],
+      [2, "בטח! זה מגיע מיד, בתיאבון.", "Com certeza! Já está chegando, bom apetite."],
+    ],
+    q: 'מה נועם מזמין בבית הקפה?', opts: ['קפה הפוך ומאפה', 'תה קר וסלט', 'מים מינרליים'], ans: 0,
+  },
+  {
+    lang: 'he', d1: 'he-IL', s1: 'Noam', d2: 'he-IL', s2: 'Tamar', lvl: 'A2',
+    titlePt: 'Na Estação de Trem para Jerusalém', titleTarget: 'בתחנת הרכבת',
+    themePt: 'Transporte público e horários em hebraico.',
+    videoTipPt: 'Busque: "Hebrew train station dialogue A2".',
+    lines: [
+      [2, "סליחה, מאיזה רציף יוצאת הרכבת לירושלים?", "Com licença, de qual plataforma sai o trem para Jerusalém?"],
+      [1, "מרציף מספר שלוש, היא תגיע בעוד ארבע דקות.", "Da plataforma número três, ele chegará em quatro minutos."],
+    ],
+    q: 'מאיזה רציף יוצאת הרכבת?', opts: ['רציף מספר שלוש', 'רציף מספר שבע', 'אוטובוס 18'], ans: 0,
+  },
+  {
+    lang: 'he', d1: 'he-IL', s1: 'Noam', d2: 'he-IL', s2: 'Tamar', lvl: 'B1',
+    titlePt: 'Consulta no Kupat Holim', titleTarget: 'אצל הרופא',
+    themePt: 'Saúde e uso de passado e futuro em hebraico.',
+    videoTipPt: 'Busque: "Hebrew medical appointment B1".',
+    lines: [
+      [1, "כואב לי הגרון כבר שלושה ימים ואני צריך לקבוע תור למחר.", "Minha garganta dói já faz três dias e preciso marcar consulta para amanhã."],
+    ],
+    q: 'כמה ימים כואב לנועם הגרון?', opts: ['שלושה ימים', 'שבועיים', 'רק הבוקר'], ans: 0,
+  },
+  {
+    lang: 'he', d1: 'he-IL', s1: 'Noam', d2: 'he-IL', s2: 'Tamar', lvl: 'B2',
+    titlePt: 'Cultura de Startups em Israel', titleTarget: 'תרבות ההייטק',
+    themePt: 'Imersão B2 sobre comunicação direta (Dugri) no trabalho.',
+    videoTipPt: 'Ouça "Streetwise Hebrew" ou podcasts da Kan 11.',
+    lines: [
+      [2, "בסטארטאפים ישראליים מעודדים תקשורת ישירה ופתוחה כדי לפתור בעיות במהירות.", "Em startups israelenses, incentiva-se a comunicação direta e aberta para resolver problemas rapidamente."],
+    ],
+    q: 'מה מעודדים בסטארטאפים ישראליים?', opts: ['תקשורת ישירה ופתוחה', 'פגישות סגורות בלבד', 'דחיית החלטות'], ans: 0,
+  },
+  {
+    lang: 'he', d1: 'he-IL', s1: 'Noam', d2: 'he-IL', s2: 'Tamar', lvl: 'C1',
+    titlePt: 'Inovação Hídrica & Clima', titleTarget: 'חדשנות בת-קיימא',
+    themePt: 'Análise C1 em registro jornalístico hebraico.',
+    videoTipPt: 'Ouça boletins da Kan Reshet Bet.',
+    lines: [
+      [1, "למרות האתגרים האקלימיים, טכנולוגיות התפלה וניהול מים חכם מבטיחות יציבות ארוכת טווח.", "Apesar dos desafios climáticos, tecnologias de dessalinização e gestão hídrica inteligente garantem estabilidade de longo prazo."],
+    ],
+    q: 'מה מבטיח יציבות ארוכת טווח לפי הדובר?', opts: ['התפלה וניהול מים חכם', 'צמצום המחקר המדעי', 'הפסקת ההשקעות'], ans: 0,
+  },
+  // NB (A1-C1)
+  {
+    lang: 'nb', d1: 'nb-NO', s1: 'Henrik', d2: 'nb-NO', s2: 'Ingrid', lvl: 'A1',
+    titlePt: 'Café da Manhã em Oslo', titleTarget: 'På kafeen i Oslo',
+    themePt: 'Pedidos educados e cultura norueguesa do kaffe.',
+    videoTipPt: 'Busque: "Norwegian Bokmål cafe ordering A1".',
+    lines: [
+      [1, "Hei! Jeg vil gjerne ha en svart kaffe og en skillingsbolle, takk.", "Oi! Eu gostaria de um café preto e um pãozinho de canela, obrigado."],
+      [2, "Vær så god! Det blir syttifem kroner.", "Aqui está! Ficam setenta e cinco coroas."],
+    ],
+    q: 'Hva bestiller Henrik til kaffen?', opts: ['En skillingsbolle', 'En vaffel', 'En iskrem'], ans: 0,
+  },
+  {
+    lang: 'nb', d1: 'nb-NO', s1: 'Henrik', d2: 'nb-NO', s2: 'Ingrid', lvl: 'A2',
+    titlePt: 'Pegando o T-bane em Oslo', titleTarget: 'På T-banen',
+    themePt: 'Transporte público e direções em Bokmål.',
+    videoTipPt: 'Busque: "Oslo T-bane Norwegian listening A2".',
+    lines: [
+      [2, "Unnskyld, hvilken linje går mot Majorstuen?", "Com licença, qual linha vai em direção a Majorstuen?"],
+      [1, "Ta linje 2 vestover fra spor én, den kommer om to minutter.", "Pegue a linha 2 para oeste da plataforma um, chega em dois minutos."],
+    ],
+    q: 'Hvilken linje skal Ingrid ta?', opts: ['Linje 2', 'Linje 5', 'Buss 30'], ans: 0,
+  },
+  {
+    lang: 'nb', d1: 'nb-NO', s1: 'Henrik', d2: 'nb-NO', s2: 'Ingrid', lvl: 'B1',
+    titlePt: 'Marcando Consulta Médica (Fastlege)', titleTarget: 'Hos fastlegen',
+    themePt: 'Sistema de saúde norueguês e tempos verbais.',
+    videoTipPt: 'Busque: "Norwegian doctor appointment dialogue B1".',
+    lines: [
+      [1, "Jeg har hatt vondt i halsen i tre dager og trenger å bestille en legetime.", "Estou com dor de garganta há três dias e preciso marcar uma consulta médica."],
+    ],
+    q: 'Hvor lenge har Henrik hatt vondt i halsen?', opts: ['I tre dager', 'I to uker', 'Bare i dag'], ans: 0,
+  },
+  {
+    lang: 'nb', d1: 'nb-NO', s1: 'Henrik', d2: 'nb-NO', s2: 'Ingrid', lvl: 'B2',
+    titlePt: 'Equilíbrio Trabalho-Vida na Noruega', titleTarget: 'Norsk arbeidsliv',
+    themePt: 'Imersão B2 sobre cultura profissional norueguesa.',
+    videoTipPt: 'Ouça "Klar Tale" ou podcasts da NRK.',
+    lines: [
+      [2, "I norsk arbeidsliv legges det stor vekt på tillit, flate strukturer og balanse mellom jobb og fritid.", "Na vida profissional norueguesa, dá-se grande valor à confiança, estruturas horizontais e equilíbrio entre trabalho e lazer."],
+    ],
+    q: 'Hva legges det stor vekt på i norsk arbeidsliv?', opts: ['Tillit og balanse mellom jobb og fritid', 'Overtid hver kveld', 'Strenge hierarkier'], ans: 0,
+  },
+  {
+    lang: 'nb', d1: 'nb-NO', s1: 'Henrik', d2: 'nb-NO', s2: 'Ingrid', lvl: 'C1',
+    titlePt: 'Energia Hidrelétrica & Futuro Verde', titleTarget: 'Grønn omstilling i Norge',
+    themePt: 'Análise C1 no estilo Bergenstesten.',
+    videoTipPt: 'Ouça NRK Ekko eller Dagsnytt 18.',
+    lines: [
+      [1, "Selv om vannkraften gir et solid grunnlag, krever det grønne skiftet langsiktige investeringer i strømnettet.", "Embora a energia hidrelétrica dê uma base sólida, a transição verde exige investimentos de longo prazo na rede elétrica."],
+    ],
+    q: 'Hva krever det grønne skiftet ifølge taleren?', opts: ['Langsiktige investeringer i strømnettet', 'Mindre fornybar kraft', 'Kutt i forskning'], ans: 0,
+  },
+  // DA (A1-C1)
+  {
+    lang: 'da', d1: 'da-DK', s1: 'Kasper', d2: 'da-DK', s2: 'Sofie', lvl: 'A1',
+    titlePt: 'Hygge e Padaria em Copenhague', titleTarget: 'Hos bageren',
+    themePt: 'Pedidos educados e cultura dinamarquesa.',
+    videoTipPt: 'Busque: "Danish bakery ordering A1".',
+    lines: [
+      [1, "Hej! Jeg vil gerne have en filterkaffe og en kanelsnegl, tak.", "Oi! Eu gostaria de um café coado e um rolinho de canela, obrigado."],
+      [2, "Værsgo! Det bliver halvtreds kroner.", "Aqui está! Ficam cinquenta coroas."],
+    ],
+    q: 'Hvad bestiller Kasper til sin kaffe?', opts: ['En kanelsnegl', 'Et rugbrød', 'En juice'], ans: 0,
+  },
+  {
+    lang: 'da', d1: 'da-DK', s1: 'Kasper', d2: 'da-DK', s2: 'Sofie', lvl: 'A2',
+    titlePt: 'Pegando o S-tog em Copenhague', titleTarget: 'Med S-toget',
+    themePt: 'Transporte público e escuta do dinamarquês falado.',
+    videoTipPt: 'Busque: "Copenhagen S-train Danish listening A2".',
+    lines: [
+      [2, "Undskyld, hvilket tog kører mod Nørreport?", "Com licença, qual trem vai em direção a Nørreport?"],
+      [1, "Tag linje B fra spor to, det kommer om tre minutter.", "Pegue a linha B da plataforma dois, chega em três minutos."],
+    ],
+    q: 'Hvilken linje skal Sofie tage?', opts: ['Linje B', 'Linje F', 'Bus 5C'], ans: 0,
+  },
+  {
+    lang: 'da', d1: 'da-DK', s1: 'Kasper', d2: 'da-DK', s2: 'Sofie', lvl: 'B1',
+    titlePt: 'Marcando Consulta no Lægehus', titleTarget: 'Hos lægen',
+    themePt: 'Saúde na Dinamarca e ordem de palavras.',
+    videoTipPt: 'Busque: "Danish doctor appointment dialogue B1".',
+    lines: [
+      [1, "Jeg har haft ondt i halsen i tre dage og vil gerne bestille en tid.", "Estou com dor de garganta há três dias e gostaria de marcar um horário."],
+    ],
+    q: 'Hvor længe har Kasper haft ondt i halsen?', opts: ['I tre dage', 'I en måned', 'Siden i går aftes'], ans: 0,
+  },
+  {
+    lang: 'da', d1: 'da-DK', s1: 'Kasper', d2: 'da-DK', s2: 'Sofie', lvl: 'B2',
+    titlePt: 'Cultura de Trabalho & Tillid', titleTarget: 'Dansk arbejdskultur',
+    themePt: 'Imersão B2 sobre flexibilidade e confiança.',
+    videoTipPt: 'Ouça "DR Radioavisen" ou "Dansk i ørerne".',
+    lines: [
+      [2, "På danske arbejdspladser bygger samarbejdet på tillid, åben dialog og høj grad af selvstændighed.", "Nos locais de trabalho dinamarqueses, a colaboração baseia-se em confiança, diálogo aberto e alto grau de autonomia."],
+    ],
+    q: 'Hvad bygger samarbejdet på i Danmark?', opts: ['Tillid, åben dialog og selvstændighed', 'Streng kontrol hver time', 'Ingen møder'], ans: 0,
+  },
+  {
+    lang: 'da', d1: 'da-DK', s1: 'Kasper', d2: 'da-DK', s2: 'Sofie', lvl: 'C1',
+    titlePt: 'Energia Eólica Offshore & Rede', titleTarget: 'Havvind og fremtidens elnet',
+    themePt: 'Análise C1 no estilo Studieprøven.',
+    videoTipPt: 'Ouça DR P1 Orientering.',
+    lines: [
+      [1, "Selvom Danmark er førende inden for havvind, kræver et stabilt elnet også effektiv energilagring.", "Embora a Dinamarca seja líder em energia eólica offshore, uma rede elétrica estável também exige armazenamento eficaz de energia."],
+    ],
+    q: 'Hvad kræver et stabilt elnet ud over havvind?', opts: ['Effektiv energilagring', 'Flere kulkraftværker', 'Mindre forskning'], ans: 0,
+  },
 ];
 
 export const PODCAST_EPISODES: PodcastEpisode[] = SEEDS.map((s) => {

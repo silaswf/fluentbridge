@@ -1586,4 +1586,32 @@ export const IN_LESSON_LEXICON: Record<LanguageCode, InLessonLexiconEntry[]> = {
       examplePt: 'O novo projeto começa na próxima semana.',
     },
   ],
+  tr: [
+    { word: 'Merhaba', ipa: '/meɾhaˈba/', translation: 'Olá', category: 'Saudações', exampleEn: 'Merhaba! Benim adım Elif ve İstanbul’da yaşıyorum.', examplePt: 'Olá! Meu nome é Elif e moro em Istambul.' },
+    { word: 'teşekkür', ipa: '/teʃecˈcyɾ/', translation: 'agradecimento / obrigado', category: 'Cortesia', exampleEn: 'Yardımınız için çok teşekkür ederim.', examplePt: 'Muito obrigado pela sua ajuda.' },
+    { word: 'kahve', ipa: '/kahˈve/', translation: 'café', category: 'Cafeteria', exampleEn: 'Sabahları bir fincan Türk kahvesi içerim.', examplePt: 'De manhã eu tomo uma xícara de café turco.' },
+    { word: 'zaman', ipa: '/zaˈman/', translation: 'tempo', category: 'Rotina', exampleEn: 'Dersten önce yeterince zaman var.', examplePt: 'Há tempo suficiente antes da aula.' },
+    { word: 'proje', ipa: '/pɾoˈʒe/', translation: 'projeto', category: 'Trabalho', exampleEn: 'Yeni proje gelecek hafta başlıyor.', examplePt: 'O novo projeto começa na próxima semana.' },
+  ],
+  he: [
+    { word: 'שלום', ipa: '/ʃaˈlom/', translation: 'Olá / Paz', category: 'Saudações', exampleEn: 'שלום! קוראים לי נועה ואני גרה בתל אביב.', examplePt: 'Olá! Meu nome é Noa e moro em Tel Aviv.' },
+    { word: 'תודה', ipa: '/toˈda/', translation: 'Obrigado(a)', category: 'Cortesia', exampleEn: 'תודה רבה על העזרה שלך היום.', examplePt: 'Muito obrigado pela sua ajuda hoje.' },
+    { word: 'קפה', ipa: '/kaˈfe/', translation: 'café', category: 'Cafeteria', exampleEn: 'אני שותה קפה שחור כל בוקר.', examplePt: 'Eu tomo café preto toda manhã.' },
+    { word: 'זמן', ipa: '/zman/', translation: 'tempo', category: 'Rotina', exampleEn: 'יש לנו מספיק זמן לפני השיעור.', examplePt: 'Temos tempo suficiente antes da aula.' },
+    { word: 'פרויקט', ipa: '/pʁoˈjekt/', translation: 'projeto', category: 'Trabalho', exampleEn: 'הפרויקט החדש מתחיל בשבוע הבא.', examplePt: 'O novo projeto começa na próxima semana.' },
+  ],
+  nb: [
+    { word: 'Hei', ipa: '/hæɪ/', translation: 'Oi / Olá', category: 'Saudações', exampleEn: 'Hei! Jeg heter Ingrid og bor i Oslo.', examplePt: 'Oi! Meu nome é Ingrid e moro em Oslo.' },
+    { word: 'takk', ipa: '/tɑk/', translation: 'obrigado(a)', category: 'Cortesia', exampleEn: 'Tusen takk for hjelpen i dag!', examplePt: 'Muito obrigado pela ajuda hoje!' },
+    { word: 'kaffe', ipa: '/ˈkɑfə/', translation: 'café', category: 'Cafeteria', exampleEn: 'Jeg drikker en kopp kaffe hver morgen.', examplePt: 'Eu tomo uma xícara de café toda manhã.' },
+    { word: 'tid', ipa: '/tiːd/', translation: 'tempo', category: 'Rotina', exampleEn: 'Vi har god tid før timen starter.', examplePt: 'Temos bastante tempo antes da aula começar.' },
+    { word: 'prosjekt', ipa: '/pruˈʃɛkt/', translation: 'projeto', category: 'Trabalho', exampleEn: 'Det nye prosjektet starter neste uke.', examplePt: 'O novo projeto começa na próxima semana.' },
+  ],
+  da: [
+    { word: 'Hej', ipa: '/hɑj/', translation: 'Oi / Olá', category: 'Saudações', exampleEn: 'Hej! Jeg hedder Freja og bor i København.', examplePt: 'Oi! Meu nome é Freja e moro em Copenhague.' },
+    { word: 'tak', ipa: '/tˢɑɡ/', translation: 'obrigado(a)', category: 'Cortesia', exampleEn: 'Tusind tak for hjælpen i dag!', examplePt: 'Muito obrigado pela ajuda hoje!' },
+    { word: 'kaffe', ipa: '/ˈkʰɑfə/', translation: 'café', category: 'Cafeteria', exampleEn: 'Jeg drikker en kop kaffe hver morgen.', examplePt: 'Eu tomo uma xícara de café toda manhã.' },
+    { word: 'tid', ipa: '/tˢiːðˀ/', translation: 'tempo', category: 'Rotina', exampleEn: 'Vi har god tid før timen begynder.', examplePt: 'Temos bastante tempo antes da aula começar.' },
+    { word: 'projekt', ipa: '/pʁoˈɕɛɡd/', translation: 'projeto', category: 'Trabalho', exampleEn: 'Det nye projekt starter næste uge.', examplePt: 'O novo projeto começa na próxima semana.' },
+  ],
 };

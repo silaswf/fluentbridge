@@ -199,6 +199,18 @@ function normalizeTtsLocale(locale: string): string {
   if (lower.startsWith('af')) return 'af-ZA';
   if (lower === 'sv-fi') return 'sv-FI';
   if (lower.startsWith('sv')) return 'sv-SE';
+  if (lower === 'tr-cy') return 'tr-CY';
+  if (lower === 'tr-tr-ank') return 'tr-TR-ANK';
+  if (lower.startsWith('tr')) return 'tr-TR';
+  if (lower === 'he-il-jer') return 'he-IL-JER';
+  if (lower === 'he-il-sep') return 'he-IL-SEP';
+  if (lower.startsWith('he') || lower.startsWith('iw')) return 'he-IL';
+  if (lower === 'nb-no-bgo') return 'nb-NO-BGO';
+  if (lower === 'nb-no-trd') return 'nb-NO-TRD';
+  if (lower.startsWith('nb') || lower.startsWith('no')) return 'nb-NO';
+  if (lower === 'da-dk-aar') return 'da-DK-AAR';
+  if (lower === 'da-dk-ode') return 'da-DK-ODE';
+  if (lower.startsWith('da')) return 'da-DK';
   if (lower.startsWith('pt')) return 'pt-BR';
   return 'en-US';
 }
@@ -320,6 +332,10 @@ export function getAllVoiceProviderLabels() {
     afNa: 'Gemini 2.5 Native TTS (af-ZA) · Gacrux / Iapetus (Namíbia)',
     svSe: 'Gemini 2.5 Native TTS (sv-SE) · Callirrhoe / Umbriel (Suécia)',
     svFi: 'Gemini 2.5 Native TTS (sv-SE) · Callirrhoe / Umbriel (Finlândia)',
+    trTr: 'Gemini 2.5 Native TTS (tr-TR) · Kore / Orus (Istambul / Ancara / Chipre)',
+    heIl: 'Gemini 2.5 Native TTS (he-IL) · Zephyr / Fenrir (Tel Aviv / Jerusalém)',
+    nbNo: 'Gemini 2.5 Native TTS (nb-NO) · Callirrhoe / Umbriel (Oslo / Bergen / Trondheim)',
+    daDk: 'Gemini 2.5 Native TTS (da-DK) · Despina / Schedar (Copenhague / Aarhus / Odense)',
   };
 }
 
@@ -348,6 +364,10 @@ export function getAllVoiceDiagnostics(): VoiceDiagnosticItem[] {
     { code: 'nl', symbol: 'NL', namePt: 'Holandês', dialectsLabel: 'NL / BE', providerLabel: v.nlNl, primaryDialect: 'nl-NL', sampleText: 'Goedemorgen! Welkom bij FluentBridge.' },
     { code: 'af', symbol: 'AF', namePt: 'Africâner', dialectsLabel: 'ZA / NA', providerLabel: v.afZa, primaryDialect: 'af-ZA', sampleText: 'Goeiemôre! Welkom by FluentBridge.' },
     { code: 'sv', symbol: 'SV', namePt: 'Sueco', dialectsLabel: 'SE / FI', providerLabel: v.svSe, primaryDialect: 'sv-SE', sampleText: 'Hej! Välkommen till FluentBridge.' },
+    { code: 'tr', symbol: 'TR', namePt: 'Turco', dialectsLabel: 'IST / ANK / CY', providerLabel: v.trTr, primaryDialect: 'tr-TR', sampleText: 'Merhaba! FluentBridge’e hoş geldiniz.' },
+    { code: 'he', symbol: 'עב', namePt: 'Hebraico', dialectsLabel: 'TLV / JER / SEP', providerLabel: v.heIl, primaryDialect: 'he-IL', sampleText: 'שלום! ברוכים הבאים ל-FluentBridge.' },
+    { code: 'nb', symbol: 'NB', namePt: 'Norueguês', dialectsLabel: 'OSL / BGO / TRD', providerLabel: v.nbNo, primaryDialect: 'nb-NO', sampleText: 'Hei! Velkommen til FluentBridge.' },
+    { code: 'da', symbol: 'DA', namePt: 'Dinamarquês', dialectsLabel: 'CPH / AAR / ODE', providerLabel: v.daDk, primaryDialect: 'da-DK', sampleText: 'Hej! Velkommen til FluentBridge.' },
   ];
 }
 

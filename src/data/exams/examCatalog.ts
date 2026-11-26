@@ -300,6 +300,62 @@ export const EXAM_TYPES: ExamTypeMeta[] = [
       { label: '0 – 59% (Underkänd)', minScore: 0, maxScore: 59, cefr: 'A2', meaningPt: 'Ainda não atingiu 60%; pratique sufixos definidos (-en/-et) e regra BIFF.', passing: false },
     ],
   },
+  {
+    id: 'tomer',
+    languageCode: 'tr',
+    name: 'TÖMER / YDS (Turco Oficial)',
+    officialOrg: 'Ankara Üniversitesi TÖMER / ÖSYM',
+    scaleLabel: '0 – 100 pontos (>= 60 aprovado)',
+    passingRulePt: 'Mínimo 60 pontos para certificação B1–C1 no TÖMER; universidades turcas costumam exigir C1 (70+).',
+    durationMinutes: 45,
+    referenceTable: [
+      { label: '85 – 100 pts (C1 Pekiyi)', minScore: 85, maxScore: 100, cefr: 'C1', meaningPt: 'Excelente — domínio pleno de harmonia vocálica, particípios e discurso indireto.', passing: true },
+      { label: '60 – 84 pts (Başarılı)', minScore: 60, maxScore: 84, cefr: 'B2', meaningPt: 'Aprovado — comunicação segura em turco cotidiano, acadêmico e corporativo.', passing: true },
+      { label: '0 – 59 pts', minScore: 0, maxScore: 59, cefr: 'A2', meaningPt: 'Abaixo da nota mínima; revise sufixos de caso, harmonia vocálica e ordem SOV.', passing: false },
+    ],
+  },
+  {
+    id: 'yael',
+    languageCode: 'he',
+    name: 'YAEL / Ulpan (Hebraico Oficial)',
+    officialOrg: 'NITE (National Institute for Testing & Evaluation)',
+    scaleLabel: '50 – 150 pontos (Níveis Alef–Vav)',
+    passingRulePt: 'Exame de proficiência acadêmica em Israel; 120+ garante isenção universitária (Ptor).',
+    durationMinutes: 45,
+    referenceTable: [
+      { label: '120 – 150 pts (Ptor / Vav)', minScore: 120, maxScore: 150, cefr: 'C1', meaningPt: 'Isenção acadêmica — leitura fluente sem Niqqud e domínio dos Binyanim.', passing: true },
+      { label: '95 – 119 pts (Dalet–He)', minScore: 95, maxScore: 119, cefr: 'B2', meaningPt: 'Intermediário superior — apto para cursos universitários e trabalho em Israel.', passing: true },
+      { label: '50 – 94 pts (Alef–Gimel)', minScore: 50, maxScore: 94, cefr: 'B1', meaningPt: 'Em consolidação; pratique leitura RTL sem vogais e estado construto (Smikhut).', passing: false },
+    ],
+  },
+  {
+    id: 'norskprove',
+    languageCode: 'nb',
+    name: 'Norskprøve / Bergenstesten',
+    officialOrg: 'HK-dir / Folkeuniversitetet',
+    scaleLabel: 'A1 – C1 (Aprovado B1/B2/C1)',
+    passingRulePt: 'B1 exigido para cidadania/residência; B2 (ou Bergenstesten 450+) para universidades e saúde na Noruega.',
+    durationMinutes: 45,
+    referenceTable: [
+      { label: '80 – 100% (C1 / Bergenstesten)', minScore: 80, maxScore: 100, cefr: 'C1', meaningPt: 'Nível C1 — domínio acadêmico e profissional completo em Bokmål.', passing: true },
+      { label: '60 – 79% (B2 Godkjent)', minScore: 60, maxScore: 79, cefr: 'B2', meaningPt: 'Aprovado no padrão B2 para admissão universitária e trabalho qualificado.', passing: true },
+      { label: '0 – 59% (A2/B1)', minScore: 0, maxScore: 59, cefr: 'B1', meaningPt: 'Reforce inversão V2, negação em subordinadas e possessivos reflexivos (sin/sitt).', passing: false },
+    ],
+  },
+  {
+    id: 'pd3',
+    languageCode: 'da',
+    name: 'Prøve i Dansk 3 / Studieprøven',
+    officialOrg: 'Styrelsen for International Rekruttering og Integration (SIRI)',
+    scaleLabel: 'Escala dinamarquesa -3 a 12 (>= 02 aprovado)',
+    passingRulePt: 'Nota >= 02 (60%+) aprova no Prøve i Dansk 3 (B2); Studieprøven exige C1 para universidades.',
+    durationMinutes: 45,
+    referenceTable: [
+      { label: '10 – 12 (C1 Studieprøven)', minScore: 80, maxScore: 100, cefr: 'C1', meaningPt: 'Excelente — apto para ensino superior na Dinamarca (Studieprøven).', passing: true },
+      { label: '02 – 07 (B2 Bestået)', minScore: 60, maxScore: 79, cefr: 'B2', meaningPt: 'Aprovado (Bestået) no Prøve i Dansk 3.', passing: true },
+      { label: '00 / -3 (Ikke bestået)', minScore: 0, maxScore: 59, cefr: 'A2', meaningPt: 'Abaixo da nota mínima; pratique escuta do Stød, regra V2 e s-passiv.', passing: false },
+    ],
+  },
 ];
 
 export function getExamTypesByLanguage(languageCode: LanguageCode): ExamTypeMeta[] {

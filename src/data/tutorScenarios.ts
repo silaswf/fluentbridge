@@ -14,6 +14,22 @@ import { AR_TUTOR_SCENARIOS } from './tutorScenariosAr';
 import { NL_TUTOR_SCENARIOS } from './tutorScenariosNl';
 import { AF_TUTOR_SCENARIOS } from './tutorScenariosAf';
 import { SV_TUTOR_SCENARIOS } from './tutorScenariosSv';
+import { TR_TUTOR_SCENARIOS } from './tutorScenariosTr';
+import { HE_TUTOR_SCENARIOS } from './tutorScenariosHe';
+import { NB_TUTOR_SCENARIOS } from './tutorScenariosNb';
+import { DA_TUTOR_SCENARIOS } from './tutorScenariosDa';
+import { EN_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_en';
+import { ES_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_es';
+import { FR_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_fr';
+import { IT_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_it';
+import { DE_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_de';
+import { RU_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_ru';
+import { JA_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_ja';
+import { ZH_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_zh';
+import { AR_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_ar';
+import { NL_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_nl';
+import { AF_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_af';
+import { SV_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_sv';
 
 export interface UnitRoleplayAngle {
   id: string;
@@ -1438,4 +1454,20 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
   ...NL_TUTOR_SCENARIOS,
   ...AF_TUTOR_SCENARIOS,
   ...SV_TUTOR_SCENARIOS,
+  ...TR_TUTOR_SCENARIOS,
+  ...HE_TUTOR_SCENARIOS,
+  ...NB_TUTOR_SCENARIOS,
+  ...DA_TUTOR_SCENARIOS,
+  ...EN_TUTOR_SCENARIOS_V9,
+  ...ES_TUTOR_SCENARIOS_V9,
+  ...FR_TUTOR_SCENARIOS_V9,
+  ...IT_TUTOR_SCENARIOS_V9,
+  ...DE_TUTOR_SCENARIOS_V9,
+  ...RU_TUTOR_SCENARIOS_V9,
+  ...JA_TUTOR_SCENARIOS_V9,
+  ...ZH_TUTOR_SCENARIOS_V9,
+  ...AR_TUTOR_SCENARIOS_V9,
+  ...NL_TUTOR_SCENARIOS_V9,
+  ...AF_TUTOR_SCENARIOS_V9,
+  ...SV_TUTOR_SCENARIOS_V9,
 ];

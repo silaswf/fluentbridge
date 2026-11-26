@@ -30,6 +30,12 @@ import {
   toJapaneseKana,
   type JapaneseScriptMode,
 } from '../utils/japaneseKana';
+import {
+  loadHebrewScriptMode,
+  saveHebrewScriptMode,
+  stripHebrewNiqqud,
+  type HebrewScriptMode,
+} from '../utils/hebrewNiqqud';
 import { HandsFreeAudioModal } from './HandsFreeAudioModal';
 import { DualAudioButtons } from './DualAudioButtons';
 import { MistakeNotebookView } from './MistakeNotebookView';
@@ -87,6 +93,9 @@ export function VocabReview({
   const [flipped, setFlipped] = useState(false);
   const [jaScriptMode, setJaScriptMode] = useState<JapaneseScriptMode>(() =>
     loadJapaneseScriptMode(),
+  );
+  const [heScriptMode, setHeScriptMode] = useState<HebrewScriptMode>(() =>
+    loadHebrewScriptMode(),
   );
   const [handsFreeOpen, setHandsFreeOpen] = useState(false);
 
@@ -349,6 +358,20 @@ export function VocabReview({
                 className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-800 cursor-pointer"
               >
                 {jaScriptMode === 'kana' ? 'あいう Kana' : '漢字 Padrão'}
+              </button>
+            )}
+            {languageCode === 'he' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const next: HebrewScriptMode =
+                    heScriptMode === 'niqqud' ? 'modern' : 'niqqud';
+                  setHeScriptMode(next);
+                  saveHebrewScriptMode(next);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800 cursor-pointer"
+              >
+                {heScriptMode === 'modern' ? 'עב Moderno' : 'נִקּוּד Niqqud'}
               </button>
             )}
           </div>
@@ -684,7 +707,9 @@ export function VocabReview({
                       <h2 className="font-display text-3xl font-extrabold text-slate-900">
                         {languageCode === 'ja' && jaScriptMode === 'kana'
                           ? toJapaneseKana(activeCard.word)
-                          : activeCard.word}
+                          : languageCode === 'he' && heScriptMode === 'modern'
+                            ? stripHebrewNiqqud(activeCard.word)
+                            : activeCard.word}
                       </h2>
                       <p className="mt-1.5 font-mono text-sm text-slate-400">
                         {activeCard.ipa}

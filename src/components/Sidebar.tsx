@@ -51,6 +51,10 @@ const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string
   nl: { symbol: 'NL', accent: 'bg-orange-600 text-white' },
   af: { symbol: 'AF', accent: 'bg-green-700 text-white' },
   sv: { symbol: 'SV', accent: 'bg-blue-700 text-yellow-300' },
+  tr: { symbol: 'TR', accent: 'bg-red-600 text-white' },
+  he: { symbol: 'עב', accent: 'bg-blue-800 text-white' },
+  nb: { symbol: 'NB', accent: 'bg-rose-700 text-white' },
+  da: { symbol: 'DA', accent: 'bg-red-700 text-white' },
 };
 
 export type NavView =
@@ -600,7 +604,7 @@ export function Sidebar({
           <select
             value={activeCourse.code}
             onChange={(e) => onChangeLanguage(e.target.value as LanguageCode)}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-800"
+            className="max-w-[122px] min-w-0 truncate rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-800"
             aria-label="Selecionar idioma"
           >
             {LANGUAGE_COURSES.map((c) => {

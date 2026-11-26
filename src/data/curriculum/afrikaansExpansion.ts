@@ -1719,7 +1719,7 @@ const AFRIKAANS_EXP_BLUEPRINTS: RichLanguageBlueprint[] = [
     writeModel: 'Meer bome behoort langs hoofstrate geplant te word. Boonop sal veilige fietslane meer mense aanmoedig om sonder motors te reis.',
     vocab: [
       { word: 'Stadsbeplanning', ipa: '/ˈstatsbəˌplanəŋ/', pt: 'Planejamento urbano', cat: 'Urbanismo' },
-      { word: 'Loopafstand', ipa: '/ˈluəpˌafstant/', pt: 'Distância caminhável', cat: 'Urbanismo' },
+      { word: 'Loopafstand', ipa: '/ˈluəpˌafstant/', pt: 'Distância caminhável', cat: 'Urbanismo', exampleTarget: 'Die treinstasie en die mark is binne loopafstand van ons huis.', examplePt: 'A estação de trem e o mercado ficam a uma distância caminhável da nossa casa.' },
       { word: 'Inheems', ipa: '/ˈənɦiəms/', pt: 'Nativo / autóctone', cat: 'Natureza' },
     ],
   },

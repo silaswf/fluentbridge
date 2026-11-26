@@ -12,6 +12,10 @@ import { PLACEMENT_QUESTIONS_AR } from './placementAr';
 import { PLACEMENT_QUESTIONS_NL } from './placementNl';
 import { PLACEMENT_QUESTIONS_AF } from './placementAf';
 import { PLACEMENT_QUESTIONS_SV } from './placementSv';
+import { PLACEMENT_TR } from './placementTr';
+import { PLACEMENT_HE } from './placementHe';
+import { PLACEMENT_NB } from './placementNb';
+import { PLACEMENT_DA } from './placementDa';
 
 export const ALL_PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   ...PLACEMENT_QUESTIONS_EN,
@@ -26,6 +30,10 @@ export const ALL_PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   ...PLACEMENT_QUESTIONS_NL,
   ...PLACEMENT_QUESTIONS_AF,
   ...PLACEMENT_QUESTIONS_SV,
+  ...PLACEMENT_TR,
+  ...PLACEMENT_HE,
+  ...PLACEMENT_NB,
+  ...PLACEMENT_DA,
 ];
 
 export function getPlacementBankByLanguage(
@@ -245,6 +253,70 @@ const UI_STRINGS_BY_LANG: Record<LanguageCode, PlacementUiStrings> = {
     breakdownTitle: 'Resultat per nivå & grammatiktips',
     applyResultBtn: (lvl) => `Starta mina ${lvl}-enheter`,
     closeAria: 'Stäng testet',
+  },
+  tr: {
+    title: 'Uyarlanabilir Türkçe Seviye Testi (CEFR A1–C1)',
+    adaptiveBadge: 'Uyarlanabilir CAT · 40 Soruluk Havuz',
+    questionProgress: (c, t) => `Soru ${c} / ${t}`,
+    currentLevelProbe: (lvl) => `${lvl} Seviyesi Test Ediliyor`,
+    nextQuestionBtn: 'Onayla ve sonraki soru',
+    finishTestBtn: 'CEFR seviyemi hesapla',
+    completedBadge: 'Uyarlanabilir değerlendirme tamamlandı',
+    recommendedHeading: (lvl) => `Önerilen Seviye: CEFR ${lvl}`,
+    summarySubtitle: (c, t, s) =>
+      `${t} uyarlanabilir sorudan ${c} tanesini doğru yanıtladınız (yeterlilik indeksi ${s}/5.0).`,
+    xpEarnedText: 'Seviye belirleme testi için +40 XP kazandınız!',
+    breakdownTitle: 'Seviyelere göre performans ve dilbilgisi notları',
+    applyResultBtn: (lvl) => `${lvl} ünitelerime başla`,
+    closeAria: 'Testi kapat',
+  },
+  he: {
+    title: 'מבחן רמה אדפטיבי בעברית (CEFR A1–C1)',
+    adaptiveBadge: 'מבחן אדפטיבי CAT · מאגר 40 שאלות',
+    questionProgress: (c, t) => `שאלה ${c} מתוך ${t}`,
+    currentLevelProbe: (lvl) => `בדיקת רמה ${lvl}`,
+    nextQuestionBtn: 'אשר ועבור לשאלה הבאה',
+    finishTestBtn: 'חשב את רמת ה-CEFR שלי',
+    completedBadge: 'האבחון האדפטיבי הושלם',
+    recommendedHeading: (lvl) => `רמה מומלצת: CEFR ${lvl}`,
+    summarySubtitle: (c, t, s) =>
+      `ענית נכון על ${c} מתוך ${t} שאלות אדפטיביות (מדד שליטה ${s}/5.0).`,
+    xpEarnedText: 'הרווחת +40 XP על מבחן הרמה!',
+    breakdownTitle: 'פירוט ביצועים לפי רמה והערות דקדוק',
+    applyResultBtn: (lvl) => `התחל ביחידות ${lvl}`,
+    closeAria: 'סגור מבחן',
+  },
+  nb: {
+    title: 'Adaptiv Nivåtest i Norsk Bokmål (CEFR A1–C1)',
+    adaptiveBadge: 'Adaptiv CAT · 40-spørsmålsbank',
+    questionProgress: (c, t) => `Spørsmål ${c} av ${t}`,
+    currentLevelProbe: (lvl) => `Tester Nivå ${lvl}`,
+    nextQuestionBtn: 'Bekreft og neste spørsmål',
+    finishTestBtn: 'Beregn mitt CEFR-nivå',
+    completedBadge: 'Adaptiv diagnostikk fullført',
+    recommendedHeading: (lvl) => `Anbefalt Nivå: CEFR ${lvl}`,
+    summarySubtitle: (c, t, s) =>
+      `Du svarte riktig på ${c} av ${t} adaptive spørsmål (ferdighetsindeks ${s}/5.0).`,
+    xpEarnedText: '+40 XP opptjent for nivåtesten!',
+    breakdownTitle: 'Resultat per nivå og grammatikktips',
+    applyResultBtn: (lvl) => `Start mine ${lvl}-enheter`,
+    closeAria: 'Lukk testen',
+  },
+  da: {
+    title: 'Adaptiv Niveautest i Dansk (CEFR A1–C1)',
+    adaptiveBadge: 'Adaptiv CAT · 40-spørgsmålsbank',
+    questionProgress: (c, t) => `Spørgsmål ${c} af ${t}`,
+    currentLevelProbe: (lvl) => `Tester Niveau ${lvl}`,
+    nextQuestionBtn: 'Bekræft og næste spørgsmål',
+    finishTestBtn: 'Beregn mit CEFR-niveau',
+    completedBadge: 'Adaptiv diagnostik fuldført',
+    recommendedHeading: (lvl) => `Anbefalet Niveau: CEFR ${lvl}`,
+    summarySubtitle: (c, t, s) =>
+      `Du svarede rigtigt på ${c} af ${t} adaptive spørgsmål (færdighedsindeks ${s}/5.0).`,
+    xpEarnedText: '+40 XP optjent for niveautesten!',
+    breakdownTitle: 'Resultat per niveau og grammatiktips',
+    applyResultBtn: (lvl) => `Start mine ${lvl}-enheder`,
+    closeAria: 'Luk testen',
   },
 };
 

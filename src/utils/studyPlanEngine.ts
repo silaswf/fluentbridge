@@ -61,6 +61,10 @@ const EXAM_HINT_BY_LANG: Record<LanguageCode, string> = {
   nl: 'CNaVT & Staatsexamen NT2',
   af: 'Taalbond & Stellenbosch Prof.',
   sv: 'Swedex & TISUS',
+  tr: 'TÖMER & YDS',
+  he: 'YAEL & Ulpan',
+  nb: 'Norskprøve & Bergenstesten',
+  da: 'Prøve i Dansk 3 & Studieprøven',
 };
 
 export function generateWeeklyStudyPlan(

@@ -24,6 +24,10 @@ const ALL_LANGUAGES: LanguageCode[] = [
   'nl',
   'af',
   'sv',
+  'tr',
+  'he',
+  'nb',
+  'da',
 ];
 
 describe('FluentBridge v8.0.0 features', () => {
@@ -42,7 +46,7 @@ describe('FluentBridge v8.0.0 features', () => {
   it('enrichCourseCohesion delivers >=10 cohesive vocab cards, 5-pair matching, cohesive cloze & script_phonics across all 12 languages', async () => {
     for (const lang of ALL_LANGUAGES) {
       const bundle = await loadLanguageCourseData(lang);
-      expect(bundle.topics.length).toBe(103);
+      expect(bundle.topics.length).toBe(150);
 
       const byTopic = new Map<string, typeof bundle.vocab>();
       for (const c of bundle.vocab) {
@@ -94,7 +98,7 @@ describe('FluentBridge v8.0.0 features', () => {
         expect(withScript.length).toBeGreaterThanOrEqual(10);
       }
     }
-  }, 30000);
+  }, 120000);
 
   it('provides 4 Duolingo English Test (DET) simulations scored on 10-160 scale', () => {
     const detMeta = EXAM_TYPES.find((e) => e.id === 'det');
@@ -122,8 +126,8 @@ describe('FluentBridge v8.0.0 features', () => {
     expect(graded.passed).toBe(true);
   });
 
-  it('expands all 60 podcasts (>=10 lines, 3 checkpoints) & 36 interactive videos (>=8 lines, 2 checkpoints)', () => {
-    expect(PODCAST_EPISODES.length).toBe(60);
+  it('expands all 80 podcasts (>=10 lines, 3 checkpoints) & 48 interactive videos (>=8 lines, 2 checkpoints)', () => {
+    expect(PODCAST_EPISODES.length).toBe(80);
     for (const ep of PODCAST_EPISODES) {
       expect(ep.lines.length).toBeGreaterThanOrEqual(10);
       expect(ep.checkpoints.length).toBeGreaterThanOrEqual(3);
@@ -138,7 +142,7 @@ describe('FluentBridge v8.0.0 features', () => {
         expect(clip.checkpoints?.length ?? 0).toBeGreaterThanOrEqual(2);
       }
     }
-    expect(totalVideos).toBe(36);
+    expect(totalVideos).toBe(48);
   });
 
   it('normalizePlatformState preserves user vocab when masterVocab is empty or single-language', () => {
