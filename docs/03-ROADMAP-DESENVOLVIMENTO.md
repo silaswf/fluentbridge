@@ -99,7 +99,7 @@ Este roadmap registra todas as entregas concluídas do **FluentBridge Academy** 
 - [x] **60 Podcasts (10+ falas, 3 checagens) & 36 Vídeos (8+ falas, 2 checagens) integrados à Trilha Modular estilo Busuu (`TrailCheckpointModal.tsx`)**.
 
 ### Fase 13.5 — Auditoria Funcional, UI/UX, Vozes Neurais & Segurança (`v8.3.0`) — CONCLUÍDA
-Detalhes e critérios de aceite em [09 — Plano `v8.3`](./09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md).
+Detalhes e critérios de aceite consolidados em [08 — Auditoria Qualitativa 360° & Análise Competitiva](./08-ANALISE-COMPETITIVA-MERCADO.md).
 - [x] **Vozes Neurais Naturais (Tier 1 Gemini 2.5 TTS nos 49 sotaques)** + fallback Deepgram Aura-2 + `tts/v6/` sem cache de fallback robótico + unlock síncrono + `speakTextAsync` + CELPIP `en-CA`.
 - [x] **S-01 & S-04:** Chave Gemini rotacionada no Worker + job `secret-scan` automático no GitHub Actions.
 - [x] **P0/P1/P2 (`F-01…F-07`, `U-01…U-07`):** `SettingsModal`, Sidebar enxuta, `Revisão` fixa mobile, menu *Mais* sem quebra de grid, `⚙️` no `LessonPlayer` mobile, Hero limpo + filtro CEFR único, Dark Mode tokens + correção laranja/teal/sky, `i18n` 100% `PT/EN/ES`, Writing híbrido com IA, Adaptativo persistente, Outbox real, LGPD `delete_my_account_data()`, Ruído Ambiente c/ volume e Retenção expansível.

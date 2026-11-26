@@ -14,9 +14,8 @@ Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°
 6. **[05 - Manual Completo de Funcionalidades](./05-MANUAL-FUNCIONALIDADES.md)** — Guia detalhado de uso das telas do aluno, do Estúdio do Professor e do **Painel Admin Mestre**.
 7. **[06 - Auditoria Completa & Plano de Otimizações](./06-AUDITORIA-OTIMIZACOES.md)** — Auditoria pós-`v2.0.0` com medições reais de bundle (`122,94 kB` inicial), segurança, Dark Mode/responsividade, latência TTS/STT e recomendações futuras.
 8. **[07 - Plano Técnico das Próximas Fases (Fases 10 a 12 · v2.1 → v3.0)](./07-PLANO-FASE-8-DIFERENCIAIS.md)** — Histórico da Fase 8 entregue e blueprints técnicos detalhados para as próximas fases.
-9. **[08 - Auditoria 360° & Análise Competitiva de Mercado (v3.0.0)](./08-ANALISE-COMPETITIVA-MERCADO.md)** — Auditoria completa de todos os âmbitos do programa + comparativo detalhado com Duolingo, Busuu, Babbel, Speak, Cambly e Preply + próximos diferenciais (`v3.1 → v4.0`).
-10. **[09 - Plano de Melhorias `v8.3` (Funcional, UI/UX & Segurança)](./09-PLANO-v8.3-MELHORIAS-FUNCIONAIS-E-UI-UX.md)** — Auditoria qualitativa das funções existentes (`F-01…F-07`), auditoria de UI/UX desktop/mobile/Dark Mode/i18n (`U-01…U-07`), incidente da chave Gemini exposta e salvaguardas (`S-01…S-06`), matriz de prioridade e sequência `v8.3 → v8.5`.
-11. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v3.0.0`).
+9. **[08 - Auditoria Qualitativa 360° (`v8.3.0`), UI/UX, Segurança & Análise Competitiva de Mercado](./08-ANALISE-COMPETITIVA-MERCADO.md)** — Documento unificado com inventário `v8.3.0`, comparativo competitivo (incluindo UI/UX), diagnóstico qualitativo e plano evolutivo (`v8.4 → v10.0`).
+10. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v3.0.0`).
 
 ---
 
