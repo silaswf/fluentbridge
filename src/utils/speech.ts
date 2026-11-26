@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
+import { REGIONAL_ACCENTS_BY_LANGUAGE } from '../data/regionalAccents';
 import type { Accent } from '../types/learning';
 import { getAudioClip, saveAudioClip } from './audioDb';
 import { isAudioRecordingSupported, startAudioRecording } from './audioRecorder';
@@ -161,8 +162,19 @@ function hashTtsKey(text: string): string {
   return (h >>> 0).toString(36);
 }
 
+const REGIONAL_TTS_CODES: Map<string, string> = new Map(
+  Object.values(REGIONAL_ACCENTS_BY_LANGUAGE)
+    .flat()
+    .map((acc) => [acc.code.toLowerCase(), acc.code] as [string, string]),
+);
+
 function normalizeTtsLocale(locale: string): string {
   const lower = locale.trim().toLowerCase();
+  // Sotaques regionais (49) precisam chegar intactos ao Worker; antes eram
+  // colapsados para o idioma base (ex.: en-AU → en-US, es-AR → es-MX) e por isso
+  // todos soavam iguais ao sotaque padrão.
+  const regional = REGIONAL_TTS_CODES.get(lower);
+  if (regional) return regional;
   if (lower === 'en-gb' || lower.startsWith('en-gb') || lower === 'uk') return 'en-GB';
   if (lower === 'es-es') return 'es-ES';
   if (lower.startsWith('es')) return 'es-MX';
@@ -215,9 +227,13 @@ export async function fetchNeuralTtsBlob(
 
   const requestPromise = (async () => {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    // A síntese neural de trechos longos (ex.: áudios de simulados com 200–500
+    // caracteres) leva 11–20 s na primeira geração (depois fica em cache R2).
+    // O limite antigo de 9 s abortava a requisição e o áudio nunca tocava.
+    const timeoutMs = Math.min(70000, 15000 + cleanText.length * 100);
     const timeoutId =
       controller !== null
-        ? globalThis.setTimeout(() => controller.abort(), 9000)
+        ? globalThis.setTimeout(() => controller.abort(), timeoutMs)
         : undefined;
 
     try {

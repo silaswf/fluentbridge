@@ -1,6 +1,6 @@
 import type { CloudConfig } from '../types/learning';
 
-export const APP_VERSION = '8.2.0';
+export const APP_VERSION = '8.2.1';
 export const GITHUB_RELEASES_URL =
   'https://github.com/silaswf/fluentbridge-releases/releases/latest';
 export const WINDOWS_DOWNLOAD_URL =

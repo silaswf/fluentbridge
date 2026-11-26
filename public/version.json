@@ -1,8 +1,8 @@
 {
-  "version": "8.2.0",
-  "publishedAt": "2026-11-24",
-  "releaseNotes": "FluentBridge Academy v8.2.0",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.0/FluentBridge-Setup-8.2.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.0/FluentBridge-v8.2.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.2.0"
+  "version": "8.2.1",
+  "publishedAt": "2026-11-26",
+  "releaseNotes": "FluentBridge Academy v8.2.1 — corrige módulos duplicados na trilha e áudios/sotaques dos simulados",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.1/FluentBridge-Setup-8.2.1.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v8.2.1/FluentBridge-v8.2.1.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v8.2.1"
 }

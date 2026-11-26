@@ -103,9 +103,54 @@ function jsonResponse(payload, status = 200, extraHeaders = {}) {
   });
 }
 
+// Sotaques regionais com prompt nativo próprio (antes caíam no padrão do idioma e soavam iguais)
+const EXTRA_REGIONAL_TTS = {
+  'it-it-mil': { loc: 'it-IT-MIL', bcp47: 'it-IT', gl: 'it', f: 'Leda', m: 'Orus', qo: '«', qc: '»',
+    p: 'Leggi esclusivamente ad alta voce il seguente testo in italiano con il tipico accento milanese (Lombardia), naturale e senza commenti:' },
+  'it-it-nap': { loc: 'it-IT-NAP', bcp47: 'it-IT', gl: 'it', f: 'Leda', m: 'Orus', qo: '«', qc: '»',
+    p: 'Leggi esclusivamente ad alta voce il seguente testo in italiano con il tipico accento napoletano (Campania), naturale e senza commenti:' },
+  'de-ch': { loc: 'de-CH', bcp47: 'de-DE', gl: 'de', f: 'Vindemiatrix', m: 'Charon', qo: '«', qc: '»',
+    p: 'Lies ausschließlich den folgenden Text als Muttersprachler mit Schweizer Hochdeutsch-Akzent (Zürich) laut vor, ohne Kommentar:' },
+  'de-de-by': { loc: 'de-DE-BY', bcp47: 'de-DE', gl: 'de', f: 'Vindemiatrix', m: 'Charon', qo: '„', qc: '“',
+    p: 'Lies ausschließlich den folgenden Text als Muttersprachler mit bairischem Akzent (München) laut vor, ohne Kommentar:' },
+  'ru-kz': { loc: 'ru-KZ', bcp47: 'ru-RU', gl: 'ru', f: 'Leda', m: 'Orus', qo: '«', qc: '»',
+    p: 'Прочитай вслух только следующий текст как носитель русского языка из Казахстана (Алматы), без комментариев:' },
+  'ja-fuk': { loc: 'ja-FUK', bcp47: 'ja-JP', gl: 'ja', f: 'Aoede', m: 'Fenrir', qo: '「', qc: '」',
+    p: '次の日本語の文章だけを、福岡（博多）の話者らしいイントネーションで、余計な説明なしにそのまま音読してください：' },
+  'zh-sg': { loc: 'zh-SG', bcp47: 'cmn-CN', gl: 'zh-CN', f: 'Kore', m: 'Puck', qo: '“', qc: '”',
+    p: '请仅朗读以下内容，使用新加坡华语的母语发音和语调，不要添加任何说明：' },
+  'ar-lb': { loc: 'ar-LB', bcp47: 'ar-XA', gl: 'ar', f: 'Sadaltager', m: 'Alnilam', qo: '«', qc: '»',
+    p: 'اقرأ النص العربي التالي فقط بصوت واضح وبلكنة لبنانية (بيروت) أصلية بدون أي تعليق إضافي:' },
+  'ar-ma': { loc: 'ar-MA', bcp47: 'ar-XA', gl: 'ar', f: 'Sadaltager', m: 'Alnilam', qo: '«', qc: '»',
+    p: 'اقرأ النص العربي التالي فقط بصوت واضح وبلكنة مغربية (الدار البيضاء) أصلية بدون أي تعليق إضافي:' },
+  'ar-ae': { loc: 'ar-AE', bcp47: 'ar-XA', gl: 'ar', f: 'Sadaltager', m: 'Alnilam', qo: '«', qc: '»',
+    p: 'اقرأ النص العربي التالي فقط بصوت واضح وبلكنة خليجية إماراتية (دبي) أصلية بدون أي تعليق إضافي:' },
+  'nl-sr': { loc: 'nl-SR', bcp47: 'nl-NL', gl: 'nl', f: 'Despina', m: 'Schedar', qo: '„', qc: '”',
+    p: 'Lees uitsluitend de volgende tekst voor met een natuurlijk Surinaams Nederlands accent (Paramaribo), zonder commentaar:' },
+  'af-cpt': { loc: 'af-CPT', bcp47: 'af-ZA', gl: 'af', f: 'Gacrux', m: 'Iapetus', qo: '„', qc: '”',
+    p: 'Lees slegs die volgende Afrikaanse teks hardop voor met ’n natuurlike Kaapse Afrikaanse aksent (Kaapstad), sonder kommentaar:' },
+  'sv-gbg': { loc: 'sv-GBG', bcp47: 'sv-SE', gl: 'sv', f: 'Callirrhoe', m: 'Umbriel', qo: '”', qc: '”',
+    p: 'Läs endast upp följande text på göteborgska med naturlig göteborgsk intonation, utan kommentarer:' },
+};
+
 function resolveTtsConfig(rawLang, rawVoice) {
   const lower = (rawLang || 'en-US').trim().toLowerCase();
   const isMale = (rawVoice || '').trim().toLowerCase() === 'male';
+
+  const extra = EXTRA_REGIONAL_TTS[lower];
+  if (extra) {
+    return {
+      engine: 'gemini-tts',
+      locale: extra.loc,
+      bcp47: extra.bcp47,
+      model: 'gemini-2.5-flash-preview-tts',
+      speaker: isMale ? extra.m : extra.f,
+      promptPrefix: extra.p,
+      quoteOpen: extra.qo,
+      quoteClose: extra.qc,
+      googleLang: extra.gl,
+    };
+  }
 
   if (lower === 'en-gb' || lower === 'uk') {
     return {
@@ -1111,7 +1156,7 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '8.2.0',
+        version: '8.2.1',
         accentCount: 49,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv'],
         endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/media/*', '/api/telemetry'],

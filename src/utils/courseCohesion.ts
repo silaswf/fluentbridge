@@ -18,31 +18,52 @@ import {
 } from './unitScriptPhonics';
 import { exampleMatchesWord } from './vocabValidation';
 
-const MODULE_TITLES_BY_LEVEL: Record<CEFRLevel, string[]> = {
+/**
+ * Temas dos módulos por nível (SEM número). O número exibido é sequencial e
+ * global no curso (ver `enrichCourseCohesion`), e a lista tem temas de sobra
+ * para nunca reciclar o mesmo título para blocos diferentes (bug da v8.2.0:
+ * só havia 3 títulos por nível para 4–5 blocos, repetindo "Módulo 1/2/3").
+ */
+const MODULE_THEMES_BY_LEVEL: Record<CEFRLevel, string[]> = {
   A1: [
-    'Módulo 1 · Primeiros Contatos & Sobrevivência',
-    'Módulo 2 · Rotina, Cidade & Compras',
-    'Módulo 3 · Comunicação do Dia a Dia',
+    'Primeiros Contatos & Sobrevivência',
+    'Rotina, Cidade & Compras',
+    'Comunicação do Dia a Dia',
+    'Pessoas, Lugares & Hábitos',
+    'Consolidação Básica',
+    'Revisão & Prática Integrada',
   ],
   A2: [
-    'Módulo 4 · Experiências, Viagens & Serviços',
-    'Módulo 5 · Planos, Saúde & Vida Social',
-    'Módulo 6 · Situações Práticas & Cultura',
+    'Experiências, Viagens & Serviços',
+    'Planos, Saúde & Vida Social',
+    'Situações Práticas & Cultura',
+    'Histórias, Opiniões Simples & Convivência',
+    'Consolidação Elementar',
+    'Revisão & Prática Integrada',
   ],
   B1: [
-    'Módulo 7 · Trabalho, Opiniões & Narrativas',
-    'Módulo 8 · Conexões, Mídia & Resolução de Problemas',
-    'Módulo 9 · Autonomia Comunicativa',
+    'Trabalho, Opiniões & Narrativas',
+    'Conexões, Mídia & Resolução de Problemas',
+    'Autonomia Comunicativa',
+    'Expressões, Registro & Situações Reais',
+    'Consolidação Intermediária',
+    'Revisão & Prática Integrada',
   ],
   B2: [
-    'Módulo 10 · Argumentação, Negócios & Tecnologia',
-    'Módulo 11 · Fluência Crítica & Debates',
-    'Módulo 12 · Nuances & Expressões Reais',
+    'Argumentação, Negócios & Tecnologia',
+    'Fluência Crítica & Debates',
+    'Nuances & Expressões Reais',
+    'Idiomas, Gírias & Registro',
+    'Consolidação Avançada',
+    'Revisão & Prática Integrada',
   ],
   C1: [
-    'Módulo 13 · Alta Performance & Liderança',
-    'Módulo 14 · Retórica, Cultura & Registro Nativo',
-    'Módulo 15 · Domínio Avançado & Exames',
+    'Alta Performance & Liderança',
+    'Retórica, Cultura & Registro Nativo',
+    'Domínio Avançado & Exames',
+    'Precisão, Estilo & Nuances Nativas',
+    'Consolidação Final',
+    'Revisão & Prática Integrada',
   ],
 };
 
@@ -345,6 +366,8 @@ export function enrichCourseCohesion(
   topics: Topic[],
   vocab: VocabCard[],
 ): { topics: Topic[]; vocab: VocabCard[] } {
+  // Número de exibição sequencial e global (1, 2, 3, … até o último bloco do curso)
+  const moduleDisplayNo = new Map<string, number>();
   const vocabByTopic = new Map<string, VocabCard[]>();
   for (const card of vocab) {
     const list = vocabByTopic.get(card.topicId) ?? [];
@@ -652,11 +675,19 @@ export function enrichCourseCohesion(
     levelCounts[topic.level] = lvlIdx + 1;
     const modGroupIdx = Math.floor(lvlIdx / 5);
     const moduleIndex = LEVEL_BASE[topic.level] + modGroupIdx + 1;
-    const modTitles = MODULE_TITLES_BY_LEVEL[topic.level];
+    const modThemes = MODULE_THEMES_BY_LEVEL[topic.level];
+    const modKey = `${topic.level}:${modGroupIdx}`;
+    let displayNo = moduleDisplayNo.get(modKey);
+    if (displayNo === undefined) {
+      displayNo = moduleDisplayNo.size + 1;
+      moduleDisplayNo.set(modKey, displayNo);
+    }
     const moduleTitlePt =
       topic.moduleTitlePt ||
-      modTitles[modGroupIdx % modTitles.length] ||
-      `Módulo ${modGroupIdx + 1} · ${topic.level}`;
+      `Módulo ${displayNo} · ${
+        modThemes[modGroupIdx] ??
+        `${modThemes[modThemes.length - 1]} ${modGroupIdx - modThemes.length + 2}`
+      }`;
 
     enrichedVocab.push(...unitVocab);
     enrichedTopics.push({

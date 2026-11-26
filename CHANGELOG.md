@@ -4,6 +4,14 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v8.2.1`] — 2026-11-26
+### Correção: módulos "duplicados" na trilha, áudios dos simulados e sotaques regionais
+- **Trilha (`src/utils/courseCohesion.ts`):** a `v8.2.0` agrupava cada nível em blocos de 5 unidades mas só tinha **3 títulos por nível**; do 4º bloco em diante o título voltava ao do 1º ("Módulo 1/2/3" reaparecendo antes do "Módulo 4"). Eram unidades **diferentes** (103 ids únicos por idioma), mas com título repetido — o que também gerava `key` duplicada no React e fazia blocos distintos abrirem/fecharem juntos. Agora há 6 temas por nível e a numeração é **sequencial e global** (`Módulo 1 … N`), sem repetições, nos 12 idiomas. `moduleIndex` e os ids de checkpoint foram preservados (progresso e checkpoints concluídos não se perdem).
+- **Áudio dos simulados (`src/utils/speech.ts`):** a síntese neural de trechos longos (200–500 caracteres, típicos dos simulados) leva **11–20 s** na primeira geração, mas o cliente abortava a requisição aos **9 s** — o áudio nunca chegava (e o fallback do navegador falhava em vários idiomas). O limite agora escala com o tamanho do texto (15 s + 100 ms/caractere, máx. 70 s).
+- **Sotaques regionais (`speech.ts` + `cloudflare-worker/worker.js` `8.2.1`):** o cliente colapsava os 49 códigos para o idioma base (`en-AU → en-US`, `es-AR → es-MX`, `it-IT-NAP → it-IT`…), então todos soavam iguais; agora o código regional chega intacto ao Worker. Além disso, 13 sotaques sem prompt próprio (`it-IT-MIL`, `it-IT-NAP`, `de-CH`, `de-DE-BY`, `ru-KZ`, `ja-FUK`, `zh-SG`, `ar-LB`, `ar-MA`, `ar-AE`, `nl-SR`, `af-CPT`, `sv-GBG`) ganharam configuração nativa no Worker.
+- **Testes:** `src/utils/__tests__/v821Fixes.test.ts` (títulos únicos e numeração 1..N nos 12 idiomas; os 49 sotaques com configuração própria no Worker; código regional intacto; síntese longa não é abortada). **20 suítes / 64 testes** Vitest, `tsc` 0 erros.
+
+---
 ## [Não lançado] — 2026-11-25
 ### Segurança (chave Gemini) & Documentação do Plano `v8.3`
 - **Segurança:** a chave do Gemini exposta no histórico público (`919cfbb`, `fba45d4`, `26e1c90`) foi revogada pelo Google; nova chave gravada **somente** como segredo do Worker (`GEMINI_API_KEY`). Verificado: `/api/health` (`hasGeminiSecret: true`), `/api/gemini-tutor` e `/api/tts` (Gemini neural `fr-FR`/`it-IT`). Nenhuma alteração de código ou novo deploy foi necessária.
