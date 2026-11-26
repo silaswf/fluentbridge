@@ -110,6 +110,7 @@ const LANG_NAME_EN: Record<LanguageCode, string> = {
   he: 'Hebrew',
   nb: 'Norwegian Bokmål',
   da: 'Danish',
+  pt: 'Portuguese (Brazil & Portugal)',
 };
 
 function analyzeStudentInput(
@@ -178,6 +179,9 @@ function analyzeStudentInput(
       da: wordCount <= 3
         ? 'Fint kort svar! Prøv at uddybe med en begrundelse eller et opfølgningsspørgsmål.'
         : 'Meget naturligt flow! Fortsæt med at bruge gode bindeord.',
+      pt: wordCount <= 3
+        ? 'Boa resposta curta! Tente desenvolver com um motivo ou uma pergunta de acompanhamento.'
+        : 'Fluxo muito natural! Continue usando conectores variados e registro adequado.',
     };
     return { feedbackPt: immersionFeedback[lang] };
   }
@@ -475,6 +479,19 @@ function buildMultiLangLocalFallbackTurn(
         'Tusind tak for hjælpen i dag!',
       ],
     },
+    pt: {
+      askReply: 'Ótima pergunta! Sim, podemos ajustar isso facilmente. Qual opção funciona melhor para você?',
+      askReplyPt: 'Great question! Yes, we can easily arrange that. Which option works best for you?',
+      followReply: 'Entendi perfeitamente. Você poderia confirmar só mais um detalhe para deixarmos tudo certo?',
+      followReplyPt: 'Got it completely. Could you confirm just one more detail so everything is set?',
+      closeReply: 'Perfeito, tudo confirmado! Muito obrigado pela conversa e tenha um ótimo dia!',
+      closeReplyPt: 'Perfect, everything is confirmed! Thank you so much for chatting and have a great day!',
+      suggestions: [
+        'Ficou ótimo para mim! Podemos confirmar o horário exato?',
+        'Só para garantir: preciso preparar mais alguma coisa?',
+        'Muito obrigado pela ajuda hoje!',
+      ],
+    },
   };
 
   const entry = bank[lang] ?? bank.en;
@@ -673,6 +690,7 @@ Return ONLY valid JSON:
     he: `שלום! בואו נתרגל את "${topic.titleEn}" (${angle.labelEn}). איך היית מגיב/ה?`,
     nb: `Hei! La oss øve på "${topic.titleEn}" (${angle.labelEn}). Hvordan ville du reagert?`,
     da: `Hej! Lad os øve på "${topic.titleEn}" (${angle.labelEn}). Hvordan ville du reagere?`,
+    pt: `Olá! Vamos praticar "${topic.titleEn}" (${angle.labelEn}). Como você responderia nesta situação?`,
   };
   return {
     usedGemini: false,
@@ -704,7 +722,11 @@ export async function generateCustomAIScenario(
 ): Promise<{ scenario: AITutorScenario; usedGemini: boolean }> {
   const targetLangName = LANG_NAME_EN[languageCode];
   const immersion = isImmersionLevel(level);
-  const instructionLang = immersion ? targetLangName : 'Brazilian Portuguese';
+  const instructionLang = immersion
+    ? targetLangName
+    : languageCode === 'pt'
+      ? 'English'
+      : 'Brazilian Portuguese';
   const ideaText =
     userIdea.trim() ||
     'Create a surprising, fun, high-stakes everyday or professional situation for this learner.';

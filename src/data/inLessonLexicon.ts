@@ -1614,4 +1614,11 @@ export const IN_LESSON_LEXICON: Record<LanguageCode, InLessonLexiconEntry[]> = {
     { word: 'tid', ipa: '/tˢiːðˀ/', translation: 'tempo', category: 'Rotina', exampleEn: 'Vi har god tid før timen begynder.', examplePt: 'Temos bastante tempo antes da aula começar.' },
     { word: 'projekt', ipa: '/pʁoˈɕɛɡd/', translation: 'projeto', category: 'Trabalho', exampleEn: 'Det nye projekt starter næste uge.', examplePt: 'O novo projeto começa na próxima semana.' },
   ],
+  pt: [
+    { word: 'olá', ipa: '/oˈla/', translation: 'hello', category: 'Greetings', exampleEn: 'Olá! Tudo bem com você hoje?', examplePt: 'Hello! How are you doing today?' },
+    { word: 'obrigado', ipa: '/obɾiˈɡadu/', translation: 'thank you', category: 'Politeness', exampleEn: 'Muito obrigado pela sua ajuda hoje!', examplePt: 'Thank you very much for your help today!' },
+    { word: 'café', ipa: '/kaˈfɛ/', translation: 'coffee', category: 'Food & Drink', exampleEn: 'Eu tomo um café preto toda manhã.', examplePt: 'I drink a black coffee every morning.' },
+    { word: 'tempo', ipa: '/ˈtẽpu/', translation: 'time / weather', category: 'Daily Life', exampleEn: 'Nós temos bastante tempo antes da aula.', examplePt: 'We have plenty of time before class.' },
+    { word: 'projeto', ipa: '/pɾoˈʒɛtu/', translation: 'project', category: 'Work', exampleEn: 'O novo projeto começa na próxima semana.', examplePt: 'The new project starts next week.' },
+  ],
 };

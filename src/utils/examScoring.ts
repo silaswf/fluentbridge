@@ -296,6 +296,29 @@ export function gradeMockExam(
       passed = rawPercent >= 60;
       break;
     }
+    case 'celpebras': {
+      const band =
+        rawPercent >= 88
+          ? 5
+          : rawPercent >= 75
+            ? 4
+            : rawPercent >= 60
+              ? 3
+              : rawPercent >= 45
+                ? 2
+                : 1;
+      const bandNames: Record<number, string> = {
+        5: 'Avançado Superior',
+        4: 'Avançado',
+        3: 'Intermediário Superior',
+        2: 'Intermediário',
+        1: 'Insuficiente',
+      };
+      officialScore = band;
+      officialLabel = `CELPE-Bras ${band}/5 (${bandNames[band]})`;
+      passed = band >= 2;
+      break;
+    }
     default: {
       officialScore = rawPercent;
       officialLabel = `${officialScore}/100`;

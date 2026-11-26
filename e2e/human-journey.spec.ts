@@ -429,7 +429,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     expect(errors).toEqual([]);
   });
 
-  test('Human Journey 5 (v9.0.0: 16 Languages, TR/HE RTL/NB/DA 150 units & YouTube Study Lab)', async ({
+  test('Human Journey 5 (v9.2.0: 17 Languages, PT PLE 150 units, TR/HE RTL/NB/DA & YouTube + Translator)', async ({
     page,
   }) => {
     const errors = await attachErrorGuards(page);
@@ -437,12 +437,13 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await loginAsHumanStudent(page);
     await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
 
-    // 1. Verify Turkish, Hebrew (RTL), Norwegian & Danish with 150 units each
+    // 1. Verify Turkish, Hebrew (RTL), Norwegian, Danish & Portuguese (PLE) with 150 units each
     for (const [code, expectRtl] of [
       ['tr', false],
       ['he', true],
       ['nb', false],
       ['da', false],
+      ['pt', false],
     ] as const) {
       await page.getByTestId('language-switcher-trigger').click();
       await page.getByTestId(`lang-option-${code}`).click();
@@ -450,12 +451,20 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
       await expect(page.getByText(/\(150 unidades\)/i)).toBeVisible({ timeout: 10000 });
     }
 
+    // 1b. Verify Bidirectional Course Translator (with Portuguese selected -> EN <-> PT)
+    await page.getByRole('button', { name: /Tradutor/i }).click();
+    await expect(page.getByTestId('course-translator-view')).toBeVisible();
+    await page.getByTestId('translator-input').fill('Bom dia');
+    await page.getByTestId('translator-submit-btn').click();
+    await expect(page.getByTestId('translator-output')).toBeVisible({ timeout: 10000 });
+    await page.getByTestId('translator-swap-btn').click();
+
     // 2. YouTube Study Lab inside Imersão -> Vídeos
     await page.getByRole('button', { name: /Imersão \(Áudio & Vídeo\)/i }).click();
     await page.getByRole('button', { name: /Vídeos/i }).click();
     await page.getByTestId('tab-youtube-study').click();
     await expect(page.getByTestId('youtube-study-lab')).toBeVisible();
-    await page.getByRole('button', { name: /Carregar Exemplo/i }).click();
+    await page.getByRole('button', { name: /^Carregar /i }).click();
     await page.getByTestId('yt-analyze-btn').click();
     await expect(page.getByTestId('yt-subtitle-word').first()).toBeVisible({ timeout: 15000 });
     await page.getByTestId('yt-subtitle-word').first().click();

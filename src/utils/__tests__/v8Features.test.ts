@@ -28,6 +28,7 @@ const ALL_LANGUAGES: LanguageCode[] = [
   'he',
   'nb',
   'da',
+  'pt',
 ];
 
 describe('FluentBridge v8.0.0 features', () => {
@@ -126,8 +127,8 @@ describe('FluentBridge v8.0.0 features', () => {
     expect(graded.passed).toBe(true);
   });
 
-  it('expands all 80 podcasts (>=10 lines, 3 checkpoints) & 48 interactive videos (>=8 lines, 2 checkpoints)', () => {
-    expect(PODCAST_EPISODES.length).toBe(80);
+  it('expands all 85 podcasts (>=10 lines, 3 checkpoints) & 51 interactive videos (>=8 lines, 2 checkpoints)', () => {
+    expect(PODCAST_EPISODES.length).toBe(85);
     for (const ep of PODCAST_EPISODES) {
       expect(ep.lines.length).toBeGreaterThanOrEqual(10);
       expect(ep.checkpoints.length).toBeGreaterThanOrEqual(3);
@@ -142,7 +143,7 @@ describe('FluentBridge v8.0.0 features', () => {
         expect(clip.checkpoints?.length ?? 0).toBeGreaterThanOrEqual(2);
       }
     }
-    expect(totalVideos).toBe(48);
+    expect(totalVideos).toBe(51);
   });
 
   it('normalizePlatformState preserves user vocab when masterVocab is empty or single-language', () => {

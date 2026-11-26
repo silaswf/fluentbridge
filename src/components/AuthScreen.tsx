@@ -260,7 +260,7 @@ export function AuthScreen({
             </div>
 
             <h1 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              16 idiomas. 1 método completo.
+              17 idiomas. 1 método completo.
             </h1>
             <p className="mt-2 text-xs leading-relaxed text-slate-400 sm:text-sm">
               Mentoria de {teacherName} com IA e sincronização em nuvem.
@@ -268,19 +268,19 @@ export function AuthScreen({
 
             <div className="mt-6 grid grid-cols-2 gap-2.5 text-xs">
               <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
-                <p className="font-mono text-base font-extrabold text-white">16 Idiomas</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">2.400 unidades A1–C1</p>
+                <p className="font-mono text-base font-extrabold text-white">17 Idiomas</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">2.550 unidades A1–C1</p>
               </div>
               <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
-                <p className="font-mono text-base font-extrabold text-white">96 Simulados</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">24 formatos oficiais</p>
+                <p className="font-mono text-base font-extrabold text-white">100 Simulados</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">25 formatos oficiais</p>
               </div>
               <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
-                <p className="font-mono text-base font-extrabold text-white">61 Sotaques</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">Voz neural &amp; YouTube Lab</p>
+                <p className="font-mono text-base font-extrabold text-white">65 Sotaques</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">Voz neural &amp; Tradutor</p>
               </div>
               <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
-                <p className="font-mono text-base font-extrabold text-white">800 Cenários</p>
+                <p className="font-mono text-base font-extrabold text-white">850 Cenários</p>
                 <p className="mt-0.5 text-[11px] text-slate-400">Tutor IA + Prof. real</p>
               </div>
             </div>

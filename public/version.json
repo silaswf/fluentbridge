@@ -1,8 +1,8 @@
 {
-  "version": "9.1.0",
+  "version": "9.2.0",
   "publishedAt": "2026-11-26",
-  "releaseNotes": "FluentBridge Academy v9.1.0 — Chunks <500 kB por idioma, eliminação de aviso de importação mista, Worker modularizado, LessonPlayer modular, Alefbet script_phonics em Hebraico e testes de contrato P1",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-Setup-9.1.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-v9.1.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.1.0"
+  "releaseNotes": "FluentBridge Academy v9.2.0 — Tradutor Bidirecional Integrado em todos os 17 idiomas + Novo Curso de Português para Estrangeiros (PLE) com 150 unidades (A1–B1 em Inglês, B2–C1 em Imersão), CELPE-Bras e 65 sotaques",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.2.0/FluentBridge-Setup-9.2.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.2.0/FluentBridge-v9.2.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.2.0"
 }

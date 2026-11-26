@@ -16,6 +16,7 @@ import { PLACEMENT_TR } from './placementTr';
 import { PLACEMENT_HE } from './placementHe';
 import { PLACEMENT_NB } from './placementNb';
 import { PLACEMENT_DA } from './placementDa';
+import { PLACEMENT_PT } from './placementPt';
 
 export const ALL_PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   ...PLACEMENT_QUESTIONS_EN,
@@ -34,6 +35,7 @@ export const ALL_PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   ...PLACEMENT_HE,
   ...PLACEMENT_NB,
   ...PLACEMENT_DA,
+  ...PLACEMENT_PT,
 ];
 
 export function getPlacementBankByLanguage(
@@ -317,6 +319,22 @@ const UI_STRINGS_BY_LANG: Record<LanguageCode, PlacementUiStrings> = {
     breakdownTitle: 'Resultat per niveau og grammatiktips',
     applyResultBtn: (lvl) => `Start mine ${lvl}-enheder`,
     closeAria: 'Luk testen',
+  },
+  pt: {
+    title: 'Adaptive Portuguese Placement Test (CEFR A1–C1)',
+    adaptiveBadge: 'Adaptive CAT · 40-question bank',
+    questionProgress: (c, t) => `Question ${c} of ${t}`,
+    currentLevelProbe: (lvl) => `Probing Level ${lvl}`,
+    nextQuestionBtn: 'Confirm & next question',
+    finishTestBtn: 'Calculate my CEFR level',
+    completedBadge: 'Adaptive assessment complete',
+    recommendedHeading: (lvl) => `Recommended Level: CEFR ${lvl}`,
+    summarySubtitle: (c, t, s) =>
+      `You answered ${c} of ${t} adaptive questions correctly (proficiency index ${s}/5.0).`,
+    xpEarnedText: '+40 XP earned for the placement test!',
+    breakdownTitle: 'Performance by level & grammar notes',
+    applyResultBtn: (lvl) => `Start my ${lvl} units`,
+    closeAria: 'Close test',
   },
 };
 

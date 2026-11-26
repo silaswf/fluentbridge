@@ -159,6 +159,10 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/norwegianExpansion')) return 'curriculum-nb-exp';
           if (id.includes('/curriculum/danishCourse')) return 'curriculum-da';
           if (id.includes('/curriculum/danishExpansion')) return 'curriculum-da-exp';
+          if (id.includes('/curriculum/portugueseCourse')) return 'curriculum-pt';
+          if (id.includes('/curriculum/portugueseExpansionA1B1')) return 'curriculum-pt-exp-a1b1';
+          if (id.includes('/curriculum/portugueseExpansionB2C1')) return 'curriculum-pt-exp-b2c1';
+          if (id.includes('/curriculum/portugueseExpansion')) return 'curriculum-pt-exp';
           if (id.includes('/curriculum/expansionV9/expV9_en')) return 'curriculum-v9-en';
           if (id.includes('/curriculum/expansionV9/expV9_es')) return 'curriculum-v9-es';
           if (id.includes('/curriculum/expansionV9/expV9_fr')) return 'curriculum-v9-fr';
@@ -187,6 +191,8 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/grammar/heGrammarGuide')) return 'grammar-he';
           if (id.includes('/grammar/nbGrammarGuide')) return 'grammar-nb';
           if (id.includes('/grammar/daGrammarGuide')) return 'grammar-da';
+          if (id.includes('/grammar/ptGrammarGuide')) return 'grammar-pt';
+          if (id.includes('/data/exams/examsPortuguese')) return 'exams-pt';
           if (id.includes('/data/exams/examsNordicSemitic')) return 'exams-nordic-semitic';
           if (id.includes('/data/exams/examsEnglish')) return 'exams-en';
           if (id.includes('/data/exams/examsCelpip')) return 'exams-celpip';
@@ -207,6 +213,7 @@ export default defineConfig(({ command }) => ({
           ) {
             return 'tutor-scenarios-nordic';
           }
+          if (id.includes('/data/tutorScenariosPt')) return 'tutor-scenarios-pt';
           if (id.includes('TutorScenariosV4') || id.includes('ScenariosV4')) {
             return 'tutor-scenarios-v4';
           }

@@ -11,6 +11,7 @@ import {
   Flame,
   GraduationCap,
   Headphones,
+  Languages,
   Lightbulb,
   LogOut,
   Menu,
@@ -55,11 +56,13 @@ const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string
   he: { symbol: 'עב', accent: 'bg-blue-800 text-white' },
   nb: { symbol: 'NB', accent: 'bg-rose-700 text-white' },
   da: { symbol: 'DA', accent: 'bg-red-700 text-white' },
+  pt: { symbol: 'PT', accent: 'bg-emerald-700 text-yellow-300' },
 };
 
 export type NavView =
   | 'learn'
   | 'tutor'
+  | 'translator'
   | 'review'
   | 'exams'
   | 'community'
@@ -239,6 +242,12 @@ export function Sidebar({
       label: tUi(uiLocale, 'nav.tips'),
       shortLabel: 'Guias',
       Icon: Lightbulb,
+    },
+    {
+      id: 'translator',
+      label: tUi(uiLocale, 'nav.translator'),
+      shortLabel: tUi(uiLocale, 'nav.translator'),
+      Icon: Languages,
     },
     {
       id: 'certificates',

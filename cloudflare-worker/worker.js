@@ -6,6 +6,7 @@
  */
 
 import { CORS_HEADERS, GEMINI_FALLBACK_MODELS, jsonResponse } from './lib/http.js';
+import { handleTranslateRequest } from './routes/translate.js';
 import { handleYouTubeStudyRequest } from './routes/youtubeStudy.js';
 
 const MAX_TTS_CHARS = 800;
@@ -121,6 +122,14 @@ async function checkPersistentDailyQuota(env, request, routeKey, dailyLimit, use
 
 // Sotaques regionais com prompt nativo próprio (antes caíam no padrão do idioma e soavam iguais)
 const EXTRA_REGIONAL_TTS = {
+  'pt-br-sp': { loc: 'pt-BR-SP', bcp47: 'pt-BR', gl: 'pt-BR', f: 'Aoede', m: 'Orus', qo: '«', qc: '»',
+    p: 'Leia exclusivamente em voz alta o seguinte texto em português brasileiro natural (sotaque neutro de São Paulo), sem comentários:' },
+  'pt-br-rj': { loc: 'pt-BR-RJ', bcp47: 'pt-BR', gl: 'pt-BR', f: 'Aoede', m: 'Orus', qo: '«', qc: '»',
+    p: 'Leia exclusivamente em voz alta o seguinte texto em português brasileiro carioca natural (Rio de Janeiro), sem comentários:' },
+  'pt-br-ne': { loc: 'pt-BR-NE', bcp47: 'pt-BR', gl: 'pt-BR', f: 'Aoede', m: 'Orus', qo: '«', qc: '»',
+    p: 'Leia exclusivamente em voz alta o seguinte texto em português brasileiro nordestino claro e natural, sem comentários:' },
+  'pt-pt': { loc: 'pt-PT', bcp47: 'pt-PT', gl: 'pt-PT', f: 'Leda', m: 'Charon', qo: '«', qc: '»',
+    p: 'Lê exclusivamente em voz alta o seguinte texto em português europeu natural (Lisboa), sem comentários:' },
   'it-it-mil': { loc: 'it-IT-MIL', bcp47: 'it-IT', gl: 'it', f: 'Leda', m: 'Orus', qo: '«', qc: '»',
     p: 'Leggi esclusivamente ad alta voce il seguente testo in italiano con il tipico accento milanese (Lombardia), naturale e senza commenti:' },
   'it-it-nap': { loc: 'it-IT-NAP', bcp47: 'it-IT', gl: 'it', f: 'Leda', m: 'Orus', qo: '«', qc: '»',
@@ -1350,16 +1359,17 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '9.1.0',
-        accentCount: 61,
-        supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da'],
-        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/youtube-study', '/api/media/list', '/api/media/*', '/api/telemetry'],
+        version: '9.2.0',
+        accentCount: 65,
+        supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt'],
+        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/translate', '/api/youtube-study', '/api/media/list', '/api/media/*', '/api/telemetry'],
         rateLimits: {
           ttsPerMin: 120,
           sttPerMin: 30,
           geminiTutorPerMin: 30,
+          translatePerMin: 40,
           youtubePerMin: 20,
-          dailyQuotas: { stt: 200, geminiTutor: 250, youtube: 100 },
+          dailyQuotas: { stt: 200, geminiTutor: 250, translate: 300, youtube: 100 },
         },
         hasAiBinding: Boolean(env.AI),
         hasGeminiSecret: Boolean(env.GEMINI_API_KEY),
@@ -1430,6 +1440,22 @@ export default {
         return jsonResponse({ ok: false, error: 'Daily AI Tutor quota exceeded' }, 429);
       }
       return handleGeminiTutorRequest(request, env);
+    }
+
+    if (path === '/api/translate') {
+      const auth = await verifySupabaseJwt(request, env);
+      if (env.REQUIRE_SUPABASE_JWT === 'true' && !auth.authenticated) {
+        return jsonResponse({ ok: false, error: 'Authentication required' }, 401);
+      }
+      const rl = checkRateLimit(request, 'translate', 40, auth.userId);
+      if (!rl.allowed) {
+        return jsonResponse({ ok: false, error: 'Rate limit exceeded for /api/translate' }, 429);
+      }
+      const dq = await checkPersistentDailyQuota(env, request, 'translate', 300, auth.userId);
+      if (!dq.allowed) {
+        return jsonResponse({ ok: false, error: 'Daily translator quota exceeded' }, 429);
+      }
+      return handleTranslateRequest(request, env);
     }
 
     if (path === '/api/youtube-study') {

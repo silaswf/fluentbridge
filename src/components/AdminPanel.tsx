@@ -118,7 +118,7 @@ export function AdminPanel({
         if (data) {
           setWorkerHealth({
             version: data.version,
-            languagesCount: data.supportedLanguages?.length ?? 16,
+            languagesCount: data.supportedLanguages?.length ?? 17,
             hasAi: Boolean(data.hasAiBinding),
             hasGemini: Boolean(data.hasGeminiSecret),
             hasR2: Boolean(data.hasR2Bucket),
@@ -337,7 +337,7 @@ export function AdminPanel({
               <span>Saúde dos Serviços & Vozes Neurais</span>
             </h2>
             <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-              {voiceDiagnostics.length}/16 idiomas ativos
+              {voiceDiagnostics.length}/17 idiomas ativos
             </span>
           </div>
           <div className="mt-3 space-y-2.5 text-xs">

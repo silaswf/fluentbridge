@@ -753,6 +753,29 @@ PACKS.da = buildGenericPack(
   'Bør storbyer prioritere offentlig transport frem for nye motorveje? Begrund din holdning.',
 );
 
+PACKS.pt = buildGenericPack(
+  'pt',
+  'Qual é a ideia principal do texto?',
+  'Leitura Complementar — Mobilidade Urbana Sustentável',
+  'Diversas cidades brasileiras e portuguesas vêm ampliando ciclovias e integrando linhas de metrô e ônibus elétricos para reduzir congestionamentos e melhorar a qualidade do ar.',
+  'Por que as cidades estão ampliando ciclovias e linhas elétricas?',
+  'Para reduzir congestionamentos e melhorar a qualidade do ar.',
+  'Para proibir o uso de transporte público no centro.',
+  'Aviso na estação: O trem expresso para Campinas partirá em cinco minutos da plataforma 6 em vez da plataforma 2.',
+  'De qual plataforma partirá o trem para Campinas?',
+  'Plataforma 6',
+  'Plataforma 2',
+  'Complete com o modo verbal adequado: "Espero que vocês ___ um excelente fim de semana!"',
+  'tenham',
+  'têm',
+  'Qual conector introduz uma ideia de concessão?',
+  'Embora',
+  'Portanto',
+  'Conte brevemente sobre sua rotina diária e por que você está aprendendo português.',
+  'Discuta as vantagens e desvantagens do trabalho híbrido nas empresas atuais.',
+  'Na sua opinião, como o transporte público gratuito impactaria as grandes metrópoles? Justifique.',
+);
+
 const EXTRA_NORDIC_SEMITIC_QUESTIONS: Partial<Record<LanguageCode, (exam: MockExam) => ExamQuestion[]>> = {
   tr: (exam) => [
     {
@@ -844,6 +867,29 @@ const EXTRA_NORDIC_SEMITIC_QUESTIONS: Partial<Record<LanguageCode, (exam: MockEx
       options: ['om', 'i', 'på', 'fra'],
       correctIndex: 0,
       explanation: 'Tempo futuro ("daqui a 5 minutos") usa "om" em dinamarquês.',
+    },
+  ],
+  pt: (exam) => [
+    {
+      id: `${exam.id}-xb1`,
+      section: 'language_use',
+      prompt: 'Escolha a frase com uso correto do Futuro do Subjuntivo:',
+      options: [
+        'Quando você chegar a São Paulo, me ligue.',
+        'Quando você chega a São Paulo, me ligue.',
+        'Quando você chegou a São Paulo, me ligue.',
+        'Quando você chegará a São Paulo, me ligue.',
+      ],
+      correctIndex: 0,
+      explanation: 'Orações temporais futuras introduzidas por "quando" exigem Futuro do Subjuntivo ("chegar").',
+    },
+    {
+      id: `${exam.id}-xb2`,
+      section: 'language_use',
+      prompt: 'Complete com a preposição correta: "Este relatório é ___ a diretoria revisar hoje."',
+      options: ['para', 'por', 'com', 'sem'],
+      correctIndex: 0,
+      explanation: 'Finalidade e destinatário em português usam "para".',
     },
   ],
 };

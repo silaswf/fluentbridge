@@ -274,6 +274,17 @@ export async function loadLanguageCourseData(
       };
       break;
     }
+    case 'pt': {
+      const [base, exp] = await Promise.all([
+        import('./curriculum/portugueseCourse'),
+        import('./curriculum/portugueseExpansion'),
+      ]);
+      bundle = {
+        topics: sortByLevel([...base.PORTUGUESE_TOPICS, ...exp.PORTUGUESE_EXPANSION_TOPICS, ...idiomTopics]),
+        vocab: [...base.PORTUGUESE_VOCAB, ...exp.PORTUGUESE_EXPANSION_VOCAB, ...idiomVocab],
+      };
+      break;
+    }
   }
 
   bundle = enrichCourseCohesion(lang, bundle.topics, bundle.vocab);

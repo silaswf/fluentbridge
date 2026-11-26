@@ -18,6 +18,7 @@ import { TR_TUTOR_SCENARIOS } from './tutorScenariosTr';
 import { HE_TUTOR_SCENARIOS } from './tutorScenariosHe';
 import { NB_TUTOR_SCENARIOS } from './tutorScenariosNb';
 import { DA_TUTOR_SCENARIOS } from './tutorScenariosDa';
+import { PT_TUTOR_SCENARIOS } from './tutorScenariosPt';
 import { EN_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_en';
 import { ES_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_es';
 import { FR_TUTOR_SCENARIOS_V9 } from './tutorScenariosV9/tutorV9_fr';
@@ -1470,4 +1471,5 @@ export const AI_TUTOR_SCENARIOS: AITutorScenario[] = [
   ...NL_TUTOR_SCENARIOS_V9,
   ...AF_TUTOR_SCENARIOS_V9,
   ...SV_TUTOR_SCENARIOS_V9,
+  ...PT_TUTOR_SCENARIOS,
 ];

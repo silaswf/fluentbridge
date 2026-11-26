@@ -530,6 +530,40 @@ export const REGIONAL_ACCENTS_BY_LANGUAGE: Record<LanguageCode, RegionalAccentOp
       bcp47: 'da-DK',
     },
   ],
+  pt: [
+    {
+      code: 'pt-BR-SP',
+      flag: '🇧🇷',
+      shortLabel: 'BR-SP',
+      regionPt: 'Português Brasileiro (São Paulo / Neutro)',
+      descriptionPt: 'Pronúncia clara de referência no Brasil',
+      bcp47: 'pt-BR',
+    },
+    {
+      code: 'pt-BR-RJ',
+      flag: '🏖️',
+      shortLabel: 'BR-RJ',
+      regionPt: 'Português Brasileiro (Rio de Janeiro)',
+      descriptionPt: 'Sotaque carioca com S chiado e ritmo musical',
+      bcp47: 'pt-BR',
+    },
+    {
+      code: 'pt-BR-NE',
+      flag: '☀️',
+      shortLabel: 'BR-NE',
+      regionPt: 'Português Brasileiro (Nordeste)',
+      descriptionPt: 'Vogais abertas e cadência expressiva do Nordeste',
+      bcp47: 'pt-BR',
+    },
+    {
+      code: 'pt-PT',
+      flag: '🇵🇹',
+      shortLabel: 'PT-LX',
+      regionPt: 'Português Europeu (Lisboa)',
+      descriptionPt: 'Vogais reduzidas e uso clássico de "tu" e ênclise',
+      bcp47: 'pt-PT',
+    },
+  ],
 };
 
 export function getRegionalAccents(languageCode: LanguageCode): RegionalAccentOption[] {

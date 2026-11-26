@@ -32,6 +32,8 @@ import { TURKISH_150_TOPICS, TURKISH_150_VOCAB } from './curriculum/turkishExpan
 import { HEBREW_150_TOPICS, HEBREW_150_VOCAB } from './curriculum/hebrewExpansion';
 import { NORWEGIAN_150_TOPICS, NORWEGIAN_150_VOCAB } from './curriculum/norwegianExpansion';
 import { DANISH_150_TOPICS, DANISH_150_VOCAB } from './curriculum/danishExpansion';
+import { PORTUGUESE_TOPICS, PORTUGUESE_VOCAB } from './curriculum/portugueseCourse';
+import { PORTUGUESE_EXPANSION_TOPICS, PORTUGUESE_EXPANSION_VOCAB } from './curriculum/portugueseExpansion';
 import { EN_V9_TOPICS, EN_V9_VOCAB } from './curriculum/expansionV9/expV9_en';
 import { ES_V9_TOPICS, ES_V9_VOCAB } from './curriculum/expansionV9/expV9_es';
 import { FR_V9_TOPICS, FR_V9_VOCAB } from './curriculum/expansionV9/expV9_fr';
@@ -528,6 +530,8 @@ const NORWEGIAN_ALL_WITH_CULTURE = sortByLevel([...NORWEGIAN_150_TOPICS, ...IDIO
 const NORWEGIAN_VOCAB_WITH_CULTURE = [...NORWEGIAN_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.nb];
 const DANISH_ALL_WITH_CULTURE = sortByLevel([...DANISH_150_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.da]);
 const DANISH_VOCAB_WITH_CULTURE = [...DANISH_150_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.da];
+const PORTUGUESE_ALL_WITH_CULTURE = sortByLevel([...PORTUGUESE_TOPICS, ...PORTUGUESE_EXPANSION_TOPICS, ...IDIOMS_SLANG_TOPICS_BY_LANG.pt]);
+const PORTUGUESE_VOCAB_WITH_CULTURE = [...PORTUGUESE_VOCAB, ...PORTUGUESE_EXPANSION_VOCAB, ...IDIOMS_SLANG_VOCAB_BY_LANG.pt];
 
 export {
   SPANISH_ALL_TOPICS,
@@ -560,6 +564,8 @@ export {
   NORWEGIAN_VOCAB_WITH_CULTURE as NORWEGIAN_150_VOCAB,
   DANISH_ALL_WITH_CULTURE as DANISH_150_TOPICS,
   DANISH_VOCAB_WITH_CULTURE as DANISH_150_VOCAB,
+  PORTUGUESE_ALL_WITH_CULTURE as PORTUGUESE_150_TOPICS,
+  PORTUGUESE_VOCAB_WITH_CULTURE as PORTUGUESE_150_VOCAB,
 };
 
 export function getLanguageCourse(code: LanguageCode): LanguageCourse {
@@ -605,7 +611,9 @@ export function getCourseTopics(
                                   ? NORWEGIAN_ALL_WITH_CULTURE
                                   : languageCode === 'da'
                                     ? DANISH_ALL_WITH_CULTURE
-                                    : [];
+                                    : languageCode === 'pt'
+                                      ? PORTUGUESE_ALL_WITH_CULTURE
+                                      : [];
   const custom = customTopics.filter(
     (t) => (t.languageCode ?? 'en') === languageCode,
   );

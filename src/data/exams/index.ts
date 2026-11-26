@@ -8,6 +8,7 @@ import { GERMANIC_MOCK_EXAMS } from './examsGermanic';
 import { EXAMS_NORDIC_SEMITIC } from './examsNordicSemitic';
 import { ROMANCE_MOCK_EXAMS } from './examsRomance';
 import { SCRIPTS_MOCK_EXAMS } from './examsScripts';
+import { EXAMS_PORTUGUESE } from './examsPortuguese';
 
 export const ALL_MOCK_EXAMS: MockExam[] = [
   ...enrichMockExams(ENGLISH_MOCK_EXAMS),
@@ -17,6 +18,7 @@ export const ALL_MOCK_EXAMS: MockExam[] = [
   ...enrichMockExams(GERMANIC_MOCK_EXAMS),
   ...enrichMockExams(SCRIPTS_MOCK_EXAMS),
   ...enrichMockExams(EXAMS_NORDIC_SEMITIC),
+  ...enrichMockExams(EXAMS_PORTUGUESE),
 ];
 
 export function getExamsByLanguage(languageCode: LanguageCode): MockExam[] {

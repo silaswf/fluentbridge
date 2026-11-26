@@ -1390,6 +1390,78 @@ export const INTERACTIVE_VIDEO_CLIPS: InteractiveVideoClip[] = [
       },
     ],
   },
+  {
+    id: 'vid-pt-1',
+    languageCode: 'pt',
+    level: 'A1',
+    categoryPt: 'Viagem',
+    titleTarget: 'Na Cafeteria em Copacabana',
+    titlePt: 'At a Coffee Shop in Rio',
+    durationLabel: '0:35',
+    gradientClass: 'from-emerald-700 via-teal-800 to-slate-900',
+    sceneSettingPt: 'Cafeteria brasileira à beira-mar',
+    lines: [
+      {
+        id: 'pt1-l1',
+        speaker: 'Lucas',
+        voice: 'male',
+        dialectCode: 'pt-BR-RJ',
+        textTarget: 'Bom dia! Tudo bem? Eu queria um café coado e uma fatia de bolo de milho.',
+        textPt: 'Good morning! How are you? I would like a drip coffee and a slice of corn cake.',
+        tokens: [
+          { surface: 'queria', lemma: 'querer', translationPt: 'would like (polite)', ipa: '/keˈɾi.ɐ/', partOfSpeech: 'Verb', notePt: 'Imperfect "queria" sounds much softer and more polite than "eu quero"!' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'vid-pt-2',
+    languageCode: 'pt',
+    level: 'A2',
+    categoryPt: 'Cotidiano',
+    titleTarget: 'Combinando um Almoço',
+    titlePt: 'Planning Lunch with Friends',
+    durationLabel: '0:40',
+    gradientClass: 'from-amber-700 via-orange-800 to-slate-900',
+    sceneSettingPt: 'Conversa informal em São Paulo',
+    lines: [
+      {
+        id: 'pt2-l1',
+        speaker: 'Camila',
+        voice: 'female',
+        dialectCode: 'pt-BR-SP',
+        textTarget: 'Se você tiver tempo hoje à tarde, a gente pode tomar um açaí perto do parque.',
+        textPt: 'If you have time this afternoon, we can have an açaí near the park.',
+        tokens: [
+          { surface: 'tiver', lemma: 'ter', translationPt: 'have (future subjunctive)', ipa: '/tʃiˈvɛɾ/', partOfSpeech: 'Verb', notePt: 'Portuguese uses the Future Subjunctive after "se" for likely future conditions.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'vid-pt-3',
+    languageCode: 'pt',
+    level: 'B2',
+    categoryPt: 'Trabalho',
+    titleTarget: 'Inovação & Parcerias Atlânticas',
+    titlePt: 'Inovação & Parcerias Atlânticas',
+    durationLabel: '0:45',
+    gradientClass: 'from-slate-800 via-emerald-950 to-slate-950',
+    sceneSettingPt: 'Debate profissional Brasil-Portugal',
+    lines: [
+      {
+        id: 'pt3-l1',
+        speaker: 'Tiago',
+        voice: 'male',
+        dialectCode: 'pt-PT',
+        textTarget: 'Embora haja diferenças de vocabulário, a colaboração entre equipes lusófonas flui naturalmente.',
+        textPt: 'Although there are vocabulary differences, collaboration across Lusophone teams flows naturally.',
+        tokens: [
+          { surface: 'Embora', lemma: 'embora', translationPt: 'although (+ subjunctive)', ipa: '/ẽˈbɔɾɐ/', partOfSpeech: 'Conjunction', notePt: '"Embora" sempre exige verbo no subjuntivo ("haja", "seja", "tenha").' },
+        ],
+      },
+    ],
+  },
 ];
 
 export function getInteractiveVideosByLanguage(

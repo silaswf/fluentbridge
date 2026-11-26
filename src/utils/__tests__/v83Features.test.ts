@@ -59,12 +59,12 @@ describe('v8.3.0 — Itens Funcionais F-01 a F-07', () => {
     }
   });
 
-  it('F-01: resolvePreferredAccent persiste qualquer dos 61 sotaques regionais', () => {
+  it('F-01: resolvePreferredAccent persiste qualquer dos 65 sotaques regionais', () => {
     const itNap = resolvePreferredAccent('it', { it: 'it-IT-NAP' }, 'en-US');
     expect(itNap.code).toBe('it-IT-NAP');
     const jaFuk = resolvePreferredAccent('ja', { ja: 'ja-FUK' }, 'en-US');
     expect(jaFuk.code).toBe('ja-FUK');
-    expect(Object.values(REGIONAL_ACCENTS_BY_LANGUAGE).flat().length).toBe(61);
+    expect(Object.values(REGIONAL_ACCENTS_BY_LANGUAGE).flat().length).toBe(65);
   });
 
   it('F-02: analyzeWritingHybrid aceita resposta alternativa correta via IA (>=80%) e cai no local quando offline', async () => {

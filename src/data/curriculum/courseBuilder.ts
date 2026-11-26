@@ -448,6 +448,12 @@ function buildContextualFallbackExample(
       { en: `Husk „${cleanWord}“, når du taler om ${topicTarget.toLowerCase()}.`, pt: `Lembre-se de "${cleanWord}" (${pt}) ao falar sobre ${topicPt}.` },
       { en: `Udtrykket „${cleanWord}“ passer rigtig godt til denne situation.`, pt: `A expressão "${cleanWord}" (${pt}) encaixa perfeitamente nesta situação.` },
     ],
+    pt: [
+      { en: `No dia a dia usamos muito "${cleanWord}" ao falar de ${topicTarget.toLowerCase()}.`, pt: `In everyday Portuguese we often use "${cleanWord}" (${pt}) when talking about ${topicPt}.` },
+      { en: `Você consegue formar uma frase natural com "${cleanWord}"?`, pt: `Can you form a natural sentence with "${cleanWord}" (${pt})?` },
+      { en: `Lembre-se de usar "${cleanWord}" em conversas reais em português.`, pt: `Remember to use "${cleanWord}" (${pt}) in real Portuguese conversations.` },
+      { en: `A expressão "${cleanWord}" combina perfeitamente com esta situação.`, pt: `The expression "${cleanWord}" (${pt}) fits this situation naturally.` },
+    ],
   };
   const list = templates[lang] ?? templates.en;
   return list[idx % list.length];

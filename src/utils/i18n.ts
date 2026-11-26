@@ -6,6 +6,7 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
   pt: {
     'nav.learn': 'Trilha de Aulas',
     'nav.tutor': 'Conversação IA',
+    'nav.translator': 'Tradutor',
     'nav.review': 'Revisão & Vocab',
     'nav.immersion': 'Imersão (Áudio & Vídeo)',
     'nav.tips': 'Guias & Gramática',
@@ -59,6 +60,7 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
   en: {
     'nav.learn': 'Learning Path',
     'nav.tutor': 'AI Conversation',
+    'nav.translator': 'Translator',
     'nav.review': 'Review & Vocab',
     'nav.immersion': 'Immersion (Audio & Video)',
     'nav.tips': 'Guides & Grammar',
@@ -112,6 +114,7 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
   es: {
     'nav.learn': 'Ruta de Clases',
     'nav.tutor': 'Conversación IA',
+    'nav.translator': 'Traductor',
     'nav.review': 'Repaso y Vocab',
     'nav.immersion': 'Inmersión (Audio y Video)',
     'nav.tips': 'Guías y Gramática',

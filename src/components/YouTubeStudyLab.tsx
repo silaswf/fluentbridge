@@ -61,6 +61,12 @@ const SAMPLE_URLS: Partial<Record<LanguageCode, { url: string; label: string; sa
     sampleTranscript:
       '0:00 כשאני מגיע לתל אביב, אני תמיד שותה קפה ליד הים.\n0:06 חשוב לי לדבר עברית כל יום עם חברים.',
   },
+  pt: {
+    url: 'https://www.youtube.com/watch?v=M7lc1UVf-VE',
+    label: 'Sample PT (B1)',
+    sampleTranscript:
+      '0:00 Embora o trânsito em São Paulo seja intenso, o metrô facilita bastante a rotina.\n0:06 Se você quiser praticar português todos os dias, vale a pena ouvir podcasts brasileiros.',
+  },
 };
 
 export function YouTubeStudyLab({

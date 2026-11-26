@@ -255,6 +255,10 @@ export function analyzePhoneticFeedback(
     da: [
       { soundLabel: 'Blødt D /ð/ & Stød', contrastPair: 'mad (comida) vs. man · rød', practiceSentence: 'Jeg vil gerne bestille rød grød med fløde.' },
     ],
+    pt: [
+      { soundLabel: 'Nasal Vowels /ɐ̃w̃/ (ão/ãe/õe)', contrastPair: 'pão (bread) vs. pau (stick) · não vs. nau', practiceSentence: 'Não sei se o João vai comprar pão e limão amanhã.' },
+      { soundLabel: 'Palatal LH /ʎ/ & NH /ɲ/', contrastPair: 'filho (son) vs. filo · manhã vs. mana', practiceSentence: 'Amanhã minha filha vai trabalhar em São Paulo.' },
+    ],
   };
 
   const targetedDrills = missedWords.length > 0 ? (DRILL_BY_LANG[languageCode] ?? []) : [];

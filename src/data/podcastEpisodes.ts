@@ -922,6 +922,59 @@ const SEEDS: EpSeed[] = [
     ],
     q: 'Hvad kræver et stabilt elnet ud over havvind?', opts: ['Effektiv energilagring', 'Flere kulkraftværker', 'Mindre forskning'], ans: 0,
   },
+  {
+    lang: 'pt', d1: 'pt-BR-SP', s1: 'Camila', d2: 'pt-PT', s2: 'Tiago', lvl: 'A1',
+    titlePt: 'First Morning at a Padaria', titleTarget: 'Café da Manhã na Padaria',
+    themePt: 'Ordering coffee, pão de queijo and polite greetings in Portuguese.',
+    videoTipPt: 'Search: "Portuguese coffee shop dialogue A1".',
+    lines: [
+      [1, "Bom dia! Queria um café com leite e dois pães de queijo, por favor.", "Good morning! I would like a coffee with milk and two cheese breads, please."],
+      [2, "Com certeza! Para comer aqui ou para viagem?", "Certainly! For here or to go?"],
+    ],
+    q: 'What does Camila order with her coffee?', opts: ['Two pães de queijo', 'Orange juice', 'A sandwich'], ans: 0,
+  },
+  {
+    lang: 'pt', d1: 'pt-BR-SP', s1: 'Camila', d2: 'pt-BR-RJ', s2: 'Lucas', lvl: 'A2',
+    titlePt: 'Taking the Metro in São Paulo & Rio', titleTarget: 'No Metrô',
+    themePt: 'Directions, transport and BR regional accents.',
+    videoTipPt: 'Search: "Brazilian Portuguese directions metro A2".',
+    lines: [
+      [2, "Com licença, qual linha vai para a Avenida Paulista?", "Excuse me, which line goes to Paulista Avenue?"],
+      [1, "Pegue a Linha Verde e desça na estação Consolação.", "Take the Green Line and get off at Consolação station."],
+    ],
+    q: 'Where should Lucas get off?', opts: ['Consolação station', 'Sé station', 'Central station'], ans: 0,
+  },
+  {
+    lang: 'pt', d1: 'pt-BR-SP', s1: 'Camila', d2: 'pt-PT', s2: 'Tiago', lvl: 'B1',
+    titlePt: 'Brazil vs. Portugal Vocabulary', titleTarget: 'Brasil e Portugal: Mesmo Idioma',
+    themePt: 'Comparing trem/comboio, ônibus/autocarro and gerúndio vs infinitivo.',
+    videoTipPt: 'Search: "Brazilian vs European Portuguese comparison B1".',
+    lines: [
+      [1, "No Brasil dizemos 'estou trabalhando' e pegamos o ônibus.", "In Brazil we say 'estou trabalhando' and take the bus."],
+      [2, "Em Lisboa dizemos 'estou a trabalhar' e apanhamos o autocarro!", "In Lisbon we say 'estou a trabalhar' and catch the bus!"],
+    ],
+    q: 'How do people say "bus" in Portugal?', opts: ['Autocarro', 'Ônibus', 'Bonde'], ans: 0,
+  },
+  {
+    lang: 'pt', d1: 'pt-BR-SP', s1: 'Camila', d2: 'pt-PT', s2: 'Tiago', lvl: 'B2',
+    titlePt: 'Trabalho Híbrido & Subjuntivo', titleTarget: 'Cultura de Trabalho Lusófona',
+    themePt: 'Imersão B2 em português sobre trabalho remoto.',
+    videoTipPt: 'Ouça podcasts como "Café da Manhã" ou "Fala Gringo".',
+    lines: [
+      [1, "Embora o trabalho remoto tenha crescido rápido, muitas equipes ainda valorizam encontros presenciais.", "Although remote work grew fast, many teams still value in-person meetings."],
+    ],
+    q: 'O que muitas equipes ainda valorizam segundo Camila?', opts: ['Encontros presenciais', 'Zero reuniões', 'Horários rígidos'], ans: 0,
+  },
+  {
+    lang: 'pt', d1: 'pt-BR-SP', s1: 'Camila', d2: 'pt-PT', s2: 'Tiago', lvl: 'C1',
+    titlePt: 'Transição Energética & Crônica', titleTarget: 'Inovação e Sustentabilidade no Atlântico',
+    themePt: 'Análise C1 no padrão CELPE-Bras Avançado.',
+    videoTipPt: 'Ouça Rádio CBN ou Antena 1 RTP.',
+    lines: [
+      [2, "Não obstante os desafios logísticos, a cooperação científica entre Brasil e Portugal tem gerado resultados expressivos.", "Notwithstanding the logistical challenges, scientific cooperation between Brazil and Portugal has yielded expressive results."],
+    ],
+    q: 'O que tem gerado resultados expressivos?', opts: ['A cooperação científica entre Brasil e Portugal', 'O corte de pesquisas', 'A redução de universidades'], ans: 0,
+  },
 ];
 
 export const PODCAST_EPISODES: PodcastEpisode[] = SEEDS.map((s) => {

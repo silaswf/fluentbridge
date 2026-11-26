@@ -667,12 +667,90 @@ const IMMERSION_BY_LANG: Record<LanguageCode, ImmersionStrings> = {
     tip2DetailsTemplate: (speakTarget, speakIpa) =>
       `Øv rytmen i "${speakTarget}" (${speakIpa}) med fokus på stød og blødt d.`,
   },
+  pt: {
+    isImmersion: true,
+    badgeLabel: 'B2/C1 Imersão',
+    teacherTip: 'Dica do Professor',
+    examplesHeading: 'Exemplos na prática (clique para ouvir)',
+    gotItContinue: 'Entendi, continuar',
+    checkAnswer: 'Verificar resposta',
+    continueBtn: 'Continuar',
+    listeningContext: 'Ouça com atenção (1.0x ou 0.75x) e escolha a melhor resposta:',
+    listeningHint: 'Alterne para 0.75x se quiser captar as vogais nasais e ligações naturais.',
+    readingHint: 'Toque nos termos destacados do glossário para revisar definições e pronúncia.',
+    matchingPrompt: 'Associe cada expressão em português ao seu significado:',
+    matchingHint: 'Observe o registro (formal/coloquial) e diferenças BR/PT antes de ligar.',
+    dictationPrompt: 'Ditado Auditivo: ouça e transcreva exatamente a frase:',
+    dictationPlaceholder: 'Digite a frase exata em português que você ouviu...',
+    dictationHint: 'Pressione R para ouvir novamente quantas vezes precisar.',
+    fillBlankPrompt: 'Complete a frase com a estrutura mais natural:',
+    fillBlankHint: 'Revise a fórmula gramatical da dica inicial.',
+    storyHint: 'Clique em "Ouvir diálogo completo" para escutar os dois falantes em sequência.',
+    speakingPrompt: 'Fale em voz alta com ritmo e entonação naturais em português:',
+    writingScenario: 'Escreva sua resposta em português para praticar (ou envie ao professor).',
+    writingMinWordsLabel: 'Pelo menos 6 palavras em português',
+    writingHint: 'Incorpore a estrutura-alvo da dica inicial.',
+    pronunciationPrefix: 'Pronúncia',
+    tip2TitlePrefix: 'Pronúncia & Uso Real',
+    audioSaysPrefix: 'Transcrição do áudio',
+    answerInText: 'Este detalhe está diretamente indicado no texto acima.',
+    correctFormPrefix: 'Forma correta',
+    confirmedInLinePrefix: 'Confirmado no diálogo',
+    tipsInTopicHeading: 'Dicas neste tópico',
+    practiceWithAiBtn: 'Conversar com IA',
+    speakerAudioLabel: 'Áudio Nativo · Português',
+    keyVocabWarning: (word, ipa, pt) =>
+      `Expressão-chave: "${word}" (${ipa}) — nuance/sentido: ${pt}.`,
+    tip2DetailsTemplate: (speakTarget, speakIpa) =>
+      `Pratique a melodia natural de "${speakTarget}" (${speakIpa}), mantendo as vogais nasais e reduções átonas.`,
+  },
+};
+
+const EN_BASE_STRINGS_FOR_PT: ImmersionStrings = {
+  isImmersion: false,
+  badgeLabel: 'A1–B1',
+  teacherTip: "Teacher's Tip",
+  examplesHeading: 'Examples in practice (click to listen)',
+  gotItContinue: 'Got it, continue',
+  checkAnswer: 'Check answer',
+  continueBtn: 'Continue',
+  listeningContext: 'Listen carefully (1.0x or 0.75x) and answer:',
+  listeningHint: 'Use 0.75x speed to catch every Portuguese word and nasal vowel.',
+  readingHint: 'Tap highlighted glossary words if you need translation help.',
+  matchingPrompt: 'Match the Portuguese expressions to their English meaning:',
+  matchingHint: 'Watch pronunciation and false friends before connecting.',
+  dictationPrompt: 'Listening Dictation: listen and type the exact sentence:',
+  dictationPlaceholder: 'Type the exact Portuguese sentence you heard...',
+  dictationHint: 'Press R to replay the audio as many times as needed.',
+  fillBlankPrompt: 'Complete the sentence correctly:',
+  fillBlankHint: 'Check the grammar formula from the opening tip.',
+  storyHint: 'Click "Play full dialogue" to hear both speakers in sequence.',
+  speakingPrompt: 'Practice speaking aloud:',
+  writingScenario: 'Write your response in Portuguese to practice (or submit to teacher).',
+  writingMinWordsLabel: 'At least 6 words in Portuguese',
+  writingHint: 'Use the structure from the opening tip.',
+  pronunciationPrefix: 'Pronunciation',
+  tip2TitlePrefix: 'Pronunciation & Real Usage',
+  audioSaysPrefix: 'The audio says',
+  answerInText: 'The answer is directly in the passage above.',
+  correctFormPrefix: 'Correct form',
+  confirmedInLinePrefix: 'Confirmed in dialogue',
+  tipsInTopicHeading: 'Tips in this topic',
+  practiceWithAiBtn: 'Chat with AI',
+  speakerAudioLabel: 'Native audio',
+  keyVocabWarning: (word, ipa, pt) =>
+    `Key vocabulary: "${word}" (${ipa}) means "${pt}".`,
+  tip2DetailsTemplate: (speakTarget, speakIpa, speakBr) =>
+    `Practice the rhythm of "${speakTarget}" (${speakIpa}). Pronunciation tip for English speakers: ${speakBr}.`,
 };
 
 export function getImmersionStrings(
   lang: LanguageCode = 'en',
   level?: CEFRLevel,
 ): ImmersionStrings {
+  if (lang === 'pt') {
+    return isImmersionLevel(level) ? IMMERSION_BY_LANG.pt : EN_BASE_STRINGS_FOR_PT;
+  }
   if (!isImmersionLevel(level)) return PT_STRINGS;
   return IMMERSION_BY_LANG[lang] ?? IMMERSION_BY_LANG.en;
 }

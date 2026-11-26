@@ -216,6 +216,19 @@ export const LANGUAGE_COURSES_META: LanguageCourse[] = [
       { code: 'da-DK-AAR', label: 'Aarhus (DK)', flag: '⛵' },
     ],
   },
+  {
+    code: 'pt',
+    namePt: 'Português (PLE)',
+    nativeName: 'Português · For English Speakers',
+    flag: '🇧🇷',
+    available: true,
+    descriptionPt:
+      'Complete Portuguese course (CEFR A1–C1) for English speakers: 150 units (English A1–B1, 100% Portuguese immersion B2–C1), 200+ grammar guides, CELPE-Bras & BR/PT accents.',
+    dialects: [
+      { code: 'pt-BR-SP', label: 'Brasil (São Paulo)', flag: '🇧🇷' },
+      { code: 'pt-PT', label: 'Portugal (Lisboa)', flag: '🇵🇹' },
+    ],
+  },
 ];
 
 export function getLanguageCourseMeta(code: LanguageCode): LanguageCourse {

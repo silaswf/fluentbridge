@@ -127,6 +127,7 @@ export function getStarterPostsForLanguage(languageCode: LanguageCode): Communit
     he: { name: 'Hebraico', sample: 'שָׁלוֹם! אֶפְשָׁר בְּבַקָּשָׁה כּוֹס קָפֶה?', tip: 'Use o alternador Niqqud/Moderno para treinar leitura com e sem vogais (RTL).' },
     nb: { name: 'Norueguês', sample: 'Hei! Kan jeg få en kaffe og en bolle, takk?', tip: 'Lembre-se da regra V2: o verbo conjugado ocupa sempre a 2ª posição.' },
     da: { name: 'Dinamarquês', sample: 'Hej! Må jeg bede om en kop kaffe, tak?', tip: 'Ouça em 0.75x para perceber o stød e o "d" suave (blødt d) no final das palavras.' },
+    pt: { name: 'Português (PLE)', sample: 'Olá! Tudo bem? Eu gostaria de um café com leite, por favor.', tip: 'Practice nasal vowels (ão, ãe, õe) and compare Brazilian vs. European Portuguese!' },
   };
   const info = labels[languageCode];
   return [
@@ -243,6 +244,7 @@ export function getMonthlyChallengeForLanguage(
     he: 'אתגר הדיבור בעברית',
     nb: 'Norsk Hverdagssprint',
     da: 'Dansk Samtaleudfordring',
+    pt: 'Desafio Fale Português',
   };
   return {
     id: `challenge-${monthKey}-${languageCode}`,

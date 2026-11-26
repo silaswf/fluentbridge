@@ -22,7 +22,8 @@ export type LanguageCode =
   | 'tr'
   | 'he'
   | 'nb'
-  | 'da';
+  | 'da'
+  | 'pt';
 
 export type UserRole = 'teacher' | 'student';
 

@@ -67,6 +67,11 @@ const CertificatesView = lazy(() =>
     default: m.CertificatesView,
   })),
 );
+const CourseTranslatorView = lazy(() =>
+  import('./components/CourseTranslatorView').then((m) => ({
+    default: m.CourseTranslatorView,
+  })),
+);
 const LessonPlayer = lazy(() =>
   import('./components/LessonPlayer').then((m) => ({ default: m.LessonPlayer })),
 );
@@ -2133,6 +2138,16 @@ export function App() {
                 setActiveView('tutor');
               }}
               initialViewMode={activeView === 'immersion' ? 'podcasts' : 'tips'}
+            />
+          )}
+
+          {activeView === 'translator' && (
+            <CourseTranslatorView
+              activeCourse={activeCourse}
+              courseVocab={courseVocab}
+              onSaveVocabCard={(card) =>
+                handleSaveCustomVocabCard({ ...card, category: 'Tradutor' })
+              }
             />
           )}
 

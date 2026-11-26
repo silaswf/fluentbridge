@@ -1,7 +1,7 @@
 import type { LanguageCode } from '../types/learning';
 
 const LEADING_DICTIONARY_MARKER_RE =
-  /^(to|att|å|at|et|a|an|the|el|la|los|las|un|una|unos|unas|le|les|l'|il|lo|i|gli|der|die|das|ein|eine|de|het|een|en|ett|'n|’n|sich|zich|se)\s+/i;
+  /^(to|att|å|at|et|a|an|the|el|la|los|las|un|una|unos|unas|le|les|l'|il|lo|i|gli|der|die|das|ein|eine|de|het|een|en|ett|'n|’n|o|os|as|um|uma|uns|umas|sich|zich|se)\s+/i;
 
 const FUNCTION_STOPWORDS = new Set([
   'a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from',
@@ -85,6 +85,17 @@ const IRREGULAR_FORM_MAP: Record<string, string[]> = {
   vide: ['ved', 'vidste', 'vidst'],
   vaere: ['er', 'var', 'vaeret'],
   fortaelle: ['fortalte', 'fortalt', 'fortaeller'],
+  estar: ['estou', 'esta', 'estamos', 'estao', 'estava', 'esteve', 'estive'],
+  ter: ['tenho', 'tem', 'temos', 'teve', 'tive', 'tinha', 'tiver'],
+  fazer: ['faco', 'faz', 'fazemos', 'fazem', 'fez', 'fiz', 'feito'],
+  dizer: ['digo', 'diz', 'dizemos', 'dizem', 'disse', 'dito'],
+  ver: ['vejo', 've', 'vemos', 'veem', 'vi', 'viu', 'visto'],
+  vir: ['venho', 'vem', 'vimos', 'veio', 'vindo'],
+  dar: ['dou', 'da', 'damos', 'dao', 'deu', 'dei', 'dado'],
+  querer: ['quero', 'quer', 'queremos', 'quis', 'quiser'],
+  saber: ['sei', 'sabe', 'sabemos', 'soube', 'souber'],
+  trazer: ['trago', 'traz', 'trouxe'],
+  por: ['ponho', 'poe', 'pomos', 'pus', 'posto'],
   'быть': ['был', 'была', 'были', 'есть', 'будет', 'будут'],
   'идти': ['иду', 'идешь', 'идет', 'идем', 'идут', 'шел', 'шла', 'шли'],
   'ехать': ['еду', 'едешь', 'едет', 'едем', 'едут', 'ехал'],

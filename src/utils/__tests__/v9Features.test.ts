@@ -12,6 +12,9 @@ import {
 import { ALL_BUILTIN_TOPICS } from '../../data/lessons';
 import { loadLanguageCourseData } from '../../data/courseLoader';
 import { HEBREW_ALEFBET, NORDIC_SPECIAL_LETTERS, TURKISH_SPECIAL_LETTERS } from '../../data/scriptTrainerData';
+import { getImmersionStrings } from '../immersion';
+import { buildOfflineTranslation, getTranslatorLanguagePair, translateCourseText } from '../courseTranslator';
+import { PORTUGUESE_TOPICS } from '../../data/curriculum/portugueseCourse';
 import type { LanguageCode } from '../../types/learning';
 
 describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () => {
@@ -57,10 +60,10 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
     expect(pack.checkpoints.length).toBeGreaterThan(0);
   });
 
-  it('guarantees zero duplicate titlePt within any of the 16 languages (150 units each)', () => {
+  it('guarantees zero duplicate titlePt within any of the 17 languages (150 units each)', () => {
     const langs: LanguageCode[] = [
       'en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh',
-      'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da',
+      'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt',
     ];
     for (const lang of langs) {
       const topics = ALL_BUILTIN_TOPICS.filter((t) => (t.languageCode ?? 'en') === lang);
@@ -126,7 +129,7 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
     expect(offline.subtitles[0].textTarget).toBe('Merhaba dünya');
   });
 
-  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.1.0 contract (P1)', () => {
+  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.2.0 contract (P1)', () => {
     const workerSrc = fs.readFileSync(
       path.resolve(process.cwd(), 'cloudflare-worker/worker.js'),
       'utf8',
@@ -135,11 +138,63 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
       path.resolve(process.cwd(), 'cloudflare-worker/routes/youtubeStudy.js'),
       'utf8',
     );
-    expect(workerSrc).toContain("version: '9.1.0'");
+    const translateRouteSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/routes/translate.js'),
+      'utf8',
+    );
+    expect(workerSrc).toContain("version: '9.2.0'");
     expect(workerSrc).toContain("from './routes/youtubeStudy.js'");
+    expect(workerSrc).toContain("from './routes/translate.js'");
     expect(workerSrc).toContain('/api/youtube-study');
+    expect(workerSrc).toContain('/api/translate');
     expect(workerSrc).toContain('/api/media/list');
     expect(workerSrc).toContain('206');
     expect(ytRouteSrc).toContain('handleYouTubeStudyRequest');
+    expect(translateRouteSrc).toContain('handleTranslateRequest');
+  });
+
+  it('adapts bidirectional translator pair to active course (PT<->Target, EN<->PT for Portuguese)', async () => {
+    const enPair = getTranslatorLanguagePair('en');
+    expect(enPair.nativeCode).toBe('pt');
+    expect(enPair.targetCode).toBe('en');
+
+    const ptPair = getTranslatorLanguagePair('pt');
+    expect(ptPair.nativeCode).toBe('en');
+    expect(ptPair.targetCode).toBe('pt');
+    expect(ptPair.explanationLang).toBe('en');
+
+    const offlinePt = buildOfflineTranslation({
+      text: 'Olá',
+      sourceLang: 'pt',
+      targetLang: 'en',
+      courseCode: 'pt',
+      courseVocab: [],
+    });
+    expect(offlinePt.translatedText.toLowerCase()).toContain('hello');
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('Server error', { status: 500 })),
+    );
+    const fallbackRes = await translateCourseText({
+      text: 'Obrigado',
+      sourceLang: 'pt',
+      targetLang: 'en',
+      courseCode: 'pt',
+      courseVocab: [],
+    });
+    expect(fallbackRes.source).toBe('offline-lexicon');
+    expect(fallbackRes.translatedText.toLowerCase()).toContain('thank');
+  });
+
+  it('enforces reversed immersion on Portuguese course (A1-B1 English scaffolding, B2-C1 Portuguese)', () => {
+    const a1Strings = getImmersionStrings('pt', 'A1');
+    const b2Strings = getImmersionStrings('pt', 'B2');
+    expect(a1Strings.listeningContext).toContain('Listen carefully');
+    expect(b2Strings.listeningContext).toContain('Ouça com atenção');
+
+    const a1Sample = PORTUGUESE_TOPICS.find((t) => t.level === 'A1');
+    expect(a1Sample).toBeDefined();
+    expect(a1Sample!.subtitle).toMatch(/[a-z]{3,}/i);
   });
 });

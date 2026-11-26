@@ -263,6 +263,17 @@ const DA_DRILLS: CompactDrill[] = [
   ['C1', 'Formelt Bindeord (Studieprøven)', 'Conector formal de contraste:', 'Budgettet var begrænset; ', ' nåede holdet målet.', ['ikke desto mindre', 'derfor', 'nemlig', 'følgelig'], 0, '"ikke desto mindre" significa "não obstante / ainda assim" em registro C1.'],
 ];
 
+const PT_DRILLS: CompactDrill[] = [
+  ['A1', 'Ser vs. Estar', 'Permanent identity vs. temporary state/location:', 'Hoje eu ', ' muito cansado depois do trabalho.', ['estou', 'sou', 'é', 'fui'], 0, 'Temporary physical/emotional states always use "estar" ("estou cansado").'],
+  ['A1', 'Por vs. Para', 'Destination / recipient uses "para":', 'Este presente é ', ' a minha mãe.', ['para', 'por', 'pela', 'em'], 0, 'Recipients and destinations take "para".'],
+  ['A2', 'Preterite vs. Imperfect', 'Habitual past action uses Imperfeito:', 'Quando eu era criança, ', ' futebol todo dia.', ['jogava', 'joguei', 'jogo', 'jogarei'], 0, 'Repeated past habits use the Imperfeito ("jogava").'],
+  ['A2', 'Ir + Infinitive', 'Near future plans:', 'Amanhã nós ', ' viajar para o Rio de Janeiro.', ['vamos', 'fomos', 'íamos', 'temos'], 0, '"Ir" (present) + infinitive expresses near future plans.'],
+  ['B1', 'Future Subjunctive (Quando/Se)', 'Future condition requires Futuro do Subjuntivo:', 'Quando você ', ' ao Brasil, me avise!', ['vier', 'vem', 'veio', 'virá'], 0, 'After "quando" for future events, Portuguese requires Future Subjunctive ("vier").'],
+  ['B1', 'Present Subjunctive', 'Wishes & hopes trigger Presente do Subjuntivo:', 'Espero que tudo ', ' bem na sua apresentação.', ['corra', 'corre', 'correu', 'correrá'], 0, '"Espero que" triggers Present Subjunctive ("corra").'],
+  ['B2', 'Concessão com Subjuntivo', 'Embora exige subjuntivo:', 'Embora o prazo ', ' curto, entregamos o projeto.', ['fosse', 'era', 'foi', 'será'], 0, '"Embora" exige modo subjuntivo ("fosse" / "seja").'],
+  ['C1', 'Crase & Regência Culta', 'Contração de preposição a + artigo a:', 'A equipe dedicou-se ', ' análise dos dados.', ['à', 'a', 'ao', 'na'], 0, 'Quem se dedica, dedica-se "a" + "a análise" = "à análise".'],
+];
+
 export const GRAMMAR_DRILLS: GrammarDrillItem[] = [
   ...expandDrills('en', EN_DRILLS),
   ...expandDrills('es', ES_DRILLS),
@@ -280,6 +291,7 @@ export const GRAMMAR_DRILLS: GrammarDrillItem[] = [
   ...expandDrills('he', HE_DRILLS),
   ...expandDrills('nb', NB_DRILLS),
   ...expandDrills('da', DA_DRILLS),
+  ...expandDrills('pt', PT_DRILLS),
 ];
 
 export function getGrammarDrillsByLanguage(lang: LanguageCode): GrammarDrillItem[] {

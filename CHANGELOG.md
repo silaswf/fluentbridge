@@ -4,6 +4,20 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v9.2.0`] — 2026-11-26
+### Tradutor Bidirecional por Curso (`/api/translate`) & Português como Língua Estrangeira (`pt`) com Imersão Invertida
+- **Tradutor Bidirecional Adaptativo (`CourseTranslatorView.tsx`, `courseTranslator.ts`, `cloudflare-worker/routes/translate.js`):**
+  - Nova aba **Tradutor** na navegação lateral (`Sidebar` + `App.tsx`) sincronizada automaticamente com o idioma ativo: traduz `PT ⇄ Idioma do Curso` nos 16 cursos padrão e **`EN ⇄ PT`** quando o curso de Português (`pt`) está selecionado.
+  - Suporte a troca instantânea de direção, registro (`Natural`, `Formal`, `Informal`), transcrição fonética **IPA**, nota cultural/literal, **áudio neural TTS**, alternativas contextuais e salvamento em 1 clique do vocabulário extraído direto no deck **SM-2**.
+  - Endpoint `POST /api/translate` no Cloudflare Worker com cotas R2 (`40/min`, `300/dia`), cache de histórico local (`20` entradas) e fallback offline automático via glossário do curso + `IN_LESSON_LEXICON`.
+- **17º Idioma — Português como Língua Estrangeira (`pt`) com Paridade 100% e Imersão Invertida:**
+  - Estruturado especificamente para falantes de **Inglês**: **A1–B1 com andaime pedagógico em Inglês** e **B2–C1 em 100% imersão em Português** (`immersion.ts`, `courseCohesion.ts`).
+  - **150 unidades coesas CEFR A1–C1** (`30` por nível; `portugueseCourse.ts`, `portugueseExpansionA1B1.ts`, `portugueseExpansionB2C1.ts`, `portugueseExpansion.ts`), **`200` guias gramaticais** (`ptGrammarGuide.ts`), **`40` questões CAT** (`placementPt.ts`), **`50` cenários de Tutor IA** (`tutorScenariosPt.ts`), **`4` simulados oficiais CELPE-Bras** (`examsPortuguese.ts`, escala `0–5`), **`5` podcasts**, **`3` vídeos interativos**, drills, graded readers e **`4` sotaques neurais** (`pt-BR-SP`, `pt-BR-RJ`, `pt-BR-NE`, `pt-PT`).
+  - **Totais globais `v9.2.0`:** **`17` idiomas**, **`2.550` unidades**, **`3.400` guias gramaticais**, **`680` questões CAT**, **`850` cenários IA**, **`100` simulados (`25` formatos)**, **`65` sotaques neurais**, **`85` podcasts** e **`51` vídeos interativos**.
+- **Verificação:** `node --check` no Worker, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `86/86` testes), `npm run build` (`8.83s`, `0` chunks > 500 kB), `playwright test` (`15/15` E2E incl. PT + Tradutor) e smoke-test em produção (`/api/health` e `/api/translate` `pt->en` e `en->pt`).
+
+---
+
 ## [`v9.1.0`] — 2026-11-26
 ### Otimização P0/P1 da Auditoria 360°, Bundle < 500 kB, Worker Modular & Alefbet em Hebraico
 - **P0 — Performance & Bundle (`vite.config.ts`, `aiTutorEngine.ts`, `speech.ts`):**

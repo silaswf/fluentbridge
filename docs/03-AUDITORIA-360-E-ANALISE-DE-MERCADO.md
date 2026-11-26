@@ -1,8 +1,8 @@
-# 03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado (`v9.1.0`)
+# 03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado (`v9.2.0`)
 
-> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v9.1.0`  
+> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v9.2.0`  
 > **Ambiente Ao Vivo:** Web PWA (`https://fluentbridge.pages.dev`) · Edge API (`https://fluentbridge-api.silaswf.workers.dev`) · Windows Desktop (Electron) · Android (Capacitor APK/AAB) · iOS Safari PWA (`$0/ano`)  
-> **Telemetria Real Pós-P0/P1:** **`23` suítes Vitest (`84/84` testes verdes)**, **`15/15` fluxos E2E Playwright**, build Vite em `7.99s` com **0 chunks `> 500 kB`** (maior chunk: `472,67 kB`) e **0 avisos de importação mista**.
+> **Telemetria Real Pós-`v9.2.0`:** **`23` suítes Vitest (`86/86` testes verdes)**, **`15/15` fluxos E2E Playwright**, build Vite em `8.83s` com **0 chunks `> 500 kB`** e **0 avisos de importação mista**, cobrindo **17 idiomas (`2.550` unidades)**, **Português PLE** e **Tradutor Bidirecional (`/api/translate`)**.
 
 ---
 

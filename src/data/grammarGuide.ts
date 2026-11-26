@@ -27,6 +27,7 @@ import { TR_GRAMMAR_GUIDE } from './grammar/trGrammarGuide';
 import { HE_GRAMMAR_GUIDE } from './grammar/heGrammarGuide';
 import { NB_GRAMMAR_GUIDE } from './grammar/nbGrammarGuide';
 import { DA_GRAMMAR_GUIDE } from './grammar/daGrammarGuide';
+import { PT_GRAMMAR_GUIDE } from './grammar/ptGrammarGuide';
 
 export interface GrammarReferenceEntry {
   id: string;
@@ -494,6 +495,7 @@ export const ALL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [
   ...HE_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'he' as LanguageCode })),
   ...NB_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'nb' as LanguageCode })),
   ...DA_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'da' as LanguageCode })),
+  ...PT_GRAMMAR_GUIDE.map((e) => ({ ...e, languageCode: 'pt' as LanguageCode })),
 ];
 
 export function getGrammarGuideByLanguage(

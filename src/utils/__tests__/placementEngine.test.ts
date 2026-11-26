@@ -49,13 +49,13 @@ function simulateAdaptiveTestForStudent(
   return computeAdaptivePlacementResult(records);
 }
 
-describe('Adaptive multi-language placement engine & 640-question bank', () => {
-  it('ships 640 target-language placement questions (40 per language across 16 languages, 8 per CEFR level)', () => {
-    expect(ALL_PLACEMENT_QUESTIONS.length).toBe(640);
+describe('Adaptive multi-language placement engine & 680-question bank', () => {
+  it('ships 680 target-language placement questions (40 per language across 17 languages, 8 per CEFR level)', () => {
+    expect(ALL_PLACEMENT_QUESTIONS.length).toBe(680);
     const uniqueIds = new Set(ALL_PLACEMENT_QUESTIONS.map((q) => q.id));
-    expect(uniqueIds.size).toBe(640);
+    expect(uniqueIds.size).toBe(680);
 
-    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da'] as const) {
+    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt'] as const) {
       const bank = getPlacementBankByLanguage(lang);
       expect(bank.length).toBe(40);
 
@@ -70,8 +70,10 @@ describe('Adaptive multi-language placement engine & 640-question bank', () => {
         expect(q.correctIndex).toBeLessThan(4);
         expect(q.prompt.length).toBeGreaterThan(10);
         expect(q.topicNote.length).toBeGreaterThan(10);
-        // Prompts must NOT be written in Portuguese
-        expect(q.prompt).not.toMatch(/Qual frase|Escolha a frase|Complete a frase em/i);
+        // Prompts must NOT be written in Portuguese (except when Portuguese is the target language)
+        if (lang !== 'pt') {
+          expect(q.prompt).not.toMatch(/Qual frase|Escolha a frase|Complete a frase em/i);
+        }
       }
     }
   });
@@ -85,8 +87,8 @@ describe('Adaptive multi-language placement engine & 640-question bank', () => {
     expect(getNextAdaptiveLevel('A1', false)).toBe('A1');
   });
 
-  it('accurately diagnoses A1, A2, B1, B2, and C1 students after 15 adaptive questions across all 16 languages', () => {
-    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da'] as const) {
+  it('accurately diagnoses A1, A2, B1, B2, and C1 students after 15 adaptive questions across all 17 languages', () => {
+    for (const lang of ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt'] as const) {
       for (const targetLevel of ADAPTIVE_LEVELS) {
         const summary = simulateAdaptiveTestForStudent(lang, targetLevel);
         expect(summary.totalQuestions).toBe(15);

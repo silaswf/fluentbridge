@@ -65,6 +65,7 @@ const EXAM_HINT_BY_LANG: Record<LanguageCode, string> = {
   he: 'YAEL & Ulpan',
   nb: 'Norskprøve & Bergenstesten',
   da: 'Prøve i Dansk 3 & Studieprøven',
+  pt: 'CELPE-Bras (Brasil) & CIPLE/DEPLE (Portugal)',
 };
 
 export function generateWeeklyStudyPlan(

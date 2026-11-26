@@ -212,6 +212,10 @@ function normalizeTtsLocale(locale: string): string {
   if (lower === 'da-dk-aar') return 'da-DK-AAR';
   if (lower === 'da-dk-ode') return 'da-DK-ODE';
   if (lower.startsWith('da')) return 'da-DK';
+  if (lower === 'pt-br-sp') return 'pt-BR-SP';
+  if (lower === 'pt-br-rj') return 'pt-BR-RJ';
+  if (lower === 'pt-br-ne') return 'pt-BR-NE';
+  if (lower === 'pt-pt') return 'pt-PT';
   if (lower.startsWith('pt')) return 'pt-BR';
   return 'en-US';
 }
@@ -337,6 +341,7 @@ export function getAllVoiceProviderLabels() {
     heIl: 'Gemini 2.5 Native TTS (he-IL) · Zephyr / Fenrir (Tel Aviv / Jerusalém)',
     nbNo: 'Gemini 2.5 Native TTS (nb-NO) · Callirrhoe / Umbriel (Oslo / Bergen / Trondheim)',
     daDk: 'Gemini 2.5 Native TTS (da-DK) · Despina / Schedar (Copenhague / Aarhus / Odense)',
+    ptBr: 'Gemini 2.5 Native TTS (pt-BR / pt-PT) · Aoede / Orus / Leda (SP / RJ / NE / Lisboa)',
   };
 }
 
@@ -369,6 +374,7 @@ export function getAllVoiceDiagnostics(): VoiceDiagnosticItem[] {
     { code: 'he', symbol: 'עב', namePt: 'Hebraico', dialectsLabel: 'TLV / JER / SEP', providerLabel: v.heIl, primaryDialect: 'he-IL', sampleText: 'שלום! ברוכים הבאים ל-FluentBridge.' },
     { code: 'nb', symbol: 'NB', namePt: 'Norueguês', dialectsLabel: 'OSL / BGO / TRD', providerLabel: v.nbNo, primaryDialect: 'nb-NO', sampleText: 'Hei! Velkommen til FluentBridge.' },
     { code: 'da', symbol: 'DA', namePt: 'Dinamarquês', dialectsLabel: 'CPH / AAR / ODE', providerLabel: v.daDk, primaryDialect: 'da-DK', sampleText: 'Hej! Velkommen til FluentBridge.' },
+    { code: 'pt', symbol: 'PT', namePt: 'Português (PLE)', dialectsLabel: 'SP / RJ / NE / PT', providerLabel: v.ptBr, primaryDialect: 'pt-BR-SP', sampleText: 'Olá! Bem-vindo ao FluentBridge.' },
   ];
 }
 

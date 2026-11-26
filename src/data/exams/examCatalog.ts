@@ -356,6 +356,22 @@ export const EXAM_TYPES: ExamTypeMeta[] = [
       { label: '00 / -3 (Ikke bestået)', minScore: 0, maxScore: 59, cefr: 'A2', meaningPt: 'Abaixo da nota mínima; pratique escuta do Stød, regra V2 e s-passiv.', passing: false },
     ],
   },
+  {
+    id: 'celpebras',
+    languageCode: 'pt',
+    name: 'CELPE-Bras (Certificado de Proficiência)',
+    officialOrg: 'INEP / Ministério da Educação (Brasil)',
+    scaleLabel: 'Escala oficial 0 – 5 (Intermediário >= 2)',
+    passingRulePt: 'Nota >= 2 (Intermediário) certifica proficiência; >= 4 (Avançado) para pós-graduação.',
+    durationMinutes: 50,
+    referenceTable: [
+      { label: '5 — Avançado Superior', minScore: 5, maxScore: 5, cefr: 'C1', meaningPt: 'Domínio pleno e argumentação culta em português.', passing: true },
+      { label: '4 — Avançado', minScore: 4, maxScore: 4, cefr: 'B2', meaningPt: 'Alta fluência acadêmica e profissional.', passing: true },
+      { label: '3 — Intermediário Superior', minScore: 3, maxScore: 3, cefr: 'B1', meaningPt: 'Comunicação autônoma em situações variadas.', passing: true },
+      { label: '2 — Intermediário', minScore: 2, maxScore: 2, cefr: 'B1', meaningPt: 'Certificação oficial mínima do CELPE-Bras.', passing: true },
+      { label: '0–1 — Sem Certificação', minScore: 0, maxScore: 1, cefr: 'A2', meaningPt: 'Continue praticando nas unidades B1–B2 e revisando conectores.', passing: false },
+    ],
+  },
 ];
 
 export function getExamTypesByLanguage(languageCode: LanguageCode): ExamTypeMeta[] {

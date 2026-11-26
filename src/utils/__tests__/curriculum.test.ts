@@ -25,7 +25,7 @@ import {
 import { getAllVoiceDiagnostics } from '../speech';
 import { exampleMatchesWord, isMetaFallbackExample } from '../vocabValidation';
 
-const ALL_16_LANGS = [
+const ALL_17_LANGS = [
   'en',
   'es',
   'fr',
@@ -42,14 +42,15 @@ const ALL_16_LANGS = [
   'he',
   'nb',
   'da',
+  'pt',
 ] as const;
 
-describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0)', () => {
-  it('ships 2400 units across 16 languages (150 per language, 30 per CEFR level) with >= 300 tips each', () => {
+describe('Multi-language curriculum, immersion, exams & videos integrity (v9.2.0)', () => {
+  it('ships 2550 units across 17 languages (150 per language, 30 per CEFR level) with >= 300 tips each', () => {
     expect(BUILTIN_TOPICS.length).toBe(150);
-    expect(ALL_BUILTIN_TOPICS.length).toBe(2400);
+    expect(ALL_BUILTIN_TOPICS.length).toBe(2550);
 
-    for (const lang of ALL_16_LANGS) {
+    for (const lang of ALL_17_LANGS) {
       const langTopics = ALL_BUILTIN_TOPICS.filter(
         (t) => (t.languageCode ?? 'en') === lang,
       );
@@ -69,7 +70,7 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0
     }
 
     const topicIds = new Set(ALL_BUILTIN_TOPICS.map((t) => t.id));
-    expect(topicIds.size).toBe(2400);
+    expect(topicIds.size).toBe(2550);
 
     for (const v of ALL_INITIAL_VOCABULARY) {
       expect(topicIds.has(v.topicId)).toBe(true);
@@ -105,7 +106,7 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0
       expect(uniqueExamples.size, `Duplicate exampleEn inside topic ${tid}`).toBe(list.length);
     }
 
-    expect(getAllVoiceDiagnostics().length).toBe(16);
+    expect(getAllVoiceDiagnostics().length).toBe(17);
 
     for (const t of ALL_BUILTIN_TOPICS) {
       const types = new Set(t.steps.map((s) => s.type));
@@ -125,7 +126,7 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0
     const b2c1Topics = ALL_BUILTIN_TOPICS.filter(
       (t) => t.level === 'B2' || t.level === 'C1',
     );
-    expect(b2c1Topics.length).toBe(960);
+    expect(b2c1Topics.length).toBe(1020);
 
     const ptBoilerplate = [
       'Ouça o áudio com atenção',
@@ -142,18 +143,18 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0
     }
   });
 
-  it('ships 3200 grammar reference entries (200 per language across 16 languages)', () => {
-    expect(ALL_GRAMMAR_GUIDE.length).toBe(3200);
-    for (const lang of ALL_16_LANGS) {
+  it('ships 3400 grammar reference entries (200 per language across 17 languages)', () => {
+    expect(ALL_GRAMMAR_GUIDE.length).toBe(3400);
+    for (const lang of ALL_17_LANGS) {
       expect(getGrammarGuideByLanguage(lang).length).toBe(200);
     }
   });
 
-  it('ships 800 AI tutor scenarios, 80 podcasts & 48 interactive video clips across 16 languages', () => {
-    expect(AI_TUTOR_SCENARIOS.length).toBe(800);
-    expect(PODCAST_EPISODES.length).toBe(80);
-    expect(INTERACTIVE_VIDEO_CLIPS.length).toBe(48);
-    for (const lang of ALL_16_LANGS) {
+  it('ships 850 AI tutor scenarios, 85 podcasts & 51 interactive video clips across 17 languages', () => {
+    expect(AI_TUTOR_SCENARIOS.length).toBe(850);
+    expect(PODCAST_EPISODES.length).toBe(85);
+    expect(INTERACTIVE_VIDEO_CLIPS.length).toBe(51);
+    for (const lang of ALL_17_LANGS) {
       expect(
         AI_TUTOR_SCENARIOS.filter((s) => s.languageCode === lang).length,
       ).toBe(50);
@@ -167,14 +168,14 @@ describe('Multi-language curriculum, immersion, exams & videos integrity (v9.0.0
     expect(UNIT_ROLEPLAY_ANGLES.length).toBe(10);
   });
 
-  it('ships complete alphabets and 96 full official mock exams (24 exam types incl. CELPIP, DET, TÖMER, YAEL, Norskprøve & PD3)', () => {
+  it('ships complete alphabets and 100 full official mock exams (25 exam types incl. CELPIP, DET, TÖMER, YAEL, Norskprøve, PD3 & CELPE-Bras)', () => {
     expect(JAPANESE_HIRAGANA.length).toBe(46);
     expect(JAPANESE_KATAKANA.length).toBe(46);
     expect(RUSSIAN_CYRILLIC.length).toBe(33);
     expect(ARABIC_ALPHABET.length).toBe(28);
 
-    expect(EXAM_TYPES.length).toBe(24);
-    expect(ALL_MOCK_EXAMS.length).toBe(96);
+    expect(EXAM_TYPES.length).toBe(25);
+    expect(ALL_MOCK_EXAMS.length).toBe(100);
     for (const meta of EXAM_TYPES) {
       const ofType = ALL_MOCK_EXAMS.filter((e) => e.examTypeId === meta.id);
       expect(ofType.length).toBe(4);

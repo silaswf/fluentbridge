@@ -1,6 +1,6 @@
-# 01 — Manual Completo de Funcionalidades (`v9.0.0`)
+# 01 — Manual Completo de Funcionalidades (`v9.2.0`)
 
-Este manual descreve **detalhe por detalhe** como funciona cada tela, botão, algoritmo, atalho de teclado, fluxo offline e permissão de perfil dentro do **FluentBridge Academy (`v9.0.0`)**.
+Este manual descreve **detalhe por detalhe** como funciona cada tela, botão, algoritmo, atalho de teclado, fluxo offline e permissão de perfil dentro do **FluentBridge Academy (`v9.2.0`)** — incluindo o **Tradutor Bidirecional por Curso (`POST /api/translate`)** e o curso de **Português como Língua Estrangeira (`pt`)** com imersão invertida (`A1–B1` em Inglês, `B2–C1` 100% em Português).
 
 ---
 

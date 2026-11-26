@@ -682,9 +682,11 @@ export function enrichCourseCohesion(
       displayNo = moduleDisplayNo.size + 1;
       moduleDisplayNo.set(modKey, displayNo);
     }
+    const isPtEnglishBase =
+      languageCode === 'pt' && topic.level !== 'B2' && topic.level !== 'C1';
     const moduleTitlePt =
       topic.moduleTitlePt ||
-      `Módulo ${displayNo} · ${
+      `${isPtEnglishBase ? 'Module' : 'Módulo'} ${displayNo} · ${
         modThemes[modGroupIdx] ??
         `${modThemes[modThemes.length - 1]} ${modGroupIdx - modThemes.length + 2}`
       }`;

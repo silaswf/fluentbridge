@@ -39,6 +39,8 @@ import {
   NORWEGIAN_150_VOCAB,
   DANISH_150_TOPICS,
   DANISH_150_VOCAB,
+  PORTUGUESE_150_TOPICS,
+  PORTUGUESE_150_VOCAB,
 } from './languages';
 
 export const BUILTIN_TOPICS: Topic[] = ENGLISH_ALL_TOPICS;
@@ -60,6 +62,7 @@ export const ALL_BUILTIN_TOPICS: Topic[] = [
   ...HEBREW_150_TOPICS,
   ...NORWEGIAN_150_TOPICS,
   ...DANISH_150_TOPICS,
+  ...PORTUGUESE_150_TOPICS,
 ];
 
 export const INITIAL_VOCABULARY: VocabCard[] = ENGLISH_ALL_VOCAB;
@@ -81,6 +84,7 @@ export const ALL_INITIAL_VOCABULARY: VocabCard[] = [
   ...HEBREW_150_VOCAB,
   ...NORWEGIAN_150_VOCAB,
   ...DANISH_150_VOCAB,
+  ...PORTUGUESE_150_VOCAB,
 ];
 
 export function cloneInitialVocab(): VocabCard[] {

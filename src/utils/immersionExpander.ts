@@ -618,6 +618,42 @@ const SNIPPETS: Record<LanguageCode, LangDialogSnippets> = {
     chk2Opts: ['Repetir em voz alta', 'Evitar ouvir áudio', 'Pular revisão'],
     chk2Exp: 'Repetir em voz alta fixa as reduções vocálicas do dinamarquês.',
   },
+  pt: {
+    intro1: (s1, s2, t) => [
+      `Bem-vindos ao FluentBridge Podcast! Eu sou ${s1} e hoje converso com ${s2} sobre "${t}".`,
+      `Welcome to the FluentBridge Podcast! I'm ${s1}, talking with ${s2} about "${t}".`,
+    ],
+    intro2: () => [
+      'Olá pessoal! Ouçam com atenção o ritmo natural do português brasileiro e europeu.',
+      'Hi everyone! Listen closely to the natural rhythm of Brazilian and European Portuguese.',
+    ],
+    reaction1: [
+      'Ótimo ponto! Você pode repetir esse detalhe principal mais uma vez?',
+      'Great point! Could you repeat that main detail one more time?',
+    ],
+    clarify2: [
+      'Claro! Prestem atenção nas vogais nasais (ão, ãe) e na diferença entre ser e estar.',
+      'Sure! Pay attention to nasal vowels (ão, ãe) and the difference between ser and estar.',
+    ],
+    detail1: [
+      'Essas expressões aparecem o tempo todo em conversas reais no Brasil e em Portugal.',
+      'These expressions come up all the time in real conversations in Brazil and Portugal.',
+    ],
+    wrap2: [
+      'Com certeza! Repetir em voz alta acelera muito a fluência.',
+      'Definitely! Repeating aloud speeds up fluency significantly.',
+    ],
+    close1: [
+      'Obrigado por ouvir! Respondam à última pergunta abaixo.',
+      'Thanks for listening! Answer the final question below.',
+    ],
+    chk1Q: 'What pronunciation feature is highlighted in this Portuguese episode?',
+    chk1Opts: ['Nasal vowels (ão/ãe) & ser vs. estar', 'Only numbers', 'Silent verbs'],
+    chk1Exp: 'Nasal vowels and ser vs. estar are core pillars of natural Portuguese.',
+    chk2Q: 'What speeds up fluency according to the speakers?',
+    chk2Opts: ['Repeating aloud', 'Skipping audio', 'Avoiding speaking'],
+    chk2Exp: 'Repeating aloud builds muscle memory for Portuguese rhythm.',
+  },
 };
 
 export interface ExpandableLine {

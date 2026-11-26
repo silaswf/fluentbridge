@@ -57,10 +57,10 @@ export function AppDownloadGateway({
         </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-slate-300">
-          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">16 Idiomas Completos</span>
-          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">2.400 Unidades A1–C1</span>
-          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">96 Simulados Oficiais</span>
-          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">YouTube Study Lab</span>
+          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">17 Idiomas Completos</span>
+          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">2.550 Unidades A1–C1</span>
+          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">100 Simulados Oficiais</span>
+          <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">Tradutor + YouTube Lab</span>
           <span className="rounded-full border border-slate-700/80 bg-slate-950/70 px-3 py-1">Tutor IA + Professor Real</span>
         </div>
       </div>
