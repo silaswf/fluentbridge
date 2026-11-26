@@ -112,13 +112,13 @@ export function AdminPanel({
   useEffect(() => {
     const base = DEFAULT_BACKEND_API_URL.trim().replace(/\/+$/, '');
     if (!base || typeof fetch === 'undefined') return;
-    fetch(`${base}/health`)
+    fetch(`${base}/api/health`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { version?: string; supportedLanguages?: string[]; hasAiBinding?: boolean; hasGeminiSecret?: boolean; hasR2Bucket?: boolean } | null) => {
         if (data) {
           setWorkerHealth({
             version: data.version,
-            languagesCount: data.supportedLanguages?.length ?? 12,
+            languagesCount: data.supportedLanguages?.length ?? 16,
             hasAi: Boolean(data.hasAiBinding),
             hasGemini: Boolean(data.hasGeminiSecret),
             hasR2: Boolean(data.hasR2Bucket),
@@ -337,7 +337,7 @@ export function AdminPanel({
               <span>Saúde dos Serviços & Vozes Neurais</span>
             </h2>
             <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-              {voiceDiagnostics.length}/12 idiomas ativos
+              {voiceDiagnostics.length}/16 idiomas ativos
             </span>
           </div>
           <div className="mt-3 space-y-2.5 text-xs">

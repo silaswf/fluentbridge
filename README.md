@@ -9,9 +9,8 @@ Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Ital
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
 - **Edge API (Cloudflare Workers AI + STT + Gemini + YouTube Study)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
-- **Windows Instalador Setup (NSIS)**: [`release/FluentBridge-Setup-5.0.0.exe`](./release/FluentBridge-Setup-5.0.0.exe)
-- **Android APK Assinado**: [`release/FluentBridge-v5.0.0.apk`](./release/FluentBridge-v5.0.0.apk)
-- **Google Play Store Bundle**: [`release/FluentBridge-v5.0.0-playstore.aab`](./release/FluentBridge-v5.0.0-playstore.aab)
+- **Windows Instalador Setup (NSIS)**: [`FluentBridge-Setup-9.0.0.exe`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-Setup-9.0.0.exe)
+- **Android APK Assinado**: [`FluentBridge-v9.0.0.apk`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-v9.0.0.apk)
 
 ---
 
@@ -25,29 +24,26 @@ Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Ital
 
 ---
 
-## Documentação Técnica & Roadmap
+## Documentação Consolidada (`docs/`)
 
-Toda a documentação detalhada está organizada na pasta **[`docs/`](./docs/README.md)**:
+Toda a documentação foi unificada em **5 documentos mestre** na pasta **[`docs/`](./docs/README.md)**:
 
 - [Índice da Documentação](./docs/README.md)
-- [01 — Diagnóstico Atual do Sistema](./docs/01-DIAGNOSTICO-ATUAL.md)
-- [02 — Arquitetura Nativa (Windows + Android + Web)](./docs/02-ARQUITETURA-NATIVA-WINDOWS-ANDROID.md)
-- [03 — Roadmap de Desenvolvimento até a Completude](./docs/03-ROADMAP-DESENVOLVIMENTO.md)
-- [04 — Guia de Sincronização Online com Supabase](./docs/04-GUIA-SINCRONIZACAO-SUPABASE.md)
-- [04 — Guia Supabase Autenticação & Google OAuth](./docs/04-GUIA-SUPABASE-AUTENTICACAO.md)
-- [05 — Manual Completo de Funcionalidades](./docs/05-MANUAL-FUNCIONALIDADES.md)
-- [06 — Auditoria Completa & Plano de Otimizações](./docs/06-AUDITORIA-OTIMIZACOES.md)
-- [07 — Plano Técnico das Próximas Fases](./docs/07-PLANO-FASE-8-DIFERENCIAIS.md)
-- [08 — Auditoria Qualitativa 360° (`v8.3.0`), UI/UX, Segurança & Análise Competitiva de Mercado](./docs/08-ANALISE-COMPETITIVA-MERCADO.md)
+- [01 — Manual Completo de Funcionalidades (Detalhado)](./docs/01-MANUAL-COMPLETO-FUNCIONALIDADES.md)
+- [02 — Arquitetura, Nuvem & Plataformas](./docs/02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md)
+- [03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado](./docs/03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md)
+- [04 — Roadmap & Evolução (`v1.0 → v10.0`)](./docs/04-ROADMAP-E-EVOLUCAO.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
-## Scripts Principais (`package.json`)
+## Comandos Principais
 
 ```bash
-npm run dev           # Servidor local Vite (http://localhost:5173)
-npm run build         # Verificação TypeScript + bundle Web em dist/
-npm run installer:build # Compila e gera o instalador Setup Windows (NSIS)
-npm run apk:sync      # Compila Web e sincroniza assets/plugins no projeto Android
+npm install              # Instala dependências
+npm run dev              # Servidor de desenvolvimento Vite (http://localhost:5173)
+npx tsc --noEmit         # Verificação estrita TypeScript
+npm test                 # Suíte Vitest (23 arquivos / 81 testes)
+npm run build            # Build de produção Web/PWA (dist/)
+npm run test:e2e         # Suíte E2E Playwright (15 fluxos Desktop + Mobile)
 ```

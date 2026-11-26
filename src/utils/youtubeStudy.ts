@@ -192,11 +192,14 @@ export async function fetchYouTubeStudyPack(params: {
   const dialectCode = getRegionalAccents(params.languageCode)[0]?.code ?? 'en-US';
   const apiBase = DEFAULT_BACKEND_API_URL.replace(/\/+$/, '');
 
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 12000) : null;
   try {
     const res = await fetch(`${apiBase}/api/youtube-study`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
+      signal: controller?.signal,
     });
     if (res.ok) {
       const data = (await res.json()) as Partial<YouTubeStudyPack> & { ok?: boolean };
@@ -216,6 +219,8 @@ export async function fetchYouTubeStudyPack(params: {
     }
   } catch {
     // Fallback to offline/manual analyzer
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 
   return buildOfflineYouTubeStudyPack(

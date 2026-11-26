@@ -1,30 +1,27 @@
-# Documentação de Desenvolvimento — FluentBridge (`v9.0.0`)
+# Documentação Oficial — FluentBridge Academy (`v9.0.0`)
 
-Documentação técnica, diagnóstico arquitetural, guia de uso, auditoria 360°, comparativo competitivo de mercado e roadmap completo do **FluentBridge Academy** (plataforma em **16 idiomas** — **Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner, Sueco, Turco, Hebraico, Norueguês e Dinamarquês** de `A1` a `C1`, com **`2.400` unidades (`150` por idioma)**, **`61` sotaques neurais**, **`3.200` guias gramaticais**, **`96` Simulados Cronometrados Oficiais**, **`800` cenários IA**, **YouTube Study Lab**, **Comunidade 2.0**, **Modo Hands-Free**, **Gateway Web/Win/Android/iOS PWA** e **Suíte Vitest + Playwright WCAG AA**).
-
----
-
-## Índice de Documentos
-
-1. **[01 - Diagnóstico Atual do Sistema](./01-DIAGNOSTICO-ATUAL.md)** — Inventário técnico completo da versão `v2.0.0`.
-2. **[02 - Arquitetura Nativa (Windows + Android + Web)](./02-ARQUITETURA-NATIVA-WINDOWS-ANDROID.md)** — Arquitetura Electron + Capacitor 7 + Cloudflare Pages/Workers (Aura-2 + Gemini Neural TTS + Whisper STT), assinatura Release (`.apk`/`.aab`), deep link OAuth e CI/CD no GitHub Actions.
-3. **[03 - Roadmap até a Completude](./03-ROADMAP-DESENVOLVIMENTO.md)** — Histórico das Fases 0 a 9 concluídas (`v1.0.0` → `v2.0.0`) e o próximo plano das **Fases 10 a 12 (`v2.1` → `v3.0`)**.
-4. **[04 - Guia de Sincronização Online com Supabase](./04-GUIA-SINCRONIZACAO-SUPABASE.md)** — Estrutura do banco (`supabase_schema.sql`), merge granular em `fb_school_state`, tombstones, áudios cross-device e backups JSON.
-5. **[04 - Guia Supabase Autenticação & IA Compartilhada](./04-GUIA-SUPABASE-AUTENTICACAO.md)** — Configuração de Google OAuth Web/Android nativo, separação Aluno vs. Professor, código docente dinâmico, bloqueio de acesso, usuário Admin Mestre (`silaswf@gmail.com`) e proxy seguro Gemini no Cloudflare Worker.
-6. **[05 - Manual Completo de Funcionalidades](./05-MANUAL-FUNCIONALIDADES.md)** — Guia detalhado de uso das telas do aluno, do Estúdio do Professor e do **Painel Admin Mestre**.
-7. **[06 - Auditoria Completa & Plano de Otimizações](./06-AUDITORIA-OTIMIZACOES.md)** — Auditoria pós-`v2.0.0` com medições reais de bundle (`122,94 kB` inicial), segurança, Dark Mode/responsividade, latência TTS/STT e recomendações futuras.
-8. **[07 - Plano Técnico das Próximas Fases (Fases 10 a 12 · v2.1 → v3.0)](./07-PLANO-FASE-8-DIFERENCIAIS.md)** — Histórico da Fase 8 entregue e blueprints técnicos detalhados para as próximas fases.
-9. **[08 - Análise Competitiva, UX/UI, Auditoria Técnica e Plano Mestre 360° (`v8.4.0`)](./08-ANALISE-COMPETITIVA-MERCADO.md)** — Relatório definitivo unificado com benchmark de mercado (incluindo UI/UX), métricas reais escavadas do código, bugs resolvidos, estratégia iOS gratuita e backlog `3.1`–`3.6` (`Q-01`..`Q-24`).
-10. **[Changelog Completo](../CHANGELOG.md)** — Registro histórico versão por versão (`v1.0.0` → `v8.4.0`).
+Documentação técnica, funcional, arquitetural e estratégica consolidada do **FluentBridge Academy** — plataforma poliglota em **16 idiomas** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`, `tr`, `he`, `nb`, `da`) de **A1 a C1**, com **`2.400` unidades (`150` por idioma)**, **`61` sotaques regionais com vozes neurais**, **`96` simulados oficiais (`24` formatos)**, **`800` cenários de Tutor IA**, **`3.200` guias gramaticais**, **`640` questões CAT**, **YouTube Study Lab** e **Estúdio do Professor + Admin Mestre**.
 
 ---
 
-## Resumo do Estado Atual (`v9.0.0`)
+## Estrutura Consolidada (`5` Documentos Mestre)
 
-| Aspecto | Estado Atual |
+| Documento | Foco | Conteúdo Principal |
+| --- | --- | --- |
+| **[01 — Manual Completo de Funcionalidades](./01-MANUAL-COMPLETO-FUNCIONALIDADES.md)** | Produto & Uso (Passo a Passo) | Enciclopédia funcional detalhada de todas as telas, botões, algoritmos (SM-2, CAT, VAD, dificuldade adaptativa), atalhos de teclado, modos offline, Estúdio do Professor e Admin Mestre. |
+| **[02 — Arquitetura, Nuvem & Plataformas](./02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md)** | Engenharia & Infraestrutura | Stack Web/PWA, Electron Windows `.exe`, Capacitor Android `.apk`/`.aab`, iOS Safari PWA (`$0/ano`), Cloudflare Worker `v9.0.0` (`8` endpoints, R2 `206 Range`, cotas), Supabase RLS/Sync e CI/CD. |
+| **[03 — Auditoria 360° & Análise de Mercado](./03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md)** | Auditoria Zero-Based & Estratégia | Telemetria real pós-`v9.0.0` (`302` arquivos, `291.681+` linhas, chunks `dist/`), avaliação dos 6 pilares, dívidas técnicas `P0/P1/P2`, matriz competitiva (Duolingo Max, Babbel, Busuu, LingQ, Cambly, ELSA) e SWOT. |
+| **[04 — Roadmap & Evolução (`v1.0 → v10.0`)](./04-ROADMAP-E-EVOLUCAO.md)** | Histórico & Próximas Ondas | Marcos entregues até a `v9.0.0` (incl. redesign Dark Sober de Login/Gateway e Hero compacto) e plano técnico para `v9.1` (modularização/chunks), `v9.5` (SaaS/pagamentos) e `v10.0` (App Store & B2B). |
+| **[CHANGELOG Completo](../CHANGELOG.md)** | Histórico de Versões | Registro cronológico de commits, tags e entregas por versão. |
+
+---
+
+## Resumo Executivo (`v9.0.0`)
+
+| Dimensão | Estado Verificado |
 | --- | --- |
-| **Plataformas & Gateway** | **Web / PWA Offline** (`https://fluentbridge.pages.dev`) + **iPhone/iPad Safari PWA ($0/ano)** + **Edge API `v9.0.0`** (`https://fluentbridge-api.silaswf.workers.dev`) + **Android Assinado** (`.apk` + `.aab`) + **Windows Setup** (`.exe`) |
-| **Segurança, RLS, Retenção & Storage** | **RLS Relacional Estrito**, cotas diárias R2 (`200` STT / `250` Gemini / `100` YouTube), streaming HTTP `206 Range`, `sourcemap: 'hidden'` + Sentry DSN opcional, **autolimpeza de áudios > 60d** e **Painel Admin Mestre** |
-| **Currículo, Escrita Completa & CAT** | **`2.400` unidades** (`16` idiomas × `150` unidades, RTL em Árabe e Hebraico + *Niqqud*), **Alfabetos 100% Completos (incl. Alefbet)**, **`3.200` tabelas gramaticais**, **`640` questões CAT**, **`phonemeBreakdown` nos 16 idiomas** |
-| **Simulados, Comunidade & Imersão/IA** | **`96` Simulados Oficiais (`24` formatos)**, **YouTube Study Lab**, **`800` cenários IA**, **`80` podcasts**, **`48` vídeos interativos**, **Comunidade 2.0**, **Modo Hands-Free** |
-| **Verificação & CI/CD** | `npm test` (`23` arquivos / `81` testes OK) · `npm run test:e2e` (`15/15` Playwright + WCAG AA OK) · `npx tsc --noEmit` (`0` erros) · Cloudflare Worker + Pages live |
+| **Idiomas & Currículo** | **16 idiomas** × **150 unidades** = **`2.400` unidades** (`30`/nível CEFR `A1–C1`), RTL nativo (`ar`, `he`) + toggle *Niqqud* (`he`), toggle *100% Kana* (`ja`), **`3.200` guias gramaticais** e **`640` questões CAT** |
+| **Voz, Áudio & Imersão** | **`61` sotaques neurais** (Gemini 2.5 Native TTS + Deepgram Aura-2 + cache R2 `tts/v6/`), Whisper STT (`/api/stt`), ruído ambiente (3 níveis), **Modo Hands-Free**, **`80` podcasts**, **`48` vídeos** (HTTP `206 Range`) e **YouTube Study Lab** |
+| **Simulados & Comunidade** | **`96` simulados cronometrados** (`24` formatos oficiais, speaking em 3 partes, rubrica Writing + envio docente) e **Comunidade 2.0** (Ligas, Desafio do Mês `+80 XP`, moderação, áudio, *diff* de correção `+10 XP`) |
+| **Interfaces & Plataformas** | Web/PWA (`https://fluentbridge.pages.dev`), Edge API (`https://fluentbridge-api.silaswf.workers.dev`), Windows `.exe`, Android `.apk`/`.aab`, iPhone/iPad Safari PWA (`$0/ano`); Login/Gateway Dark Sober e Hero compacto |
+| **Qualidade & Testes** | `tsc --noEmit` (`0` erros) · `vitest` (`23` suítes / `81` testes verdes) · `playwright` (`15/15` fluxos E2E Desktop + Mobile `390x844` + WCAG AA Light/Dark) |

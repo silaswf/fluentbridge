@@ -14,9 +14,12 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
   - **`+10` novos cenários de conversação IA por idioma** em `src/data/tutorScenariosV9/` (`800` cenários totais nos 16 idiomas).
 - **YouTube Study Lab (`POST /api/youtube-study` + `YouTubeStudyLab.tsx`):**
   - Nova aba dentro de **Imersão → Vídeos** onde o aluno cola qualquer URL do YouTube (ou transcrição SRT/VTT/texto), gera legendas bilíngues clicáveis palavra a palavra com salvamento direto no deck SM-2, analisa **"Gramática & Uso Real"** (explicando *por que* o falante usou cada estrutura) e responde a checkpoints interativos (cota persistente de `100/dia` no R2 + modo offline).
-- **Correções de Interface & Qualidade (`Dark Mode` + `Mobile`):**
-  - Contraste do cabeçalho CEFR sticky e do card *Módulo Atual* no Dark Mode (`e495e14`) e trava de largura no seletor de idioma mobile (`Sidebar.tsx`) eliminando overflow horizontal em `390x844`.
-- **Verificação:** `node --check cloudflare-worker/worker.js`, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `81/81` testes verdes), `npm run build` (`7.03s`), `playwright test` (`15/15` E2E verdes incl. Jornada 5), deploy live Worker `v9.0.0` + Pages (`https://e99df26f.fluentbridge.pages.dev`) + pré-aquecimento R2 (`24` itens).
+- **Correções de Interface, Redesign Dark Sober & Qualidade:**
+  - **Login & Gateway (`AuthScreen.tsx`, `AppDownloadGateway.tsx`):** redesign moderno e sóbrio em Dark Mode padrão (`#090D16`), com 4 blocos curtos de destaque e remoção de textos extensos.
+  - **Trilha (`LearningPath.tsx`):** Hero Banner compacto (sem parágrafo descritivo longo e card de meta diária enxuto) para priorizar filtros CEFR e módulos logo acima da dobra.
+  - **Admin, Vínculo & Resiliência:** correção do endpoint `/api/health` e contagem `/16 idiomas ativos` em `AdminPanel.tsx`, remoção de referências antigas (`194 unidades`) em `TeacherLinkModal.tsx`/`AuthScreen.tsx`, timeout `AbortController` (`12s`) em `youtubeStudy.ts` e contraste Dark Mode + trava anti-overflow mobile em `Sidebar.tsx`.
+- **Documentação Consolidada:** reescrita integral do zero unificando 11 arquivos fragmentados em **5 documentos mestre** (`docs/README.md`, `01-MANUAL-COMPLETO-FUNCIONALIDADES.md`, `02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md`, `03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md`, `04-ROADMAP-E-EVOLUCAO.md`).
+- **Verificação:** `node --check cloudflare-worker/worker.js`, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `81/81` testes verdes), `npm run build` (`7.35s`), `playwright test` (`15/15` E2E verdes incl. Jornada 5), deploy live Worker `v9.0.0` + Pages + pré-aquecimento R2 (`24` itens).
 
 ---
 

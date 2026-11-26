@@ -243,68 +243,75 @@ export function AuthScreen({
   };
 
   return (
-    <div className="safe-top safe-bottom min-h-screen bg-[#F7F9FC] px-4 py-8 sm:px-6 lg:flex lg:items-center lg:justify-center">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch">
-        {/* Left Value Prop */}
-        <div className="flex flex-col justify-between rounded-3xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 p-7 text-white shadow-xl shadow-blue-600/15 lg:col-span-6 lg:p-9">
+    <div className="safe-top safe-bottom relative min-h-screen overflow-hidden bg-[#090D16] px-4 py-8 text-slate-100 sm:px-6 lg:flex lg:items-center lg:justify-center">
+      {/* Subtle ambient glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-blue-600/12 blur-3xl"
+      />
+
+      <div className="relative z-10 mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-12 lg:items-stretch">
+        {/* Left Compact Highlights */}
+        <div className="flex flex-col justify-between rounded-3xl border border-white/10 bg-slate-900/75 p-6 backdrop-blur-md sm:p-8 lg:col-span-5">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-bold backdrop-blur-xs">
-              <Sparkles className="h-4 w-4" />
-              <span>{schoolName} · Plataforma Completa A1–C1</span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold tracking-wide text-blue-300">
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <span>{schoolName} · CEFR A1–C1</span>
             </div>
 
-            <h1 className="mt-5 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-              12 Idiomas nas 4 Habilidades com mentoria de {teacherName}
+            <h1 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              16 idiomas. 1 método completo.
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-blue-100">
-              1.200 unidades completas do A1 ao C1, 72 simulados oficiais cronometrados, comunidade com ligas semanais, tutor de conversação IA e certificados CEFR.
+            <p className="mt-2 text-xs leading-relaxed text-slate-400 sm:text-sm">
+              Mentoria de {teacherName} com IA e sincronização em nuvem.
             </p>
 
-            <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
-              <div className="rounded-2xl bg-white/10 p-3.5 backdrop-blur-xs">
-                <p className="font-mono text-lg font-extrabold">1.200 Unidades</p>
-                <p className="text-blue-100">12 idiomas · A1–C1 completo</p>
+            <div className="mt-6 grid grid-cols-2 gap-2.5 text-xs">
+              <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
+                <p className="font-mono text-base font-extrabold text-white">16 Idiomas</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">2.400 unidades A1–C1</p>
               </div>
-              <div className="rounded-2xl bg-white/10 p-3.5 backdrop-blur-xs">
-                <p className="font-mono text-lg font-extrabold">72 Simulados</p>
-                <p className="text-blue-100">IELTS, TOEFL, DELE, DELF, JLPT+</p>
+              <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
+                <p className="font-mono text-base font-extrabold text-white">96 Simulados</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">24 formatos oficiais</p>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
+                <p className="font-mono text-base font-extrabold text-white">61 Sotaques</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">Voz neural &amp; YouTube Lab</p>
+              </div>
+              <div className="rounded-2xl border border-white/8 bg-slate-950/60 p-3.5">
+                <p className="font-mono text-base font-extrabold text-white">800 Cenários</p>
+                <p className="mt-0.5 text-[11px] text-slate-400">Tutor IA + Prof. real</p>
               </div>
             </div>
+          </div>
 
+          <div className="mt-6 space-y-3 border-t border-white/10 pt-5">
             {onOpenDownloadModal && (
               <button
                 type="button"
                 data-testid="auth-download-app-btn"
                 onClick={onOpenDownloadModal}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/15 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/25 cursor-pointer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-xs font-bold text-slate-200 transition hover:bg-white/10 hover:text-white cursor-pointer"
               >
-                <Download className="h-4 w-4" />
-                <span>Baixar Aplicativo (Windows .exe / Android .apk)</span>
+                <Download className="h-4 w-4 text-blue-400" />
+                <span>Baixar App (Windows · Android · iOS)</span>
               </button>
             )}
-          </div>
-
-          <div className="mt-8 space-y-3 border-t border-white/15 pt-6">
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xs">
-              <div className="flex items-center gap-2 text-xs font-extrabold tracking-wide uppercase">
-                <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                <span>Acesso Autenticado & Sincronizado</span>
-              </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-blue-100">
-                Entre com sua conta Google ou crie seu acesso com e-mail e senha. Seu progresso, vocabulário e correções do {teacherName} ficam salvos na nuvem entre computador, celular Android e Web.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-blue-100/90">
-              <span>• Alunos: use o código da turma no cadastro</span>
-              <span>• Professores: cadastro mediante código docente</span>
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                Progresso sincronizado
+              </span>
+              <span>Turma · VIP · Autônomo</span>
             </div>
           </div>
         </div>
 
-        {/* Right Auth Form */}
-        <div className="flex flex-col justify-center rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs lg:col-span-6 lg:p-9">
+        {/* Right Auth Form (Dark Sober Card) */}
+        <div className="flex flex-col justify-center rounded-3xl border border-slate-800 bg-slate-900/95 p-6 shadow-2xl sm:p-8 lg:col-span-7">
           {/* Tabs */}
-          <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1">
+          <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-slate-800 bg-slate-950/90 p-1">
             <button
               type="button"
               onClick={() => {
@@ -313,8 +320,8 @@ export function AuthScreen({
               }}
               className={`inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-800 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <LogIn className="h-4 w-4" />
@@ -328,8 +335,8 @@ export function AuthScreen({
               }}
               className={`inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition cursor-pointer ${
                 mode === 'register'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-800 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <UserPlus className="h-4 w-4" />
@@ -343,7 +350,7 @@ export function AuthScreen({
               type="button"
               disabled={isSubmitting}
               onClick={() => void handleGoogleButtonClick()}
-              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-white py-2.5 text-sm font-bold text-slate-900 shadow-xs transition hover:bg-slate-100 disabled:opacity-60 cursor-pointer"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -366,26 +373,17 @@ export function AuthScreen({
               <span>Entrar com Google</span>
             </button>
 
-            <div className="my-4 flex items-center gap-3 text-[11px] font-semibold text-slate-400">
-              <div className="h-px flex-1 bg-slate-200" />
-              <span>ou use e-mail e senha</span>
-              <div className="h-px flex-1 bg-slate-200" />
+            <div className="my-4 flex items-center gap-3 text-[11px] font-semibold text-slate-500">
+              <div className="h-px flex-1 bg-slate-800" />
+              <span>ou com e-mail</span>
+              <div className="h-px flex-1 bg-slate-800" />
             </div>
           </div>
 
           {mode === 'login' ? (
             <form onSubmit={(e) => void handleLoginSubmit(e)} className="space-y-4">
               <div>
-                <h2 className="font-display text-xl font-extrabold text-slate-900">
-                  Acesse sua conta
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Entre com seu e-mail e senha cadastrados ou acesse diretamente com sua conta Google.
-                </p>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700">E-mail</label>
+                <label className="text-xs font-bold text-slate-300">E-mail</label>
                 <input
                   type="email"
                   autoComplete="email"
@@ -393,12 +391,12 @@ export function AuthScreen({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seuemail@exemplo.com"
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Senha</label>
+                <label className="text-xs font-bold text-slate-300">Senha</label>
                 <input
                   type="password"
                   autoComplete="current-password"
@@ -406,12 +404,12 @@ export function AuthScreen({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Digite sua senha"
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 />
               </div>
 
               {error && (
-                <p className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
+                <p className="rounded-xl border border-rose-500/40 bg-rose-950/60 px-3.5 py-2.5 text-xs font-medium text-rose-200">
                   {error}
                 </p>
               )}
@@ -419,7 +417,7 @@ export function AuthScreen({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-60 cursor-pointer"
               >
                 <LogIn className="h-4 w-4" />
                 <span>{isSubmitting ? 'Entrando...' : 'Entrar na plataforma'}</span>
@@ -427,15 +425,6 @@ export function AuthScreen({
             </form>
           ) : (
             <form onSubmit={(e) => void handleRegisterSubmit(e)} className="space-y-3.5">
-              <div>
-                <h2 className="font-display text-xl font-extrabold text-slate-900">
-                  Criar nova conta
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Crie seu usuário e senha para acessar e sincronizar seu progresso entre computador e celular.
-                </p>
-              </div>
-
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -445,12 +434,12 @@ export function AuthScreen({
                   }}
                   className={`flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs font-bold transition cursor-pointer ${
                     role === 'student'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'border-blue-500 bg-blue-500/15 text-blue-300'
+                      : 'border-slate-700/80 bg-slate-950/50 text-slate-400 hover:bg-slate-800/70 hover:text-slate-200'
                   }`}
                 >
                   <Users className="h-4 w-4" />
-                  <span>Cadastro de Aluno</span>
+                  <span>Sou Aluno(a)</span>
                 </button>
                 <button
                   type="button"
@@ -460,47 +449,47 @@ export function AuthScreen({
                   }}
                   className={`flex items-center justify-center gap-2 rounded-xl border p-2.5 text-xs font-bold transition cursor-pointer ${
                     role === 'teacher'
-                      ? 'border-purple-600 bg-purple-50 text-purple-700'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'border-purple-500 bg-purple-500/15 text-purple-300'
+                      : 'border-slate-700/80 bg-slate-950/50 text-slate-400 hover:bg-slate-800/70 hover:text-slate-200'
                   }`}
                 >
                   <GraduationCap className="h-4 w-4" />
-                  <span>Cadastro de Professor</span>
+                  <span>Sou Professor(a)</span>
                 </button>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Nome completo</label>
+                <label className="text-xs font-bold text-slate-300">Nome completo</label>
                 <input
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: João Pedro Silva"
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">E-mail</label>
+                <label className="text-xs font-bold text-slate-300">E-mail</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@email.com"
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                 />
                 {isMasterAdminEmail(email) && (
-                  <p className="mt-1.5 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-bold text-amber-900">
-                    <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
-                    E-mail mestre identificado ({MASTER_ADMIN_EMAIL}) — conta terá privilégio total de Admin/Professor.
+                  <p className="mt-1.5 flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-950/50 px-2.5 py-1.5 text-[11px] font-bold text-amber-200">
+                    <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
+                    E-mail mestre ({MASTER_ADMIN_EMAIL}) — privilégio total Admin/Professor.
                   </p>
                 )}
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-bold text-slate-700">
+                  <label className="text-xs font-bold text-slate-300">
                     Senha (mín. 6 caracteres)
                   </label>
                   <input
@@ -509,12 +498,12 @@ export function AuthScreen({
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Crie uma senha segura"
-                    className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    placeholder="Crie uma senha"
+                    className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700">
+                  <label className="text-xs font-bold text-slate-300">
                     Confirmar senha
                   </label>
                   <input
@@ -524,15 +513,15 @@ export function AuthScreen({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita a senha"
-                    className="mt-1 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               {role === 'student' && !isMasterAdminEmail(email) && (
-                <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5">
-                  <label className="text-xs font-bold text-slate-700">
-                    Vínculo de Acompanhamento Docente
+                <div className="space-y-2.5 rounded-2xl border border-slate-800 bg-slate-950/60 p-3.5">
+                  <label className="text-xs font-bold text-slate-300">
+                    Vínculo Docente
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
                     {(
@@ -551,8 +540,8 @@ export function AuthScreen({
                         }}
                         className={`rounded-xl py-2 text-[11px] font-bold transition cursor-pointer ${
                           studentLinkMode === opt.id
-                            ? 'bg-blue-600 text-white shadow-2xs'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'border border-slate-700/80 bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                         }`}
                       >
                         {opt.label}
@@ -566,7 +555,7 @@ export function AuthScreen({
                         value={classCode}
                         onChange={(e) => setClassCode(e.target.value.toUpperCase())}
                         placeholder="Ex: TURMA-A1, TURMA-B1, VIP-2026"
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 font-mono text-sm uppercase focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-xl border border-slate-700/80 bg-slate-900 px-3.5 py-2 font-mono text-sm uppercase text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                       />
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
                         {classes.map((c) => (
@@ -574,7 +563,7 @@ export function AuthScreen({
                             key={c.id}
                             type="button"
                             onClick={() => setClassCode(c.code)}
-                            className="rounded-lg bg-white border border-slate-200 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
+                            className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-300 hover:border-blue-500 hover:text-blue-300 cursor-pointer"
                           >
                             {c.code}
                           </button>
@@ -589,23 +578,20 @@ export function AuthScreen({
                         value={vipTeacherCode}
                         onChange={(e) => setVipTeacherCode(e.target.value.toUpperCase())}
                         placeholder="Código do Professor (ex: PROF-SILAS)"
-                        className="w-full rounded-xl border border-indigo-200 bg-white px-3.5 py-2 font-mono text-sm uppercase focus:border-indigo-500 focus:outline-none"
+                        className="w-full rounded-xl border border-indigo-500/40 bg-slate-900 px-3.5 py-2 font-mono text-sm uppercase text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none"
                       />
-                      <p className="mt-1 text-[11px] text-slate-500">
-                        Para alunos individuais / VIP vinculados diretamente a um professor.
-                      </p>
                     </div>
                   )}
 
                   {studentLinkMode === 'independent' && (
-                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-950">
-                      <p className="font-bold">
-                        Aviso de restrição sem professor vinculado:
+                    <div className="rounded-xl border border-amber-500/30 bg-amber-950/40 p-3 text-[11px] leading-relaxed text-amber-200">
+                      <p className="font-bold text-amber-100">
+                        Modo autônomo (sem professor vinculado)
                       </p>
-                      <p className="mt-0.5">
-                        Você terá acesso completo às 194 unidades e ao Tutor IA, porém o envio de Speaking/Writing para correção docente e tarefas VIP ficarão bloqueados até você se vincular.
+                      <p className="mt-0.5 text-amber-200/90">
+                        Acesso às 2.400 unidades nos 16 idiomas e Tutor IA liberado; envios de Speaking/Writing para correção docente ficam bloqueados até você se vincular.
                       </p>
-                      <label className="mt-2 flex items-start gap-2 font-semibold cursor-pointer">
+                      <label className="mt-2 flex items-start gap-2 font-semibold text-amber-100 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={confirmNoTeacher}
@@ -613,7 +599,7 @@ export function AuthScreen({
                           className="mt-0.5 rounded"
                         />
                         <span>
-                          Confirmo que desejo continuar sem atribuição a um professor.
+                          Confirmo continuar sem atribuição a um professor.
                         </span>
                       </label>
                     </div>
@@ -622,25 +608,22 @@ export function AuthScreen({
               )}
 
               {role === 'teacher' && !isMasterAdminEmail(email) && (
-                <div className="rounded-2xl border border-purple-200 bg-purple-50/70 p-3.5">
-                  <label className="text-xs font-bold text-purple-950">
+                <div className="rounded-2xl border border-purple-500/30 bg-purple-950/40 p-3.5">
+                  <label className="text-xs font-bold text-purple-200">
                     Código de Autorização Docente *
                   </label>
-                  <p className="mt-0.5 text-[11px] text-purple-800">
-                    Área restrita à equipe pedagógica. Digite o código fornecido pelo Prof. Silas.
-                  </p>
                   <input
                     required
                     value={teacherCode}
                     onChange={(e) => setTeacherCode(e.target.value.toUpperCase())}
                     placeholder="Código de convite docente"
-                    className="mt-2 w-full rounded-xl border border-purple-200 bg-white px-3.5 py-2 font-mono text-sm uppercase focus:border-purple-500 focus:outline-none"
+                    className="mt-2 w-full rounded-xl border border-purple-500/40 bg-slate-900 px-3.5 py-2 font-mono text-sm uppercase text-white placeholder:text-slate-500 focus:border-purple-400 focus:outline-none"
                   />
                 </div>
               )}
 
               {error && (
-                <p className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
+                <p className="rounded-xl border border-rose-500/40 bg-rose-950/60 px-3.5 py-2.5 text-xs font-medium text-rose-200">
                   {error}
                 </p>
               )}
@@ -648,7 +631,7 @@ export function AuthScreen({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-60 cursor-pointer"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{isSubmitting ? 'Criando conta...' : 'Criar conta e entrar'}</span>
@@ -656,10 +639,10 @@ export function AuthScreen({
             </form>
           )}
 
-          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-[11px] text-slate-400">
-            <span className="inline-flex items-center gap-1">
-              <Award className="h-3.5 w-3.5 text-emerald-500" />
-              Sincronizado com nuvem Supabase
+          <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4 text-[11px] text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Award className="h-3.5 w-3.5 text-emerald-400" />
+              Supabase Cloud Sync
             </span>
             <span>CEFR A1–C1</span>
           </div>

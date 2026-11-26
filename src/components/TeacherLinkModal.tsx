@@ -234,7 +234,7 @@ export function TeacherLinkModal({
                 <span>O que continua 100% liberado:</span>
               </p>
               <p className="mt-1 text-emerald-900">
-                Todas as <strong>194 unidades (EN/ES/FR/IT/DE)</strong>, Tutor IA com modo Chamada, revisão SM-2, Guia Gramatical e pontuação automática de fala permanecem disponíveis, e você poderá se vincular a um professor a qualquer momento.
+                Todas as <strong>2.400 unidades nos 16 idiomas</strong>, Tutor IA com modo Chamada, revisão SM-2, Guia Gramatical e pontuação automática de fala permanecem disponíveis, e você poderá se vincular a um professor a qualquer momento.
               </p>
             </div>
 

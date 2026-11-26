@@ -193,7 +193,7 @@ function buildDailyQuests(q: DailyQuestsProgress) {
 
 export function LearningPath({
   currentUser,
-  teacherName,
+  teacherName: _teacherName,
   assignedTeacherName,
   activeCourse,
   classNameLabel,
@@ -331,24 +331,24 @@ export function LearningPath({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 p-6 text-white shadow-md shadow-blue-600/15 sm:p-7">
-        <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-          <div className="max-w-xl space-y-2.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-blue-50 backdrop-blur-xs">
+      {/* Compact Hero Banner */}
+      <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 p-4 text-white shadow-md shadow-blue-600/15 sm:p-5">
+        <div className="relative z-10 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div className="max-w-xl space-y-2">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-blue-50 backdrop-blur-xs">
                 <span>{activeCourse.flag}</span>
                 <span>
                   {activeCourse.namePt} · {completedCount}/{topics.length} unidades
                 </span>
               </span>
               {classNameLabel && (
-                <span className="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-bold text-emerald-100">
+                <span className="rounded-full bg-emerald-400/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-100">
                   {classNameLabel}
                 </span>
               )}
               {currentUser.role === 'student' && assignedTeacherName && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/25 px-3 py-1 text-xs font-bold text-amber-100">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/25 px-2.5 py-0.5 text-[11px] font-bold text-amber-100">
                   <span>
                     {currentUser.enrollmentType === 'vip' ? '⭐ VIP · ' : 'Prof. '}
                     {assignedTeacherName}
@@ -368,7 +368,7 @@ export function LearningPath({
                 <button
                   type="button"
                   onClick={onOpenTeacherLink}
-                  className="rounded-full bg-amber-300 px-3 py-1 text-xs font-extrabold text-amber-950 hover:bg-amber-200 cursor-pointer"
+                  className="rounded-full bg-amber-300 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-950 hover:bg-amber-200 cursor-pointer"
                 >
                   Sem professor · Vincular agora
                 </button>
@@ -377,7 +377,7 @@ export function LearningPath({
                 (activeCourse.code === 'en'
                   ? currentUser.recommendedLevel
                   : undefined)) && (
-                <span className="rounded-full bg-amber-300 px-2.5 py-0.5 font-mono text-[11px] font-extrabold text-amber-950">
+                <span className="rounded-full bg-amber-300 px-2 py-0.5 font-mono text-[10px] font-extrabold text-amber-950">
                   Nível indicado ({activeCourse.namePt}):{' '}
                   {currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
                     currentUser.recommendedLevel}
@@ -385,21 +385,18 @@ export function LearningPath({
               )}
             </div>
 
-            <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Olá, {currentUser.name}! Pronto para praticar {activeCourse.namePt}?
+            <h1 className="font-display text-lg font-extrabold tracking-tight sm:text-xl">
+              Olá, {currentUser.name}! Vamos praticar {activeCourse.namePt}.
             </h1>
-            <p className="text-sm leading-relaxed text-blue-100">
-              {activeCourse.descriptionPt} ({teacherName})
-            </p>
 
-            <div className="flex flex-wrap gap-2.5 pt-1">
+            <div className="flex flex-wrap gap-2 pt-0.5">
               {nextTopic && (
                 <button
                   type="button"
                   onClick={() => onStartTopic(nextTopic)}
-                  className="hero-cta-btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 shadow-sm transition hover:bg-blue-50 active:scale-[0.99] cursor-pointer"
+                  className="hero-cta-btn inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-blue-700 shadow-sm transition hover:bg-blue-50 active:scale-[0.99] sm:text-sm cursor-pointer"
                 >
-                  <Play className="h-4 w-4 fill-blue-700" />
+                  <Play className="h-3.5 w-3.5 fill-blue-700" />
                   <span>
                     {completedTopicIds.includes(nextTopic.id)
                       ? `Revisar: ${nextTopic.titlePt}`
@@ -411,9 +408,9 @@ export function LearningPath({
               <button
                 type="button"
                 onClick={onOpenPlacementTest}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
               >
-                <Compass className="h-4 w-4" />
+                <Compass className="h-3.5 w-3.5" />
                 <span>{tUi(uiLocale, 'trail.placementTest')}</span>
               </button>
 
@@ -422,9 +419,9 @@ export function LearningPath({
                   type="button"
                   data-testid="goal-onboarding-btn"
                   onClick={() => setGoalModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 cursor-pointer"
                 >
-                  <Target className="h-4 w-4" />
+                  <Target className="h-3.5 w-3.5" />
                   <span>{tUi(uiLocale, 'trail.setGoal')}</span>
                 </button>
               )}
@@ -435,33 +432,33 @@ export function LearningPath({
           </div>
 
           {/* Daily Goal Mini Card */}
-          <div className="w-full shrink-0 rounded-2xl border border-white/20 bg-white/12 p-4 backdrop-blur-sm md:w-64">
+          <div className="w-full shrink-0 rounded-2xl border border-white/20 bg-white/12 p-3 backdrop-blur-sm md:w-56">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-blue-100">
-                <Target className="h-4 w-4" />
-                Meta diária de estudo
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-100">
+                <Target className="h-3.5 w-3.5" />
+                Meta diária
               </span>
               <span className="font-mono text-xs font-bold text-white">
                 {currentUser.todayMinutes}/{currentUser.dailyGoalMinutes} min
               </span>
             </div>
 
-            <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/20">
               <div
                 className="h-full rounded-full bg-emerald-300 transition-all duration-500"
                 style={{ width: `${goalPct}%` }}
               />
             </div>
 
-            <div className="mt-3 flex items-center justify-between gap-1">
-              <span className="text-[11px] text-blue-100">Ajustar ritmo:</span>
+            <div className="mt-2.5 flex items-center justify-between gap-1">
+              <span className="text-[10px] text-blue-100">Ritmo:</span>
               <div className="flex gap-1">
                 {[10, 15, 20].map((min) => (
                   <button
                     key={min}
                     type="button"
                     onClick={() => onChangeDailyGoal(min)}
-                    className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold transition cursor-pointer ${currentUser.dailyGoalMinutes === min
+                    className={`rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold transition cursor-pointer ${currentUser.dailyGoalMinutes === min
                       ? 'bg-white text-blue-700'
                       : 'bg-white/15 text-white hover:bg-white/25'
                       }`}
@@ -472,12 +469,12 @@ export function LearningPath({
               </div>
             </div>
 
-            <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-white/15 pt-2.5 text-[11px]">
+            <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/15 pt-2 text-[10px]">
               <span className="inline-flex items-center gap-1 text-blue-100" title="Proteção automática de sequência (Streak Freeze)">
-                <Snowflake className="h-3.5 w-3.5 text-sky-200" />
+                <Snowflake className="h-3 w-3 text-sky-200" />
                 <span>{currentUser.streakFreezes ?? 1} proteção(ões)</span>
               </span>
-              <span className="font-mono text-[10px] font-bold text-blue-100">
+              <span className="font-mono font-bold text-blue-100">
                 {Math.round(goalPct)}% hoje
               </span>
             </div>
