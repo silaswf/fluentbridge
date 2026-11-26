@@ -1,4 +1,4 @@
-# FluentBridge Academy (`v9.0.0`)
+# FluentBridge Academy (`v9.1.0`)
 
 Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner, Sueco, Turco, Hebraico, Norueguês e Dinamarquês)** de **A1 a C1** (**`2.400` unidades**, **`61` sotaques regionais com vozes neurais**, **`96` Simulados Cronometrados Oficiais**, **`800` cenários de Tutor IA**, **YouTube Study Lab com análise gramatical por IA**, **Comunidade 2.0**, **Modo Hands-Free**, **RTL nativo em Árabe e Hebraico com toggle de Niqqud**, **Gateway Web / Windows / Android / iOS Safari PWA ($0/ano)**, **Suíte Vitest + E2E Playwright com Auditoria WCAG AA** e **Estúdio do Professor + Admin Mestre**), desenvolvida para o **Prof. Silas Wagner**.
 
@@ -9,8 +9,8 @@ Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Ital
 - **Versão Web / PWA (Cloudflare Pages)**: https://fluentbridge.pages.dev
 - **Edge API (Cloudflare Workers AI + STT + Gemini + YouTube Study)**: https://fluentbridge-api.silaswf.workers.dev
 - **Repositório & Releases (GitHub)**: https://github.com/silaswf/fluentbridge
-- **Windows Instalador Setup (NSIS)**: [`FluentBridge-Setup-9.0.0.exe`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-Setup-9.0.0.exe)
-- **Android APK Assinado**: [`FluentBridge-v9.0.0.apk`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-v9.0.0.apk)
+- **Windows Instalador Setup (NSIS)**: [`FluentBridge-Setup-9.1.0.exe`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-Setup-9.1.0.exe)
+- **Android APK Assinado**: [`FluentBridge-v9.1.0.apk`](https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-v9.1.0.apk)
 
 ---
 
@@ -20,7 +20,7 @@ Plataforma completa de ensino em **16 idiomas (Inglês, Espanhol, Francês, Ital
 - **61 Sotaques Regionais & Vozes Neurais**: Gemini 2.5 Native Neural TTS + Deepgram Aura-2 + cache SHA-256 em R2 + **Modo Hands-Free** em áudio contínuo + **Phoneme Breakdown** nos 16 idiomas
 - **96 Simulados Cronometrados Oficiais (`24` formatos)**: IELTS, TOEFL, CELPIP, DET, DELE, DELF, CILS, Goethe, JLPT, HSK, ТРКИ, ALPT, CNaVT, TISUS, TÖMER, YAEL, Norskprøve, PD3 e mais
 - **YouTube Study Lab & Imersão**: estude qualquer vídeo do YouTube com legendas clicáveis para SM-2, explicações de *Gramática & Uso Real* e quiz, além de `80` podcasts e `48` vídeos interativos
-- **Qualidade Garantida**: `81/81` testes **Vitest** (`23` suítes) + **`15/15` testes E2E Playwright** (incl. auditoria WCAG AA Light/Dark e Jornada 5) · `0` erros TypeScript · Edge API `v9.0.0` com cotas R2 e HTTP `206 Range`
+- **Qualidade Garantida**: `84/84` testes **Vitest** (`23` suítes) + **`15/15` testes E2E Playwright** (incl. auditoria WCAG AA Light/Dark e Jornada 5) · `0` erros TypeScript · `0` chunks > 500 kB · Edge API `v9.1.0` com cotas R2 e HTTP `206 Range`
 
 ---
 

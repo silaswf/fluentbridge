@@ -1,6 +1,7 @@
 import {
   ARABIC_ALPHABET,
   CHINESE_HANZI,
+  HEBREW_ALEFBET,
   JAPANESE_HIRAGANA,
   JAPANESE_KATAKANA,
   RUSSIAN_CYRILLIC,
@@ -48,7 +49,7 @@ function collectTopicTargetText(topic: Topic, topicVocab: VocabCard[]): string {
 function buildSoundQuiz(
   items: ScriptPhonicsChar[],
   unitIdx: number,
-  lang: 'ru' | 'ar' | 'ja' | 'zh',
+  lang: 'ru' | 'ar' | 'ja' | 'zh' | 'he',
 ): ScriptPhonicsStep['soundQuiz'] {
   const target = items[unitIdx % items.length] ?? items[0];
   const distractors = items.filter((it) => it.char !== target.char).slice(0, 2);
@@ -175,6 +176,33 @@ export function buildUnitScriptPhonicsStep(
       languageCode: 'ar',
       items,
       soundQuiz: buildSoundQuiz(items, unitIdx, 'ar'),
+    };
+  }
+
+  if (languageCode === 'he') {
+    if (unitIdx >= 14) return null;
+    const heGroups = [
+      { title: 'Alefbet RTL 1 · Primeiras Letras (א–ד)', intro: 'Leia da direita para a esquerda. Observe א (silenciosa), ב (B/V com ou sem Dagesh), ג e ד.' },
+      { title: 'Alefbet RTL 2 · Guturais & Labiais (ה–ח)', intro: 'Pratique ה (H suave), ו (V / vogal O-U), ז (Z) e ח (CH gutural).' },
+      { title: 'Alefbet RTL 3 · Consoantes Centrais (ט–ל)', intro: 'Domine ט (T), י (Y/I), כ/ך (K/CH + Sofit final) e ל (L).' },
+      { title: 'Alefbet RTL 4 · Nasais & Finais Sofit (מ–ע)', intro: 'Atenção às formas finais Sofit: ם (Mem final), ן (Nun final), ס (S) e ע (Ayin).' },
+      { title: 'Alefbet RTL 5 · Duplas & Sibilantes (פ–ש)', intro: 'Diferencie פ/ף (P/F), צ/ץ (TS), ק (K), ר (R) e ש (SH/S).' },
+      { title: 'Alefbet RTL 6 · Fechamento & Formas Finais (ת + Sofit)', intro: 'Consolide ת (T) e todas as 5 letras Sofit (ך, ם, ן, ף, ץ) usadas apenas no fim da palavra.' },
+      { title: 'Alefbet RTL 7 · Revisão Geral & Niqqud', intro: 'Revise o Alefbet completo com e sem diacríticos (Niqqud) para leitura fluente em Israel.' },
+    ];
+    const gIdx = unitIdx % heGroups.length;
+    const start = (gIdx * 4) % Math.max(1, HEBREW_ALEFBET.length - 3);
+    const items = HEBREW_ALEFBET.slice(start, start + 4).map(toPhonicsChar);
+    if (items.length === 0) return null;
+    return {
+      id: `${topic.id}-script`,
+      type: 'script_phonics',
+      stageLabelPt: 'Alefbet RTL',
+      categoryTitlePt: heGroups[gIdx].title,
+      introPt: heGroups[gIdx].intro,
+      languageCode: 'he',
+      items,
+      soundQuiz: buildSoundQuiz(items, unitIdx, 'he'),
     };
   }
 

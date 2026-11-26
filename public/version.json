@@ -1,8 +1,8 @@
 {
-  "version": "9.0.0",
+  "version": "9.1.0",
   "publishedAt": "2026-11-26",
-  "releaseNotes": "FluentBridge Academy v9.0.0 — 16 idiomas (Turco, Hebraico RTL, Norueguês Bokmål e Dinamarquês), 150 unidades coesas por idioma (2.400 unidades), 61 sotaques, 800 cenários de Tutor IA, 92 simulados oficiais e YouTube Study Lab",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-Setup-9.0.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.0.0/FluentBridge-v9.0.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.0.0"
+  "releaseNotes": "FluentBridge Academy v9.1.0 — Chunks <500 kB por idioma, eliminação de aviso de importação mista, Worker modularizado, LessonPlayer modular, Alefbet script_phonics em Hebraico e testes de contrato P1",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-Setup-9.1.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.1.0/FluentBridge-v9.1.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.1.0"
 }

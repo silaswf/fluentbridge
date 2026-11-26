@@ -4,6 +4,7 @@ import { REGIONAL_ACCENTS_BY_LANGUAGE } from '../data/regionalAccents';
 import type { Accent } from '../types/learning';
 import { getAudioClip, saveAudioClip } from './audioDb';
 import { isAudioRecordingSupported, startAudioRecording } from './audioRecorder';
+import { getSupabaseAccessToken } from './cloudSync';
 
 interface SpeakOptions {
   accent?: Accent | string;
@@ -663,7 +664,6 @@ export async function transcribeAudioBlobDetailed(
   try {
     let token: string | null = null;
     try {
-      const { getSupabaseAccessToken } = await import('./cloudSync');
       token = await getSupabaseAccessToken();
     } catch {
       token = null;

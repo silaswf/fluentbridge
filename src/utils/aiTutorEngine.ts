@@ -14,6 +14,7 @@ import type {
   Topic,
   TutorMessage,
 } from '../types/learning';
+import { getSupabaseAccessToken } from './cloudSync';
 import { isImmersionLevel } from './immersion';
 
 export { AI_TUTOR_SCENARIOS, UNIT_ROLEPLAY_ANGLES, type UnitRoleplayAngle };
@@ -527,7 +528,6 @@ async function callGeminiJson<T>(
     if (useCloudProxy && DEFAULT_BACKEND_API_URL.trim().length > 0) {
       let token: string | null = null;
       try {
-        const { getSupabaseAccessToken } = await import('./cloudSync');
         token = await getSupabaseAccessToken();
       } catch {
         token = null;

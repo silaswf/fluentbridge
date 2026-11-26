@@ -151,14 +151,26 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/vocabExpansion/vocabExpAf')) return 'vocab-exp-af';
           if (id.includes('/curriculum/vocabExpansion/vocabExpSv')) return 'vocab-exp-sv';
           if (id.includes('/curriculum/swedishExpansion')) return 'curriculum-sv-exp';
-          if (id.includes('/curriculum/turkishCourse') || id.includes('/curriculum/turkishExpansion')) return 'curriculum-tr';
-          if (id.includes('/curriculum/hebrewCourse') || id.includes('/curriculum/hebrewExpansion')) return 'curriculum-he';
-          if (id.includes('/curriculum/norwegianCourse') || id.includes('/curriculum/norwegianExpansion')) return 'curriculum-nb';
-          if (id.includes('/curriculum/danishCourse') || id.includes('/curriculum/danishExpansion')) return 'curriculum-da';
-          if (id.includes('/curriculum/expansionV9/expV9_en') || id.includes('/curriculum/expansionV9/expV9_es') || id.includes('/curriculum/expansionV9/expV9_fr')) return 'curriculum-v9-en-es-fr';
-          if (id.includes('/curriculum/expansionV9/expV9_it') || id.includes('/curriculum/expansionV9/expV9_de') || id.includes('/curriculum/expansionV9/expV9_ru')) return 'curriculum-v9-it-de-ru';
-          if (id.includes('/curriculum/expansionV9/expV9_ja') || id.includes('/curriculum/expansionV9/expV9_zh') || id.includes('/curriculum/expansionV9/expV9_ar')) return 'curriculum-v9-ja-zh-ar';
-          if (id.includes('/curriculum/expansionV9/expV9_nl') || id.includes('/curriculum/expansionV9/expV9_af') || id.includes('/curriculum/expansionV9/expV9_sv')) return 'curriculum-v9-nl-af-sv';
+          if (id.includes('/curriculum/turkishCourse')) return 'curriculum-tr';
+          if (id.includes('/curriculum/turkishExpansion')) return 'curriculum-tr-exp';
+          if (id.includes('/curriculum/hebrewCourse')) return 'curriculum-he';
+          if (id.includes('/curriculum/hebrewExpansion')) return 'curriculum-he-exp';
+          if (id.includes('/curriculum/norwegianCourse')) return 'curriculum-nb';
+          if (id.includes('/curriculum/norwegianExpansion')) return 'curriculum-nb-exp';
+          if (id.includes('/curriculum/danishCourse')) return 'curriculum-da';
+          if (id.includes('/curriculum/danishExpansion')) return 'curriculum-da-exp';
+          if (id.includes('/curriculum/expansionV9/expV9_en')) return 'curriculum-v9-en';
+          if (id.includes('/curriculum/expansionV9/expV9_es')) return 'curriculum-v9-es';
+          if (id.includes('/curriculum/expansionV9/expV9_fr')) return 'curriculum-v9-fr';
+          if (id.includes('/curriculum/expansionV9/expV9_it')) return 'curriculum-v9-it';
+          if (id.includes('/curriculum/expansionV9/expV9_de')) return 'curriculum-v9-de';
+          if (id.includes('/curriculum/expansionV9/expV9_ru')) return 'curriculum-v9-ru';
+          if (id.includes('/curriculum/expansionV9/expV9_ja')) return 'curriculum-v9-ja';
+          if (id.includes('/curriculum/expansionV9/expV9_zh')) return 'curriculum-v9-zh';
+          if (id.includes('/curriculum/expansionV9/expV9_ar')) return 'curriculum-v9-ar';
+          if (id.includes('/curriculum/expansionV9/expV9_nl')) return 'curriculum-v9-nl';
+          if (id.includes('/curriculum/expansionV9/expV9_af')) return 'curriculum-v9-af';
+          if (id.includes('/curriculum/expansionV9/expV9_sv')) return 'curriculum-v9-sv';
           if (id.includes('/grammar/enGrammarExtra') || id.includes('/grammar/enGrammarV4')) return 'grammar-en';
           if (id.includes('/grammar/esGrammarExtra') || id.includes('/grammar/esGrammarV4')) return 'grammar-es';
           if (id.includes('/grammar/frGrammarExtra') || id.includes('/grammar/frGrammarV4')) return 'grammar-fr';
@@ -186,7 +198,19 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/idiomsSlangExpansion')) return 'curriculum-idioms-slang';
           if (id.includes('/data/scriptTrainerData')) return 'script-trainer';
           if (id.includes('/data/podcastEpisodes')) return 'podcasts';
-          if (id.includes('/data/tutorScenarios')) return 'tutor-scenarios';
+          if (id.includes('/data/tutorScenariosV9/')) return 'tutor-scenarios-v9';
+          if (
+            id.includes('/data/tutorScenariosTr') ||
+            id.includes('/data/tutorScenariosHe') ||
+            id.includes('/data/tutorScenariosNb') ||
+            id.includes('/data/tutorScenariosDa')
+          ) {
+            return 'tutor-scenarios-nordic';
+          }
+          if (id.includes('TutorScenariosV4') || id.includes('ScenariosV4')) {
+            return 'tutor-scenarios-v4';
+          }
+          if (id.includes('/data/tutorScenarios')) return 'tutor-scenarios-core';
           if (id.includes('/data/placement/')) {
             return 'placement-bank';
           }

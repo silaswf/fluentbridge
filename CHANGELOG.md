@@ -4,6 +4,20 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v9.1.0`] — 2026-11-26
+### Otimização P0/P1 da Auditoria 360°, Bundle < 500 kB, Worker Modular & Alefbet em Hebraico
+- **P0 — Performance & Bundle (`vite.config.ts`, `aiTutorEngine.ts`, `speech.ts`):**
+  - Fatiados os chunks `curriculum-v9-*`, `curriculum-tr/he/nb/da` (base vs. expansão) e `tutor-scenarios-*` por idioma/grupo, eliminando todos os **9 avisos de chunks > 500 kB** (maior chunk agora em `472,67 kB`).
+  - Padronizadas as importações de `cloudSync.ts` em `aiTutorEngine.ts` e `speech.ts`, zerando o aviso de importação mista estática+dinâmica no Vite/Rollup.
+- **P1 — Modularização (`cloudflare-worker/`, `LessonPlayer.tsx`):**
+  - Extraídos `cloudflare-worker/lib/http.js` e `cloudflare-worker/routes/youtubeStudy.js` de `worker.js`, e `src/components/lesson/FillBlankStepView.tsx` de `LessonPlayer.tsx`.
+- **P1 — Pedagogia & Testes (`unitScriptPhonics.ts`, `v9Features.test.ts`):**
+  - Adicionado suporte automático ao **Alefbet RTL (`script_phonics`)** nas unidades A1 de Hebraico (`he`), igualando a paridade com `ru`, `ja`, `zh` e `ar`.
+  - Novos testes unitários cobrindo `script_phonics` em Hebraico, `fetchYouTubeStudyPack` (mock online + fallback offline) e contrato do Worker `v9.1.0`.
+- **Verificação:** `node --check` em `worker.js`/`routes`/`lib`, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `84/84` testes verdes), `npm run build` (`7.99s` sem avisos), `playwright test` (`15/15` E2E verdes).
+
+---
+
 ## [`v9.0.0`] — 2026-11-26
 ### 16 Idiomas (Turco, Hebraico RTL + Niqqud, Norueguês & Dinamarquês), 150 Unidades Coesas por Idioma (2.400 Totais), +10 Cenários IA/Idioma (800) & YouTube Study Lab
 - **4 Novos Idiomas com Paridade 100% (`tr`, `he`, `nb`, `da`):**

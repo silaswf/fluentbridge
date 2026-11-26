@@ -1,16 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import { isRtlLanguage } from '../platform';
 import { stripHebrewNiqqud } from '../hebrewNiqqud';
 import {
   buildOfflineYouTubeStudyPack,
   extractYouTubeVideoId,
+  fetchYouTubeStudyPack,
   parseManualTranscript,
 } from '../youtubeStudy';
 import { ALL_BUILTIN_TOPICS } from '../../data/lessons';
+import { loadLanguageCourseData } from '../../data/courseLoader';
 import { HEBREW_ALEFBET, NORDIC_SPECIAL_LETTERS, TURKISH_SPECIAL_LETTERS } from '../../data/scriptTrainerData';
 import type { LanguageCode } from '../../types/learning';
 
 describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it('supports RTL for both Arabic and Hebrew and strips Hebrew Niqqud cleanly', () => {
     expect(isRtlLanguage('ar')).toBe(true);
     expect(isRtlLanguage('he')).toBe(true);
@@ -61,5 +68,78 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
       const uniqueTitles = new Set(topics.map((t) => t.titlePt.trim().toLowerCase()));
       expect(uniqueTitles.size, `Duplicate titlePt in ${lang}`).toBe(150);
     }
+  });
+
+  it('injects Hebrew Alefbet script_phonics steps in A1 Hebrew units (P1)', async () => {
+    const bundle = await loadLanguageCourseData('he');
+    const withScript = bundle.topics.filter((t) =>
+      t.steps.some((s) => s.type === 'script_phonics'),
+    );
+    expect(withScript.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('fetchYouTubeStudyPack uses /api/youtube-study when ok and falls back offline on failure (P1)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            ok: true,
+            title: 'Real Video',
+            author: 'Channel',
+            source: 'youtube-captions',
+            subtitles: [
+              {
+                id: 's1',
+                startSec: 0,
+                textTarget: 'Shalom haverim',
+                textPt: 'Olá amigos',
+                tokens: [],
+              },
+            ],
+            grammarInsights: [],
+            checkpoints: [],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    );
+    const online = await fetchYouTubeStudyPack({
+      url: 'https://youtu.be/M7lc1UVf-VE',
+      languageCode: 'he',
+      level: 'A1',
+    });
+    expect(online.title).toBe('Real Video');
+    expect(online.subtitles[0].textTarget).toBe('Shalom haverim');
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('Server error', { status: 500 })),
+    );
+    const offline = await fetchYouTubeStudyPack({
+      url: 'https://youtu.be/M7lc1UVf-VE',
+      languageCode: 'tr',
+      level: 'B1',
+      manualTranscript: '0:00 Merhaba dünya',
+    });
+    expect(offline.source).toBe('manual-transcript');
+    expect(offline.subtitles[0].textTarget).toBe('Merhaba dünya');
+  });
+
+  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.1.0 contract (P1)', () => {
+    const workerSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/worker.js'),
+      'utf8',
+    );
+    const ytRouteSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/routes/youtubeStudy.js'),
+      'utf8',
+    );
+    expect(workerSrc).toContain("version: '9.1.0'");
+    expect(workerSrc).toContain("from './routes/youtubeStudy.js'");
+    expect(workerSrc).toContain('/api/youtube-study');
+    expect(workerSrc).toContain('/api/media/list');
+    expect(workerSrc).toContain('206');
+    expect(ytRouteSrc).toContain('handleYouTubeStudyRequest');
   });
 });

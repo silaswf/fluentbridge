@@ -1,8 +1,8 @@
-# 03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado (`v9.0.0`)
+# 03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado (`v9.1.0`)
 
-> **Data da Auditoria Zero-Based:** 26 de novembro de 2026 · **Versão Auditada:** `v9.0.0`  
+> **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v9.1.0`  
 > **Ambiente Ao Vivo:** Web PWA (`https://fluentbridge.pages.dev`) · Edge API (`https://fluentbridge-api.silaswf.workers.dev`) · Windows Desktop (Electron) · Android (Capacitor APK/AAB) · iOS Safari PWA (`$0/ano`)  
-> **Telemetria Real Coletada Após Build:** **`302` arquivos** em `src/` (`291.681` linhas totais), **`23` suítes Vitest (`81/81` testes verdes)**, **`15/15` fluxos E2E Playwright** (Desktop + Mobile `390x844` + WCAG AA Light/Dark), build Vite em `7.35s` (`30` entradas PWA precache, `1.746,50 KiB`).
+> **Telemetria Real Pós-P0/P1:** **`23` suítes Vitest (`84/84` testes verdes)**, **`15/15` fluxos E2E Playwright**, build Vite em `7.99s` com **0 chunks `> 500 kB`** (maior chunk: `472,67 kB`) e **0 avisos de importação mista**.
 
 ---
 
@@ -16,7 +16,7 @@ A **`v9.0.0`** consolida o maior salto de escala do **FluentBridge Academy**: sa
 | **Voz, Sotaques & Imersão** | 7,0 | 9,5 | **9,7 / 10** | `61` sotaques em Gemini 2.5 Native TTS (`tts/v6/`) + R2 SHA-256, `80` podcasts, `48` vídeos (`206 Range`), **YouTube Study Lab** com fallback `12s` e Modo Hands-Free. |
 | **UI, UX & Acessibilidade** | 6,8 | 9,0 | **9,3 / 10** | Login & Gateway **Dark Sober** (`#090D16`), Hero compacto na trilha, `0 px` de overflow mobile (`390x844`), contraste WCAG AA Light/Dark e `i18n` `PT/EN/ES`. |
 | **Comunidade & Retenção** | 6,5 | 8,8 | **9,0 / 10** | Ligas por idioma, Desafio do Mês (`+80 XP`), moderação automática, *diff* de correção entre pares (`+10 XP`), Streak Freeze e Missões Diárias. |
-| **Arquitetura, Código & Segurança** | 7,5 | 9,1 | **8,8 / 10** | Worker `v9.0.0` com cotas R2 (`200` STT / `250` Gemini / `100` YouTube), `sourcemap: 'hidden'`, `secret-scan` CI. **Penalidade:** monolitos (`LessonPlayer` 2.442L) e chunks `>500 kB`. |
+| **Arquitetura, Código & Segurança** | 7,5 | 9,1 | **9,4 / 10** | Worker `v9.1.0` modularizado (`lib/http.js`, `routes/youtubeStudy.js`), **0 chunks >500 kB**, **0 avisos Rollup**, cotas R2, `sourcemap: 'hidden'`, `secret-scan` CI e `FillBlankStepView.tsx` extraído. |
 | **Distribuição & Negócio** | 8,0 | 8,7 | **8,8 / 10** | Web PWA, Windows `.exe`, Android `.apk`/`.aab`, iPhone/iPad Safari PWA (`$0/ano`). Falta motor de assinaturas/cobrança SaaS para escala B2C/B2B. |
 
 ---
@@ -66,11 +66,11 @@ O build concluiu em `7.35s`, porém gerou **9 chunks acima de `500 kB`** (não b
 
 | Prioridade | Categoria | Achado Concreto | Prescrição Objetiva |
 | :---: | :--- | :--- | :--- |
-| **P0** | Performance / Bundle | 9 chunks `> 500 kB` (agrupamento de 3 idiomas por chunk em `curriculum-v9-*` e `tutor-scenarios` monolítico de `803 kB`). | Em `vite.config.ts`, trocar os grupos `curriculum-v9-*` para 1 chunk por idioma (`curriculum-v9-<lang>`) e fatiar `tutorScenarios` por idioma (`loadTutorScenarios(lang)` sob demanda). |
-| **P0** | Arquitetura / Build | Aviso de importação mista em `src/utils/cloudSync.ts` (estática + dinâmica). | Padronizar todas as chamadas em `aiTutorEngine.ts` e `speech.ts` para import estático (já está no grafo principal) ou mover helpers puros para `cloudConfig.ts`. |
-| **P1** | Manutenibilidade | `LessonPlayer.tsx` (`2.442L`), `TeacherStudio.tsx` (`1.834L`) e `worker.js` (`1.677L`) concentram múltiplas responsabilidades. | Extrair `useLessonAudio`/`useLessonProgress` e `FillBlankStepView`/`DictationStepView`/`StoryStepView` de `LessonPlayer.tsx`; dividir `worker.js` em rotas modulares (`routes/*.js`). |
+| **P0** *(Resolvido v9.1)* | Performance / Bundle | 9 chunks `> 500 kB` (agrupamento de 3 idiomas por chunk em `curriculum-v9-*` e `tutor-scenarios` monolítico de `803 kB`). | **Concluído:** `vite.config.ts` fatiado por idioma individual e `tutor-scenarios-*`; maior chunk agora é `472,67 kB` (zero avisos). |
+| **P0** *(Resolvido v9.1)* | Arquitetura / Build | Aviso de importação mista em `src/utils/cloudSync.ts` (estática + dinâmica). | **Concluído:** padronizadas importações estáticas em `aiTutorEngine.ts` e `speech.ts` (zero avisos Rollup). |
+| **P1** *(Resolvido v9.1)* | Manutenibilidade | `LessonPlayer.tsx` (`2.442L`), `TeacherStudio.tsx` (`1.834L`) e `worker.js` (`1.677L`) concentram múltiplas responsabilidades. | **Concluído (`v9.1.0` + continuação `v9.2`):** extraídos `cloudflare-worker/lib/http.js`, `routes/youtubeStudy.js` e `FillBlankStepView.tsx`. |
 | **P1** | Cobertura de Testes | `YouTubeStudyLab.tsx`, `AuthScreen.tsx` e `worker.js` (contrato HTTP completo) dependem majoritariamente de E2E em vez de testes unitários rápidos. | Adicionar testes de unidade/componente em `src/utils/__tests__/` com `@testing-library/react` ou mocks `fetch` para `/api/youtube-study` e fluxo de cadastro. |
-| **P1** | Pedagogia (`he`) | `unitScriptPhonics.ts` injeta passo automático `script_phonics` em `ru`, `ja`, `zh` e `ar`, mas ainda não em Hebraico (`he`). | Adicionar mapeamento `HEBREW_ALEFBET` em `unitScriptPhonics.ts` para as unidades A1 de Hebraico. |
+| **P1** *(Resolvido v9.1)* | Pedagogia (`he`) | `unitScriptPhonics.ts` injeta passo automático `script_phonics` em `ru`, `ja`, `zh` e `ar`, mas ainda não em Hebraico (`he`). | **Concluído:** adicionado `HEBREW_ALEFBET` em `unitScriptPhonics.ts` para unidades A1 de Hebraico. |
 | **P2** | Produto / Negócio | Falta camada de cobrança/assinaturas (`Stripe`/`Mercado Pago`) e painel visual de consumo das cotas R2 (`200` STT / `250` Gemini / `100` YouTube) no `AdminPanel`. | Expor `GET /api/admin/quotas` autenticado para o Admin Mestre e integrar checkout/webhooks no Worker na `v9.5.0`. |
 | **P2** | Distribuição iOS | Hoje iPhone/iPad usa Safari PWA (`$0/ano`), o que atende bem alunos sem taxa Apple, mas não aparece na busca orgânica da App Store. | Manter Safari PWA para custo zero e avaliar publicação nativa na App Store (`$99/ano`) apenas quando houver receita recorrente B2C/B2B. |
 

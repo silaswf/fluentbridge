@@ -1,4 +1,4 @@
-# Documentação Oficial — FluentBridge Academy (`v9.0.0`)
+# Documentação Oficial — FluentBridge Academy (`v9.1.0`)
 
 Documentação técnica, funcional, arquitetural e estratégica consolidada do **FluentBridge Academy** — plataforma poliglota em **16 idiomas** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`, `tr`, `he`, `nb`, `da`) de **A1 a C1**, com **`2.400` unidades (`150` por idioma)**, **`61` sotaques regionais com vozes neurais**, **`96` simulados oficiais (`24` formatos)**, **`800` cenários de Tutor IA**, **`3.200` guias gramaticais**, **`640` questões CAT**, **YouTube Study Lab** e **Estúdio do Professor + Admin Mestre**.
 
@@ -24,4 +24,4 @@ Documentação técnica, funcional, arquitetural e estratégica consolidada do *
 | **Voz, Áudio & Imersão** | **`61` sotaques neurais** (Gemini 2.5 Native TTS + Deepgram Aura-2 + cache R2 `tts/v6/`), Whisper STT (`/api/stt`), ruído ambiente (3 níveis), **Modo Hands-Free**, **`80` podcasts**, **`48` vídeos** (HTTP `206 Range`) e **YouTube Study Lab** |
 | **Simulados & Comunidade** | **`96` simulados cronometrados** (`24` formatos oficiais, speaking em 3 partes, rubrica Writing + envio docente) e **Comunidade 2.0** (Ligas, Desafio do Mês `+80 XP`, moderação, áudio, *diff* de correção `+10 XP`) |
 | **Interfaces & Plataformas** | Web/PWA (`https://fluentbridge.pages.dev`), Edge API (`https://fluentbridge-api.silaswf.workers.dev`), Windows `.exe`, Android `.apk`/`.aab`, iPhone/iPad Safari PWA (`$0/ano`); Login/Gateway Dark Sober e Hero compacto |
-| **Qualidade & Testes** | `tsc --noEmit` (`0` erros) · `vitest` (`23` suítes / `81` testes verdes) · `playwright` (`15/15` fluxos E2E Desktop + Mobile `390x844` + WCAG AA Light/Dark) |
+| **Qualidade & Testes** | `tsc --noEmit` (`0` erros) · `vitest` (`23` suítes / `84` testes verdes) · `playwright` (`15/15` fluxos E2E Desktop + Mobile `390x844` + WCAG AA Light/Dark) · `0` chunks > 500 kB · Worker `v9.1.0` + Pages live |
