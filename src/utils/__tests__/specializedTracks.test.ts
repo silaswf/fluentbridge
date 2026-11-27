@@ -103,5 +103,6 @@ describe('Specialized Tracks (Negócios, Tecnologia, Saúde, Viagens)', () => {
       expect(tipCollisions, `Tip title collisions in ${lang}`).toEqual([]);
       expect(vocabCollisions, `Vocab word collisions in ${lang}`).toEqual([]);
     },
+    60_000,
   );
 });

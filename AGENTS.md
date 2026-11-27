@@ -114,4 +114,9 @@ Para publicar uma nova versão (`vX.Y.Z`):
 - Sincronizar versão em `package.json`, `src/config/appConfig.ts`, `public/version.json`, `cloudflare-worker/worker.js` (`/api/health`), `e2e/fluentbridge.spec.ts` (links de download), `CHANGELOG.md`, `README.md` e `docs/*`.
 - Deploy do Worker (`Push-Location cloudflare-worker; npx wrangler deploy; Pop-Location`) + deploy do Pages (`npx wrangler pages deploy dist --project-name fluentbridge --branch main --commit-dirty=true`).
 - Smoke-test ao vivo em `GET /api/health` e nos novos endpoints.
-- Commit em `main`, criação/push da tag `vX.Y.Z` e conferência de `gh run list --limit 3`.
+- Commit em `main` e criação/push da tag `vX.Y.Z`.
+- **Acompanhamento Obrigatório até o Final (Deploy & GitHub Actions):**
+  - **Nunca encerrar uma tarefa ou entrega** enquanto houver deploy em andamento ou workflows do GitHub Actions em `queued` / `in_progress`.
+  - Acompanhar ativamente **todos** os workflows disparados (tanto o push na branch `main` quanto o push da tag `vX.Y.Z`) usando `gh run watch <run-id> --exit-status` e `gh run list --limit 5` até que **100% dos jobs concluam com `completed / success`**.
+  - Caso qualquer job falhe (em `main` ou na tag), inspecionar os logs com `gh run view <run-id> --log-failed`, corrigir a causa raiz, revalidar localmente, fazer novo push e acompanhar novamente até **tudo ficar verde de ponta a ponta**.
+  - Só reportar conclusão ao usuário depois de confirmar simultaneamente: (1) Worker + Pages respondendo ao vivo (`/api/health`), e (2) todos os runs do GitHub Actions concluídos com `success`.
