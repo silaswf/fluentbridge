@@ -13,7 +13,6 @@ import {
 } from '../../data/specializedTracks';
 import type { LanguageCode } from '../../types/learning';
 
-const CORE_6_LANGS: LanguageCode[] = ['en', 'es', 'fr', 'de', 'it', 'pt'];
 const ALL_17_LANGS: LanguageCode[] = [
   'en', 'es', 'fr', 'de', 'it', 'pt',
   'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da',
@@ -57,7 +56,7 @@ describe('Specialized Tracks (Negócios, Tecnologia, Saúde, Viagens)', () => {
     }
   });
 
-  it.each(CORE_6_LANGS)(
+  it.each(ALL_17_LANGS)(
     'has ZERO unit title, vocab word, or grammar tip title collisions with main curriculum for %s',
     async (lang) => {
       const mainCourse = await loadLanguageCourseData(lang);

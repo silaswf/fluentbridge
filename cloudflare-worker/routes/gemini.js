@@ -26,6 +26,9 @@ export async function handleGeminiTutorRequest(request, env) {
     return jsonResponse({ error: 'Missing Gemini contents array' }, 400);
   }
 
+  const url = new URL(request.url);
+  const wantsStream = url.searchParams.get('stream') === '1' || body.stream === true;
+
   const payload = {
     contents: body.contents,
     ...(body.systemInstruction ? { systemInstruction: body.systemInstruction } : {}),
@@ -41,9 +44,13 @@ export async function handleGeminiTutorRequest(request, env) {
   let lastErrorText = 'Gemini upstream unavailable';
 
   for (const model of candidateModels) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      model,
-    )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const endpoint = wantsStream
+      ? `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model,
+        )}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`
+      : `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model,
+        )}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     try {
       const upstream = await fetch(endpoint, {
@@ -53,6 +60,17 @@ export async function handleGeminiTutorRequest(request, env) {
       });
 
       if (upstream.ok) {
+        if (wantsStream && upstream.body) {
+          return new Response(upstream.body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/event-stream; charset=utf-8',
+              'Cache-Control': 'no-cache, no-transform',
+              'X-Model-Used': model,
+              ...CORS_HEADERS,
+            },
+          });
+        }
         const data = await upstream.json();
         return new Response(JSON.stringify({ ...data, _modelUsed: model }), {
           status: 200,

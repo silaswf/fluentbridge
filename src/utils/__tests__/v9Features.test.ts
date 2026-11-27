@@ -136,7 +136,7 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
     expect(offline.subtitles[0].textTarget).toBe('Merhaba dünya');
   });
 
-  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v11.5.0 contract (P1)', () => {
+  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v11.6.0 contract (P1)', () => {
     const workerSrc = fs.readFileSync(
       path.resolve(process.cwd(), 'cloudflare-worker/worker.js'),
       'utf8',
@@ -161,7 +161,7 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
       path.resolve(process.cwd(), 'cloudflare-worker/routes/billing.js'),
       'utf8',
     );
-    expect(workerSrc).toContain("version: '11.5.0'");
+    expect(workerSrc).toContain("version: '11.6.0'");
     expect(workerSrc).toContain("from './routes/youtubeStudy.js'");
     expect(workerSrc).toContain("from './routes/translate.js'");
     expect(workerSrc).toContain("from './routes/adminQuotas.js'");

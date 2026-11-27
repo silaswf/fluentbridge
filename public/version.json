@@ -1,8 +1,8 @@
 {
-  "version": "11.5.0",
+  "version": "11.6.0",
   "publishedAt": "2026-11-27",
-  "releaseNotes": "FluentBridge Academy v11.5.0 — Menu responsivo de Revisão sem overflow mobile, Simulados Cronometrados v2 (Modo Prova Real, Redação Cronometrada, Evolução Comparativa) e 12 Trilhas Especializadas Inéditas (Negócios, Tecnologia, Saúde, Viagens)",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.5.0/FluentBridge-Setup-11.5.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.5.0/FluentBridge-v11.5.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v11.5.0"
+  "releaseNotes": "FluentBridge Academy v11.6.0 — Todos os 6 itens P0: 17 idiomas nativos nas Trilhas Especializadas (0 colisões), Streaming SSE no AITutor, Split preventivo de chunks, Auditoria Mobile 360x800/390x844, Gate @file e GitHub Actions @v5 com Playwright E2E",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.6.0/FluentBridge-Setup-11.6.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.6.0/FluentBridge-v11.6.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v11.6.0"
 }

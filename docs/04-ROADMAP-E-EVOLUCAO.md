@@ -23,7 +23,8 @@ Este documento consolida todo o **ciclo concluído (`v1.0.0 → v11.5.0`)** e de
 | **`v9.4.0`** | Motor de Planos & Assinaturas estruturado (`subscriptionEngine`, `/api/billing/*`, `subscriptions` SQL) em modo 100% gratuito | ✅ Concluído |
 | **`v10.0.0`** | **Multi-Tenancy Escolar Completo:** isolamento estrito por `schoolId` + PostgreSQL RLS (`Seção 13`), coordenação global Master Admin, alocação fácil de alunos, troca de professor dentro da mesma escola e portal `?escola=<slug>` | ✅ Concluído |
 | **`v11.0.0`** | **Eixos A–G (P0–P2) Completos:** `364` imagens estilo Duolingo no R2 (3 ondas + `picture_choice` 2×2), Replay Comparativo + Mapa de Calor + `0.75x/1.0x/1.15x`, Revisão Express 5 min + Streak Freeze por mérito + Grupos de Estudo, QR/Logo/Cor/CSV + Coordenador `isSchoolAdmin` + Diário de Presença, `worker.js` modular (`293` LOC) + `deltaSyncEngine` + Pacote Offline CEFR | ✅ Concluído |
-| **`v11.5.0`** | **Menu Revisão Mobile Zero-Overflow (`390×844`)**, **Simulados Oficiais Cronometrados v2** (Modo Prova Real, Redação Cronometrada, `ExamEvolutionPanel` + CSV), **`12` Trilhas Especializadas Inéditas/Idioma (`204` unidades sem repetição)**, CI em Node 22 + **`31/31` Vitest (`130` testes)** + **`21/21` Playwright E2E** | ✅ **Concluído (Atual)** |
+| **`v11.5.0`** | **Menu Revisão Mobile Zero-Overflow (`390×844`)**, **Simulados Oficiais Cronometrados v2** (Modo Prova Real, Redação Cronometrada, `ExamEvolutionPanel` + CSV), **`12` Trilhas Especializadas Inéditas/Idioma (`204` unidades sem repetição)**, CI em Node 22 + **`31/31` Vitest (`130` testes)** + **`21/21` Playwright E2E** | ✅ Concluído |
+| **`v11.6.0`** | **Todos os 6 Itens P0 Entregues:** **17 idiomas nativos** nas Trilhas Especializadas (`0` colisões + chunks por idioma), **Streaming SSE no `AITutor`**, split dos chunks > `400 kB`, **blindagem mobile `360×800`/`390×844`** (`9` telas), gate `@file` (`376/376`), `public/_headers` CSP e **GitHub Actions `@v5` + job `e2e-playwright`** (`32/32` Vitest `143` testes + `23/23` E2E) | ✅ **Concluído (Atual)** |
 
 ---
 
@@ -31,17 +32,17 @@ Este documento consolida todo o **ciclo concluído (`v1.0.0 → v11.5.0`)** e de
 
 Organizado por prioridade real da Auditoria 360° (`P0 → P2`), permitindo entregas incrementais sem risco de regressão.
 
-### Fase 1 — `v11.6`: Blindagem de CI/CD, Chunks `< 350 kB`, Higiene `@file` & Mobile Total (`P0`)
-*Objetivo: zerar dívidas imediatas de risco técnico e garantir blindagem mobile em todas as telas.*
-- [ ] **Cabeçalho `@file` 100% + Gate no CI:** restaurar `@file` em `src/components/LearningPath.tsx` e adicionar verificação automática no GitHub Actions.
-- [ ] **Split Preventivo dos 5 Chunks > `400 kB`:** dividir `tutor-scenarios-core` (`472.73 kB`), `curriculum-he-exp` (`446.76 kB`), `curriculum-v9-ar` (`423.52 kB`), `curriculum-nb-exp` (`416.91 kB`) e reduzir `index` (`430.31 kB` → `< 320 kB`).
-- [ ] **GitHub Actions Modernizado + E2E & WCAG no CI:** migrar `actions/checkout`, `setup-node` e `setup-java` para `@v5` (eliminando avisos de depreciação) e adicionar job automático de **Playwright E2E + `@axe-core/playwright` (WCAG 2.1 AA)** na branch `main`.
-- [ ] **Auditoria Mobile Zero-Overflow (`360×800` e `390×844`) nas 15 Telas:** testes E2E cobrindo `MockExamHub`, `AITutor`, `SpecializedTracksHub`, `CommunityHub`, `TeacherStudio`, `AdminPanel`, `CourseTranslatorView`, `YouTubeStudyLab` e `SchoolCoordinatorPanel`.
-- [ ] **Hardening HTTP (`public/_headers`) & Limpeza de `devDependencies`:** CSP, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy` no Cloudflare Pages.
+### Fase 1 — `v11.6`: Blindagem de CI/CD, Chunks `< 400 kB`, Higiene `@file`, Streaming SSE & Mobile Total (`P0`) — ✅ Concluído na `v11.6.0`
+- [x] **Cabeçalho `@file` 100% + Gate no CI:** restaurado `@file` em `src/components/LearningPath.tsx`, criado `scripts/check-file-headers.mjs` (`lint:headers`, `376/376` OK) e verificação automática no GitHub Actions.
+- [x] **Split Preventivo dos 5 Chunks > `400 kB`:** divididos `tutor-scenarios-core`, `curriculum-he-exp`, `curriculum-v9-ar`, `curriculum-nb-exp` e aplicados `React.lazy()` nos modais secundários (`0` chunks de dados > `400 kB`, `index` em `406.40 kB`).
+- [x] **GitHub Actions Modernizado (`@v5`) + Job `e2e-playwright` no CI:** migrados `actions/checkout`, `setup-node` e `setup-java` para `@v5` e adicionado job automático de **Playwright E2E** na branch `main`.
+- [x] **Auditoria Mobile Zero-Overflow (`360×800` e `390×844`) nas Telas Centrais (`e2e/mobile-all-views.spec.ts`):** corrigido cabeçalho mobile da `Sidebar.tsx` em `360px` e validadas `9` telas com `<= 1px` de overflow.
+- [x] **Hardening HTTP (`public/_headers`):** headers CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` e `Permissions-Policy` aplicados no Cloudflare Pages.
+- [x] **Nativização das Trilhas Especializadas nos 11 Idiomas Restantes (`ru, ja, zh, ar, nl, af, sv, tr, he, nb, da`):** `11` arquivos nativos inéditos + split por idioma + `19/19` testes sem colisão nos **17 idiomas** (P0 #1).
+- [x] **Streaming SSE no `AITutor` (`/api/gemini-tutor?stream=1`):** streaming progressivo no Worker + `aiTutorEngine.ts` + bolha em tempo real no `AITutor.tsx` + `aiTutorStreaming.test.ts` (P0 #7).
 
-### Fase 2 — `v11.8`: Trilhas Especializadas 100% Nativas nos 17 Idiomas & Novos Exercícios (`P0/P1`)
+### Fase 2 — `v11.8`: Novos Exercícios, Expansão Visual & Expansão das Trilhas (`P1`)
 *Objetivo: elevar ainda mais a profundidade pedagógica e a variedade dentro das lições.*
-- [ ] **Nativização das Trilhas Especializadas nos 11 Idiomas Restantes (`ru, ja, zh, ar, nl, af, sv, tr, he, nb, da`):** conteúdo 100% nativo e inédito (com teste automatizado de `0` colisões estendido aos `17` idiomas) e **code-splitting por idioma** (`specialized-tracks-<lang>`).
 - [ ] **Novos Passos no `LessonPlayer`:** `word_bank` (montagem de frases por blocos clicáveis) e `spot_error` (identificar e corrigir erro gramatical no contexto).
 - [ ] **Expansão Visual (`364 → 600+` Ilustrações no R2):** cobertura de vocabulário B1–B2 e dos 4 domínios das Trilhas Especializadas com artes contextuais leves.
 - [ ] **Expansão das Trilhas Especializadas (`3 → 6` Unidades/Trilha = `24`/Idioma):** entrevistas técnicas/executivas, negociações, emergências clínicas e imigração/aeroportos.

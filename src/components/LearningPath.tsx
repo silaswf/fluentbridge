@@ -1,3 +1,8 @@
+/**
+ * @file src/components/LearningPath.tsx
+ * @description Trilha de aprendizagem CEFR A1–C1 com módulos recolhíveis, filtros por nível/foco, checkpoints, metas diárias e acesso rápido às Trilhas Especializadas e Revisão Express.
+ * @exports LearningPath
+ */
 import { useEffect, useState } from 'react';
 import {
   Activity,
@@ -347,7 +352,7 @@ export function LearningPath({
     .slice(0, 5);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-6xl min-w-0 space-y-6 overflow-x-hidden">
       {/* Compact Hero Banner */}
       <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 via-blue-600 to-indigo-700 p-4 text-white shadow-md shadow-blue-600/15 sm:p-5">
         <div className="relative z-10 flex flex-col justify-between gap-4 md:flex-row md:items-center">

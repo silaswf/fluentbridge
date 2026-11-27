@@ -6,258 +6,31 @@
 import type {
   CEFRLevel,
   LanguageCode,
-  LessonStep,
   TipCategory,
   Topic,
-  TrackTag,
   VocabCard,
 } from '../types/learning';
+import {
+  SPECIALIZED_TRACKS_META,
+  buildUnitAndVocab,
+  type RawUnitSpec,
+  type SpecializedTrackId,
+  type SpecializedTrackMeta,
+} from './specializedTracks/builder';
+import { AF_SPECS } from './specializedTracks/tracks_af';
+import { AR_SPECS } from './specializedTracks/tracks_ar';
+import { DA_SPECS } from './specializedTracks/tracks_da';
+import { HE_SPECS } from './specializedTracks/tracks_he';
+import { JA_SPECS } from './specializedTracks/tracks_ja';
+import { NB_SPECS } from './specializedTracks/tracks_nb';
+import { NL_SPECS } from './specializedTracks/tracks_nl';
+import { RU_SPECS } from './specializedTracks/tracks_ru';
+import { SV_SPECS } from './specializedTracks/tracks_sv';
+import { TR_SPECS } from './specializedTracks/tracks_tr';
+import { ZH_SPECS } from './specializedTracks/tracks_zh';
 
-export type SpecializedTrackId = 'business' | 'tech' | 'health' | 'travel';
-
-export interface SpecializedTrackMeta {
-  id: SpecializedTrackId;
-  titlePt: string;
-  subtitlePt: string;
-  badgePt: string;
-  icon: 'Briefcase' | 'Cpu' | 'HeartPulse' | 'Plane';
-  accentColor: string;
-  bgClass: string;
-  borderClass: string;
-  badgeClass: string;
-  trackTags: TrackTag[];
-}
-
-export const SPECIALIZED_TRACKS_META: SpecializedTrackMeta[] = [
-  {
-    id: 'business',
-    titlePt: 'Negócios & Liderança',
-    subtitlePt: 'Cap table, governança de conselho, M&A e unit economics SaaS.',
-    badgePt: 'Executivo B2–C1',
-    icon: 'Briefcase',
-    accentColor: '#4F46E5',
-    bgClass: 'bg-indigo-50/70',
-    borderClass: 'border-indigo-200',
-    badgeClass: 'bg-indigo-100 text-indigo-800',
-    trackTags: ['business', 'career'],
-  },
-  {
-    id: 'tech',
-    titlePt: 'Tecnologia & Engenharia',
-    subtitlePt: 'Resiliência distribuída, observabilidade, SLOs e contratos de API.',
-    badgePt: 'Engenharia B2–C1',
-    icon: 'Cpu',
-    accentColor: '#0891B2',
-    bgClass: 'bg-cyan-50/70',
-    borderClass: 'border-cyan-200',
-    badgeClass: 'bg-cyan-100 text-cyan-800',
-    trackTags: ['career', 'business'],
-  },
-  {
-    id: 'health',
-    titlePt: 'Saúde & Prática Clínica',
-    subtitlePt: 'Anamnese, protocolos de triagem, farmacovigilância e telemedicina.',
-    badgePt: 'Clínico B1–C1',
-    icon: 'HeartPulse',
-    accentColor: '#DB2777',
-    bgClass: 'bg-rose-50/70',
-    borderClass: 'border-rose-200',
-    badgeClass: 'bg-rose-100 text-rose-800',
-    trackTags: ['career', 'daily'],
-  },
-  {
-    id: 'travel',
-    titlePt: 'Viagens & Mobilidade Global',
-    subtitlePt: 'Rerouting aéreo, despacho aduaneiro, sub-rogação e assistência consular.',
-    badgePt: 'Mobilidade B1–C1',
-    icon: 'Plane',
-    accentColor: '#2563EB',
-    bgClass: 'bg-blue-50/70',
-    borderClass: 'border-blue-200',
-    badgeClass: 'bg-blue-100 text-blue-800',
-    trackTags: ['travel', 'daily'],
-  },
-];
-
-interface RawVocabSpec {
-  word: string;
-  translation: string;
-  ipa: string;
-  exampleTarget: string;
-  examplePt: string;
-  visualConceptId: string;
-}
-
-interface RawUnitSpec {
-  trackId: SpecializedTrackId;
-  unitIndex: 1 | 2 | 3;
-  level: CEFRLevel;
-  titlePt: string;
-  titleEn: string;
-  subtitle: string;
-  estimatedMinutes: number;
-  coverConceptId: string;
-  tipCategory: TipCategory;
-  tipTitle: string;
-  tipSummary: string;
-  tipDetails: string;
-  tipExamples: Array<{ en: string; pt: string; highlight?: string }>;
-  vocab: RawVocabSpec[];
-  listening: {
-    speakerLabel: string;
-    contextPt: string;
-    audioText: string;
-    question: string;
-    options: [string, string, string, string];
-    correctIndex: number;
-    explanation: string;
-    hintTip: string;
-  };
-  reading: {
-    title: string;
-    format: 'email' | 'article' | 'chat';
-    text: string;
-    question: string;
-    options: [string, string, string, string];
-    correctIndex: number;
-    explanation: string;
-    hintTip: string;
-  };
-  speaking: {
-    promptPt: string;
-    targetSentence: string;
-    translationPt: string;
-    ipa: string;
-    brPhoneticHint: string;
-    focusTip: string;
-  };
-  writing: {
-    promptPt: string;
-    scenarioPt: string;
-    minWords: number;
-    checklist: Array<{ label: string; keywords: string[] }>;
-    modelAnswer: string;
-    hintTip: string;
-  };
-}
-
-const TRACK_META_MAP: Record<SpecializedTrackId, SpecializedTrackMeta> = {
-  business: SPECIALIZED_TRACKS_META[0],
-  tech: SPECIALIZED_TRACKS_META[1],
-  health: SPECIALIZED_TRACKS_META[2],
-  travel: SPECIALIZED_TRACKS_META[3],
-};
-
-function buildUnitAndVocab(
-  lang: LanguageCode,
-  spec: RawUnitSpec,
-): { topic: Topic; vocab: VocabCard[] } {
-  const meta = TRACK_META_MAP[spec.trackId];
-  const topicId = `spec-${lang}-${spec.trackId}-${spec.unitIndex}`;
-
-  const vocab: VocabCard[] = spec.vocab.map((v, idx) => ({
-    id: `${topicId}-v${idx + 1}`,
-    topicId,
-    languageCode: lang,
-    word: v.word,
-    translation: v.translation,
-    ipa: v.ipa,
-    exampleEn: v.exampleTarget,
-    examplePt: v.examplePt,
-    category: `specialized_${spec.trackId}`,
-    strength: 'weak',
-    reviewCount: 0,
-    visualConceptId: v.visualConceptId,
-  }));
-
-  const steps: LessonStep[] = [
-    {
-      id: `${topicId}-vocab`,
-      type: 'vocab_intro',
-      titlePt: `Léxico Técnico: ${spec.titlePt}`,
-      cards: vocab,
-    },
-    {
-      id: `${topicId}-tip`,
-      type: 'tip',
-      tip: {
-        id: `${topicId}-tip-content`,
-        category: spec.tipCategory,
-        title: spec.tipTitle,
-        summary: spec.tipSummary,
-        details: spec.tipDetails,
-        examples: spec.tipExamples,
-      },
-    },
-    {
-      id: `${topicId}-listen`,
-      type: 'listening',
-      speakerLabel: spec.listening.speakerLabel,
-      contextPt: spec.listening.contextPt,
-      audioText: spec.listening.audioText,
-      question: spec.listening.question,
-      options: spec.listening.options,
-      correctIndex: spec.listening.correctIndex,
-      explanation: spec.listening.explanation,
-      hintTip: spec.listening.hintTip,
-    },
-    {
-      id: `${topicId}-read`,
-      type: 'reading',
-      title: spec.reading.title,
-      format: spec.reading.format,
-      text: spec.reading.text,
-      glossary: spec.vocab.slice(0, 4).map((v) => ({
-        word: v.word,
-        translation: v.translation,
-        ipa: v.ipa,
-      })),
-      question: spec.reading.question,
-      options: spec.reading.options,
-      correctIndex: spec.reading.correctIndex,
-      explanation: spec.reading.explanation,
-      hintTip: spec.reading.hintTip,
-    },
-    {
-      id: `${topicId}-speak`,
-      type: 'speaking',
-      promptPt: spec.speaking.promptPt,
-      targetSentence: spec.speaking.targetSentence,
-      translationPt: spec.speaking.translationPt,
-      ipa: spec.speaking.ipa,
-      brPhoneticHint: spec.speaking.brPhoneticHint,
-      focusTip: spec.speaking.focusTip,
-    },
-    {
-      id: `${topicId}-write`,
-      type: 'writing_free',
-      promptPt: spec.writing.promptPt,
-      scenarioPt: spec.writing.scenarioPt,
-      minWords: spec.writing.minWords,
-      checklist: spec.writing.checklist,
-      modelAnswer: spec.writing.modelAnswer,
-      hintTip: spec.writing.hintTip,
-    },
-  ];
-
-  const topic: Topic = {
-    id: topicId,
-    languageCode: lang,
-    titlePt: spec.titlePt,
-    titleEn: spec.titleEn,
-    subtitle: spec.subtitle,
-    level: spec.level,
-    estimatedMinutes: spec.estimatedMinutes,
-    icon: meta.icon,
-    color: meta.accentColor,
-    coverConceptId: spec.coverConceptId,
-    trackTags: meta.trackTags,
-    topicTipsSummary: [spec.tipTitle, spec.tipSummary],
-    steps,
-  };
-
-  return { topic, vocab };
-}
+export { SPECIALIZED_TRACKS_META };
+export type { SpecializedTrackId, SpecializedTrackMeta };
 
 // ============================================================================
 // DEDICATED SPECS: EN, ES, FR, DE, IT, PT (PLE with EN scaffolding)
@@ -4167,244 +3940,6 @@ const PT_SPECS: RawUnitSpec[] = hydrateCompactSpecs('pt', [
   },
 ]);
 
-// ============================================================================
-// ADAPTED DOMAIN TEMPLATES FOR THE OTHER 11 LANGUAGES
-// (ru, ja, zh, ar, nl, af, sv, tr, he, nb, da)
-// ============================================================================
-
-const OTHER_11_LANGS: LanguageCode[] = [
-  'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da',
-];
-
-interface AdaptedLangLexicon {
-  business: [string, string, string, string, string];
-  tech: [string, string, string, string, string];
-  health: [string, string, string, string, string];
-  travel: [string, string, string, string, string];
-  speakerCity: string;
-}
-
-const ADAPTED_LEXICON: Record<string, AdaptedLangLexicon> = {
-  ru: {
-    business: ['таблица капитализации', 'дью-дилидженс', 'темп сжигания кэша', 'амортизация', 'точка безубыточности'],
-    tech: ['идемпотентность', 'автоматический выключатель', 'откат релиза', 'ограничение частоты', 'очередь недоставленных сообщений'],
-    health: ['клинический анамнез', 'противопоказание', 'протокол триажа', 'аускультация', 'профилактика'],
-    travel: ['ваучер на пересадку', 'перемаршрутизация', 'суброгация', 'форс-мажор', 'таможенный манифест'],
-    speakerCity: 'Москва',
-  },
-  ja: {
-    business: ['資本政策表', 'デューデリジェンス', 'バーンレート', '減価償却', '損益分岐点'],
-    tech: ['べき等性', 'サーキットブレーカー', 'ロールバック', 'レート制限', 'デッドレターキュー'],
-    health: ['臨床問診', '禁忌事項', 'トリアージ手順', '聴診所見', '予防投与'],
-    travel: ['乗り継ぎバウチャー', '旅程変更', '代位求償', '不可抗力', '税関目録'],
-    speakerCity: '東京',
-  },
-  zh: {
-    business: ['股权结构表', '尽职调查', '资金消耗率', '会计摊销', '盈亏平衡点'],
-    tech: ['幂等性', '熔断器', '自动回滚', '限流策略', '死信队列'],
-    health: ['临床病史采集', '临床禁忌症', '分诊规范', '肺部听诊', '预防性用药'],
-    travel: ['中转住宿券', '航程改签', '保险代位权', '不可抗力', '海关舱单'],
-    speakerCity: '北京',
-  },
-  ar: {
-    business: ['جدول الملكية', 'العناية الواجبة', 'معدل حرق السيولة', 'الاستهلاك المحاسبي', 'نقطة التعادل'],
-    tech: ['تطابق الطلبات', 'قاطع الدائرة البرمجي', 'التراجع الآلي', 'تحديد معدل الطلبات', 'قائمة الرسائل المرفوضة'],
-    health: ['التاريخ المرضي السريري', 'موانع الاستعمال', 'بروتوكول الفرز', 'الفحص بالسماعة', 'الوقاية العلاجية'],
-    travel: ['قسيمة التوقف', 'إعادة توجيه المسار', 'الحلول التأميني', 'القوة القاهرة', 'البيان الجمركي'],
-    speakerCity: 'الرياض',
-  },
-  nl: {
-    business: ['aandeelhoudersregister', 'boekenonderzoek', 'burnrate-tempo', 'boekhoudkundige afschrijving', 'break-evenpunt'],
-    tech: ['idempotentie', 'stroomonderbrekerpatroon', 'automatische terugrol', 'snelheidsbeperking', 'uitvalwachtrij'],
-    health: ['klinische anamnese', 'contra-indicatie', 'triageprotocol', 'longauscultatie', 'profylaxe'],
-    travel: ['overstapvoucher', 'routeomlegging', 'verhaalsrecht', 'overmacht', 'douanemanifest'],
-    speakerCity: 'Amsterdam',
-  },
-  af: {
-    business: ['aandeelhouerstabel', 'omsigtigheidsoudit', 'kontantverbranding', 'boekhoudkundige amortisasie', 'gelykbreekpunt'],
-    tech: ['idempotensie', 'stroombrekerpatroon', 'outomatiese terugrol', 'tempobeperking', 'mislukte boodskapwaglys'],
-    health: ['kliniese anamnese', 'kontra-indikasie', 'triageprotokol', 'longouskultasie', 'profilakse'],
-    travel: ['oostapbewys', 'roete-herleiding', 'subrogasie', 'oormag', 'doeanemanifes'],
-    speakerCity: 'Kaapstad',
-  },
-  sv: {
-    business: ['aktieägartabell', 'företagsbesiktning', 'kapitalförbrukning', 'bokföringsmässig avskrivning', 'nollpunktsresultat'],
-    tech: ['idempotens', 'kretsbrytarmönster', 'automatisk återställning', 'hastighetsbegränsning', 'kö för misslyckade meddelanden'],
-    health: ['klinisk anamnes', 'kontraindikation', 'triageprotokoll', 'lungauskultation', 'profylax'],
-    travel: ['mellanlandningsvoucher', 'ruttomläggning', 'regressrätt', 'force majeure', 'tullmanifest'],
-    speakerCity: 'Stockholm',
-  },
-  tr: {
-    business: ['ortaklık tablosu', 'durum tespiti', 'nakit yakım oranı', 'muhasebe amortismanı', 'başabaş noktası'],
-    tech: ['idempotans', 'devre kesici deseni', 'otomatik geri alma', 'hız sınırlama', 'ölü mektup kuyruğu'],
-    health: ['klinik anamnez', 'kontrendikasyon', 'triyaj protokolü', 'akciğer oskültasyonu', 'profilaksi'],
-    travel: ['aktarma kuponu', 'rota yönlendirme', 'rücu hakkı', 'mücbir sebep', 'gümrük manifestosu'],
-    speakerCity: 'İstanbul',
-  },
-  he: {
-    business: ['טבלת הון', 'בדיקת נאותות', 'קצב שריפת מזומנים', 'הפחתה חשבונאית', 'נקודת איזון'],
-    tech: ['אידמפוטנטיות', 'מפסק זרם תוכנתי', 'שחזור גרסה אוטומטי', 'הגבלת קצב', 'תור הודעות כושלות'],
-    health: ['אנמנזה קלינית', 'התוויית נגד', 'פרוטוקול מיון', 'האזנה לריאות', 'טיפול מונע'],
-    travel: ['שובר עצירת ביניים', 'ניתוב מסלול מחדש', 'זכות שיבוב', 'כוח עליון', 'מניפסט מכס'],
-    speakerCity: 'תל אביב',
-  },
-  nb: {
-    business: ['aksjonærtabell', 'selskapsgjennomgang', 'kapitalforbruk', 'regnskapsmessig avskrivning', 'nullpunkt'],
-    tech: ['idempotens', 'strømbrytermønster', 'automatisk tilbakerulling', 'hastighetsbegrensning', 'kø for feilede meldinger'],
-    health: ['klinisk anamnese', 'kontraindikasjon', 'triageprotokoll', 'lungeauskultasjon', 'profylakse'],
-    travel: ['mellomlandingskupong', 'omruting', 'regressrett', 'force majeure', 'tollmanifest'],
-    speakerCity: 'Oslo',
-  },
-  da: {
-    business: ['ejerbogstabel', 'due diligence-gennemgang', 'likviditetsforbrug', 'regnskabsmæssig afskrivning', 'nulpunkt'],
-    tech: ['idempotens', 'afbrydermønster', 'automatisk tilbagerulning', 'hastighedsbegrænsning', 'kø for fejlede beskeder'],
-    health: ['klinisk anamnese', 'kontraindikation', 'triageprotokol', 'lungeauskultation', 'profylakse'],
-    travel: ['mellemlandingsvoucher', 'ruteomlægning', 'regresret', 'force majeure', 'toldmanifest'],
-    speakerCity: 'København',
-  },
-};
-
-function buildAdaptedSpecsForLang(lang: LanguageCode): RawUnitSpec[] {
-  const lex = ADAPTED_LEXICON[lang] ?? ADAPTED_LEXICON.nl;
-  const tracks: Array<{
-    trackId: SpecializedTrackId;
-    words: [string, string, string, string, string];
-    ptMeanings: [string, string, string, string, string];
-    concepts: [string, string, string, string, string];
-    unitTitles: [string, string, string];
-  }> = [
-    {
-      trackId: 'business',
-      words: lex.business,
-      ptMeanings: ['tabela societária', 'auditoria prévia', 'queima de caixa', 'amortização', 'ponto de equilíbrio'],
-      concepts: ['chart-up', 'contract', 'chart-down', 'calculator', 'goal'],
-      unitTitles: [
-        'Cap Table e Auditoria Prévia',
-        'Governança Corporativa e M&A',
-        'Unit Economics e Retenção SaaS',
-      ],
-    },
-    {
-      trackId: 'tech',
-      words: lex.tech,
-      ptMeanings: ['idempotência', 'circuit breaker', 'rollback', 'rate limiting', 'dead-letter queue'],
-      concepts: ['lock-tech', 'warning-law', 'tools', 'traffic-light', 'database'],
-      unitTitles: [
-        'Resiliência Distribuída e Circuit Breakers',
-        'Observabilidade e Orçamento de Latência',
-        'Arquitetura Orientada a Eventos',
-      ],
-    },
-    {
-      trackId: 'health',
-      words: lex.health,
-      ptMeanings: ['anamnese clínica', 'contraindicação', 'protocolo de triagem', 'ausculta', 'profilaxia'],
-      concepts: ['doctor', 'warning-law', 'ambulance', 'heart', 'vaccine'],
-      unitTitles: [
-        'Anamnese Clínica e Triagem Hospitalar',
-        'Farmacovigilância e Adesão Terapêutica',
-        'Telemedicina e Consentimento Informado',
-      ],
-    },
-    {
-      trackId: 'travel',
-      words: lex.travel,
-      ptMeanings: ['voucher de escala', 'reacomodação', 'sub-rogação', 'força maior', 'manifesto aduaneiro'],
-      concepts: ['hotel', 'airplane', 'scales', 'storm', 'customs'],
-      unitTitles: [
-        'Conexões Perdidas e Vouchers',
-        'Despacho Aduaneiro e Bagagem',
-        'Seguros e Assistência Consular',
-      ],
-    },
-  ];
-
-  const specs: RawUnitSpec[] = [];
-  for (const t of tracks) {
-    ([1, 2, 3] as const).forEach((unitIndex) => {
-      const level: CEFRLevel = unitIndex === 2 ? 'C1' : unitIndex === 3 ? 'B1' : 'B2';
-      const titleBase = t.unitTitles[unitIndex - 1];
-      specs.push({
-        trackId: t.trackId,
-        unitIndex,
-        level,
-        titlePt: `${titleBase} (${lang.toUpperCase()})`,
-        titleEn: `${titleBase} — Specialized ${lang.toUpperCase()}`,
-        subtitle: `Domine terminologia avançada de ${t.trackId} no idioma ${lang.toUpperCase()}.`,
-        estimatedMinutes: level === 'C1' ? 15 : 13,
-        coverConceptId: t.concepts[0],
-        tipCategory: unitIndex === 3 ? 'culture' : 'grammar',
-        tipTitle: `Registro Profissional ${t.trackId.toUpperCase()} (${lang.toUpperCase()} · U${unitIndex})`,
-        tipSummary: `Empregue estruturas impessoais e conectivos condicionais formais no contexto de ${titleBase.toLowerCase()}.`,
-        tipDetails: `Em comunicações especializadas em ${lang.toUpperCase()}, combine termos técnicos como "${t.words[0]}" e "${t.words[1]}" com tom objetivo e verificável.`,
-        tipExamples: [
-          {
-            en: `${t.words[0]} — ${t.words[1]} (${lex.speakerCity})`,
-            pt: `${t.ptMeanings[0]} — ${t.ptMeanings[1]}`,
-          },
-        ],
-        vocab: t.words.map((w, idx) => ({
-          word: unitIndex === 1 ? w : `${w} (${unitIndex})`,
-          translation: t.ptMeanings[idx],
-          ipa: `/${w.slice(0, 8)}/`,
-          exampleTarget: `${w}: ${t.ptMeanings[idx]} (${lex.speakerCity}).`,
-          examplePt: `Uso técnico de "${t.ptMeanings[idx]}" no contexto de ${titleBase.toLowerCase()}.`,
-          visualConceptId: t.concepts[idx],
-        })),
-        listening: {
-          speakerLabel: `Especialista · ${lex.speakerCity}`,
-          contextPt: `Ouça o briefing técnico sobre ${titleBase.toLowerCase()}.`,
-          audioText: `${t.words[0]}. ${t.words[1]}. ${t.words[2]}.`,
-          question: `Qual termo técnico abre a apresentação de ${lex.speakerCity}?`,
-          options: [
-            `${t.words[0]} (${t.ptMeanings[0]})`,
-            `${t.words[3]} (${t.ptMeanings[3]})`,
-            `${t.words[4]} (${t.ptMeanings[4]})`,
-            'Termo genérico não especializado',
-          ],
-          correctIndex: 0,
-          explanation: `O briefing inicia com "${t.words[0]}" (${t.ptMeanings[0]}).`,
-          hintTip: `Observe o primeiro conceito: ${t.ptMeanings[0]}.`,
-        },
-        reading: {
-          title: `Nota Técnica · ${titleBase}`,
-          format: 'article',
-          text: `${t.words[0]} — ${t.words[1]} — ${t.words[4]}.`,
-          question: `Quais conceitos técnicos estão documentados na nota?`,
-          options: [
-            `${t.ptMeanings[0]}, ${t.ptMeanings[1]} e ${t.ptMeanings[4]}.`,
-            'Apenas saudações básicas.',
-            'Vocabulário exclusivo de gastronomia.',
-            'Nenhum termo especializado.',
-          ],
-          correctIndex: 0,
-          explanation: `A nota reúne ${t.words[0]}, ${t.words[1]} e ${t.words[4]}.`,
-          hintTip: `Relacione os três termos exibidos no texto.`,
-        },
-        speaking: {
-          promptPt: `Pronuncie os termos centrais da unidade em ${lang.toUpperCase()}.`,
-          targetSentence: `${t.words[0]}, ${t.words[1]}`,
-          translationPt: `${t.ptMeanings[0]}, ${t.ptMeanings[1]}`,
-          ipa: `/${t.words[0]}/`,
-          brPhoneticHint: `Articule pausadamente: ${t.words[0]}.`,
-          focusTip: `Mantenha clareza na pronúncia do termo técnico.`,
-        },
-        writing: {
-          promptPt: `Redija uma frase técnica utilizando o vocabulário de ${titleBase}.`,
-          scenarioPt: `Inclua "${t.words[0]}" e "${t.words[1]}" em um contexto profissional.`,
-          minWords: 6,
-          checklist: [
-            { label: 'Incluir termos técnicos', keywords: [t.words[0], t.words[1]] },
-          ],
-          modelAnswer: `${t.words[0]} — ${t.words[1]} (${t.ptMeanings[0]} / ${t.ptMeanings[1]}).`,
-          hintTip: `Combine os dois primeiros termos da unidade.`,
-        },
-      });
-    });
-  }
-  return specs;
-}
-
 const SPECS_BY_LANG: Partial<Record<LanguageCode, RawUnitSpec[]>> = {
   en: EN_SPECS,
   es: ES_SPECS,
@@ -4412,6 +3947,17 @@ const SPECS_BY_LANG: Partial<Record<LanguageCode, RawUnitSpec[]>> = {
   de: DE_SPECS,
   it: IT_SPECS,
   pt: PT_SPECS,
+  ru: RU_SPECS,
+  ja: JA_SPECS,
+  zh: ZH_SPECS,
+  ar: AR_SPECS,
+  nl: NL_SPECS,
+  af: AF_SPECS,
+  sv: SV_SPECS,
+  tr: TR_SPECS,
+  he: HE_SPECS,
+  nb: NB_SPECS,
+  da: DA_SPECS,
 };
 
 const BUILT_CACHE = new Map<LanguageCode, { topics: Topic[]; vocab: VocabCard[] }>();
@@ -4420,7 +3966,7 @@ function getOrBuildForLang(lang: LanguageCode): { topics: Topic[]; vocab: VocabC
   const cached = BUILT_CACHE.get(lang);
   if (cached) return cached;
 
-  const specs = SPECS_BY_LANG[lang] ?? (OTHER_11_LANGS.includes(lang) ? buildAdaptedSpecsForLang(lang) : EN_SPECS);
+  const specs = SPECS_BY_LANG[lang] ?? EN_SPECS;
   const topics: Topic[] = [];
   const vocab: VocabCard[] = [];
 

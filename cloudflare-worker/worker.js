@@ -176,7 +176,7 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '11.5.0',
+        version: '11.6.0',
         accentCount: 65,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt'],
         endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/translate', '/api/youtube-study', '/api/media/list', '/api/media/*', '/api/billing/plans', '/api/billing/checkout', '/api/billing/webhook', '/api/telemetry', '/api/admin/quotas'],

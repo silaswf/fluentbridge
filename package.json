@@ -1,7 +1,7 @@
 {
   "name": "fluentbridge",
   "private": true,
-  "version": "11.5.0",
+  "version": "11.6.0",
   "description": "FluentBridge Academy - Plataforma de Ensino em 17 Idiomas (A1-C1)",
   "author": "Prof. Silas - FluentBridge Academy",
   "type": "module",
@@ -11,6 +11,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run src",
     "test:e2e": "playwright test",
+    "lint:headers": "node scripts/check-file-headers.mjs",
     "preview": "vite preview",
     "icons": "node scripts/make-icons.mjs",
     "cap:sync": "npm run build && npx cap sync",

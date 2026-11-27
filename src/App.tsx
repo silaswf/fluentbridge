@@ -25,11 +25,29 @@ import {
   type SupabaseAuthUserInfo,
 } from './utils/cloudSync';
 import { AppDownloadGateway } from './components/AppDownloadGateway';
-import { AppUpdateModal } from './components/AppUpdateModal';
 import { AuthScreen } from './components/AuthScreen';
-import { PrivacyLgpdModal } from './components/PrivacyLgpdModal';
-import { SettingsModal } from './components/SettingsModal';
 import { ViewSkeleton } from './components/ViewSkeleton';
+
+const AppUpdateModal = lazy(() =>
+  import('./components/AppUpdateModal').then((m) => ({
+    default: m.AppUpdateModal,
+  })),
+);
+const PrivacyLgpdModal = lazy(() =>
+  import('./components/PrivacyLgpdModal').then((m) => ({
+    default: m.PrivacyLgpdModal,
+  })),
+);
+const SettingsModal = lazy(() =>
+  import('./components/SettingsModal').then((m) => ({
+    default: m.SettingsModal,
+  })),
+);
+const TeacherLinkModal = lazy(() =>
+  import('./components/TeacherLinkModal').then((m) => ({
+    default: m.TeacherLinkModal,
+  })),
+);
 import { checkForAppUpdate, type AppUpdateInfo } from './utils/appUpdater';
 import {
   clearOfflineOutbox,
@@ -41,7 +59,6 @@ import { reportClientError } from './utils/telemetry';
 import { getTeacherDisplayName } from './utils/teacherDisplay';
 import { LearningPath } from './components/LearningPath';
 import { Sidebar, type NavView } from './components/Sidebar';
-import { TeacherLinkModal } from './components/TeacherLinkModal';
 import type { TeacherTab } from './components/TeacherStudio';
 import { useCloudSyncController } from './hooks/useCloudSyncController';
 import { purgeExpiredSpeakingAudios } from './utils/audioRetention';
@@ -1630,18 +1647,20 @@ export function App() {
   if (!currentUser) {
     if (!dismissedWebGateway && isWebPlatform()) {
       return (
-        <AppDownloadGateway
-          mode="landing"
-          schoolName={state.schoolName}
-          uiLocale={uiLocale}
-          onChangeUiLocale={setUiLocale}
-          onContinueWeb={(remember) => {
-            if (remember && typeof window !== 'undefined') {
-              window.localStorage.setItem('fluentbridge_prefer_web', '1');
-            }
-            setDismissedWebGateway(true);
-          }}
-        />
+        <Suspense fallback={<ViewSkeleton />}>
+          <AppDownloadGateway
+            mode="landing"
+            schoolName={state.schoolName}
+            uiLocale={uiLocale}
+            onChangeUiLocale={setUiLocale}
+            onContinueWeb={(remember) => {
+              if (remember && typeof window !== 'undefined') {
+                window.localStorage.setItem('fluentbridge_prefer_web', '1');
+              }
+              setDismissedWebGateway(true);
+            }}
+          />
+        </Suspense>
       );
     }
     return (
@@ -1664,14 +1683,16 @@ export function App() {
           onRegister={handleRegister}
         />
         {showDownloadModal && (
-          <AppDownloadGateway
-            mode="modal"
-            schoolName={state.schoolName}
-            uiLocale={uiLocale}
-            onChangeUiLocale={setUiLocale}
-            onContinueWeb={() => setShowDownloadModal(false)}
-            onClose={() => setShowDownloadModal(false)}
-          />
+          <Suspense fallback={null}>
+            <AppDownloadGateway
+              mode="modal"
+              schoolName={state.schoolName}
+              uiLocale={uiLocale}
+              onChangeUiLocale={setUiLocale}
+              onContinueWeb={() => setShowDownloadModal(false)}
+              onClose={() => setShowDownloadModal(false)}
+            />
+          </Suspense>
         )}
       </>
     );
@@ -2603,91 +2624,93 @@ export function App() {
         )}
       </Suspense>
 
-      <TeacherLinkModal
-        open={
-          currentUser.role === 'student' &&
-          (Boolean(currentUser.unlinkedNoticePending) || showTeacherLinkModal)
-        }
-        student={currentUser}
-        schoolName={effectiveSchool.name}
-        teachers={teachersList}
-        mandatoryPrompt={Boolean(currentUser.unlinkedNoticePending)}
-        onLinkToTeacher={(teacherId) =>
-          handleLinkStudentToTeacher(currentUser.id, teacherId)
-        }
-        onConfirmIndependent={handleConfirmIndependentMode}
-        onClose={() => setShowTeacherLinkModal(false)}
-      />
-
-      {showDownloadModal && (
-        <AppDownloadGateway
-          mode="modal"
-          schoolName={state.schoolName}
-          uiLocale={uiLocale}
-          onChangeUiLocale={setUiLocale}
-          onContinueWeb={() => setShowDownloadModal(false)}
-          onClose={() => setShowDownloadModal(false)}
-        />
-      )}
-
-      <AppUpdateModal
-        open={showUpdateModal}
-        initialInfo={appUpdateInfo}
-        onUpdateInfo={(info) => setAppUpdateInfo(info)}
-        onClose={() => setShowUpdateModal(false)}
-      />
-
-      <SettingsModal
-        open={showSettingsModal}
-        user={currentUser}
-        activeCourse={activeCourse}
-        activeDialect={activeDialect}
-        themeMode={themeMode}
-        uiLocale={uiLocale}
-        fontScale={fontScale}
-        pendingOutboxCount={pendingOutboxCount}
-        hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
-        latestAppVersion={appUpdateInfo?.latestVersion}
-        onClose={() => setShowSettingsModal(false)}
-        onChangeDialect={(langCode, dialectCode) => {
-          updateCurrentUser((u) => ({
-            ...u,
-            accent: langCode === 'en' && (dialectCode === 'en-US' || dialectCode === 'en-GB')
-              ? dialectCode
-              : u.accent,
-            dialectByLanguage: {
-              ...(u.dialectByLanguage ?? {}),
-              [langCode]: dialectCode,
-            },
-          }));
-        }}
-        onCycleTheme={handleCycleTheme}
-        onChangeUiLocale={setUiLocale}
-        onChangeFontScale={setFontScale}
-        onFlushOutbox={() => void handleFlushOfflineOutbox()}
-        onOpenUpdateModal={() => setShowUpdateModal(true)}
-        onOpenPrivacyLgpd={() => setShowPrivacyModal(true)}
-        onOpenDownloadModal={() => setShowDownloadModal(true)}
-        onLogout={handleLogout}
-      />
-
-      <PrivacyLgpdModal
-        open={showPrivacyModal}
-        user={currentUser}
-        onClose={() => setShowPrivacyModal(false)}
-        onDeleteAccount={async () => {
-          const cloudRes = await deleteMyCloudAccount(state.cloudConfig);
-          if (!cloudRes.ok) {
-            return { ok: false, error: cloudRes.error };
+      <Suspense fallback={null}>
+        <TeacherLinkModal
+          open={
+            currentUser.role === 'student' &&
+            (Boolean(currentUser.unlinkedNoticePending) || showTeacherLinkModal)
           }
-          await clearOfflineOutbox();
-          setPendingOutboxCount(0);
-          handleDeleteUser(currentUser.id);
-          setShowPrivacyModal(false);
-          handleLogout();
-          return { ok: true };
-        }}
-      />
+          student={currentUser}
+          schoolName={effectiveSchool.name}
+          teachers={teachersList}
+          mandatoryPrompt={Boolean(currentUser.unlinkedNoticePending)}
+          onLinkToTeacher={(teacherId) =>
+            handleLinkStudentToTeacher(currentUser.id, teacherId)
+          }
+          onConfirmIndependent={handleConfirmIndependentMode}
+          onClose={() => setShowTeacherLinkModal(false)}
+        />
+
+        {showDownloadModal && (
+          <AppDownloadGateway
+            mode="modal"
+            schoolName={state.schoolName}
+            uiLocale={uiLocale}
+            onChangeUiLocale={setUiLocale}
+            onContinueWeb={() => setShowDownloadModal(false)}
+            onClose={() => setShowDownloadModal(false)}
+          />
+        )}
+
+        <AppUpdateModal
+          open={showUpdateModal}
+          initialInfo={appUpdateInfo}
+          onUpdateInfo={(info) => setAppUpdateInfo(info)}
+          onClose={() => setShowUpdateModal(false)}
+        />
+
+        <SettingsModal
+          open={showSettingsModal}
+          user={currentUser}
+          activeCourse={activeCourse}
+          activeDialect={activeDialect}
+          themeMode={themeMode}
+          uiLocale={uiLocale}
+          fontScale={fontScale}
+          pendingOutboxCount={pendingOutboxCount}
+          hasAppUpdate={Boolean(appUpdateInfo?.hasUpdate)}
+          latestAppVersion={appUpdateInfo?.latestVersion}
+          onClose={() => setShowSettingsModal(false)}
+          onChangeDialect={(langCode, dialectCode) => {
+            updateCurrentUser((u) => ({
+              ...u,
+              accent: langCode === 'en' && (dialectCode === 'en-US' || dialectCode === 'en-GB')
+                ? dialectCode
+                : u.accent,
+              dialectByLanguage: {
+                ...(u.dialectByLanguage ?? {}),
+                [langCode]: dialectCode,
+              },
+            }));
+          }}
+          onCycleTheme={handleCycleTheme}
+          onChangeUiLocale={setUiLocale}
+          onChangeFontScale={setFontScale}
+          onFlushOutbox={() => void handleFlushOfflineOutbox()}
+          onOpenUpdateModal={() => setShowUpdateModal(true)}
+          onOpenPrivacyLgpd={() => setShowPrivacyModal(true)}
+          onOpenDownloadModal={() => setShowDownloadModal(true)}
+          onLogout={handleLogout}
+        />
+
+        <PrivacyLgpdModal
+          open={showPrivacyModal}
+          user={currentUser}
+          onClose={() => setShowPrivacyModal(false)}
+          onDeleteAccount={async () => {
+            const cloudRes = await deleteMyCloudAccount(state.cloudConfig);
+            if (!cloudRes.ok) {
+              return { ok: false, error: cloudRes.error };
+            }
+            await clearOfflineOutbox();
+            setPendingOutboxCount(0);
+            handleDeleteUser(currentUser.id);
+            setShowPrivacyModal(false);
+            handleLogout();
+            return { ok: true };
+          }}
+        />
+      </Suspense>
 
       {toastMessage && (
         <div

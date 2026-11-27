@@ -6,6 +6,23 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v11.6.0`] — 2026-11-27
+### Todos os 6 Itens P0: 17 Idiomas Nativos nas Trilhas Especializadas, Streaming SSE no AITutor, Split de Chunks, Blindagem Mobile 360×800 / 390×844, Gate `@file` & CI `@v5` + Playwright E2E
+- **P0 #1 — Nativização Completa das Trilhas Especializadas nos 17 Idiomas (`src/data/specializedTracks/builder.ts`, `tracks_*.ts`, `vite.config.ts`):**
+  - Substituídos os templates adaptados dos 11 idiomas restantes (`ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`, `tr`, `he`, `nb`, `da`) por **11 arquivos dedicados 100% nativos** (`60` termos inéditos por idioma = `660` novos termos + exemplos/áudios/leituras nativas, sem sufixos) e chunks isolados `specialized-tracks-<lang>`.
+  - `src/utils/__tests__/specializedTracks.test.ts` expandido para validar **0 colisões** de títulos, vocabulário e dicas gramaticais em **todos os 17 idiomas** (`19/19` testes verdes).
+- **P0 #7 — Streaming SSE em Tempo Real no `AITutor` (`cloudflare-worker/routes/gemini.js`, `src/utils/aiTutorEngine.ts`, `src/components/AITutor.tsx`):**
+  - Suporte a `?stream=1` / `stream: true` via `:streamGenerateContent?alt=sse` no Worker com fallback entre modelos, decodificação progressiva de `replyEn` (`parseSseGeminiChunk`, `extractPartialReplyEnFromJsonStream`, `callGeminiJsonStream` com `AbortController`) e bolha `ai-tutor-streaming-bubble` no `AITutor`.
+- **P0 #24 — Split Preventivo de Chunks > 400 kB (`vite.config.ts`, `hebrewExpansionPart1/2.ts`, `expV9_ar_part1/2.ts`, `norwegianExpansionPart1/2.ts`, `src/App.tsx`):**
+  - Divididos `curriculum-he-exp`, `curriculum-v9-ar`, `curriculum-nb-exp` e `tutor-scenarios-core` (`tutor-scenarios-ext` + `tutor-scenarios-scripts`) e aplicados `React.lazy()` nos modais secundários do `App.tsx`: **todos os chunks de dados/rotas agora < 400 kB** (`index` reduzido para `406.40 kB`, `0` chunks > `500 kB`).
+- **P0 #13 — Auditoria & Blindagem Mobile `360×800` e `390×844` (`e2e/mobile-all-views.spec.ts`, `Sidebar.tsx`, `LearningPath.tsx`):**
+  - Corrigido o overflow de `16px` do cabeçalho mobile em `360×800` e validado **zero overflow (`<= 1px`)** em `LearningPath`, `VocabReview`, `AITutor`, `MockExamHub`, `SpecializedTracksHub`, `CommunityHub`, `CourseTranslatorView`, `TeacherStudio` e `AdminPanel`.
+- **P0 #23 & P0 #28 — Higiene `@file` 100%, `public/_headers` & GitHub Actions `@v5` + Playwright E2E (`.github/workflows/build-android-apk.yml`, `scripts/check-file-headers.mjs`, `package.json`):**
+  - Restaurado `@file` em `LearningPath.tsx`, criado gate `lint:headers` (`376/376` arquivos OK), adicionados headers HTTP de segurança em `public/_headers`, migradas Actions para `@v5` e incluído job `e2e-playwright` no CI.
+- **Verificação:** `check-file-headers.mjs` (`376` OK), `node --check`, `tsc --noEmit` (`0` erros), `vitest run src` (**`32/32` suítes / `143/143` testes**), `npm run build` (`0` avisos Rollup, `0` chunks > `500 kB`), `playwright test` (**`23/23` jornadas E2E**).
+
+---
+
 ## [`v11.5.0`] — 2026-11-27
 ### Revisão Mobile Sem Rolagem Horizontal, Simulados Oficiais Cronometrados v2 & Trilhas Especializadas Inéditas (12 Unidades × 17 Idiomas)
 - **Correção de Overflow Horizontal em Mobile no Menu de Revisão (`src/components/VocabReview.tsx`):**

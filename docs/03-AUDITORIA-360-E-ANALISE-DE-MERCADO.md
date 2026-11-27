@@ -2,7 +2,9 @@
 
 # 03 — Auditoria 360° & Análise Competitiva de Mercado (`v11.5.0`)
 
-**Data da Auditoria:** 27/11/2026 · **Versão Auditada:** `v11.5.0` (commit `b62cbec`) · **Escopo:** Auditoria zero-based completa após entrega integral dos **Eixos A–G (`v11.0.0`)**, **Simulados v2**, **`12` Trilhas Especializadas Inéditas/idioma** e **correção Mobile Zero-Overflow no `VocabReview` (`v11.5.0`)**.
+**Data da Auditoria:** 27/11/2026 · **Versão Auditada:** `v11.5.0` (base) → **`v11.6.0` (todos os 6 P0 concluídos)** · **Escopo:** Auditoria zero-based pós-`v11.5.0` e entrega integral dos **6 itens P0** na **`v11.6.0`** (`17` idiomas nativos nas Trilhas Especializadas com `0` colisões, Streaming SSE no `AITutor`, split de chunks, blindagem mobile `360×800`/`390×844`, gate `@file` `376/376`, `public/_headers` CSP e CI `@v5` + job `e2e-playwright`).
+
+> **Atualização `v11.6.0` (27/11/2026):** Todos os **6 itens marcados como `P0`** nesta auditoria (itens `#1`, `#7`, `#13`, `#23`, `#24` e `#28`) foram **implementados e validados** com `32/32` suítes Vitest (`143/143` testes), `23/23` jornadas Playwright E2E, `376/376` arquivos com `@file` e `0` chunks de dados > `400 kB`. Restam apenas os itens `P1–P3`.
 
 ---
 

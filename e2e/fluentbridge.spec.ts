@@ -31,11 +31,11 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.5\.0\/FluentBridge-Setup-11\.5\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.6\.0\/FluentBridge-Setup-11\.6\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.5\.0\/FluentBridge-v11\.5\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.6\.0\/FluentBridge-v11\.6\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();

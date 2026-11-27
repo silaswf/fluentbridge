@@ -159,8 +159,12 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/turkishCourse')) return 'curriculum-tr';
           if (id.includes('/curriculum/turkishExpansion')) return 'curriculum-tr-exp';
           if (id.includes('/curriculum/hebrewCourse')) return 'curriculum-he';
+          if (id.includes('/curriculum/hebrewExpansionPart1')) return 'curriculum-he-exp-part1';
+          if (id.includes('/curriculum/hebrewExpansionPart2')) return 'curriculum-he-exp-part2';
           if (id.includes('/curriculum/hebrewExpansion')) return 'curriculum-he-exp';
           if (id.includes('/curriculum/norwegianCourse')) return 'curriculum-nb';
+          if (id.includes('/curriculum/norwegianExpansionPart1')) return 'curriculum-nb-exp-part1';
+          if (id.includes('/curriculum/norwegianExpansionPart2')) return 'curriculum-nb-exp-part2';
           if (id.includes('/curriculum/norwegianExpansion')) return 'curriculum-nb-exp';
           if (id.includes('/curriculum/danishCourse')) return 'curriculum-da';
           if (id.includes('/curriculum/danishExpansion')) return 'curriculum-da-exp';
@@ -176,6 +180,8 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/curriculum/expansionV9/expV9_ru')) return 'curriculum-v9-ru';
           if (id.includes('/curriculum/expansionV9/expV9_ja')) return 'curriculum-v9-ja';
           if (id.includes('/curriculum/expansionV9/expV9_zh')) return 'curriculum-v9-zh';
+          if (id.includes('/curriculum/expansionV9/expV9_ar_part1')) return 'curriculum-v9-ar-part1';
+          if (id.includes('/curriculum/expansionV9/expV9_ar_part2')) return 'curriculum-v9-ar-part2';
           if (id.includes('/curriculum/expansionV9/expV9_ar')) return 'curriculum-v9-ar';
           if (id.includes('/curriculum/expansionV9/expV9_nl')) return 'curriculum-v9-nl';
           if (id.includes('/curriculum/expansionV9/expV9_af')) return 'curriculum-v9-af';
@@ -222,6 +228,21 @@ export default defineConfig(({ command }) => ({
           if (id.includes('TutorScenariosV4') || id.includes('ScenariosV4')) {
             return 'tutor-scenarios-v4';
           }
+          if (
+            id.includes('/data/tutorScenariosAr') ||
+            id.includes('/data/tutorScenariosNl') ||
+            id.includes('/data/tutorScenariosAf') ||
+            id.includes('/data/tutorScenariosSv')
+          ) {
+            return 'tutor-scenarios-ext';
+          }
+          if (
+            id.includes('/data/tutorScenariosRu') ||
+            id.includes('/data/tutorScenariosJa') ||
+            id.includes('/data/tutorScenariosZh')
+          ) {
+            return 'tutor-scenarios-scripts';
+          }
           if (id.includes('/data/tutorScenarios')) return 'tutor-scenarios-core';
           if (id.includes('/data/placement/')) {
             return 'placement-bank';
@@ -231,6 +252,10 @@ export default defineConfig(({ command }) => ({
           }
           if (id.includes('/utils/japaneseKana')) return 'japanese-kana';
           if (id.includes('/data/visualConcepts')) return 'visual-concepts';
+          if (id.includes('/data/specializedTracks/tracks_')) {
+            const m = id.match(/tracks_([a-z]{2})\.ts/);
+            if (m) return `specialized-tracks-${m[1]}`;
+          }
           if (id.includes('/data/specializedTracks')) return 'specialized-tracks';
           return undefined;
         },

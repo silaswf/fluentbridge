@@ -1,7 +1,7 @@
 /**
  * @file src/utils/aiTutorEngine.ts
  * @description Utilitário aiTutorEngine da camada de lógica do FluentBridge.
- * @exports TutorReplyResult, generateDynamicUnitScenario, generateCustomAIScenario, generateDynamicOpeningVariation, generateTutorReply
+ * @exports TutorReplyResult, generateDynamicUnitScenario, generateCustomAIScenario, generateDynamicOpeningVariation, generateTutorReply, parseSseGeminiChunk, extractPartialReplyEnFromJsonStream
  */
 import {
   CLOUD_GEMINI_PROXY_TOKEN,
@@ -521,6 +521,139 @@ function buildMultiLangLocalFallbackTurn(
   };
 }
 
+export function parseSseGeminiChunk(line: string): string {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('data:')) return '';
+  const jsonStr = trimmed.slice(5).trim();
+  if (!jsonStr || jsonStr === '[DONE]') return '';
+  try {
+    const parsed = JSON.parse(jsonStr) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    };
+    return parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function extractPartialReplyEnFromJsonStream(rawBuffer: string): string | null {
+  const keyMatch = /"replyEn"\s*:\s*"/.exec(rawBuffer);
+  if (!keyMatch) return null;
+  let i = keyMatch.index + keyMatch[0].length;
+  let out = '';
+  while (i < rawBuffer.length) {
+    const ch = rawBuffer[i];
+    if (ch === '\\') {
+      if (i + 1 >= rawBuffer.length) break;
+      const next = rawBuffer[i + 1];
+      if (next === 'n') out += '\n';
+      else if (next === 'r') out += '\r';
+      else if (next === 't') out += '\t';
+      else out += next;
+      i += 2;
+      continue;
+    }
+    if (ch === '"') break;
+    out += ch;
+    i++;
+  }
+  return out.length > 0 ? out : null;
+}
+
+async function callGeminiJsonStream<T>(
+  prompt: string,
+  apiKey: string | undefined,
+  onDeltaText?: (accumulatedRaw: string) => void,
+): Promise<T | null> {
+  const cleanKey = (apiKey ?? '').trim();
+  const useCloudProxy =
+    cleanKey === CLOUD_GEMINI_PROXY_TOKEN || cleanKey.length === 0;
+  if (!useCloudProxy || DEFAULT_BACKEND_API_URL.trim().length === 0) {
+    return callGeminiJson<T>(prompt, apiKey);
+  }
+
+  const streamEndpoint = `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/gemini-tutor?stream=1`;
+  const bodyPayload = {
+    stream: true,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.85,
+      responseMimeType: 'application/json',
+    },
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 18_000);
+
+  try {
+    let token: string | null = null;
+    try {
+      token = await getSupabaseAccessToken();
+    } catch {
+      token = null;
+    }
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(streamEndpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(bodyPayload),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      return callGeminiJson<T>(prompt, apiKey);
+    }
+
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('text/event-stream') || !res.body) {
+      const data = (await res.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      return rawJson ? (JSON.parse(rawJson) as T) : null;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let sseBuffer = '';
+    let accumulatedJson = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      sseBuffer += decoder.decode(value, { stream: true });
+      const lines = sseBuffer.split(/\r?\n/);
+      sseBuffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const piece = parseSseGeminiChunk(line);
+        if (piece) {
+          accumulatedJson += piece;
+          onDeltaText?.(accumulatedJson);
+        }
+      }
+    }
+
+    if (sseBuffer.trim()) {
+      const piece = parseSseGeminiChunk(sseBuffer);
+      if (piece) {
+        accumulatedJson += piece;
+        onDeltaText?.(accumulatedJson);
+      }
+    }
+
+    if (!accumulatedJson.trim()) {
+      return callGeminiJson<T>(prompt, apiKey);
+    }
+    return JSON.parse(accumulatedJson) as T;
+  } catch {
+    return callGeminiJson<T>(prompt, apiKey);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function callGeminiJson<T>(
   prompt: string,
   apiKey?: string,
@@ -861,8 +994,9 @@ export async function generateTutorReply(params: {
   userText: string;
   geminiApiKey?: string;
   pedagogicalMemory?: string;
+  onPartialReply?: (partialText: string) => void;
 }): Promise<TutorReplyResult> {
-  const { scenario, history, userText, geminiApiKey, pedagogicalMemory } = params;
+  const { scenario, history, userText, geminiApiKey, pedagogicalMemory, onPartialReply } = params;
   const lang = scenario.languageCode ?? 'en';
   const targetLangName = LANG_NAME_EN[lang];
   const immersion = isImmersionLevel(scenario.level);
@@ -902,13 +1036,24 @@ Respond ONLY with valid JSON:
   "suggestions": ["3 varied, natural ${targetLangName} reply options the student could say next"]
 }`;
 
-    const parsed = await callGeminiJson<{
-      replyEn?: string;
-      replyPt?: string;
-      feedbackPt?: string;
-      correctedEn?: string | null;
-      suggestions?: string[];
-    }>(prompt, geminiApiKey);
+    const parsed = onPartialReply
+      ? await callGeminiJsonStream<{
+          replyEn?: string;
+          replyPt?: string;
+          feedbackPt?: string;
+          correctedEn?: string | null;
+          suggestions?: string[];
+        }>(prompt, geminiApiKey, (acc) => {
+          const partial = extractPartialReplyEnFromJsonStream(acc);
+          if (partial) onPartialReply(partial);
+        })
+      : await callGeminiJson<{
+          replyEn?: string;
+          replyPt?: string;
+          feedbackPt?: string;
+          correctedEn?: string | null;
+          suggestions?: string[];
+        }>(prompt, geminiApiKey);
 
     if (parsed?.replyEn && parsed?.replyPt) {
       return {

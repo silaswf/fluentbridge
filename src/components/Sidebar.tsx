@@ -614,10 +614,10 @@ export function Sidebar({
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="safe-pt-3 sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-3 pb-2.5 backdrop-blur-sm lg:hidden">
-        <div className="flex items-center gap-2">
+      <header className="safe-pt-3 sticky top-0 z-30 flex min-w-0 items-center justify-between gap-1.5 overflow-x-hidden border-b border-slate-200/80 bg-white/95 px-2.5 pb-2.5 backdrop-blur-sm sm:px-3 lg:hidden">
+        <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold text-white"
+            className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold text-white min-[380px]:flex sm:h-8 sm:w-8 sm:text-xs"
             style={{ backgroundColor: user.avatarColor }}
           >
             {user.name.slice(0, 2).toUpperCase()}
@@ -625,7 +625,7 @@ export function Sidebar({
           <select
             value={activeCourse.code}
             onChange={(e) => onChangeLanguage(e.target.value as LanguageCode)}
-            className="max-w-[122px] min-w-0 truncate rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-800"
+            className="max-w-[108px] min-w-0 truncate rounded-lg border border-slate-200 bg-slate-50 px-1.5 py-1 text-xs font-bold text-slate-800 sm:max-w-[122px] sm:px-2"
             aria-label="Selecionar idioma"
           >
             {LANGUAGE_COURSES.map((c) => {
@@ -639,21 +639,21 @@ export function Sidebar({
           </select>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           {activeDialectObj && (
             <button
               type="button"
               onClick={cycleMobileDialect}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-1.5 py-1 text-[11px] font-semibold text-slate-700 sm:px-2"
             >
               {activeDialectObj.flag}
             </button>
           )}
-          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-1 text-[11px] font-bold text-orange-600">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-1.5 py-1 text-[10px] font-bold text-orange-600 sm:gap-1 sm:px-2 sm:text-[11px]">
             <Flame className="h-3 w-3" />
             {user.streakDays}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-700">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 px-1.5 py-1 text-[10px] font-bold text-blue-700 sm:gap-1 sm:px-2 sm:text-[11px]">
             <Zap className="h-3 w-3" />
             {user.xp}
           </span>

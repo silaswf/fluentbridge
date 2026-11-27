@@ -148,6 +148,7 @@ export function AITutor({
     null,
   );
   const [messages, setMessages] = useState<TutorMessage[]>([]);
+  const [streamingReplyText, setStreamingReplyText] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showTranslations, setShowTranslations] = useState<Record<string, boolean>>({});
@@ -249,6 +250,7 @@ export function AITutor({
 
     setInput('');
     setVoiceError('');
+    setStreamingReplyText('');
     setIsSending(true);
 
     const studentMsgId = `msg-stu-${Date.now()}`;
@@ -269,8 +271,10 @@ export function AITutor({
       userText: text,
       geminiApiKey,
       pedagogicalMemory,
+      onPartialReply: (partial) => setStreamingReplyText(partial),
     });
 
+    setStreamingReplyText('');
     setUsedGeminiSession(result.usedGemini);
 
     const tutorMsg: TutorMessage = {
@@ -1081,7 +1085,21 @@ export function AITutor({
           );
         })}
 
-        {isSending && (
+        {isSending && streamingReplyText && (
+          <div
+            data-testid="ai-tutor-streaming-bubble"
+            className="flex flex-col items-start"
+          >
+            <div className="max-w-[88%] rounded-2xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-slate-900 shadow-2xs sm:max-w-[78%]">
+              <p className="text-sm leading-relaxed font-medium">
+                {streamingReplyText}
+                <span className="ml-1 inline-block h-3.5 w-1.5 animate-pulse bg-blue-600 align-middle" />
+              </p>
+            </div>
+          </div>
+        )}
+
+        {isSending && !streamingReplyText && (
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
             <Bot className="h-4 w-4 animate-bounce text-blue-600" />
             <span>
