@@ -31,10 +31,19 @@ import {
 } from '../config/appConfig';
 import type {
   BillingConfig,
+  ClassGroup,
   PlatformState,
+  SchoolTenant,
   SubscriptionPlanId,
   UserProfile,
 } from '../types/learning';
+import {
+  DEFAULT_SCHOOL_ID,
+  getEffectiveSchool,
+  getSchoolClasses,
+  getSchoolTeachers,
+  resolveUserSchoolId,
+} from '../utils/tenantEngine';
 import {
   DEFAULT_BILLING_CONFIG,
   fetchBillingPlansStatus,
@@ -63,6 +72,20 @@ import { ConfirmDialog } from './ConfirmDialog';
 
 interface AdminPanelProps {
   state: PlatformState;
+  allUsersCount?: number;
+  schools?: SchoolTenant[];
+  classesAll?: ClassGroup[];
+  usersAll?: UserProfile[];
+  adminSchoolFilter?: string;
+  onChangeAdminSchoolFilter?: (schoolId: string) => void;
+  onCreateSchool?: (payload: {
+    name: string;
+    inviteCode?: string;
+    ownerEmail?: string;
+    primaryColor?: string;
+  }) => void;
+  onToggleSchoolStatus?: (schoolId: string) => void;
+  onAllocateUserSchool?: (userId: string, targetSchoolId: string) => void;
   currentUser: UserProfile;
   totalBuiltinTopicsCount: number;
   autoSyncStatus?: {
@@ -90,6 +113,14 @@ interface AdminPanelProps {
 
 export function AdminPanel({
   state,
+  schools = [],
+  classesAll,
+  usersAll,
+  adminSchoolFilter = 'ALL',
+  onChangeAdminSchoolFilter,
+  onCreateSchool,
+  onToggleSchoolStatus,
+  onAllocateUserSchool,
   currentUser,
   totalBuiltinTopicsCount,
   autoSyncStatus,
@@ -166,6 +197,9 @@ export function AdminPanel({
   );
   const [pwDraftByUser, setPwDraftByUser] = useState<Record<string, string>>({});
   const [inviteDraftByTeacher, setInviteDraftByTeacher] = useState<Record<string, string>>({});
+  const [newSchoolName, setNewSchoolName] = useState('');
+  const [newSchoolOwnerEmail, setNewSchoolOwnerEmail] = useState('');
+  const [copiedSchoolId, setCopiedSchoolId] = useState<string | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<{
     title: string;
     description: string;
@@ -288,6 +322,177 @@ export function AdminPanel({
           <p className="text-xs font-semibold text-slate-500">Submissões</p>
         </div>
       </div>
+
+      {/* Escolas & Multi-Tenancy (Isolamento por Tenant) */}
+      <section
+        data-testid="admin-schools-panel"
+        className="rounded-3xl border border-blue-200 bg-white p-6 shadow-xs space-y-4"
+      >
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
+              <ShieldCheck className="h-5 w-5 text-blue-600" />
+              <span>Escolas &amp; Multi-Tenancy (Isolamento por Tenant)</span>
+            </h2>
+            <p className="text-xs text-slate-500">
+              Cada escola possui dados 100% isolados (usuários, turmas, professores, comunidade e RLS Supabase). Filtre ou aloque alunos e professores em 1 clique.
+            </p>
+          </div>
+          {onChangeAdminSchoolFilter && (
+            <select
+              value={adminSchoolFilter}
+              onChange={(e) => onChangeAdminSchoolFilter(e.target.value)}
+              aria-label="Filtrar painel por escola"
+              className="rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs font-bold text-blue-950"
+            >
+              <option value="ALL">Todas as escolas ({schools.length})</option>
+              {schools.map((sc) => (
+                <option key={sc.id} value={sc.id}>
+                  {sc.name} ({sc.status === 'active' ? 'Ativa' : 'Suspensa'})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {schools.map((sc) => {
+            const allUsers = usersAll ?? state.users;
+            const allClasses = classesAll ?? state.classes;
+            const scStudents = allUsers.filter(
+              (u) => u.role === 'student' && resolveUserSchoolId(u) === sc.id,
+            ).length;
+            const scTeachers = allUsers.filter(
+              (u) => u.role === 'teacher' && resolveUserSchoolId(u) === sc.id,
+            ).length;
+            const scClasses = allClasses.filter(
+              (c) => (c.schoolId || DEFAULT_SCHOOL_ID) === sc.id,
+            ).length;
+            const isMain = sc.id === DEFAULT_SCHOOL_ID;
+            return (
+              <div
+                key={sc.id}
+                className={`rounded-2xl border p-4 text-xs ${
+                  sc.status === 'suspended'
+                    ? 'border-rose-200 bg-rose-50/60'
+                    : 'border-slate-200 bg-slate-50/70'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-display text-sm font-bold text-slate-900">
+                      {sc.name}
+                    </p>
+                    <p className="font-mono text-[11px] text-slate-500">
+                      ?escola={sc.slug} · {sc.inviteCode}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      sc.status === 'active'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {sc.status === 'active' ? 'Ativa' : 'Suspensa'}
+                  </span>
+                </div>
+                <p className="mt-2 font-mono text-[11px] text-slate-600">
+                  {scStudents} aluno(s) · {scTeachers} prof(s) · {scClasses} turma(s)
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const portalUrl =
+                        typeof window !== 'undefined'
+                          ? `${window.location.origin}/?escola=${sc.slug}`
+                          : `/?escola=${sc.slug}`;
+                      void navigator.clipboard?.writeText(portalUrl);
+                      setCopiedSchoolId(sc.id);
+                      window.setTimeout(() => setCopiedSchoolId(null), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  >
+                    {copiedSchoolId === sc.id ? (
+                      <Check className="h-3 w-3 text-emerald-600" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                    <span>{copiedSchoolId === sc.id ? 'Link copiado' : 'Copiar link'}</span>
+                  </button>
+                  {!isMain && onToggleSchoolStatus && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPendingConfirm({
+                          tone: sc.status === 'active' ? 'danger' : 'primary',
+                          title:
+                            sc.status === 'active'
+                              ? `Suspender escola "${sc.name}"?`
+                              : `Reativar escola "${sc.name}"?`,
+                          description:
+                            sc.status === 'active'
+                              ? 'Alunos e professores desta escola não conseguirão fazer login até a reativação.'
+                              : 'Todos os alunos e professores da escola poderão acessar normalmente.',
+                          confirmLabel:
+                            sc.status === 'active' ? 'Suspender escola' : 'Reativar escola',
+                          action: () => onToggleSchoolStatus(sc.id),
+                        })
+                      }
+                      className={`rounded-lg px-2.5 py-1 text-[11px] font-bold cursor-pointer ${
+                        sc.status === 'active'
+                          ? 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                      }`}
+                    >
+                      {sc.status === 'active' ? 'Suspender' : 'Reativar'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {onCreateSchool && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!newSchoolName.trim()) return;
+              onCreateSchool({
+                name: newSchoolName.trim(),
+                ownerEmail: newSchoolOwnerEmail.trim() || undefined,
+              });
+              setNewSchoolName('');
+              setNewSchoolOwnerEmail('');
+            }}
+            className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 sm:flex-row sm:items-center"
+          >
+            <input
+              type="text"
+              required
+              value={newSchoolName}
+              onChange={(e) => setNewSchoolName(e.target.value)}
+              placeholder="Nome da nova escola (ex: Idiomas Alpha)..."
+              className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+            />
+            <input
+              type="email"
+              value={newSchoolOwnerEmail}
+              onChange={(e) => setNewSchoolOwnerEmail(e.target.value)}
+              placeholder="E-mail do coordenador (opcional)"
+              className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+            />
+            <button
+              type="submit"
+              className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+            >
+              + Nova Escola
+            </button>
+          </form>
+        )}
+      </section>
 
       {/* Exclusive Teacher Authorization Code + Cloud/Voice Diagnostics */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -566,19 +771,54 @@ export function AdminPanel({
                       )}
                     </div>
                     <p className="truncate text-xs text-slate-500">
-                      {u.email} · {u.xp} XP · {u.completedTopicIds.length} unidades
+                      {u.email} · {u.xp} XP · {u.completedTopicIds.length} unidades ·{' '}
+                      <strong className="text-slate-700">
+                        {getEffectiveSchool(schools, resolveUserSchoolId(u), state.schoolName).name}
+                      </strong>
                     </p>
                   </div>
                 </div>
 
                 {!isSelfMaster ? (
                   <div className="flex flex-wrap items-center gap-2">
+                    {onAllocateUserSchool && schools.length > 0 && (
+                      <select
+                        value={resolveUserSchoolId(u)}
+                        onChange={(e) => {
+                          const targetSchoolId = e.target.value;
+                          if (targetSchoolId === resolveUserSchoolId(u)) return;
+                          const targetSchoolName = getEffectiveSchool(
+                            schools,
+                            targetSchoolId,
+                            state.schoolName,
+                          ).name;
+                          setPendingConfirm({
+                            tone: 'warning',
+                            title: `Mover ${u.name} para "${targetSchoolName}"?`,
+                            description:
+                              'O usuário passará a enxergar apenas dados desta escola. Vínculos anteriores com professor ou turma de outra escola serão removidos automaticamente.',
+                            confirmLabel: 'Confirmar alocação',
+                            action: () => onAllocateUserSchool(u.id, targetSchoolId),
+                          });
+                        }}
+                        className="rounded-xl border border-blue-200 bg-blue-50/70 px-2.5 py-1.5 text-xs font-semibold text-blue-950"
+                        aria-label={`Escola de ${u.name}`}
+                      >
+                        {schools.map((sc) => (
+                          <option key={sc.id} value={sc.id}>
+                            Escola: {sc.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
                     {u.role === 'student' && (
                       <select
                         value={u.assignedTeacherId ?? ''}
                         onChange={(e) => {
                           const nextTeacherId = e.target.value;
-                          const nextTeacherObj = state.users.find(
+                          const allUsers = usersAll ?? state.users;
+                          const nextTeacherObj = allUsers.find(
                             (t) => t.id === nextTeacherId,
                           );
                           const nextTeacherName = nextTeacherObj
@@ -611,13 +851,11 @@ export function AdminPanel({
                         aria-label={`Professor responsável de ${u.name}`}
                       >
                         <option value="">Sem professor (VIP)</option>
-                        {state.users
-                          .filter((t) => t.role === 'teacher')
-                          .map((t) => (
-                            <option key={t.id} value={t.id}>
-                              Prof. {getTeacherDisplayName(t, state.teacherName)}
-                            </option>
-                          ))}
+                        {getSchoolTeachers(usersAll ?? state.users, resolveUserSchoolId(u)).map((t) => (
+                          <option key={t.id} value={t.id}>
+                            Prof. {getTeacherDisplayName(t, state.teacherName)}
+                          </option>
+                        ))}
                       </select>
                     )}
 
@@ -661,7 +899,7 @@ export function AdminPanel({
                       aria-label={`Turma de ${u.name}`}
                     >
                       <option value="">Sem turma</option>
-                      {state.classes.map((c) => (
+                      {getSchoolClasses(classesAll ?? state.classes, resolveUserSchoolId(u)).map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>

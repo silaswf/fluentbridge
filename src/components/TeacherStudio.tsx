@@ -91,6 +91,7 @@ interface TeacherStudioProps {
   onDeleteUser: (userId: string) => void;
   onLinkStudentToTeacher?: (studentId: string, teacherId: string) => void;
   onUnlinkStudentFromTeacher?: (studentId: string) => void;
+  onReassignStudentTeacher?: (studentId: string, newTeacherId: string | undefined) => void;
   onCreateAssignment?: (payload: {
     title: string;
     description: string;
@@ -139,6 +140,7 @@ export function TeacherStudio({
   onDeleteUser,
   onLinkStudentToTeacher,
   onUnlinkStudentFromTeacher,
+  onReassignStudentTeacher,
   onCreateAssignment,
   onDeleteAssignment,
 }: TeacherStudioProps) {
@@ -812,10 +814,12 @@ export function TeacherStudio({
             <div className="lg:col-span-12">
               <VipStudentsPanel
                 currentUser={currentUser}
+                schoolName={state.schoolName}
                 users={state.users}
                 isMaster={isMaster}
                 onLinkStudentToTeacher={onLinkStudentToTeacher}
                 onUnlinkStudentFromTeacher={onUnlinkStudentFromTeacher}
+                onReassignStudentTeacher={onReassignStudentTeacher}
                 onCreateVipAssignment={onCreateAssignment}
               />
             </div>

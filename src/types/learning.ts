@@ -289,6 +289,7 @@ export type LessonStep =
 
 export interface Topic {
   id: string;
+  schoolId?: string;
   languageCode?: LanguageCode;
   titlePt: string;
   titleEn: string;
@@ -336,6 +337,7 @@ export interface PronunciationRubric {
 
 export interface StudentSubmission {
   id: string;
+  schoolId?: string;
   languageCode?: LanguageCode;
   type: 'writing' | 'speaking';
   studentId: string;
@@ -365,6 +367,7 @@ export interface StudentSubmission {
 
 export interface ClassGroup {
   id: string;
+  schoolId?: string;
   languageCode?: LanguageCode;
   teacherId?: string;
   name: string;
@@ -377,6 +380,7 @@ export interface ClassGroup {
 
 export interface CertificateRecord {
   id: string;
+  schoolId?: string;
   languageCode?: LanguageCode;
   level: CEFRLevel;
   studentId: string;
@@ -398,6 +402,7 @@ export interface DailyQuestsProgress {
 
 export interface TeacherAssignment {
   id: string;
+  schoolId?: string;
   title: string;
   description: string;
   classId?: string;
@@ -468,6 +473,7 @@ export interface CommunityReply {
 
 export interface CommunityPost {
   id: string;
+  schoolId?: string;
   languageCode: LanguageCode;
   authorId: string;
   authorName: string;
@@ -490,6 +496,7 @@ export type LearningGoalType = 'travel' | 'career' | 'exam' | 'abroad' | 'cultur
 
 export interface LiveSessionRecord {
   id: string;
+  schoolId?: string;
   languageCode: LanguageCode;
   teacherId: string;
   teacherName: string;
@@ -539,14 +546,27 @@ export interface BillingConfig {
   updatedAt?: string;
 }
 
+export interface SchoolTenant {
+  id: string;
+  slug: string;
+  name: string;
+  inviteCode: string;
+  ownerEmail?: string;
+  primaryColor?: string;
+  status: 'active' | 'suspended';
+  createdAt: string;
+}
+
 export interface UserProfile {
   id: string;
+  schoolId?: string;
   name: string;
   teacherDisplayName?: string;
   email: string;
   password: string;
   role: UserRole;
   isMasterAdmin?: boolean;
+  isSchoolAdmin?: boolean;
   blocked?: boolean;
   blockedReason?: string;
   classId?: string;
@@ -600,6 +620,7 @@ export interface CloudConfig {
 
 export interface PlatformState {
   schoolName: string;
+  schools?: SchoolTenant[];
   teacherName: string;
   teacherAccessCode?: string;
   currentUserId: string | null;

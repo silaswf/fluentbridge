@@ -14,10 +14,12 @@ import {
   Users,
 } from 'lucide-react';
 import type { LanguageCode, UserProfile } from '../../types/learning';
+import { getTeacherDisplayName } from '../../utils/teacherDisplay';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 interface VipStudentsPanelProps {
   currentUser: UserProfile;
+  schoolName?: string;
   users: UserProfile[];
   isMaster: boolean;
   onLinkStudentToTeacher: (studentId: string, teacherId: string, mode: 'vip' | 'class') => void;
@@ -25,6 +27,7 @@ interface VipStudentsPanelProps {
     studentId: string,
     initiatedBy: 'teacher' | 'admin' | 'student',
   ) => void;
+  onReassignStudentTeacher?: (studentId: string, newTeacherId: string | undefined) => void;
   onCreateVipAssignment?: (payload: {
     title: string;
     description: string;
@@ -36,10 +39,12 @@ interface VipStudentsPanelProps {
 
 export function VipStudentsPanel({
   currentUser,
+  schoolName,
   users,
   isMaster,
   onLinkStudentToTeacher,
   onUnlinkStudentFromTeacher,
+  onReassignStudentTeacher,
   onCreateVipAssignment,
 }: VipStudentsPanelProps) {
   const [copiedCode, setCopiedCode] = useState(false);
@@ -52,6 +57,7 @@ export function VipStudentsPanel({
   const [pendingAction, setPendingAction] = useState<
     | { type: 'unlink'; student: UserProfile }
     | { type: 'link'; student: UserProfile }
+    | { type: 'reassign'; student: UserProfile; targetTeacherId: string; targetTeacherName: string }
     | null
   >(null);
 
@@ -97,9 +103,14 @@ export function VipStudentsPanel({
     <div className="rounded-3xl border border-indigo-200/80 bg-white p-6 shadow-xs space-y-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="flex items-center gap-2 font-display text-lg font-extrabold text-slate-900">
+          <h3 className="flex flex-wrap items-center gap-2 font-display text-lg font-extrabold text-slate-900">
             <Crown className="h-5 w-5 text-amber-500" />
             <span>Alunos VIP / Individuais & Vinculação Docente</span>
+            {schoolName && (
+              <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700">
+                {schoolName}
+              </span>
+            )}
           </h3>
           <p className="mt-0.5 text-xs text-slate-500">
             Compartilhe seu código de professor para alunos individuais (VIP) ou gerencie seus alunos vinculados com confirmação segura.
@@ -222,7 +233,33 @@ export function VipStudentsPanel({
                     <strong>{assignedTeacher?.name ?? 'Nenhum vinculado'}</strong>
                   </span>
 
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {onReassignStudentTeacher && teachers.length >= 2 && (
+                      <select
+                        value={stu.assignedTeacherId ?? ''}
+                        onChange={(e) => {
+                          const nextId = e.target.value;
+                          if (!nextId || nextId === stu.assignedTeacherId) return;
+                          const targetT = teachers.find((t) => t.id === nextId);
+                          if (!targetT) return;
+                          setPendingAction({
+                            type: 'reassign',
+                            student: stu,
+                            targetTeacherId: targetT.id,
+                            targetTeacherName: getTeacherDisplayName(targetT),
+                          });
+                        }}
+                        aria-label={`Trocar professor de ${stu.name}`}
+                        className="rounded-lg border border-indigo-200 bg-white px-2 py-1 text-[11px] font-semibold text-indigo-900"
+                      >
+                        <option value="">Trocar professor...</option>
+                        {teachers.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            Prof. {getTeacherDisplayName(t)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     {!isMine && (
                       <button
                         type="button"
@@ -327,24 +364,30 @@ export function VipStudentsPanel({
         title={
           pendingAction?.type === 'unlink'
             ? `Remover ${pendingAction.student.name} da vinculação?`
-            : `Vincular ${pendingAction?.student.name ?? ''} como seu aluno VIP?`
+            : pendingAction?.type === 'reassign'
+              ? `Transferir ${pendingAction.student.name} para ${pendingAction.targetTeacherName}?`
+              : `Vincular ${pendingAction?.student.name ?? ''} como seu aluno VIP?`
         }
         description={
           pendingAction?.type === 'unlink'
             ? 'O aluno perderá o vínculo com você. No próximo login, ele será perguntado se deseja se vincular a outro professor ou seguir sem atribuição.'
-            : 'Este aluno passará a enviar Speaking, Writing e receber tarefas VIP diretamente com você.'
+            : pendingAction?.type === 'reassign'
+              ? `O aluno continuará na mesma escola (${schoolName ?? 'escola atual'}) com todo o XP, histórico e certificados preservados, passando a responder ao(à) Prof. ${pendingAction.targetTeacherName}.`
+              : 'Este aluno passará a enviar Speaking, Writing e receber tarefas VIP diretamente com você.'
         }
         warningBox={
           pendingAction?.type === 'unlink'
             ? 'Caso o aluno opte por ficar sem professor, atividades que dependem de validação docente (envio de áudio/redação e tarefas VIP) ficarão restritas até uma nova vinculação.'
-            : pendingAction?.student.assignedTeacherId
+            : pendingAction?.type === 'link' && pendingAction?.student.assignedTeacherId
               ? 'Atenção: este aluno já possui outro professor vinculado e será transferido para você.'
               : undefined
         }
         confirmLabel={
           pendingAction?.type === 'unlink'
             ? 'Sim, desvincular aluno'
-            : 'Sim, vincular como VIP'
+            : pendingAction?.type === 'reassign'
+              ? 'Confirmar troca de professor'
+              : 'Sim, vincular como VIP'
         }
         onCancel={() => setPendingAction(null)}
         onConfirm={() => {
@@ -353,6 +396,11 @@ export function VipStudentsPanel({
             onUnlinkStudentFromTeacher(
               pendingAction.student.id,
               isMaster ? 'admin' : 'teacher',
+            );
+          } else if (pendingAction.type === 'reassign') {
+            onReassignStudentTeacher?.(
+              pendingAction.student.id,
+              pendingAction.targetTeacherId,
             );
           } else {
             onLinkStudentToTeacher(

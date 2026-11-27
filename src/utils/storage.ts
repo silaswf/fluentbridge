@@ -5,6 +5,7 @@
  */
 import { isMasterAdminEmail } from '../config/appConfig';
 import type { LanguageCode, PlatformState, UserProfile, VocabCard } from '../types/learning';
+import { DEFAULT_SCHOOL_ID, ensureSchoolsList } from './tenantEngine';
 
 export const PLATFORM_STORAGE_KEY = 'fluentbridge_platform_v3';
 
@@ -126,6 +127,7 @@ export function normalizePlatformState(
               : undefined;
           return {
             ...u,
+            schoolId: u.schoolId?.trim() || DEFAULT_SCHOOL_ID,
             name:
               isMasterAdminEmail(u.email) &&
               (u.name === 'Silas (Admin Mestre)' || !u.name.trim())
@@ -153,6 +155,11 @@ export function normalizePlatformState(
             nl: 'nl-NL',
             af: 'af-ZA',
             sv: 'sv-SE',
+            tr: 'tr-TR',
+            da: 'da-DK',
+            nb: 'nb-NO',
+            he: 'he-IL',
+            pt: 'pt-BR',
             ...(u.dialectByLanguage ?? {}),
           },
           completedTopicIds: Array.isArray(u.completedTopicIds)
@@ -213,30 +220,60 @@ export function normalizePlatformState(
       ? defaults.teacherName
       : raw.teacherName;
 
+  const resolvedSchoolName = raw.schoolName ?? defaults.schoolName;
+  const resolvedSchools = ensureSchoolsList(raw.schools, resolvedSchoolName);
+  const rawClasses =
+    Array.isArray(raw.classes) && raw.classes.length > 0
+      ? raw.classes
+      : defaults.classes;
+
   return {
-    schoolName: raw.schoolName ?? defaults.schoolName,
+    schoolName: resolvedSchoolName,
+    schools: resolvedSchools,
     teacherName: resolvedTeacherName,
     teacherAccessCode: raw.teacherAccessCode ?? defaults.teacherAccessCode,
     currentUserId:
       raw.currentUserId !== undefined ? raw.currentUserId : defaults.currentUserId,
-    classes:
-      Array.isArray(raw.classes) && raw.classes.length > 0
-        ? raw.classes
-        : defaults.classes,
-    users: mergedUsers,
-    customTopics: Array.isArray(raw.customTopics)
+    classes: rawClasses.map((c) => ({
+      ...c,
+      schoolId: c.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    users: mergedUsers.map((u) => ({
+      ...u,
+      schoolId: u.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    customTopics: (Array.isArray(raw.customTopics)
       ? raw.customTopics
-      : defaults.customTopics,
-    submissions: cleanedSubmissions,
-    assignments: Array.isArray(raw.assignments)
+      : defaults.customTopics
+    ).map((t) => ({
+      ...t,
+      schoolId: t.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    submissions: cleanedSubmissions.map((s) => ({
+      ...s,
+      schoolId: s.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    assignments: (Array.isArray(raw.assignments)
       ? raw.assignments
-      : defaults.assignments ?? [],
-    communityPosts: Array.isArray(raw.communityPosts)
+      : defaults.assignments ?? []
+    ).map((a) => ({
+      ...a,
+      schoolId: a.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    communityPosts: (Array.isArray(raw.communityPosts)
       ? raw.communityPosts
-      : defaults.communityPosts ?? [],
-    liveSessions: Array.isArray(raw.liveSessions)
+      : defaults.communityPosts ?? []
+    ).map((p) => ({
+      ...p,
+      schoolId: p.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
+    liveSessions: (Array.isArray(raw.liveSessions)
       ? raw.liveSessions
-      : defaults.liveSessions ?? [],
+      : defaults.liveSessions ?? []
+    ).map((ls) => ({
+      ...ls,
+      schoolId: ls.schoolId?.trim() || DEFAULT_SCHOOL_ID,
+    })),
     deletedUserIds: Array.isArray(raw.deletedUserIds)
       ? raw.deletedUserIds
       : defaults.deletedUserIds ?? [],

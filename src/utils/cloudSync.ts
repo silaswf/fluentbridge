@@ -17,6 +17,7 @@ import type {
   MistakeEntry,
   PlatformState,
   PronunciationHistoryEntry,
+  SchoolTenant,
   StudentSubmission,
   TeacherAssignment,
   Topic,
@@ -26,6 +27,7 @@ import type {
 } from '../types/learning';
 import { blobToDataUrl } from './audioDb';
 import { compactPlatformStateForStorage } from './storage';
+import { ensureSchoolsList } from './tenantEngine';
 
 export const NATIVE_OAUTH_REDIRECT_URL = 'com.fluentbridge.app://auth-callback';
 
@@ -744,11 +746,28 @@ export function mergePlatformStates(
     }
   }
 
+  // Schools by id (multi-tenancy)
+  const schoolMap = new Map<string, SchoolTenant>();
+  const remoteSchools = Array.isArray(remote.schools) ? remote.schools : [];
+  const orderedSchools =
+    preferSide === 'local'
+      ? [...remoteSchools, ...(local.schools ?? [])]
+      : [...(local.schools ?? []), ...remoteSchools];
+  for (const sc of orderedSchools) {
+    if (!sc?.id) continue;
+    schoolMap.set(sc.id, sc);
+  }
+  const mergedSchools = ensureSchoolsList(
+    Array.from(schoolMap.values()),
+    local.schoolName || remote.schoolName,
+  );
+
   return {
     schoolName:
       preferSide === 'remote' && remote.schoolName
         ? remote.schoolName
         : local.schoolName,
+    schools: mergedSchools,
     teacherName:
       preferSide === 'remote' && remote.teacherName
         ? remote.teacherName

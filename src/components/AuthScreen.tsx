@@ -29,10 +29,17 @@ import {
 } from '../utils/i18n';
 import type {
   ClassGroup,
+  SchoolTenant,
   StudentEnrollmentType,
   UserProfile,
   UserRole,
 } from '../types/learning';
+import {
+  DEFAULT_SCHOOL_ID,
+  findSchoolByInviteCode,
+  resolveEntitySchoolId,
+  resolveUserSchoolId,
+} from '../utils/tenantEngine';
 
 interface AuthScreenProps {
   schoolName: string;
@@ -40,6 +47,8 @@ interface AuthScreenProps {
   teacherAccessCode?: string;
   users: UserProfile[];
   classes: ClassGroup[];
+  schools?: SchoolTenant[];
+  urlDetectedSchool?: SchoolTenant | null;
   cloudConfigured: boolean;
   uiLocale?: UiLocale;
   onChangeUiLocale?: (locale: UiLocale) => void;
@@ -55,6 +64,7 @@ interface AuthScreenProps {
     email: string;
     password: string;
     role: UserRole;
+    schoolId?: string;
     classId?: string;
     assignedTeacherId?: string;
     enrollmentType?: StudentEnrollmentType;
@@ -67,6 +77,8 @@ export function AuthScreen({
   teacherAccessCode,
   users,
   classes,
+  schools,
+  urlDetectedSchool,
   cloudConfigured,
   uiLocale = 'pt',
   onChangeUiLocale,
@@ -87,6 +99,9 @@ export function AuthScreen({
   const [vipTeacherCode, setVipTeacherCode] = useState('');
   const [confirmNoTeacher, setConfirmNoTeacher] = useState(false);
   const [teacherCode, setTeacherCode] = useState('');
+  const [schoolInviteCode, setSchoolInviteCode] = useState(
+    urlDetectedSchool?.inviteCode ?? '',
+  );
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -177,6 +192,18 @@ export function AuthScreen({
     let matchedClassId: string | undefined;
     let matchedTeacherId: string | undefined;
     let resolvedEnrollmentType: StudentEnrollmentType | undefined;
+    let resolvedSchoolId: string | undefined = urlDetectedSchool?.id;
+
+    if (schoolInviteCode.trim()) {
+      const matchedSchool = findSchoolByInviteCode(schools, schoolInviteCode);
+      if (!matchedSchool) {
+        setError(
+          `Código de escola "${schoolInviteCode.trim().toUpperCase()}" não encontrado.`,
+        );
+        return;
+      }
+      resolvedSchoolId = matchedSchool.id;
+    }
 
     if (normalizedRole === 'student') {
       resolvedEnrollmentType = studentLinkMode;
@@ -198,6 +225,7 @@ export function AuthScreen({
         }
         matchedClassId = matched.id;
         matchedTeacherId = matched.teacherId ?? users.find((u) => u.role === 'teacher')?.id;
+        resolvedSchoolId = resolveEntitySchoolId(matched);
       } else if (studentLinkMode === 'vip') {
         const cleanVip = vipTeacherCode.trim().toUpperCase();
         if (!cleanVip) {
@@ -216,6 +244,7 @@ export function AuthScreen({
           return;
         }
         matchedTeacherId = matchedTeacher.id;
+        resolvedSchoolId = resolveUserSchoolId(matchedTeacher);
       } else if (!confirmNoTeacher) {
         setError(
           'Confirme na caixa de seleção que entende as restrições de estudar sem professor vinculado.',
@@ -230,6 +259,7 @@ export function AuthScreen({
       email: email.trim(),
       password,
       role: normalizedRole,
+      schoolId: resolvedSchoolId ?? DEFAULT_SCHOOL_ID,
       classId: matchedClassId,
       assignedTeacherId: matchedTeacherId,
       enrollmentType: resolvedEnrollmentType,
@@ -655,16 +685,43 @@ export function AuthScreen({
               )}
 
               {role === 'teacher' && !isMasterAdminEmail(email) && (
-                <div className="rounded-2xl border border-purple-500/30 bg-purple-950/40 p-3.5">
-                  <label className="text-xs font-bold text-purple-200">
-                    Código de Autorização Docente *
+                <div className="rounded-2xl border border-purple-500/30 bg-purple-950/40 p-3.5 space-y-2.5">
+                  <div>
+                    <label className="text-xs font-bold text-purple-200">
+                      Código de Autorização Docente *
+                    </label>
+                    <input
+                      required
+                      value={teacherCode}
+                      onChange={(e) => setTeacherCode(e.target.value.toUpperCase())}
+                      placeholder="Código de convite docente"
+                      className="mt-2 w-full rounded-xl border border-purple-500/40 bg-slate-900 px-3.5 py-2 font-mono text-sm uppercase text-white placeholder:text-slate-500 focus:border-purple-400 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-purple-200">
+                      Código da Escola (opcional)
+                    </label>
+                    <input
+                      value={schoolInviteCode}
+                      onChange={(e) => setSchoolInviteCode(e.target.value.toUpperCase())}
+                      placeholder="Ex: ESCOLA-FB"
+                      className="mt-1.5 w-full rounded-xl border border-purple-500/30 bg-slate-900 px-3.5 py-2 font-mono text-xs uppercase text-white placeholder:text-slate-500 focus:border-purple-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {role === 'student' && !isMasterAdminEmail(email) && (schools?.length ?? 0) > 1 && (
+                <div>
+                  <label className="text-xs font-bold text-slate-300">
+                    Código da Escola (opcional)
                   </label>
                   <input
-                    required
-                    value={teacherCode}
-                    onChange={(e) => setTeacherCode(e.target.value.toUpperCase())}
-                    placeholder="Código de convite docente"
-                    className="mt-2 w-full rounded-xl border border-purple-500/40 bg-slate-900 px-3.5 py-2 font-mono text-sm uppercase text-white placeholder:text-slate-500 focus:border-purple-400 focus:outline-none"
+                    value={schoolInviteCode}
+                    onChange={(e) => setSchoolInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: ESCOLA-FB (preenchido automático por turma/VIP)"
+                    className="mt-1 w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-3.5 py-2 font-mono text-xs uppercase text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               )}

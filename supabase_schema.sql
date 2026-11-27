@@ -1,5 +1,5 @@
 -- @file supabase_schema.sql
--- Schema SQL completo e idempotente do Supabase (tabelas relacionais, snapshot, RLS, buckets speaking-audios/fb-audio, triggers, Realtime e migrações até v9.2+ para 17 idiomas).
+-- Schema SQL completo e idempotente do Supabase (tabelas relacionais, snapshot, multi-tenancy school_id + RLS, buckets speaking-audios/fb-audio, triggers, Realtime e migrações até v10.0.0 para 17 idiomas).
 -- ============================================================================
 -- FluentBridge Production Database & Storage Schema (Supabase / PostgreSQL)
 -- Execute este script completo no SQL Editor do seu projeto Supabase.
@@ -767,3 +767,155 @@ drop policy if exists "billing_events_admin_read" on public.billing_events;
 create policy "billing_events_admin_read" on public.billing_events
   for select to authenticated
   using (public.is_master_admin());
+
+-- ============================================================================
+-- SEÇÃO 13 (v10.0.0): MULTI-TENANCY ESCOLAR & ISOLAMENTO ESTRITO RLS (school_id)
+-- ============================================================================
+-- Garante que cada escola (tenant) possua dados 100% isolados em nível de banco
+-- de dados (PostgreSQL RLS), permitindo múltiplos professores por escola e
+-- coordenação global exclusiva do Master Admin.
+
+create table if not exists public.schools (
+  id text primary key,
+  slug text unique not null,
+  name text not null,
+  invite_code text unique not null,
+  owner_email text,
+  primary_color text not null default '#116DFF',
+  status text not null default 'active' check (status in ('active','suspended')),
+  created_at timestamptz not null default now()
+);
+
+insert into public.schools (id, slug, name, invite_code, owner_email, primary_color, status)
+values ('school-fluentbridge-main', 'fluentbridge', 'FluentBridge Academy', 'ESCOLA-FB', 'silaswf@gmail.com', '#116DFF', 'active')
+on conflict (id) do nothing;
+
+alter table public.schools enable row level security;
+
+-- Adiciona school_id em todas as tabelas multi-tenant (100% idempotente)
+alter table public.profiles
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+alter table public.profiles
+  add column if not exists is_school_admin boolean not null default false;
+
+alter table public.classes
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.custom_topics
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.submissions
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.assignments
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.certificates
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.community_posts
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+alter table public.live_sessions
+  add column if not exists school_id text not null default 'school-fluentbridge-main' references public.schools(id);
+
+create index if not exists idx_profiles_school_id on public.profiles(school_id);
+create index if not exists idx_classes_school_id on public.classes(school_id);
+create index if not exists idx_submissions_school_id on public.submissions(school_id);
+create index if not exists idx_assignments_school_id on public.assignments(school_id);
+create index if not exists idx_community_posts_school_id on public.community_posts(school_id);
+create index if not exists idx_live_sessions_school_id on public.live_sessions(school_id);
+
+-- Helper SQL: escola atual do usuário autenticado
+create or replace function public.current_user_school_id()
+returns text
+language sql
+security definer
+stable
+as $$
+  select coalesce(
+    (select school_id from public.profiles where id = auth.uid()),
+    'school-fluentbridge-main'
+  );
+$$;
+
+-- Atualiza teaches_student para exigir mesma escola (zero vínculo cross-school)
+create or replace function public.teaches_student(target_student_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = target_student_id
+      and (
+        public.is_master_admin()
+        or (
+          p.school_id = public.current_user_school_id()
+          and (
+            p.assigned_teacher_id = auth.uid()
+            or exists (
+              select 1
+              from public.class_members cm
+              join public.classes c on c.id = cm.class_id
+              where cm.student_id = target_student_id
+                and c.teacher_id = auth.uid()
+                and c.school_id = public.current_user_school_id()
+            )
+          )
+        )
+      )
+  );
+$$;
+
+-- RLS de schools
+drop policy if exists "schools_read_member_or_admin" on public.schools;
+create policy "schools_read_member_or_admin" on public.schools
+  for select to authenticated
+  using (public.is_master_admin() or id = public.current_user_school_id());
+
+drop policy if exists "schools_master_admin_manage" on public.schools;
+create policy "schools_master_admin_manage" on public.schools
+  for all to authenticated
+  using (public.is_master_admin())
+  with check (public.is_master_admin());
+
+-- RLS estrito por escola nas tabelas multi-tenant
+drop policy if exists "profiles_self_select" on public.profiles;
+create policy "profiles_self_select" on public.profiles
+  for select to authenticated
+  using (
+    id = auth.uid()
+    or public.is_master_admin()
+    or (public.is_teacher() and school_id = public.current_user_school_id())
+  );
+
+drop policy if exists "classes_read_all_auth" on public.classes;
+create policy "classes_read_all_auth" on public.classes
+  for select to authenticated
+  using (public.is_master_admin() or school_id = public.current_user_school_id());
+
+drop policy if exists "topics_read_all" on public.custom_topics;
+create policy "topics_read_all" on public.custom_topics
+  for select to authenticated
+  using (public.is_master_admin() or school_id = public.current_user_school_id());
+
+drop policy if exists "community_posts_school_read" on public.community_posts;
+create policy "community_posts_school_read" on public.community_posts
+  for select to authenticated
+  using (public.is_master_admin() or school_id = public.current_user_school_id());
+
+drop policy if exists "community_posts_school_write" on public.community_posts;
+create policy "community_posts_school_write" on public.community_posts
+  for insert to authenticated
+  with check (
+    author_id = auth.uid()
+    and (public.is_master_admin() or school_id = public.current_user_school_id())
+  );
+
+drop policy if exists "live_sessions_school_read" on public.live_sessions;
+create policy "live_sessions_school_read" on public.live_sessions
+  for select to authenticated
+  using (public.is_master_admin() or school_id = public.current_user_school_id());

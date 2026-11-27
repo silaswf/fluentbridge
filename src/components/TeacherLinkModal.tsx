@@ -20,6 +20,7 @@ import { getTeacherDisplayName } from '../utils/teacherDisplay';
 interface TeacherLinkModalProps {
   open: boolean;
   student: UserProfile;
+  schoolName?: string;
   teachers: UserProfile[];
   mandatoryPrompt?: boolean;
   onLinkToTeacher: (teacherId: string) => void;
@@ -30,6 +31,7 @@ interface TeacherLinkModalProps {
 export function TeacherLinkModal({
   open,
   student,
+  schoolName,
   teachers,
   mandatoryPrompt = false,
   onLinkToTeacher,
@@ -94,8 +96,13 @@ export function TeacherLinkModal({
               <p className="mt-0.5 text-xs text-slate-500">
                 {student.unlinkedNoticePending
                   ? 'Sua vinculação anterior foi removida.'
-                  : 'Escolha um professor responsável ou estude de forma independente.'}
+                  : 'Escolha um professor da sua escola (seu XP e progresso são 100% preservados).'}
               </p>
+              {schoolName && (
+                <span className="mt-1.5 inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700">
+                  Escola: {schoolName}
+                </span>
+              )}
             </div>
           </div>
 

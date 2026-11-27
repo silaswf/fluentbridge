@@ -6,6 +6,23 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v10.0.0`] — 2026-11-27
+### Multi-Tenancy Escolar (Isolamento RLS), Troca de Professor na Mesma Escola & Nova Auditoria 360° + Roadmap v10.1–v12.0
+- **Motor de Multi-Tenancy Escolar (`src/utils/tenantEngine.ts`, `src/types/learning.ts`, `storage.ts`, `cloudSync.ts`):**
+  - Introduzida a entidade `SchoolTenant` e o campo `schoolId` em usuários, turmas, submissões, tarefas, tópicos customizados, posts de comunidade, sessões ao vivo e certificados (migração transparente para `school-fluentbridge-main`).
+  - Isolamento absoluto garantido por `scopePlatformStateForUser()`: usuários comuns (alunos e professores) enxergam estritamente dados da própria escola (zero vazamento entre instituições); o **Master Admin** coordena todas as escolas globalmente ou filtra por escola.
+  - Alocação segura (`allocateUserToSchool`) que remove automaticamente vínculos de professor/turma da escola antiga ao transferir um aluno, e troca segura de professor dentro da mesma escola (`reassignStudentTeacherInSchool`) preservando `schoolId`, XP, progresso e certificados.
+- **PostgreSQL RLS Multi-Tenant (`supabase_schema.sql` — Seção 13):**
+  - Tabela `public.schools`, coluna `school_id` indexada em todas as tabelas relacionais, função `public.current_user_school_id()`, atualização de `public.teaches_student()` contra vínculos cross-school e políticas RLS por `school_id`.
+- **Interfaces Multi-Escola (`AdminPanel.tsx`, `VipStudentsPanel.tsx`, `TeacherLinkModal.tsx`, `AuthScreen.tsx`, `App.tsx`):**
+  - Painel **Escolas & Multi-Tenancy** (`admin-schools-panel`) no Admin Mestre com criação de escolas, suspensão/reativação protegida por `ConfirmDialog`, cópia de link (`?escola=<slug>`), filtro global e alocação em 1 clique por usuário com dropdowns de professor/turma escopados à escola do aluno.
+  - Seletor **"Trocar professor na escola"** no `VipStudentsPanel` (quando há 2+ professores na escola), selo da escola no `TeacherLinkModal` e resolução automática de escola via código/turma/VIP ou `?escola=<slug>` no `AuthScreen`.
+- **Nova Auditoria 360° & Roadmap Extenso (`docs/03`, `docs/04`):**
+  - Ciclo `v1.0 → v10.0` finalizado; Auditoria 360° refeita com telemetria real (`327` arquivos / `313.814` LOC / `143` arquivos de código / `44.208` LOC) e novo roadmap detalhado `v10.1 → v12.0`.
+- **Verificação:** `tsc --noEmit` (`0` erros), `vitest run src` (`24/24` suítes / `93/93` testes), `npm run build` (`8.32s`, `0` chunks > 500 kB), `playwright test` (`15/15` jornadas E2E).
+
+---
+
 ## [`v9.4.0`] — 2026-11-26
 ### Estrutura do Motor de Planos & Assinaturas (Modo 100% Gratuito por Padrão)
 - **Motor de Planos & Entitlements (`subscriptionEngine.ts`, `src/types/learning.ts`):**

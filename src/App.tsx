@@ -163,6 +163,19 @@ import {
   savePlatformState,
   verifyPassword,
 } from './utils/storage';
+import {
+  allocateUserToSchool,
+  DEFAULT_SCHOOL_ID,
+  detectSchoolFromUrl,
+  ensureSchoolsList,
+  generateSchoolInviteCode,
+  getEffectiveSchool,
+  getSchoolTeachers,
+  reassignStudentTeacherInSchool,
+  resolveUserSchoolId,
+  scopePlatformStateForUser,
+  slugifySchoolName,
+} from './utils/tenantEngine';
 
 const AVATAR_COLORS = ['#116DFF', '#0D9488', '#D97706', '#7C3AED', '#E11D48'];
 
@@ -225,6 +238,7 @@ export function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
   const [uiLocale, setUiLocale] = useState<UiLocale>(() => loadStoredUiLocale());
   const [ptUiBannerDismissed, setPtUiBannerDismissed] = useState(false);
+  const [adminSchoolFilter, setAdminSchoolFilter] = useState<string>('ALL');
   const [fontScale, setFontScale] = useState<FontScale>(() => loadStoredFontScale());
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
@@ -469,13 +483,43 @@ export function App() {
     )
     : 'en-US';
 
+  const isCurrentUserMaster = Boolean(
+    currentUser &&
+      (currentUser.isMasterAdmin || isMasterAdminEmail(currentUser.email)),
+  );
+
+  const effectiveSchool = useMemo(
+    () =>
+      getEffectiveSchool(
+        state.schools,
+        currentUser?.schoolId,
+        state.schoolName,
+      ),
+    [state.schools, currentUser?.schoolId, state.schoolName],
+  );
+
+  const urlDetectedSchool = useMemo(
+    () => detectSchoolFromUrl(state.schools),
+    [state.schools],
+  );
+
+  const scopedState = useMemo(
+    () =>
+      scopePlatformStateForUser(
+        state,
+        currentUser,
+        isCurrentUserMaster ? adminSchoolFilter : undefined,
+      ),
+    [state, currentUser, isCurrentUserMaster, adminSchoolFilter],
+  );
+
   const courseTopics = useMemo(() => {
     const builtin = loadedCourses[activeLanguage]?.topics ?? [];
-    const custom = state.customTopics.filter(
+    const custom = scopedState.customTopics.filter(
       (t) => (t.languageCode ?? 'en') === activeLanguage,
     );
     return [...builtin, ...custom];
-  }, [loadedCourses, activeLanguage, state.customTopics]);
+  }, [loadedCourses, activeLanguage, scopedState.customTopics]);
 
   const courseVocab = useMemo(() => {
     if (!currentUser) return [];
@@ -514,6 +558,19 @@ export function App() {
 
   const handleLogin = (userId: string) => {
     const target = state.users.find((u) => u.id === userId);
+    if (target && !target.isMasterAdmin && !isMasterAdminEmail(target.email)) {
+      const userSchool = getEffectiveSchool(
+        state.schools,
+        target.schoolId,
+        state.schoolName,
+      );
+      if (userSchool.status === 'suspended') {
+        showToast(
+          `A escola "${userSchool.name}" está temporariamente suspensa. Contate a administração.`,
+        );
+        return;
+      }
+    }
     setState((prev) => ({ ...prev, currentUserId: userId }));
     setPathFilterLevel('ALL');
     setActiveView(target?.role === 'teacher' ? 'teacher' : 'learn');
@@ -524,6 +581,7 @@ export function App() {
     email: string;
     password: string;
     role: UserRole;
+    schoolId?: string;
     classId?: string;
     assignedTeacherId?: string;
     enrollmentType?: StudentEnrollmentType;
@@ -533,6 +591,7 @@ export function App() {
     const id = `user-${Date.now()}`;
     return {
       id,
+      schoolId: payload.schoolId?.trim() || DEFAULT_SCHOOL_ID,
       name: payload.name,
       email: payload.email,
       password: hashPassword(payload.password),
@@ -591,6 +650,7 @@ export function App() {
     email: string;
     password: string;
     role: UserRole;
+    schoolId?: string;
     classId?: string;
     assignedTeacherId?: string;
     enrollmentType?: StudentEnrollmentType;
@@ -644,7 +704,13 @@ export function App() {
       return { ok: true };
     }
 
-    const newUser = buildFreshUserProfile(payload);
+    const newUser = buildFreshUserProfile({
+      ...payload,
+      schoolId:
+        payload.schoolId ||
+        urlDetectedSchool?.id ||
+        DEFAULT_SCHOOL_ID,
+    });
     setState((prev) => ({
       ...prev,
       users: [...prev.users, newUser],
@@ -915,6 +981,7 @@ export function App() {
           type: 'writing',
           studentId: currentUser.id,
           studentName: currentUser.name,
+          schoolId: resolveUserSchoolId(currentUser),
           classId: currentUser.classId,
           teacherId: targetTeacherId,
           topicId: payload.topicId,
@@ -972,6 +1039,7 @@ export function App() {
           type: 'speaking',
           studentId: currentUser.id,
           studentName: currentUser.name,
+          schoolId: resolveUserSchoolId(currentUser),
           classId: currentUser.classId,
           teacherId: targetTeacherId,
           topicId: payload.topicId,
@@ -1208,6 +1276,7 @@ export function App() {
       classes: [
         {
           id: `class-${Date.now()}`,
+          schoolId: resolveUserSchoolId(currentUser),
           languageCode: 'en',
           name: payload.name,
           teacherId: currentUser?.id,
@@ -1257,9 +1326,13 @@ export function App() {
   };
 
   const handleAddCustomTopic = (topic: Topic) => {
+    const stampedTopic: Topic = {
+      ...topic,
+      schoolId: topic.schoolId ?? resolveUserSchoolId(currentUser),
+    };
     setState((prev) => ({
       ...prev,
-      customTopics: [topic, ...prev.customTopics],
+      customTopics: [stampedTopic, ...prev.customTopics],
     }));
     showToast(`Tópico "${topic.titlePt}" publicado na Trilha!`);
   };
@@ -1370,6 +1443,7 @@ export function App() {
   }) => {
     const newAssignment = {
       id: `assign-${Date.now()}`,
+      schoolId: resolveUserSchoolId(currentUser),
       title: payload.title.trim(),
       description: payload.description.trim(),
       classId: payload.classId || undefined,
@@ -1393,23 +1467,96 @@ export function App() {
       (u) => u.id === teacherId && u.role === 'teacher',
     );
     if (!teacher) return;
+    const res = reassignStudentTeacherInSchool(state.users, studentId, teacherId);
+    if (!res.ok) {
+      showToast(res.error ?? 'Não foi possível vincular professor de outra escola.');
+      return;
+    }
     const teacherDisplay = getTeacherDisplayName(teacher, state.teacherName);
     setState((prev) => ({
       ...prev,
-      users: prev.users.map((u) =>
-        u.id === studentId
-          ? {
-            ...u,
-            assignedTeacherId: teacherId,
-            enrollmentType: 'vip',
-            unlinkedNoticePending: false,
-            unlinkedByTeacherName: undefined,
-          }
-          : u,
-      ),
+      users: reassignStudentTeacherInSchool(prev.users, studentId, teacherId).users,
     }));
     setShowTeacherLinkModal(false);
     showToast(`Aluno vinculado ao(à) Prof. ${teacherDisplay}!`);
+  };
+
+  const handleReassignStudentTeacher = (
+    studentId: string,
+    newTeacherId: string | undefined,
+  ) => {
+    const res = reassignStudentTeacherInSchool(state.users, studentId, newTeacherId);
+    if (!res.ok) {
+      showToast(res.error ?? 'Erro ao trocar professor.');
+      return;
+    }
+    setState((prev) => ({
+      ...prev,
+      users: reassignStudentTeacherInSchool(prev.users, studentId, newTeacherId).users,
+    }));
+    const newTeacher = newTeacherId
+      ? state.users.find((u) => u.id === newTeacherId)
+      : undefined;
+    showToast(
+      newTeacher
+        ? `Professor alterado para ${getTeacherDisplayName(newTeacher, state.teacherName)} (escola e XP preservados).`
+        : 'Professor desvinculado mantendo a escola do aluno.',
+    );
+  };
+
+  const handleCreateSchool = (payload: {
+    name: string;
+    inviteCode?: string;
+    ownerEmail?: string;
+    primaryColor?: string;
+  }) => {
+    const cleanName = payload.name.trim();
+    if (!cleanName) return;
+    const schools = ensureSchoolsList(state.schools, state.schoolName);
+    const baseSlug = slugifySchoolName(cleanName);
+    const uniqueSlug = schools.some((s) => s.slug === baseSlug)
+      ? `${baseSlug}-${Math.floor(10 + Math.random() * 89)}`
+      : baseSlug;
+    const inviteCode =
+      payload.inviteCode?.trim().toUpperCase() ||
+      generateSchoolInviteCode(cleanName, uniqueSlug);
+    const newSchool = {
+      id: `school-${Date.now()}`,
+      slug: uniqueSlug,
+      name: cleanName,
+      inviteCode,
+      ownerEmail: payload.ownerEmail?.trim() || undefined,
+      primaryColor: payload.primaryColor || '#116DFF',
+      status: 'active' as const,
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+    setState((prev) => ({
+      ...prev,
+      schools: [...ensureSchoolsList(prev.schools, prev.schoolName), newSchool],
+    }));
+    showToast(`Escola "${cleanName}" criada · Código: ${inviteCode}`);
+  };
+
+  const handleToggleSchoolStatus = (schoolId: string) => {
+    if (schoolId === DEFAULT_SCHOOL_ID) return;
+    setState((prev) => ({
+      ...prev,
+      schools: ensureSchoolsList(prev.schools, prev.schoolName).map((s) =>
+        s.id === schoolId
+          ? { ...s, status: s.status === 'active' ? 'suspended' : 'active' }
+          : s,
+      ),
+    }));
+    showToast('Status da escola atualizado.');
+  };
+
+  const handleAllocateUserSchool = (userId: string, targetSchoolId: string) => {
+    setState((prev) => ({
+      ...prev,
+      users: allocateUserToSchool(prev.users, prev.classes, userId, targetSchoolId),
+    }));
+    const targetSchool = getEffectiveSchool(state.schools, targetSchoolId, state.schoolName);
+    showToast(`Usuário alocado para "${targetSchool.name}".`);
   };
 
   const handleUnlinkStudentFromTeacher = (studentId: string, bySelf = false) => {
@@ -1546,11 +1693,13 @@ export function App() {
     return (
       <>
         <AuthScreen
-          schoolName={state.schoolName}
+          schoolName={urlDetectedSchool?.name ?? state.schoolName}
           teacherName={state.teacherName}
           teacherAccessCode={state.teacherAccessCode}
           users={state.users}
           classes={state.classes}
+          schools={ensureSchoolsList(state.schools, state.schoolName)}
+          urlDetectedSchool={urlDetectedSchool}
           cloudConfigured={isCloudConfigured}
           uiLocale={uiLocale}
           onChangeUiLocale={setUiLocale}
@@ -1705,6 +1854,7 @@ export function App() {
   }) => {
     const newPost: CommunityPost = {
       id: `post-${Date.now()}`,
+      schoolId: resolveUserSchoolId(currentUser),
       languageCode: payload.languageCode,
       authorId: currentUser.id,
       authorName: currentUser.name,
@@ -1868,21 +2018,22 @@ export function App() {
     showToast(msg);
     return msg;
   };
-  const pendingSubmissionsCount = state.submissions.filter(
+  const pendingSubmissionsCount = scopedState.submissions.filter(
     (s) => s.status === 'pending',
   ).length;
 
-  const reviewedForUser = state.submissions.filter(
+  const reviewedForUser = scopedState.submissions.filter(
     (s) =>
       s.status === 'reviewed' &&
       (currentUser.role === 'teacher' || s.studentId === currentUser.id),
   );
 
-  const userClassName = state.classes.find(
+  const userClassName = scopedState.classes.find(
     (c) => c.id === currentUser.classId,
   )?.name;
 
-  const teachersList = state.users.filter((u) => u.role === 'teacher');
+  const mySchoolId = resolveUserSchoolId(currentUser);
+  const teachersList = getSchoolTeachers(scopedState.users, mySchoolId);
   const assignedTeacher = currentUser.assignedTeacherId
     ? teachersList.find((t) => t.id === currentUser.assignedTeacherId)
     : undefined;
@@ -1895,6 +2046,7 @@ export function App() {
   ) => {
     const newSession: LiveSessionRecord = {
       ...payload,
+      schoolId: payload.schoolId ?? resolveUserSchoolId(currentUser),
       id: `live-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
@@ -1922,6 +2074,7 @@ export function App() {
     const dueDate = new Date(Date.now() + 3 * 86400_000).toISOString().slice(0, 10);
     const newAssignment = {
       id: `assign-live-${Date.now()}`,
+      schoolId: resolveUserSchoolId(currentUser),
       title: `Pós-Aula: ${session.title}`,
       description:
         session.notes?.trim() ||
@@ -1942,7 +2095,7 @@ export function App() {
     showToast('Tarefa pós-aula gerada para o aluno!');
   };
 
-  const classmates = state.users.filter((u) => u.role === 'student');
+  const classmates = scopedState.users.filter((u) => u.role === 'student');
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F7F9FC] lg:flex-row">
@@ -1955,7 +2108,7 @@ export function App() {
       <Sidebar
         activeView={activeView}
         onChangeView={setActiveView}
-        schoolName={state.schoolName}
+        schoolName={effectiveSchool.name}
         teacherName={state.teacherName}
         user={currentUser}
         activeCourse={activeCourse}
@@ -2072,7 +2225,7 @@ export function App() {
               setActiveView('tutor');
             }}
             reviewedSubmissions={reviewedForUser}
-            assignments={state.assignments}
+            assignments={scopedState.assignments}
             onGoToTeacher={
               currentUser.role === 'teacher'
                 ? () => {
@@ -2135,9 +2288,9 @@ export function App() {
           {activeView === 'community' && (
             <CommunityHub
               currentUser={currentUser}
-              users={state.users}
+              users={scopedState.users}
               activeCourse={activeCourse}
-              posts={state.communityPosts ?? []}
+              posts={scopedState.communityPosts ?? []}
               realtimeConnected={realtimeConnected}
               onCreatePost={handleCreateCommunityPost}
               onReplyPost={handleReplyCommunityPost}
@@ -2153,9 +2306,9 @@ export function App() {
             <LiveClassroomView
               currentUser={currentUser}
               activeLanguage={activeLanguage}
-              classes={state.classes}
+              classes={scopedState.classes}
               students={classmates}
-              sessions={state.liveSessions ?? []}
+              sessions={scopedState.liveSessions ?? []}
               onCreateSession={handleCreateLiveSession}
               onUpdateSessionNotes={handleUpdateLiveSessionNotes}
               onGeneratePostClassTask={handleGeneratePostClassTask}
@@ -2195,7 +2348,7 @@ export function App() {
             <CertificatesView
               user={currentUser}
               topics={courseTopics}
-              schoolName={state.schoolName}
+              schoolName={effectiveSchool.name}
               teacherName={state.teacherName}
               className={userClassName}
               onUnlockCertificate={handleUnlockCertificate}
@@ -2212,10 +2365,11 @@ export function App() {
 
           {activeView === 'teacher' && currentUser.role === 'teacher' && (
             <TeacherStudio
-              state={state}
+              state={scopedState}
               currentUser={currentUser}
               autoSyncStatus={autoSyncStatus}
               initialTab={teacherInitialTab}
+              onReassignStudentTeacher={handleReassignStudentTeacher}
               onGradeSubmission={handleGradeSubmission}
               onCreateClass={handleCreateClass}
               onDeleteClass={handleDeleteClass}
@@ -2292,7 +2446,16 @@ export function App() {
             (currentUser.isMasterAdmin ||
               isMasterAdminEmail(currentUser.email)) && (
               <AdminPanel
-                state={state}
+                state={scopedState}
+                allUsersCount={state.users.length}
+                schools={ensureSchoolsList(state.schools, state.schoolName)}
+                classesAll={state.classes}
+                usersAll={state.users}
+                adminSchoolFilter={adminSchoolFilter}
+                onChangeAdminSchoolFilter={setAdminSchoolFilter}
+                onCreateSchool={handleCreateSchool}
+                onToggleSchoolStatus={handleToggleSchoolStatus}
+                onAllocateUserSchool={handleAllocateUserSchool}
                 currentUser={currentUser}
                 totalBuiltinTopicsCount={2550}
                 autoSyncStatus={autoSyncStatus}
@@ -2414,6 +2577,7 @@ export function App() {
           (Boolean(currentUser.unlinkedNoticePending) || showTeacherLinkModal)
         }
         student={currentUser}
+        schoolName={effectiveSchool.name}
         teachers={teachersList}
         mandatoryPrompt={Boolean(currentUser.unlinkedNoticePending)}
         onLinkToTeacher={(teacherId) =>

@@ -1,8 +1,8 @@
 <!-- @file docs/02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md — Documentação de arquitetura técnica: cliente React/PWA, Electron, Capacitor, iOS Safari PWA, Cloudflare Worker + R2, Supabase RLS e diretrizes. -->
 
-# 02 — Arquitetura, Nuvem & Plataformas (`v9.4.0`)
+# 02 — Arquitetura, Nuvem & Plataformas (`v10.0.0`)
 
-Este documento consolida toda a arquitetura técnica do **FluentBridge Academy**: cliente Web/PWA, aplicativos nativos Windows (Electron) e Android (Capacitor), estratégia iOS gratuita (Safari PWA), Edge API no Cloudflare Workers (`v9.4.0`, incluindo `/api/translate`, `/api/admin/quotas` e `/api/billing/*` em modo gratuito) + R2, banco/autenticação Supabase e pipeline CI/CD no GitHub Actions.
+Este documento consolida toda a arquitetura técnica do **FluentBridge Academy**: cliente Web/PWA, aplicativos nativos Windows (Electron) e Android (Capacitor), estratégia iOS gratuita (Safari PWA), Edge API no Cloudflare Workers (`v10.0.0`, incluindo `/api/translate`, `/api/admin/quotas` e `/api/billing/*` em modo gratuito) + R2, banco/autenticação Supabase com **Multi-Tenancy RLS por `school_id` (`Seção 13`)** e pipeline CI/CD no GitHub Actions.
 
 ---
 
