@@ -2294,7 +2294,7 @@ export function App() {
               <AdminPanel
                 state={state}
                 currentUser={currentUser}
-                totalBuiltinTopicsCount={1236}
+                totalBuiltinTopicsCount={2550}
                 autoSyncStatus={autoSyncStatus}
                 onUpdateTeacherAccessCode={handleUpdateTeacherAccessCode}
                 onUpdateTeacherInviteCode={handleUpdateTeacherInviteCode}
@@ -2309,6 +2309,38 @@ export function App() {
                 onDeleteUser={handleDeleteUser}
                 onGoToTeacherStudio={() => setActiveView('teacher')}
                 onRunAudioRetentionCleanup={handleRunAudioRetentionCleanup}
+                onUpdateBillingConfig={(billingConfig) => {
+                  setState((prev) => ({ ...prev, billingConfig }));
+                  showToast(
+                    billingConfig.billingEnabled
+                      ? 'Motor de cobrança marcado como ativo.'
+                      : 'Modo 100% gratuito ativo para todos os usuários.',
+                  );
+                }}
+                onUpdateUserSubscription={(userId, planId) => {
+                  setState((prev) => ({
+                    ...prev,
+                    users: prev.users.map((u) =>
+                      u.id === userId
+                        ? {
+                            ...u,
+                            subscription: {
+                              ...(u.subscription ?? {}),
+                              planId,
+                              status:
+                                planId === 'free' || planId === 'school_grant'
+                                  ? 'lifetime_free'
+                                  : 'active',
+                              provider: 'manual',
+                              grantedByAdmin: true,
+                              updatedAt: new Date().toISOString(),
+                            },
+                          }
+                        : u,
+                    ),
+                  }));
+                  showToast(`Plano atualizado para "${planId}".`);
+                }}
               />
             )}
         </Suspense>

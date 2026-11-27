@@ -653,6 +653,7 @@ begin
   delete from public.submissions where student_id = uid;
   delete from public.student_progress where user_id = uid;
   delete from public.certificates where student_id = uid;
+  delete from public.subscriptions where user_id = uid;
   delete from public.user_quotas where user_id = uid;
   delete from public.profiles where id = uid;
 end;
@@ -719,3 +720,50 @@ create policy "fb_audio_read_own_or_teacher" on storage.objects
       or public.is_teacher()
     )
   );
+
+-- ============================================================================
+-- SEÇÃO 12 (v9.4.0): ESTRUTURA DE PLANOS & ASSINATURAS (MODO GRATUITO POR PADRÃO)
+-- ============================================================================
+-- Preparação de banco para cobrança futura (Stripe / Mercado Pago) sem ativar
+-- restrições enquanto BILLING_ENABLED estiver desativado.
+
+create table if not exists public.subscriptions (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  plan_id text not null default 'free' check (plan_id in ('free','school_grant','student_pro','student_vip','school_b2b')),
+  status text not null default 'lifetime_free' check (status in ('lifetime_free','active','trialing','past_due','canceled')),
+  provider text not null default 'none' check (provider in ('none','manual','stripe','mercadopago')),
+  external_customer_id text,
+  external_subscription_id text,
+  current_period_end timestamptz,
+  granted_by_admin boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.subscriptions enable row level security;
+
+drop policy if exists "subscriptions_self_or_admin_read" on public.subscriptions;
+create policy "subscriptions_self_or_admin_read" on public.subscriptions
+  for select to authenticated
+  using (user_id = auth.uid() or public.is_master_admin());
+
+drop policy if exists "subscriptions_admin_manage" on public.subscriptions;
+create policy "subscriptions_admin_manage" on public.subscriptions
+  for all to authenticated
+  using (public.is_master_admin())
+  with check (public.is_master_admin());
+
+create table if not exists public.billing_events (
+  id text primary key,
+  provider text not null check (provider in ('stripe','mercadopago','manual')),
+  event_type text not null,
+  user_id uuid references auth.users(id) on delete set null,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table public.billing_events enable row level security;
+
+drop policy if exists "billing_events_admin_read" on public.billing_events;
+create policy "billing_events_admin_read" on public.billing_events
+  for select to authenticated
+  using (public.is_master_admin());

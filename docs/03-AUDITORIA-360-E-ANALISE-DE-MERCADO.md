@@ -73,8 +73,8 @@ O build concluiu em `7.35s`, porém gerou **9 chunks acima de `500 kB`** (não b
 | **P1** *(Resolvido v9.1)* | Manutenibilidade | `LessonPlayer.tsx` (`2.442L`), `TeacherStudio.tsx` (`1.834L`) e `worker.js` (`1.677L`) concentram múltiplas responsabilidades. | **Concluído (`v9.1.0` + continuação `v9.2`):** extraídos `cloudflare-worker/lib/http.js`, `routes/youtubeStudy.js` e `FillBlankStepView.tsx`. |
 | **P1** | Cobertura de Testes | `YouTubeStudyLab.tsx`, `AuthScreen.tsx` e `worker.js` (contrato HTTP completo) dependem majoritariamente de E2E em vez de testes unitários rápidos. | Adicionar testes de unidade/componente em `src/utils/__tests__/` com `@testing-library/react` ou mocks `fetch` para `/api/youtube-study` e fluxo de cadastro. |
 | **P1** *(Resolvido v9.1)* | Pedagogia (`he`) | `unitScriptPhonics.ts` injeta passo automático `script_phonics` em `ru`, `ja`, `zh` e `ar`, mas ainda não em Hebraico (`he`). | **Concluído:** adicionado `HEBREW_ALEFBET` em `unitScriptPhonics.ts` para unidades A1 de Hebraico. |
-| **P2** | Produto / Negócio | Falta camada de cobrança/assinaturas (`Stripe`/`Mercado Pago`) e painel visual de consumo das cotas R2 (`200` STT / `250` Gemini / `100` YouTube) no `AdminPanel`. | Expor `GET /api/admin/quotas` autenticado para o Admin Mestre e integrar checkout/webhooks no Worker na `v9.5.0`. |
-| **P2** | Distribuição iOS | Hoje iPhone/iPad usa Safari PWA (`$0/ano`), o que atende bem alunos sem taxa Apple, mas não aparece na busca orgânica da App Store. | Manter Safari PWA para custo zero e avaliar publicação nativa na App Store (`$99/ano`) apenas quando houver receita recorrente B2C/B2B. |
+| **P2** *(Base v9.4)* | Produto / Negócio | Camada de assinaturas (`Stripe`/`Mercado Pago`) e painel de cotas R2 no `AdminPanel`. | **Concluído (`v9.3` + `v9.4`):** `/api/admin/quotas` ativo e estrutura `/api/billing/*` + `subscriptions` pronta em modo 100% gratuito (`billingEnabled: false`) para ativação futura. |
+| **P2** | Distribuição iOS | iPhone/iPad usa Safari PWA (`$0/ano`) como estratégia permanente sem taxa anual da Apple. | Manter Safari PWA gratuito (publicação na Apple App Store removida do roadmap por ora). |
 
 ---
 

@@ -6,6 +6,19 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v9.4.0`] — 2026-11-26
+### Estrutura do Motor de Planos & Assinaturas (Modo 100% Gratuito por Padrão)
+- **Motor de Planos & Entitlements (`subscriptionEngine.ts`, `src/types/learning.ts`):**
+  - Definidos os 5 planos estruturais (`free`, `school_grant`, `student_pro`, `student_vip`, `school_b2b`), `BillingConfig` (`billingEnabled: false` por padrão) e `resolveUserEntitlements()` garantindo acesso gratuito e irrestrito enquanto a cobrança estiver desativada, além de proteção permanente para alunos vinculados à escola (`school_grant`).
+- **Edge Billing API (`cloudflare-worker/routes/billing.js`, `worker.js`):**
+  - Adicionados os endpoints `GET /api/billing/plans`, `POST /api/billing/checkout` e `POST /api/billing/webhook` (com validação HMAC-SHA256 Stripe e log de eventos no R2), operando em `mode: "free"` enquanto `BILLING_ENABLED !== 'true'`.
+- **Supabase & Admin (`supabase_schema.sql` Seção 12, `AdminPanel.tsx`, `App.tsx`):**
+  - Criadas tabelas `public.subscriptions` e `public.billing_events` com RLS estrito e exclusão LGPD em `delete_my_account_data()`.
+  - Adicionado painel **Motor de Planos & Assinaturas** (`admin-billing-panel`) no `AdminPanel` e seletor opcional de plano por usuário, sem qualquer paywall nas telas do aluno. Corrigida também a contagem `totalBuiltinTopicsCount` para `2550`.
+- **Roadmap (`docs/04-ROADMAP-E-EVOLUCAO.md`):** removida a publicação na Apple App Store do planejamento atual (iOS segue atendido gratuitamente via Safari PWA `$0/ano`).
+
+---
+
 ## [`v9.3.0`] — 2026-11-26
 ### i18n no Login/Gateway + Banner PT PLE, Observabilidade de Cotas R2 (`/api/admin/quotas`), Modularização & Melhorias Admin/Professor
 - **i18n Completo na Entrada & Curso de Português PLE (`i18n.ts`, `AppDownloadGateway.tsx`, `AuthScreen.tsx`, `App.tsx`):**

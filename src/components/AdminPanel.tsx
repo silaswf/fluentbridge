@@ -8,6 +8,7 @@ import {
   Activity,
   Check,
   Copy,
+  CreditCard,
   Crown,
   Download,
   KeyRound,
@@ -28,7 +29,18 @@ import {
   getEffectiveSupabaseConfig,
   isMasterAdminEmail,
 } from '../config/appConfig';
-import type { PlatformState, UserProfile } from '../types/learning';
+import type {
+  BillingConfig,
+  PlatformState,
+  SubscriptionPlanId,
+  UserProfile,
+} from '../types/learning';
+import {
+  DEFAULT_BILLING_CONFIG,
+  fetchBillingPlansStatus,
+  SUBSCRIPTION_PLANS,
+  type BillingPlansApiResponse,
+} from '../utils/subscriptionEngine';
 import {
   AUDIO_RETENTION_DAYS,
   getAudioRetentionSummary,
@@ -72,6 +84,8 @@ interface AdminPanelProps {
   onDeleteUser: (userId: string) => void;
   onGoToTeacherStudio: () => void;
   onRunAudioRetentionCleanup?: () => Promise<string>;
+  onUpdateBillingConfig?: (cfg: BillingConfig) => void;
+  onUpdateUserSubscription?: (userId: string, planId: SubscriptionPlanId) => void;
 }
 
 export function AdminPanel({
@@ -90,6 +104,8 @@ export function AdminPanel({
   onDeleteUser,
   onGoToTeacherStudio,
   onRunAudioRetentionCleanup,
+  onUpdateBillingConfig,
+  onUpdateUserSubscription,
 }: AdminPanelProps) {
   const isMaster =
     Boolean(currentUser.isMasterAdmin) || isMasterAdminEmail(currentUser.email);
@@ -114,6 +130,7 @@ export function AdminPanel({
   } | null>(null);
   const [quotasSnapshot, setQuotasSnapshot] = useState<AdminQuotaSnapshot | null>(null);
   const [loadingQuotas, setLoadingQuotas] = useState(false);
+  const [billingStatus, setBillingStatus] = useState<BillingPlansApiResponse | null>(null);
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryErrorLog[]>([]);
   const [search, setSearch] = useState('');
   const [pwFeedback, setPwFeedback] = useState<string | null>(null);
@@ -142,6 +159,7 @@ export function AdminPanel({
       .catch(() => undefined);
     void fetchTelemetryLogs().then(setTelemetryLogs);
     void fetchAdminQuotas(7).then(setQuotasSnapshot);
+    void fetchBillingPlansStatus().then(setBillingStatus);
   }, []);
   const [filter, setFilter] = useState<'all' | 'students' | 'teachers' | 'unlinked' | 'blocked'>(
     'all',
@@ -669,6 +687,23 @@ export function AdminPanel({
                       {u.role === 'teacher' ? 'Tornar Aluno' : 'Promover Professor'}
                     </button>
 
+                    {onUpdateUserSubscription && (
+                      <select
+                        value={u.subscription?.planId ?? (u.assignedTeacherId || u.classId ? 'school_grant' : 'free')}
+                        onChange={(e) =>
+                          onUpdateUserSubscription(u.id, e.target.value as SubscriptionPlanId)
+                        }
+                        className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+                        aria-label={`Plano de ${u.name}`}
+                      >
+                        {SUBSCRIPTION_PLANS.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            Plano: {p.badgePt}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
                     <button
                       type="button"
                       onClick={() =>
@@ -847,6 +882,104 @@ export function AdminPanel({
           })}
         </div>
       </section>
+
+      {/* Motor de Planos & Assinaturas (Pronto para ativação futura) */}
+      {(() => {
+        const billingCfg = state.billingConfig ?? DEFAULT_BILLING_CONFIG;
+        const isBillingOn = Boolean(billingCfg.billingEnabled);
+        return (
+          <section
+            data-testid="admin-billing-panel"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
+                    <CreditCard className="h-4.5 w-4.5 text-emerald-600" />
+                    <span>Motor de Planos &amp; Assinaturas</span>
+                  </h2>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                      isBillingOn
+                        ? 'bg-amber-100 text-amber-900'
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}
+                  >
+                    {isBillingOn
+                      ? 'Cobrança Ativa'
+                      : '100% Gratuito (Cobrança Desativada)'}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-600">
+                  Estrutura pronta (Stripe / Mercado Pago + tabelas Supabase + rotas <code className="font-mono">/api/billing/*</code>). Enquanto estiver desativada, <strong>nenhum aluno vê paywall</strong> e todos têm acesso irrestrito. Alunos vinculados a professores mantêm <code className="font-mono">school_grant</code> gratuito.
+                </p>
+              </div>
+              {onUpdateBillingConfig && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPendingConfirm({
+                      tone: isBillingOn ? 'primary' : 'warning',
+                      title: isBillingOn
+                        ? 'Voltar para modo 100% gratuito?'
+                        : 'Ativar motor de cobrança?',
+                      description: isBillingOn
+                        ? 'Todos os usuários voltarão imediatamente para acesso gratuito irrestrito.'
+                        : 'Exigirá chaves STRIPE_SECRET_KEY ou MERCADOPAGO_ACCESS_TOKEN no Worker para checkout real. Alunos da escola/VIP continuam gratuitos.',
+                      confirmLabel: isBillingOn ? 'Ativar modo gratuito' : 'Confirmar ativação',
+                      action: () =>
+                        onUpdateBillingConfig({
+                          ...billingCfg,
+                          billingEnabled: !isBillingOn,
+                          updatedAt: new Date().toISOString(),
+                        }),
+                    })
+                  }
+                  className={`rounded-xl px-3.5 py-2 text-xs font-bold cursor-pointer ${
+                    isBillingOn
+                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                      : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {isBillingOn ? 'Voltar p/ 100% Gratuito' : 'Ativar cobrança (futuro)'}
+                </button>
+              )}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <span className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-700">
+                Worker Mode: {billingStatus?.mode ?? 'free'}
+              </span>
+              <span className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-bold ${billingStatus?.providers.stripe ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                Stripe Secret: {billingStatus?.providers.stripe ? 'Configurado' : 'Pendente'}
+              </span>
+              <span className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-bold ${billingStatus?.providers.mercadopago ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                Mercado Pago: {billingStatus?.providers.mercadopago ? 'Configurado' : 'Pendente'}
+              </span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
+              {SUBSCRIPTION_PLANS.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs"
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-bold text-slate-900">{plan.badgePt}</span>
+                    <span className="font-mono text-[10px] text-slate-500">
+                      {plan.referencePricePt}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-snug text-slate-600">
+                    {plan.summaryPt}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Retenção Automática de Áudios (60 dias) */}
       {(() => {

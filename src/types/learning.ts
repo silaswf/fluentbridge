@@ -505,6 +505,40 @@ export interface LiveSessionRecord {
   createdAt: string;
 }
 
+export type SubscriptionPlanId =
+  | 'free'
+  | 'school_grant'
+  | 'student_pro'
+  | 'student_vip'
+  | 'school_b2b';
+
+export type SubscriptionStatus =
+  | 'lifetime_free'
+  | 'active'
+  | 'trialing'
+  | 'past_due'
+  | 'canceled';
+
+export type BillingProvider = 'none' | 'manual' | 'stripe' | 'mercadopago';
+
+export interface UserSubscription {
+  planId: SubscriptionPlanId;
+  status: SubscriptionStatus;
+  provider?: BillingProvider;
+  externalCustomerId?: string;
+  externalSubscriptionId?: string;
+  currentPeriodEnd?: string;
+  grantedByAdmin?: boolean;
+  updatedAt?: string;
+}
+
+export interface BillingConfig {
+  billingEnabled: boolean;
+  provider: BillingProvider;
+  freeNoticePt?: string;
+  updatedAt?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -553,6 +587,7 @@ export interface UserProfile {
   themeMode?: 'light' | 'dark' | 'system';
   reminderEnabled?: boolean;
   reminderTime?: string;
+  subscription?: UserSubscription;
   createdAt: string;
 }
 
@@ -576,6 +611,7 @@ export interface PlatformState {
   communityPosts?: CommunityPost[];
   liveSessions?: LiveSessionRecord[];
   cloudConfig: CloudConfig;
+  billingConfig?: BillingConfig;
   deletedUserIds?: string[];
   deletedClassIds?: string[];
   deletedTopicIds?: string[];

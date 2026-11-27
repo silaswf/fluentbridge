@@ -1,6 +1,6 @@
 /**
  * @file cloudflare-worker/worker.js
- * @description Ponto de entrada do Cloudflare Worker (Edge API): roteia /api/health, /api/tts, /api/stt, /api/gemini-tutor, /api/translate, /api/youtube-study, /api/media/*, /api/telemetry e /api/admin/quotas com rate limit e verificação JWT.
+ * @description Ponto de entrada do Cloudflare Worker (Edge API): roteia /api/health, /api/tts, /api/stt, /api/gemini-tutor, /api/translate, /api/youtube-study, /api/media/*, /api/billing/*, /api/telemetry e /api/admin/quotas com rate limit e verificação JWT.
  */
 /**
  * FluentBridge Cloud API Worker
@@ -12,6 +12,7 @@
 import { CORS_HEADERS, GEMINI_FALLBACK_MODELS, jsonResponse } from './lib/http.js';
 import { checkPersistentDailyQuota } from './lib/quotas.js';
 import { handleAdminQuotasRequest } from './routes/adminQuotas.js';
+import { handleBillingRequest } from './routes/billing.js';
 import { handleMediaRequest } from './routes/media.js';
 import { handleTranslateRequest } from './routes/translate.js';
 import { handleYouTubeStudyRequest } from './routes/youtubeStudy.js';
@@ -1220,10 +1221,11 @@ export default {
       return jsonResponse({
         ok: true,
         service: 'fluentbridge-api',
-        version: '9.3.0',
+        version: '9.4.0',
         accentCount: 65,
         supportedLanguages: ['en', 'es', 'fr', 'it', 'de', 'ru', 'ja', 'zh', 'ar', 'nl', 'af', 'sv', 'tr', 'he', 'nb', 'da', 'pt'],
-        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/translate', '/api/youtube-study', '/api/media/list', '/api/media/*', '/api/telemetry', '/api/admin/quotas'],
+        endpoints: ['/api/health', '/api/tts', '/api/stt', '/api/gemini-tutor', '/api/translate', '/api/youtube-study', '/api/media/list', '/api/media/*', '/api/billing/plans', '/api/billing/checkout', '/api/billing/webhook', '/api/telemetry', '/api/admin/quotas'],
+        billingEnabled: env.BILLING_ENABLED === 'true',
         rateLimits: {
           ttsPerMin: 120,
           sttPerMin: 30,
@@ -1337,6 +1339,15 @@ export default {
 
     if (path.startsWith('/api/media/')) {
       return handleMediaRequest(request, env, path, { verifySupabaseJwt });
+    }
+
+    if (path.startsWith('/api/billing/')) {
+      const limit = path === '/api/billing/webhook' ? 60 : 30;
+      const rl = checkRateLimit(request, 'billing', limit);
+      if (!rl.allowed) {
+        return jsonResponse({ ok: false, error: 'Rate limit exceeded for /api/billing/*' }, 429);
+      }
+      return handleBillingRequest(request, env, path, { verifySupabaseJwt });
     }
 
     if (path === '/api/admin/quotas') {

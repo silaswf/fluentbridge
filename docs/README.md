@@ -1,6 +1,6 @@
 <!-- @file docs/README.md — Índice mestre e resumo executivo da documentação consolidada do FluentBridge Academy. -->
 
-# Documentação Oficial — FluentBridge Academy (`v9.3.0`)
+# Documentação Oficial — FluentBridge Academy (`v9.4.0`)
 
 Documentação técnica, funcional, arquitetural e estratégica consolidada do **FluentBridge Academy** — plataforma poliglota em **17 idiomas** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`, `tr`, `he`, `nb`, `da`, `pt`) de **A1 a C1**, com **`2.550` unidades (`150` por idioma)**, **Tradutor Bidirecional por Curso (`POST /api/translate`)**, **Português PLE para falantes de Inglês (imersão invertida `EN → PT`)**, **`65` sotaques regionais com vozes neurais**, **`100` simulados oficiais (`25` formatos incl. CELPE-Bras)**, **`850` cenários de Tutor IA**, **`3.400` guias gramaticais**, **`680` questões CAT**, **YouTube Study Lab** e **Estúdio do Professor + Admin Mestre**.
 
@@ -18,7 +18,7 @@ Documentação técnica, funcional, arquitetural e estratégica consolidada do *
 
 ---
 
-## Resumo Executivo (`v9.3.0`)
+## Resumo Executivo (`v9.4.0`)
 
 | Dimensão | Estado Verificado |
 | --- | --- |

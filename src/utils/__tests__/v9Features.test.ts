@@ -21,7 +21,8 @@ import { buildOfflineTranslation, getTranslatorLanguagePair, translateCourseText
 import { PORTUGUESE_TOPICS } from '../../data/curriculum/portugueseCourse';
 import { detectPreferredBrowserLocale, tUi } from '../i18n';
 import { fetchAdminQuotas } from '../telemetry';
-import type { LanguageCode } from '../../types/learning';
+import { DEFAULT_BILLING_CONFIG, resolveUserEntitlements } from '../subscriptionEngine';
+import type { LanguageCode, UserProfile } from '../../types/learning';
 
 describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () => {
   afterEach(() => {
@@ -135,7 +136,7 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
     expect(offline.subtitles[0].textTarget).toBe('Merhaba dünya');
   });
 
-  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.3.0 contract (P1)', () => {
+  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.4.0 contract (P1)', () => {
     const workerSrc = fs.readFileSync(
       path.resolve(process.cwd(), 'cloudflare-worker/worker.js'),
       'utf8',
@@ -156,19 +157,76 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
       path.resolve(process.cwd(), 'cloudflare-worker/routes/media.js'),
       'utf8',
     );
-    expect(workerSrc).toContain("version: '9.3.0'");
+    const billingRouteSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/routes/billing.js'),
+      'utf8',
+    );
+    expect(workerSrc).toContain("version: '9.4.0'");
     expect(workerSrc).toContain("from './routes/youtubeStudy.js'");
     expect(workerSrc).toContain("from './routes/translate.js'");
     expect(workerSrc).toContain("from './routes/adminQuotas.js'");
     expect(workerSrc).toContain("from './routes/media.js'");
+    expect(workerSrc).toContain("from './routes/billing.js'");
     expect(workerSrc).toContain('/api/youtube-study');
     expect(workerSrc).toContain('/api/translate');
     expect(workerSrc).toContain('/api/admin/quotas');
+    expect(workerSrc).toContain('/api/billing/');
     expect(workerSrc).toContain('/api/media/');
     expect(mediaRouteSrc).toContain('206');
     expect(ytRouteSrc).toContain('handleYouTubeStudyRequest');
     expect(translateRouteSrc).toContain('handleTranslateRequest');
     expect(adminQuotasSrc).toContain('handleAdminQuotasRequest');
+    expect(billingRouteSrc).toContain('handleBillingRequest');
+  });
+
+  it('keeps full free access for all users when billingEnabled is false and protects school_grant', () => {
+    const unlinkedStudent = {
+      id: 'stu-free-1',
+      name: 'Aluno Livre',
+      email: 'livre@example.com',
+      password: 'x',
+      role: 'student',
+      avatarColor: '#116DFF',
+      activeLanguage: 'en',
+      dialectByLanguage: { en: 'en-US' },
+      accent: 'en-US',
+      dailyGoalMinutes: 15,
+      todayMinutes: 0,
+      xp: 0,
+      streakDays: 1,
+      completedTopicIds: [],
+      skillScores: { listening: 50, reading: 50, speaking: 50, writing: 50 },
+      vocab: [],
+      issuedCertificates: [],
+      dailyQuests: { lessonsCompletedToday: 0, vocabReviewedToday: 0, tutorSessionsToday: 0, claimedQuestIds: [] },
+      createdAt: '2026-11-26',
+    } as UserProfile;
+
+    const freeMode = resolveUserEntitlements(unlinkedStudent, DEFAULT_BILLING_CONFIG);
+    expect(freeMode.billingActive).toBe(false);
+    expect(freeMode.isFullAccess).toBe(true);
+    expect(freeMode.canUseAllLanguages).toBe(true);
+    expect(freeMode.canUseMockExams).toBe(true);
+
+    const linkedStudent: UserProfile = {
+      ...unlinkedStudent,
+      id: 'stu-school-1',
+      assignedTeacherId: 'teacher-1',
+    };
+    const schoolWhenBillingOn = resolveUserEntitlements(linkedStudent, {
+      billingEnabled: true,
+      provider: 'stripe',
+    });
+    expect(schoolWhenBillingOn.billingActive).toBe(true);
+    expect(schoolWhenBillingOn.isFullAccess).toBe(true);
+    expect(schoolWhenBillingOn.effectivePlanId).toBe('school_grant');
+
+    const unlinkedWhenBillingOn = resolveUserEntitlements(unlinkedStudent, {
+      billingEnabled: true,
+      provider: 'stripe',
+    });
+    expect(unlinkedWhenBillingOn.billingActive).toBe(true);
+    expect(unlinkedWhenBillingOn.isFullAccess).toBe(false);
   });
 
   it('supports i18n parity across pt/en/es for Auth/Gateway & fetches admin quotas cleanly', async () => {

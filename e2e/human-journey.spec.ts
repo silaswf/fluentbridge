@@ -353,10 +353,11 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     expect(darkSurfaceCheck.modRgb[2]).toBeLessThan(80);
     await page.evaluate(() => document.documentElement.classList.remove('dark'));
 
-    // Open Admin Panel via desktop/wide nav and run live Health Check + verify Quotas Panel
+    // Open Admin Panel via desktop/wide nav and run live Health Check + verify Quotas & Billing Panels
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.getByRole('button', { name: /Admin Mestre|Painel Admin/i }).click();
     await expect(page.getByTestId('admin-quotas-panel')).toBeVisible();
+    await expect(page.getByTestId('admin-billing-panel')).toBeVisible();
     await page.getByTestId('admin-run-healthcheck-btn').click();
     await expect(page.getByTestId('admin-healthcheck-results')).toBeVisible({ timeout: 15000 });
 

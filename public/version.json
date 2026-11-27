@@ -1,8 +1,8 @@
 {
-  "version": "9.3.0",
+  "version": "9.4.0",
   "publishedAt": "2026-11-26",
-  "releaseNotes": "FluentBridge Academy v9.3.0 — i18n no Login/Gateway + sugestão automática EN no curso Português PLE, Painel de Cotas IA R2 (/api/admin/quotas), modularização LessonPlayer/TeacherStudio e melhorias completas no Admin & Professor",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.3.0/FluentBridge-Setup-9.3.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.3.0/FluentBridge-v9.3.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.3.0"
+  "releaseNotes": "FluentBridge Academy v9.4.0 — Estrutura do Motor de Planos & Assinaturas pronta para ativação futura (operando em modo 100% gratuito sem cobrança)",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.4.0/FluentBridge-Setup-9.4.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v9.4.0/FluentBridge-v9.4.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v9.4.0"
 }
