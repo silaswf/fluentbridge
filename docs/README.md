@@ -12,8 +12,8 @@ Documentação técnica, funcional, arquitetural e estratégica consolidada do *
 | --- | --- | --- |
 | **[01 — Manual Completo de Funcionalidades](./01-MANUAL-COMPLETO-FUNCIONALIDADES.md)** | Produto & Uso (Passo a Passo) | Enciclopédia funcional detalhada de todas as telas, botões, algoritmos (SM-2, CAT, VAD, dificuldade adaptativa), atalhos de teclado, modos offline, Estúdio do Professor e Admin Mestre. |
 | **[02 — Arquitetura, Nuvem & Plataformas](./02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md)** | Engenharia & Infraestrutura | Stack Web/PWA, Electron Windows `.exe`, Capacitor Android `.apk`/`.aab`, iOS Safari PWA (`$0/ano`), Cloudflare Worker `v9.0.0` (`8` endpoints, R2 `206 Range`, cotas), Supabase RLS/Sync e CI/CD. |
-| **[03 — Auditoria 360° & Análise de Mercado](./03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md)** | Auditoria Zero-Based & Estratégia | Telemetria real pós-`v10.0.0` (`327` arquivos, `313.814` linhas, chunks `dist/`), avaliação dos 8 pilares, oportunidades `P0–P3` e comparativo competitivo. |
-| **[04 — Roadmap & Evolução (`v1.0 → v12.0`)](./04-ROADMAP-E-EVOLUCAO.md)** | Histórico & Próximas Ondas | Ciclo `v1.0 → v10.0` concluído e plano detalhado de 7 fases (`v10.1 → v12.0`: imagens nas unidades, fala 2.0, comunidade, B2B avançado, modularização e offline-first). |
+| **[03 — Auditoria 360° & Análise de Mercado](./03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md)** | Auditoria Zero-Based & Estratégia | Telemetria real pós-`v11.5.0` (`357` arquivos, `330.387` linhas, Top 15 LOC, Top 10 chunks `dist/`), scorecard `9.26/10`, SWOT competitivo e catálogo de `36` oportunidades `P0–P3`. |
+| **[04 — Roadmap & Evolução (`v1.0 → v13.0`)](./04-ROADMAP-E-EVOLUCAO.md)** | Histórico & Novo Ciclo | Ciclo `v1.0 → v11.5` 100% concluído e novo roadmap de `7` fases (`v11.6 → v13.0`: CI/chunks/mobile total, nativização das trilhas nos 17 idiomas, IA 3.0 streaming, FSRS, B2B 3.0, refatoração e Delta Sync primário). |
 | **[CHANGELOG Completo](../CHANGELOG.md)** | Histórico de Versões | Registro cronológico de commits, tags e entregas por versão. |
 
 ---
