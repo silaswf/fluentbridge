@@ -6,6 +6,21 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v11.5.0`] — 2026-11-27
+### Revisão Mobile Sem Rolagem Horizontal, Simulados Oficiais Cronometrados v2 & Trilhas Especializadas Inéditas (12 Unidades × 17 Idiomas)
+- **Correção de Overflow Horizontal em Mobile no Menu de Revisão (`src/components/VocabReview.tsx`):**
+  - Reorganização do cabeçalho da aba `Revisão` em 3 linhas responsivas (`grid-cols-3` nas abas principais e modos de estudo + `flex-wrap` nos filtros de nível e opções secundárias com contraste dark/light preservado e `overflow-x-hidden`), eliminando `100%` da rolagem horizontal em telas `390×844`.
+- **Simulados Oficiais Cronometrados v2 (`src/components/MockExamHub.tsx`, `src/components/exams/ExamEvolutionPanel.tsx`):**
+  - **Modo Prova Real (`real-exam-mode-toggle`):** oculta dicas, rubricas analíticas e bullets durante o simulado, impõe limite de **2 reproduções de áudio no Listening** e protege a saída com `ConfirmDialog`.
+  - **Redação Cronometrada Dedicada (`writing-timer-badge`):** cronômetro regressivo exclusivo para a seção de Writing com contagem em tempo real de palavras, caracteres e parágrafos (`computeWritingStats`).
+  - **Painel de Evolução Comparativa (`ExamEvolutionPanel.tsx`):** KPIs por tentativa, evolução primeira vs última nota por habilidade, tabela cronológica de tentativas e exportação CSV (`computeExamEvolutionStats`).
+- **Trilhas Especializadas Inéditas (`src/data/specializedTracks.ts`, `src/components/SpecializedTracksHub.tsx`, `Sidebar.tsx`, `TrailQuickActionsBar.tsx`, `App.tsx`, `vite.config.ts`):**
+  - `4` trilhas transversais (**Negócios & Liderança**, **Tecnologia & Engenharia**, **Saúde & Clínica** e **Viagens & Hospitalidade**) com **`3` unidades inéditas por trilha = `12` unidades por idioma (`204` unidades nos `17` idiomas)**, chunk dedicado `specialized-tracks` (`279.88 kB`) e **zero colisão** de títulos de unidade, vocabulário ou dicas gramaticais com o currículo principal de `2.550` unidades.
+  - Billing (`billingEnabled: false`) e Apple App Store permanecem intencionalmente desativados/fora do escopo.
+- **Verificação:** `node --check` em `cloudflare-worker/**/*.js`, `tsc --noEmit` (`0` erros), `vitest run src` (**`31/31` suítes / `130/130` testes**), `npm run build` (`0` chunks > 500 kB, `SpecializedTracksHub` `7.52 kB`, `specialized-tracks` `279.88 kB`), `playwright test` (**`21/21` jornadas E2E**).
+
+---
+
 ## [`v11.0.0`] — 2026-11-27
 ### Eixos A–G Completos (P0, P1 e P2): Imagens Estilo Duolingo (3 Ondas), Fala/IA 2.0, Revisão Express 5 min, B2B Avançado, Delta Sync & Modularização
 - **Eixo A — Imagens Estilo Duolingo nas 3 Ondas (`visualConcepts.ts`, `ConceptIllustration.tsx`, `PictureChoiceStepView.tsx`, `VocabIntroStep.tsx`, `VocabReview.tsx`, `courseCohesion.ts`, `TopicCreatorTab.tsx`, `scripts/generate-and-upload-concept-images.mjs`):**

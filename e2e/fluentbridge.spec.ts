@@ -31,11 +31,11 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.0\.0\/FluentBridge-Setup-11\.0\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.5\.0\/FluentBridge-Setup-11\.5\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.0\.0\/FluentBridge-v11\.0\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.5\.0\/FluentBridge-v11\.5\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -126,7 +126,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
       await expect(page.getByTestId(`voice-health-${code}`)).toBeVisible();
     }
 
-    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
     const startBtn6 = page.getByRole('button', { name: /^Começar$/i }).first();
     if (!(await startBtn6.isVisible({ timeout: 2000 }).catch(() => false))) {
       await page.getByTestId('toggle-all-modules-btn').click();
@@ -210,7 +210,7 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     page,
   }) => {
     await loginAsMasterAdmin(page);
-    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
 
     // 1) Busuu-style Module Header & Trail Checkpoint Modal on LearningPath
     await expect(page.getByTestId('module-header-card').first()).toBeVisible();

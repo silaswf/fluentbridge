@@ -1,14 +1,14 @@
 <!-- @file docs/03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md — Auditoria Técnica 360° (Zero-Based) pós-v10.0.0, telemetria real do codebase, benchmark competitivo de mercado e catálogo exaustivo de oportunidades de evolução. -->
 
-# 03 — Auditoria 360° & Análise Competitiva de Mercado (`v11.0.0`)
+# 03 — Auditoria 360° & Análise Competitiva de Mercado (`v11.5.0`)
 
-**Data da Auditoria:** 27/11/2026 · **Versão Auditada:** `v11.0.0` · **Escopo:** Pós-execução integral dos **Eixos A–G (P0, P1 e P2)** + 3 Ondas de Imagens Estilo Duolingo.
+**Data da Auditoria:** 27/11/2026 · **Versão Auditada:** `v11.5.0` · **Escopo:** Pós-execução integral dos **Eixos A–G (P0, P1 e P2)** + 3 Ondas de Imagens Estilo Duolingo + **Parte 3 do Roadmap (`Simulados v2`, `Trilhas Especializadas Inéditas` e `VocabReview` Mobile Zero-Overflow)**.
 
 ---
 
-## 1. Resumo Executivo & Scorecard 360° (`v11.0.0`)
+## 1. Resumo Executivo & Scorecard 360° (`v11.5.0`)
 
-Na **`v11.0.0`**, todos os itens **P0, P1 e P2** dos **Eixos A–G** listados na auditoria `v10.0.0` foram implementados e validados em produção: `364` ilustrações conceituais servidas no Cloudflare R2, exercício `picture_choice` 2×2, Replay Comparativo de fala + Mapa de Calor fonético + velocidades `0.75x/1.0x/1.15x`, Revisão Express 5 min + Streak Freeze por mérito + Grupos de Estudo, QR Code SVG + logo/cor por escola + importação CSV + painel `isSchoolAdmin` + Diário de Presença, `worker.js` reduzido a `293` linhas + extração de módulos de `LessonPlayer`/`AdminPanel`/`App`/`cloudSync`, Pacotes Offline CEFR + `deltaSyncEngine.ts`, e `115/115` testes Vitest + `18/18` jornadas Playwright.
+Na **`v11.5.0`**, além de todos os itens **P0, P1 e P2** dos **Eixos A–G** entregues na `v11.0.0`, foram entregues os itens pedagógicos da **Parte 3 do Roadmap** (mantendo `billingEnabled: false` e Apple App Store fora do escopo): **Simulados Oficiais Cronometrados v2** (`Modo Prova Real`, cronômetro dedicado de `Writing` com contador de palavras/caracteres/parágrafos e `ExamEvolutionPanel` com CSV), **`12` Trilhas Especializadas inéditas por idioma** (`Negócios`, `Tecnologia`, `Saúde`, `Viagens` — `204` unidades sem nenhuma colisão com o currículo principal) e reorganização responsiva do cabeçalho de `VocabReview` para eliminar `100%` da rolagem horizontal em `390×844` (**`31/31` suítes Vitest / `130/130` testes** + **`21/21` jornadas Playwright**).
 
 | Dimensão Auditada | Nota (`v11.0.0`) | Evolução vs `v10.0` | Diagnóstico Objetivo |
 | --- | :---: | :---: | --- |

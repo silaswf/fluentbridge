@@ -116,6 +116,11 @@ const SchoolCoordinatorPanel = lazy(() =>
     default: m.SchoolCoordinatorPanel,
   })),
 );
+const SpecializedTracksHub = lazy(() =>
+  import('./components/SpecializedTracksHub').then((m) => ({
+    default: m.SpecializedTracksHub,
+  })),
+);
 import {
   DEFAULT_PLATFORM_STATE,
   getActiveDialectMeta as getActiveDialect,
@@ -249,6 +254,9 @@ export function App() {
   const [ptUiBannerDismissed, setPtUiBannerDismissed] = useState(false);
   const [adminSchoolFilter, setAdminSchoolFilter] = useState<string>('ALL');
   const [showExpressReviewModal, setShowExpressReviewModal] = useState(false);
+  const [activeSpecializedVocab, setActiveSpecializedVocab] = useState<
+    import('./types/learning').VocabCard[]
+  >([]);
   const [fontScale, setFontScale] = useState<FontScale>(() => loadStoredFontScale());
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
@@ -2171,6 +2179,7 @@ export function App() {
             dueVocabCount={dueVocabCount}
             schoolName={effectiveSchool.name}
             onOpenExpressReview={() => setShowExpressReviewModal(true)}
+            onOpenSpecializedTracks={() => setActiveView('tracks')}
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             onGoToReview={() => setActiveView('review')}
@@ -2194,6 +2203,17 @@ export function App() {
         )}
 
         <Suspense fallback={<ViewSkeleton />}>
+          {activeView === 'tracks' && (
+            <SpecializedTracksHub
+              languageCode={activeLanguage}
+              completedTopicIds={currentUser.completedTopicIds}
+              onStartTopic={(topic, topicVocabCards) => {
+                setActiveSpecializedVocab(topicVocabCards);
+                setActiveTopic(topic);
+              }}
+            />
+          )}
+
           {activeView === 'tutor' && (
             <AITutor
               accent={currentUser.accent}
@@ -2530,7 +2550,11 @@ export function App() {
           <LessonPlayer
             key={activeTopic.id}
             topic={activeTopic}
-            topicVocab={courseVocab.filter((v) => v.topicId === activeTopic.id)}
+            topicVocab={
+              activeTopic.id.startsWith('spec-') && activeSpecializedVocab.length > 0
+                ? activeSpecializedVocab
+                : courseVocab.filter((v) => v.topicId === activeTopic.id)
+            }
             initialStepIdx={
               currentUser.completedTopicIds.includes(activeTopic.id)
                 ? 0

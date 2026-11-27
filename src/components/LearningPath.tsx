@@ -117,6 +117,7 @@ interface LearningPathProps {
   dueVocabCount?: number;
   schoolName?: string;
   onOpenExpressReview?: () => void;
+  onOpenSpecializedTracks?: () => void;
 }
 
 const TOPIC_ICONS = {
@@ -227,6 +228,7 @@ export function LearningPath({
   dueVocabCount = 0,
   schoolName,
   onOpenExpressReview,
+  onOpenSpecializedTracks,
 }: LearningPathProps) {
   const [selectedTrack, setSelectedTrack] = useState<TrailTrackFilter>('ALL');
   const [confirmUnlinkOpen, setConfirmUnlinkOpen] = useState(false);
@@ -562,6 +564,7 @@ export function LearningPath({
           schoolName={schoolName}
           onSelectTrack={setSelectedTrack}
           onOpenExpressReview={onOpenExpressReview}
+          onOpenSpecializedTracks={onOpenSpecializedTracks}
         />
       )}
       {currentUser.learningGoal && (() => {

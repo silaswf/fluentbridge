@@ -1,17 +1,19 @@
 /**
  * @file src/components/MockExamHub.tsx
- * @description Central de Simulados Oficiais Cronometrados (100 exames em 25 formatos incl. IELTS, CELPIP, DET, TÖMER, YAEL, Norskprøve, PD3 e CELPE-Bras).
- * @exports MockExamHub
+ * @description Central de Simulados Oficiais Cronometrados (100 exames em 25 formatos incl. IELTS, CELPIP, DET, TÖMER, YAEL, Norskprøve, PD3 e CELPE-Bras) com Modo Prova Real, Redação Cronometrada e Evolução Comparativa.
+ * @exports computeWritingStats, getEffectiveAudioPlaysLimit, canPlayListeningAudio, MockExamHub
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award,
+  BarChart3,
   BookOpen,
   CheckCircle2,
   Clock,
   FileText,
   Headphones,
   Loader2,
+  Lock,
   Mic,
   Play,
   RotateCcw,
@@ -20,6 +22,8 @@ import {
   Sparkles,
   Square,
   Timer,
+  TrendingDown,
+  TrendingUp,
   XCircle,
 } from 'lucide-react';
 import { getExamTypeById, getExamTypesByLanguage } from '../data/exams/examCatalog';
@@ -44,6 +48,64 @@ import {
 import { gradeMockExam, type GradedExamResult } from '../utils/examScoring';
 import { transcribeAudioBlob } from '../utils/speech';
 import { DualAudioButtons } from './DualAudioButtons';
+import { ConfirmDialog } from './ConfirmDialog';
+import { ExamEvolutionPanel } from './exams/ExamEvolutionPanel';
+
+export interface WritingStats {
+  wordCount: number;
+  charCount: number;
+  paragraphCount: number;
+  progressPercent: number;
+  status: 'Abaixo do mínimo' | 'Meta atingida ✓' | 'Extensão avançada ★';
+}
+
+/**
+ * Computes word, character, paragraph counts and target progress for timed writing.
+ */
+export function computeWritingStats(text: string, minWords: number): WritingStats {
+  const trimmed = text.trim();
+  const wordCount = trimmed ? trimmed.split(/\s+/).length : 0;
+  const charCount = text.length;
+  const paragraphCount = trimmed
+    ? trimmed.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length
+    : 0;
+  const safeMin = Math.max(1, minWords);
+  const progressPercent = Math.min(100, Math.round((wordCount / safeMin) * 100));
+  const status: WritingStats['status'] =
+    wordCount < safeMin
+      ? 'Abaixo do mínimo'
+      : wordCount >= Math.round(safeMin * 1.4)
+        ? 'Extensão avançada ★'
+        : 'Meta atingida ✓';
+  return {
+    wordCount,
+    charCount,
+    paragraphCount,
+    progressPercent,
+    status,
+  };
+}
+
+/**
+ * Returns the effective listening audio play limit (enforces max 2 plays in Real Exam mode).
+ */
+export function getEffectiveAudioPlaysLimit(
+  realExamMode: boolean,
+  questionLimit?: number,
+): number {
+  return realExamMode ? 2 : (questionLimit ?? 2);
+}
+
+/**
+ * Checks whether a listening question's audio can still be played.
+ */
+export function canPlayListeningAudio(
+  playsUsed: number,
+  realExamMode: boolean,
+  questionLimit?: number,
+): boolean {
+  return playsUsed < getEffectiveAudioPlaysLimit(realExamMode, questionLimit);
+}
 
 interface MockExamHubProps {
   activeCourse: LanguageCourse;
@@ -128,6 +190,11 @@ export function MockExamHub({
 
   const [audioPlays, setAudioPlays] = useState<Record<string, number>>({});
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [writingSecondsLeft, setWritingSecondsLeft] = useState(1200);
+  const [realExamMode, setRealExamMode] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showEvolutionPanel, setShowEvolutionPanel] = useState(false);
+  const lastCompletedAttemptIdRef = useRef<string | null>(null);
   const [result, setResult] = useState<GradedExamResult | null>(null);
   const [writingRubric, setWritingRubric] =
     useState<AnalyticalWritingRubric | null>(null);
@@ -182,8 +249,10 @@ export function MockExamHub({
       selectedCategory,
     );
     setResult(graded);
+    const attemptId = `attempt-${examToGrade.id}-${Date.now()}`;
+    lastCompletedAttemptIdRef.current = attemptId;
     onCompleteExam({
-      id: `attempt-${examToGrade.id}-${Date.now()}`,
+      id: attemptId,
       examId: examToGrade.id,
       examTypeId: metaToGrade.id,
       languageCode: activeCourse.code,
@@ -238,6 +307,29 @@ export function MockExamHub({
     return () => window.clearInterval(timer);
   }, [activeExam, activeMeta, result, secondsLeft]);
 
+  useEffect(() => {
+    if (
+      !activeExam ||
+      !activeMeta ||
+      result ||
+      activeSectionTab !== 'writing'
+    ) {
+      return undefined;
+    }
+    if (writingSecondsLeft <= 0) return undefined;
+    const timer = window.setInterval(() => {
+      setWritingSecondsLeft((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [activeExam, activeMeta, result, activeSectionTab, writingSecondsLeft]);
+
+  const previousAttempt = useMemo(() => {
+    const filtered = pastAttempts.filter(
+      (a) => a.id !== lastCompletedAttemptIdRef.current,
+    );
+    return filtered[filtered.length - 1] ?? null;
+  }, [pastAttempts]);
+
   const startSimulation = (exam: MockExam, catOverride?: ExamPracticeCategory) => {
     const cat = catOverride ?? selectedCategory;
     const meta = getExamTypeById(exam.examTypeId) ?? examTypes[0];
@@ -253,6 +345,8 @@ export function MockExamHub({
     setResult(null);
     setWritingRubric(null);
     setSpeakingEval(null);
+    setShowExitConfirm(false);
+    setWritingSecondsLeft(1200);
     setActiveSectionTab(cat === 'full' ? 'reading' : cat);
     const scaledMinutes =
       cat === 'full'
@@ -351,9 +445,10 @@ export function MockExamHub({
   };
 
   if (activeExam && activeMeta) {
-    const wordCount = writingResponse.trim()
-      ? writingResponse.trim().split(/\s+/).length
-      : 0;
+    const writingStats = computeWritingStats(
+      writingResponse,
+      activeExam.writingTask.minWords,
+    );
 
     const visibleQuestions = activeExam.questions.filter(
       (q) => q.section === activeSectionTab,
@@ -405,6 +500,15 @@ export function MockExamHub({
             <h2 className="font-display text-base font-extrabold text-slate-900">
               {activeExam.title}
             </h2>
+            {realExamMode && (
+              <span
+                data-testid="real-exam-active-badge"
+                className="mt-1 inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-[11px] font-extrabold text-rose-800 ring-1 ring-rose-200"
+              >
+                <Lock className="h-3 w-3" />
+                <span>Modo Prova Real · Dicas Bloqueadas</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -434,9 +538,14 @@ export function MockExamHub({
             )}
             <button
               type="button"
+              data-testid="exit-exam-btn"
               onClick={() => {
-                setActiveExam(null);
-                setResult(null);
+                if (realExamMode && !result) {
+                  setShowExitConfirm(true);
+                } else {
+                  setActiveExam(null);
+                  setResult(null);
+                }
               }}
               className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
             >
@@ -444,6 +553,21 @@ export function MockExamHub({
             </button>
           </div>
         </div>
+
+        <ConfirmDialog
+          open={showExitConfirm}
+          title="Sair do Modo Prova Real?"
+          description="Você está no meio de um simulado oficial cronometrado. Se sair agora, suas respostas e o tempo restante serão perdidos."
+          confirmLabel="Sim, sair da prova"
+          cancelLabel="Continuar prova"
+          tone="danger"
+          onConfirm={() => {
+            setShowExitConfirm(false);
+            setActiveExam(null);
+            setResult(null);
+          }}
+          onCancel={() => setShowExitConfirm(false)}
+        />
 
         {/* Result Screen with Official Scale, AI Writing Rubric, Speaking Eval & Reference Table */}
         {result ? (
@@ -507,6 +631,46 @@ export function MockExamHub({
                 ))}
               </div>
             </div>
+
+            {previousAttempt && (
+              <div
+                data-testid="previous-attempt-comparison"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs"
+              >
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 uppercase">
+                    Comparação com Tentativa Anterior ({previousAttempt.completedAt})
+                  </p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-700">
+                    Anterior: <strong>{previousAttempt.officialScoreLabel}</strong> ({previousAttempt.rawPercent}%) · Atual: <strong>{result.officialLabel}</strong> ({result.rawPercent}%)
+                  </p>
+                </div>
+                {(() => {
+                  const delta = result.rawPercent - previousAttempt.rawPercent;
+                  return (
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-xs font-extrabold ${
+                        delta > 0
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : delta < 0
+                            ? 'bg-rose-100 text-rose-700'
+                            : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      {delta >= 0 ? (
+                        <TrendingUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <TrendingDown className="h-3.5 w-3.5" />
+                      )}
+                      <span>
+                        {delta >= 0 ? '+' : ''}
+                        {delta}%
+                      </span>
+                    </span>
+                  );
+                })()}
+              </div>
+            )}
 
             {isAiGrading && (
               <div className="flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-xs font-bold text-indigo-800">
@@ -725,7 +889,15 @@ export function MockExamHub({
               activeSectionTab === 'language_use') &&
               visibleQuestions.map((q, idx) => {
                 const playsUsed = audioPlays[q.id] ?? 0;
-                const playsLimit = q.audioPlaysLimit ?? 2;
+                const playsLimit = getEffectiveAudioPlaysLimit(
+                  realExamMode,
+                  q.audioPlaysLimit,
+                );
+                const canPlay = canPlayListeningAudio(
+                  playsUsed,
+                  realExamMode,
+                  q.audioPlaysLimit,
+                );
                 return (
                   <div
                     key={q.id}
@@ -771,7 +943,7 @@ export function MockExamHub({
                             Reproduções usadas: {playsUsed}/{playsLimit}
                           </p>
                         </div>
-                        {playsUsed < playsLimit ? (
+                        {canPlay ? (
                           <DualAudioButtons
                             text={q.audioText}
                             languageCode={activeCourse.code}
@@ -790,9 +962,14 @@ export function MockExamHub({
                             }
                           />
                         ) : (
-                          <span className="rounded-lg bg-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-600">
-                            Limite atingido
-                          </span>
+                          <button
+                            type="button"
+                            disabled
+                            data-testid={`audio-limit-disabled-${q.id}`}
+                            className="rounded-lg bg-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-500 cursor-not-allowed"
+                          >
+                            Limite atingido ({playsUsed}/{playsLimit})
+                          </button>
                         )}
                       </div>
                     )}
@@ -832,26 +1009,41 @@ export function MockExamHub({
             {/* Writing Section */}
             {activeSectionTab === 'writing' && (
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-2xs">
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 uppercase">
-                  <FileText className="h-3 w-3" />
-                  Writing · Produção Escrita
-                </span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 uppercase">
+                    <FileText className="h-3 w-3" />
+                    Writing · Redação Cronometrada
+                  </span>
+                  <span
+                    data-testid="writing-timer-badge"
+                    className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1 font-mono text-xs font-extrabold ${
+                      writingSecondsLeft <= 120
+                        ? 'bg-rose-100 text-rose-700 animate-pulse'
+                        : 'bg-amber-50 text-amber-900 ring-1 ring-amber-200'
+                    }`}
+                  >
+                    <Timer className="h-3.5 w-3.5" />
+                    <span>{formatTimer(writingSecondsLeft)}</span>
+                  </span>
+                </div>
                 <p
                   dir={activeCourse.code === 'ar' ? 'rtl' : 'ltr'}
                   className="mt-2 font-display text-sm font-bold text-slate-900"
                 >
                   {activeExam.writingTask.prompt}
                 </p>
-                <ul className="mt-2 flex flex-wrap gap-1.5">
-                  {activeExam.writingTask.rubricCriteria.map((crit, cIdx) => (
-                    <li
-                      key={cIdx}
-                      className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
-                    >
-                      ✓ {crit}
-                    </li>
-                  ))}
-                </ul>
+                {!realExamMode && (
+                  <ul className="mt-2 flex flex-wrap gap-1.5">
+                    {activeExam.writingTask.rubricCriteria.map((crit, cIdx) => (
+                      <li
+                        key={cIdx}
+                        className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                      >
+                        ✓ {crit}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <textarea
                   rows={6}
                   value={writingResponse}
@@ -860,11 +1052,43 @@ export function MockExamHub({
                   placeholder={`Escreva pelo menos ${activeExam.writingTask.minWords} palavras em ${activeCourse.namePt}...`}
                   className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-900"
                 />
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                  <span>
-                    Palavras: <strong>{wordCount}</strong> / mín.{' '}
-                    {activeExam.writingTask.minWords}
-                  </span>
+                <div className="mt-3 space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span>
+                        Palavras: <strong>{writingStats.wordCount}</strong> / mín.{' '}
+                        {activeExam.writingTask.minWords}
+                      </span>
+                      <span>
+                        Caracteres: <strong>{writingStats.charCount}</strong>
+                      </span>
+                      <span>
+                        Parágrafos: <strong>{writingStats.paragraphCount}</strong>
+                      </span>
+                    </div>
+                    <span
+                      data-testid="writing-status-badge"
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                        writingStats.status === 'Abaixo do mínimo'
+                          ? 'bg-amber-100 text-amber-800'
+                          : writingStats.status === 'Extensão avançada ★'
+                            ? 'bg-indigo-100 text-indigo-800'
+                            : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
+                      {writingStats.status}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        writingStats.progressPercent >= 100
+                          ? 'bg-emerald-500'
+                          : 'bg-amber-500'
+                      }`}
+                      style={{ width: `${writingStats.progressPercent}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -912,16 +1136,18 @@ export function MockExamHub({
                         {part.prompt}
                       </p>
 
-                      <ul className="flex flex-wrap gap-1.5">
-                        {part.bulletPoints.map((bp, bi) => (
-                          <li
-                            key={bi}
-                            className="rounded-lg bg-white px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200"
-                          >
-                            • {bp}
-                          </li>
-                        ))}
-                      </ul>
+                      {!realExamMode && (
+                        <ul className="flex flex-wrap gap-1.5">
+                          {part.bulletPoints.map((bp, bi) => (
+                            <li
+                              key={bi}
+                              className="rounded-lg bg-white px-2.5 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200"
+                            >
+                              • {bp}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
 
                       <div className="flex flex-wrap items-center gap-2">
                         <button
@@ -1037,25 +1263,67 @@ export function MockExamHub({
         </p>
       </div>
 
-      {/* Practice Category Filter */}
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-2xs">
-        {CATEGORY_OPTIONS.map((cat) => (
+      {/* Practice Category Filter + Real Exam Mode + Evolution Toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-2xs">
+          {CATEGORY_OPTIONS.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              data-testid={`exam-category-${cat.id}`}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`rounded-xl px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+                selectedCategory === cat.id
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
           <button
-            key={cat.id}
             type="button"
-            data-testid={`exam-category-${cat.id}`}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`rounded-xl px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
-              selectedCategory === cat.id
-                ? 'bg-slate-900 text-white shadow-2xs'
-                : 'text-slate-600 hover:bg-slate-50'
+            data-testid="real-exam-mode-toggle"
+            aria-pressed={realExamMode}
+            onClick={() => setRealExamMode((v) => !v)}
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition cursor-pointer ${
+              realExamMode
+                ? 'border-rose-300 bg-rose-50 text-rose-800 shadow-2xs'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
             }`}
           >
-            {cat.label}
+            <Lock className="h-3.5 w-3.5" />
+            <span>
+              {realExamMode ? 'Modo Prova Real: ATIVO' : 'Modo Prova Real'}
+            </span>
           </button>
-        ))}
+
+          <button
+            type="button"
+            data-testid="toggle-evolution-panel-btn"
+            aria-pressed={showEvolutionPanel}
+            onClick={() => setShowEvolutionPanel((v) => !v)}
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition cursor-pointer ${
+              showEvolutionPanel
+                ? 'border-blue-300 bg-blue-600 text-white shadow-2xs'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>Evolução Comparativa ({pastAttempts.length})</span>
+          </button>
+        </div>
       </div>
 
+      {showEvolutionPanel ? (
+        <ExamEvolutionPanel
+          attempts={pastAttempts}
+          languageNamePt={activeCourse.namePt}
+        />
+      ) : (
       <div className="space-y-5">
         {examTypes.map((meta) => {
           const typeExams = exams.filter((e) => e.examTypeId === meta.id);
@@ -1127,6 +1395,7 @@ export function MockExamHub({
           );
         })}
       </div>
+      )}
     </div>
   );
 }

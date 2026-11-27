@@ -1,8 +1,8 @@
 {
-  "version": "11.0.0",
+  "version": "11.5.0",
   "publishedAt": "2026-11-27",
-  "releaseNotes": "FluentBridge Academy v11.0.0 — Eixos A-G completos: Imagens estilo Duolingo (3 ondas + R2), Replay comparativo & Mapa de calor fonético, Revisão Express 5 min, B2B QR/CSV/Coordenador/Presença e Delta Sync + Pacote Offline CEFR",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.0.0/FluentBridge-Setup-11.0.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.0.0/FluentBridge-v11.0.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v11.0.0"
+  "releaseNotes": "FluentBridge Academy v11.5.0 — Menu responsivo de Revisão sem overflow mobile, Simulados Cronometrados v2 (Modo Prova Real, Redação Cronometrada, Evolução Comparativa) e 12 Trilhas Especializadas Inéditas (Negócios, Tecnologia, Saúde, Viagens)",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.5.0/FluentBridge-Setup-11.5.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.5.0/FluentBridge-v11.5.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v11.5.0"
 }

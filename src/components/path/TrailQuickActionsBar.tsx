@@ -17,6 +17,7 @@ interface TrailQuickActionsBarProps {
   schoolName?: string;
   onSelectTrack: (track: TrailTrackFilter) => void;
   onOpenExpressReview: () => void;
+  onOpenSpecializedTracks?: () => void;
   onTestReminder?: () => void;
 }
 
@@ -35,6 +36,7 @@ export function TrailQuickActionsBar({
   schoolName,
   onSelectTrack,
   onOpenExpressReview,
+  onOpenSpecializedTracks,
   onTestReminder,
 }: TrailQuickActionsBarProps) {
   const [reminderFeedback, setReminderFeedback] = useState<string | null>(null);
@@ -76,6 +78,18 @@ export function TrailQuickActionsBar({
             </span>
           )}
         </button>
+
+        {onOpenSpecializedTracks && (
+          <button
+            type="button"
+            data-testid="open-specialized-tracks-btn"
+            onClick={onOpenSpecializedTracks}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-800 transition hover:bg-indigo-100 cursor-pointer"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+            <span>Trilhas Pro</span>
+          </button>
+        )}
 
         <div
           data-testid="track-tag-filter-bar"

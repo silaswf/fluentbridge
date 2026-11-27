@@ -47,7 +47,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
 
     await page.getByTestId('language-switcher-trigger').click();
     await page.getByTestId('lang-option-en').click();
-    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
 
     // Verify collapsible module accordions: only 1 module expanded by default
     const headers = page.getByTestId('module-header-card');
@@ -264,7 +264,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     await page.getByTestId('language-switcher-trigger').click();
     await page.getByTestId('lang-option-ja').click();
     await expect(page.locator('main')).toHaveAttribute('dir', 'ltr');
-    await page.getByRole('button', { name: /Trilha.*\(/i }).click();
+    await page.getByRole('button', { name: /Trilha de Aulas/i }).click();
     await page.getByRole('button', { name: /Começar|Continuar|Refazer/i }).first().click();
     await expect(page.getByTestId('ja-kana-toggle')).toBeVisible({ timeout: 8000 });
     await page.getByTestId('ja-kana-toggle').click();

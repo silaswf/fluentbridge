@@ -231,6 +231,7 @@ export default defineConfig(({ command }) => ({
           }
           if (id.includes('/utils/japaneseKana')) return 'japanese-kana';
           if (id.includes('/data/visualConcepts')) return 'visual-concepts';
+          if (id.includes('/data/specializedTracks')) return 'specialized-tracks';
           return undefined;
         },
       },

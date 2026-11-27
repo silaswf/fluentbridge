@@ -64,7 +64,7 @@ Este documento registra o **ciclo concluído (`v1.0.0 → v11.0.0`)** e a próxi
 ---
 
 ## Parte 3 — Próxima Onda Opcional (`v11.5 → v12.0`)
-- [ ] **Simulados Oficiais Cronometrados v2:** modo prova real com bloqueio de dicas, redação cronometrada com contagem de palavras e relatório comparativo de evolução por tentativa.
-- [ ] **Trilhas Especializadas (Negócios, Tecnologia, Saúde & Viagens):** pacotes temáticos transversais nos principais idiomas.
+- [x] **Simulados Oficiais Cronometrados v2 (`v11.5.0`):** modo prova real (`real-exam-mode-toggle`) com bloqueio de dicas/rubrica e limite de 2 reproduções de áudio, redação cronometrada dedicada com contagem de palavras/caracteres/parágrafos (`writing-timer-badge`) e relatório comparativo de evolução por tentativa (`ExamEvolutionPanel.tsx` + exportação CSV).
+- [x] **Trilhas Especializadas (`v11.5.0` — Negócios, Tecnologia, Saúde & Viagens):** `12` unidades transversais inéditas por idioma (`3` por trilha nos `17` idiomas, total de `204` unidades temáticas sem nenhuma repetição de título, vocabulário ou dica gramatical do currículo principal) em `SpecializedTracksHub.tsx`.
 - [ ] **Ativação Opcional de Planos & Checkout (Somente sob Decisão Futura):** ligar `BILLING_ENABLED = true` com chaves Stripe / Mercado Pago / Asaas para B2C ou licenciamento B2B de escolas parceiras.
 - [ ] **Publicação em Lojas (Opcional/Futuro):** Google Play Store (`.aab`) e Microsoft Store (`.msix`/`.exe`) quando houver interesse estratégico — *Apple App Store permanece fora do roadmap até decisão explícita*.

@@ -66,6 +66,7 @@ const LANGUAGE_BADGE_META: Record<LanguageCode, { symbol: string; accent: string
 
 export type NavView =
   | 'learn'
+  | 'tracks'
   | 'tutor'
   | 'translator'
   | 'review'
@@ -203,6 +204,12 @@ export function Sidebar({
       label: `${tUi(uiLocale, 'nav.learn')} (${topicsCount})`,
       shortLabel: uiLocale === 'pt' ? 'Trilha' : tUi(uiLocale, 'nav.learn'),
       Icon: Compass,
+    },
+    {
+      id: 'tracks',
+      label: 'Trilhas Especializadas (12)',
+      shortLabel: 'Trilhas Pro',
+      Icon: Sparkles,
     },
     {
       id: 'tutor',
