@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementNb.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Norueguês Bokmål.
+ * @exports PLACEMENT_NB
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_NB: PlacementQuestion[] = [

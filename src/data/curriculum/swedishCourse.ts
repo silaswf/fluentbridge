@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/swedishCourse.ts
+ * @description Conteúdo curricular (swedishCourse) do curso de idiomas.
+ * @exports SWEDISH_META, SWEDISH_BASE_TOPICS, SWEDISH_BASE_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

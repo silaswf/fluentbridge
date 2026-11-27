@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/japaneseKana.ts
+ * @description Conversor de sentenças com Kanji para 100% Hiragana/Katakana para o modo de leitura facilitada em Japonês.
+ * @exports JapaneseScriptMode, loadJapaneseScriptMode, saveJapaneseScriptMode, extractKanjiChars, getKanjiScriptChar, toJapaneseKana
+ */
 import { JAPANESE_KANJI, type ScriptCharacterItem } from '../data/scriptTrainerData';
 import type { ScriptPhonicsChar } from '../types/learning';
 

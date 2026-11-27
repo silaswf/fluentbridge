@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/expansionV9/expV9_zh.ts
+ * @description Expansão curricular v9.0 (+47 unidades coesas A1–C1 para completar 150 unidades) em Chinês (Mandarim).
+ * @exports ZH_V9_TOPICS, ZH_V9_VOCAB
+ */
 import type { Topic, VocabCard } from '../../../types/learning';
 import {
   buildLanguageVocab,

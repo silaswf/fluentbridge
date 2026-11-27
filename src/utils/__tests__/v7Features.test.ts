@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v7Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v7Features.
+ */
 import { describe, expect, it } from 'vitest';
 import { buildClozePrompt } from '../srsEngine';
 import { buildPedagogicalMemoryContext } from '../tutorMemory';

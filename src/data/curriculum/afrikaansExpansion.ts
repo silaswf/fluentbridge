@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/afrikaansExpansion.ts
+ * @description Conteúdo curricular (afrikaansExpansion) do curso de idiomas.
+ * @exports AFRIKAANS_EXP_TOPICS, AFRIKAANS_EXP_VOCAB, AFRIKAANS_100_TOPICS, AFRIKAANS_100_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   AFRIKAANS_BASE_TOPICS,

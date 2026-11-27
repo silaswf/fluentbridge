@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/audioDb.ts
+ * @description Wrapper IndexedDB para armazenar e recuperar gravações de áudio Speaking do aluno localmente.
+ * @exports saveAudioClip, getAudioClip, deleteAudioClip, blobToDataUrl
+ */
 const DB_NAME = 'fluentbridge_audio_v1';
 const STORE_NAME = 'clips';
 const memoryFallback = new Map<string, Blob>();

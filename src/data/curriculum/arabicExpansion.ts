@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/arabicExpansion.ts
+ * @description Conteúdo curricular (arabicExpansion) do curso de idiomas.
+ * @exports ARABIC_EXP_TOPICS, ARABIC_EXP_VOCAB, ARABIC_100_TOPICS, ARABIC_100_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

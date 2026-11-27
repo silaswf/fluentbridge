@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosAr.ts
+ * @description Banco de cenários de conversação do Tutor IA para Árabe (RTL).
+ * @exports AR_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const AR_TUTOR_SCENARIOS: AITutorScenario[] = [

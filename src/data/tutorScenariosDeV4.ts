@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosDeV4.ts
+ * @description Banco de cenários de conversação do Tutor IA para Alemão.
+ * @exports DE_TUTOR_SCENARIOS_V4
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const DE_TUTOR_SCENARIOS_V4: AITutorScenario[] = [

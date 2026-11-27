@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/frenchExtra.ts
+ * @description Conteúdo curricular (frenchExtra) do curso de idiomas.
+ * @exports FRENCH_META, FRENCH_EXTRA_TOPICS, FRENCH_EXTRA_VOCAB, FRENCH_EXTRA_GRAMMAR_GUIDE
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

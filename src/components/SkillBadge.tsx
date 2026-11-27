@@ -1,3 +1,8 @@
+/**
+ * @file src/components/SkillBadge.tsx
+ * @description Badge visual padronizado de habilidades (Listening, Reading, Speaking, Writing) e metadados de categorias de dicas.
+ * @exports BadgeKind, SKILL_META, TIP_CATEGORY_META, SkillBadge
+ */
 import type { LucideIcon } from 'lucide-react';
 import {
   AlertTriangle,

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/heGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de heGrammarGuide.
+ * @exports HE_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const HE_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/spanishCourse.ts
+ * @description Conteúdo curricular (spanishCourse) do curso de idiomas.
+ * @exports SPANISH_ALL_TOPICS, SPANISH_ALL_TOPICS_50, SPANISH_ALL_VOCAB, SPANISH_ALL_VOCAB_50, SPANISH_GRAMMAR_GUIDE
+ */
 import type { CEFRLevel, Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

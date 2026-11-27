@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/idiomsSlangExpansion.ts
+ * @description Unidades de expressões idiomáticas, gírias e cultura regional nos 17 idiomas.
+ * @exports IDIOMS_SLANG_TOPICS_BY_LANG, IDIOMS_SLANG_VOCAB_BY_LANG
+ */
 import type { LanguageCode, Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

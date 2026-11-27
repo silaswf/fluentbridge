@@ -1,3 +1,8 @@
+/**
+ * @file src/components/GoalOnboardingModal.tsx
+ * @description Componente de interface GoalOnboardingModal do FluentBridge.
+ * @exports GoalOnboardingModal
+ */
 import { useState } from 'react';
 import { Check, Compass, X } from 'lucide-react';
 import type { LearningGoalType } from '../types/learning';

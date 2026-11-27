@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/vocabUnlock.ts
+ * @description Controla desbloqueio progressivo de vocabulário e metadados das etapas dentro do LessonPlayer.
+ * @exports getUnlockedVocabCards, LessonStageKey, getStepStageMeta
+ */
 import type { LessonStep, UserProfile, VocabCard } from '../types/learning';
 
 /**

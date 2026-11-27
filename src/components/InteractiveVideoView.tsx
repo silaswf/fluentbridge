@@ -1,3 +1,8 @@
+/**
+ * @file src/components/InteractiveVideoView.tsx
+ * @description Player de vídeos curtos interativos (streaming R2 HTTP 206) com legendas sincronizadas, salvamento SM-2 e integração com YouTube Study Lab.
+ * @exports InteractiveVideoView
+ */
 import { useEffect, useRef, useState } from 'react';
 import {
   BookmarkCheck,

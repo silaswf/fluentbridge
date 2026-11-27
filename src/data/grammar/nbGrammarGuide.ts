@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/nbGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de nbGrammarGuide.
+ * @exports NB_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const NB_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

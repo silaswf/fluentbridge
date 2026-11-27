@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosFrV4.ts
+ * @description Banco de cenários de conversação do Tutor IA para Francês.
+ * @exports FR_TUTOR_SCENARIOS_V4
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const FR_TUTOR_SCENARIOS_V4: AITutorScenario[] = [

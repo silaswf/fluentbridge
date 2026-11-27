@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsPortuguese.ts
+ * @description Banco de simulados oficiais cronometrados (Portuguese).
+ * @exports EXAMS_PORTUGUESE
+ */
 import type { MockExam } from '../../types/exams';
 
 export const EXAMS_PORTUGUESE: MockExam[] = [

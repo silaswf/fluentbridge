@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/jaGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de jaGrammarGuide.
+ * @exports JA_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const JA_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

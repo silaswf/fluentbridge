@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosNl.ts
+ * @description Banco de cenários de conversação do Tutor IA para Holandês.
+ * @exports NL_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const NL_TUTOR_SCENARIOS: AITutorScenario[] = [

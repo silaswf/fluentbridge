@@ -1,3 +1,8 @@
+/**
+ * @file src/components/EmptyStateCard.tsx
+ * @description Componente visual padrão para estados vazios com ícone, mensagem orientativa e ação opcional.
+ * @exports EmptyStateCard
+ */
 import type { LucideIcon } from 'lucide-react';
 
 interface EmptyStateCardProps {

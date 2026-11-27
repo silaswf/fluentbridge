@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/i18n.ts
+ * @description Dicionário completo de internacionalização da interface (PT, EN, ES), detecção de idioma do navegador e persistência.
+ * @exports UiLocale, tUi, getAllUiTranslationKeys, hasExplicitUiLocale, detectPreferredBrowserLocale, loadStoredUiLocale, saveUiLocale
+ */
 export type UiLocale = 'pt' | 'en' | 'es';
 
 const UI_LOCALE_KEY = 'fb_ui_locale_v1';

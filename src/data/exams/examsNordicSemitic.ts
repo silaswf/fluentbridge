@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsNordicSemitic.ts
+ * @description Banco de simulados oficiais cronometrados (NordicSemitic).
+ * @exports EXAMS_NORDIC_SEMITIC
+ */
 import type { MockExam } from '../../types/exams';
 
 export const EXAMS_NORDIC_SEMITIC: MockExam[] = [

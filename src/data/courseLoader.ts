@@ -1,3 +1,8 @@
+/**
+ * @file src/data/courseLoader.ts
+ * @description Carregador assíncrono (code-splitting) sob demanda dos currículos por idioma com cache em memória.
+ * @exports LoadedCourseBundle, getCachedCourseData, loadLanguageCourseData
+ */
 import type { LanguageCode, Topic, VocabCard } from '../types/learning';
 import { enrichCourseCohesion } from '../utils/courseCohesion';
 import { mergeCourseVocab } from './curriculum/vocabExpansion';

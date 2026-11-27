@@ -1,3 +1,8 @@
+/**
+ * @file cloudflare-worker/routes/media.js
+ * @description Rotas de mídia R2 (/api/media/upload, /api/media/list e streaming /api/media/* com suporte a HTTP 206 Partial Content Range para Safari/iOS).
+ * @exports handleMediaRequest
+ */
 import { CORS_HEADERS, jsonResponse } from '../lib/http.js';
 
 export async function handleMediaRequest(request, env, path, { verifySupabaseJwt }) {

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/storage.ts
+ * @description Persistência local segura (localStorage), hashing de senha com salt (fbh1:) e normalização/migração de PlatformState.
+ * @exports PLATFORM_STORAGE_KEY, hashPassword, verifyPassword, generateTeacherInviteCode, normalizePlatformState, mergeLoadedLanguageVocab, loadPlatformState, compactPlatformStateForStorage (+2)
+ */
 import { isMasterAdminEmail } from '../config/appConfig';
 import type { LanguageCode, PlatformState, UserProfile, VocabCard } from '../types/learning';
 

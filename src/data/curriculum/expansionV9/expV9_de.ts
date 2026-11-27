@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/expansionV9/expV9_de.ts
+ * @description Expansão curricular v9.0 (+47 unidades coesas A1–C1 para completar 150 unidades) em Alemão.
+ * @exports DE_V9_TOPICS, DE_V9_VOCAB
+ */
 import type { Topic, VocabCard } from '../../../types/learning';
 import {
   buildLanguageVocab,

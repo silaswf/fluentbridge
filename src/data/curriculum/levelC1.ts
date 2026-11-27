@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/levelC1.ts
+ * @description Unidades e vocabulário base do nível C1 de Inglês.
+ * @exports TOPICS_C1, VOCAB_C1
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 
 export const TOPICS_C1: Topic[] = [

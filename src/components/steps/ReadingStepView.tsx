@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/ReadingStepView.tsx
+ * @description Renderiza etapa de leitura guiada (reading) com glossário clicável palavra a palavra e compreensão textual.
+ * @exports ReadingStepView
+ */
 import { BookOpen, CheckCircle2, XCircle } from 'lucide-react';
 import type { GlossWord, LanguageCode, ReadingStep } from '../../types/learning';
 import { DualAudioButtons } from '../DualAudioButtons';

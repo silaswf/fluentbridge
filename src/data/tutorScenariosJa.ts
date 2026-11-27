@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosJa.ts
+ * @description Banco de cenários de conversação do Tutor IA para Japonês.
+ * @exports JA_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const JA_TUTOR_SCENARIOS: AITutorScenario[] = [

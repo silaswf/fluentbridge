@@ -1,3 +1,8 @@
+/**
+ * @file src/components/Sidebar.tsx
+ * @description Navegação lateral responsiva e barra mobile inferior com seletor de 17 idiomas, badges de XP/ofensiva e acesso a todos os módulos.
+ * @exports NavView, Sidebar
+ */
 import { useEffect, useRef, useState } from 'react';
 import {
   Award,

@@ -1,3 +1,5 @@
+<!-- @file docs/03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md — Auditoria técnica zero-based (telemetria de código e chunks) + análise competitiva e SWOT do FluentBridge no mercado. -->
+
 # 03 — Auditoria 360° (Zero-Based) & Análise Competitiva de Mercado (`v9.3.0`)
 
 > **Data da Auditoria:** 26 de novembro de 2026 · **Versão Auditada:** `v9.3.0`  

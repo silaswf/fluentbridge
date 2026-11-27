@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsGermanic.ts
+ * @description Banco de simulados oficiais cronometrados (Germanic).
+ * @exports GERMANIC_MOCK_EXAMS
+ */
 import type { MockExam } from '../../types/exams';
 
 export const GERMANIC_MOCK_EXAMS: MockExam[] = [

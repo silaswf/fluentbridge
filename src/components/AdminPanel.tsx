@@ -1,3 +1,8 @@
+/**
+ * @file src/components/AdminPanel.tsx
+ * @description Painel Admin Mestre: controle de usuários, bloqueios, código docente, diagnóstico de 17 vozes neurais, cotas R2 em tempo real, CSV, retenção de áudio e telemetria.
+ * @exports AdminPanel
+ */
 import { useEffect, useState } from 'react';
 import {
   Activity,

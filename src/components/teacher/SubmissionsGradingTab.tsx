@@ -1,3 +1,8 @@
+/**
+ * @file src/components/teacher/SubmissionsGradingTab.tsx
+ * @description Aba de fila e correção de envios Writing/Speaking com filtros por tipo, status, idioma (17), turma, busca, rubrica e selos.
+ * @exports SubmissionsGradingTab
+ */
 import { useState } from 'react';
 import { Award, CheckCircle2, Clock, Mic, PenTool, Save, Search } from 'lucide-react';
 import { getLanguageCourseMeta, LANGUAGE_COURSES_META } from '../../data/platformDefaults';

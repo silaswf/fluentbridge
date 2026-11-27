@@ -1,4 +1,6 @@
 @echo off
+:: @file gerar-apk.bat
+:: Script batch Windows para build web, sincronização Capacitor e geração do APK/AAB Android assinado.
 setlocal
 cd /d "%~dp0"
 

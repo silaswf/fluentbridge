@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * @file scripts/synthetic-health-check.mjs
+ * @description Script de verificação sintética externa contra /api/health e endpoints críticos da Edge API.
+ */
+/**
  * Health check sintético multi-camada (Web, Worker Edge, TTS e Release Pública)
  * Uso: node scripts/synthetic-health-check.mjs
  */

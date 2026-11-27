@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/courseTranslator.ts
+ * @description Motor do Tradutor Bidirecional por Curso: resolve par de idiomas (PT<->Alvo ou EN<->PT), chama /api/translate e faz fallback offline.
+ * @exports TranslatorRegister, TranslatorPairInfo, TranslatorAlternative, TranslatorVocabToken, TranslationResult, getTranslatorLanguagePair, loadTranslatorHistory, saveTranslatorHistory (+2)
+ */
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import { IN_LESSON_LEXICON } from '../data/inLessonLexicon';
 import type { LanguageCode, VocabCard } from '../types/learning';

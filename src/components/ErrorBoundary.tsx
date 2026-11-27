@@ -1,3 +1,8 @@
+/**
+ * @file src/components/ErrorBoundary.tsx
+ * @description Error Boundary React que captura falhas inesperadas de renderização, envia telemetria e exibe recuperação amigável.
+ * @exports ErrorBoundary
+ */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, Copy, RotateCcw } from 'lucide-react';
 import { reportClientError } from '../utils/telemetry';

@@ -1,3 +1,7 @@
+/**
+ * @file capacitor.config.ts
+ * @description Configuração do Capacitor para empacotamento Android (.apk/.aab), deep link OAuth e SplashScreen.
+ */
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {

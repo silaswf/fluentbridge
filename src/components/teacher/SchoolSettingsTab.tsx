@@ -1,3 +1,8 @@
+/**
+ * @file src/components/teacher/SchoolSettingsTab.tsx
+ * @description Aba do Estúdio do Professor para configurar nome da escola/professor, chaves de nuvem, snapshot JSON e restauração.
+ * @exports SchoolSettingsTab
+ */
 import { useRef, useState } from 'react';
 import {
   CloudDownload,

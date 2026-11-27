@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/italianExpansion.ts
+ * @description Conteúdo curricular (italianExpansion) do curso de idiomas.
+ * @exports ITALIAN_EXPANSION_BLUEPRINTS, ITALIAN_EXPANSION_TOPICS, ITALIAN_EXPANSION_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

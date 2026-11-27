@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/arGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de arGrammarGuide.
+ * @exports AR_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const AR_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/speech.test.ts
+ * @description Suíte de testes unitários Vitest validando speech.
+ */
 import { describe, expect, it } from 'vitest';
 import { evaluatePronunciation } from '../speech';
 

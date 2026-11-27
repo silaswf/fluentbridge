@@ -1,3 +1,8 @@
+/**
+ * @file src/components/AuthScreen.tsx
+ * @description Tela de Login e Cadastro Dark Sober: OAuth Google, e-mail/senha com hash local, seletor PT/EN/ES e vínculo por Turma, VIP ou Autônomo.
+ * @exports AuthScreen
+ */
 import { useState } from 'react';
 import {
   Award,

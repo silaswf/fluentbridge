@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/retentionNotifications.ts
+ * @description Utilitário retentionNotifications da camada de lógica do FluentBridge.
+ * @exports RetentionAlert, computeRetentionAlerts, requestAndSendBrowserNotification, scheduleNativeRetentionNotifications
+ */
 import type { UserProfile } from '../types/learning';
 
 export interface RetentionAlert {

@@ -1,3 +1,8 @@
+/**
+ * @file src/types/learning.ts
+ * @description Definições TypeScript centrais do domínio pedagógico: LanguageCode (17 idiomas), CEFRLevel, Topic, LessonStep, VocabCard, MockExam, UserProfile e PlatformState.
+ * @exports CEFRLevel, SkillType, TipCategory, Accent, LanguageCode, UserRole, StudentEnrollmentType, LanguageDialect (+46)
+ */
 export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
 export type SkillType = 'listening' | 'reading' | 'speaking' | 'writing';

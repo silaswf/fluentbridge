@@ -1,3 +1,4 @@
+/* @file src/index.css — Folha de estilos Tailwind CSS v4 com variante dark customizada (@custom-variant dark), tokens visuais e utilitários de safe-area mobile. */
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 

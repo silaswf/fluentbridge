@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/courseCohesion.ts
+ * @description Enriquecimento de coesão espiral (enrichCourseCohesion): injeta vocabulário reciclado, matching, cloze, módulos sequenciais e fonética.
+ * @exports CourseModuleGroup, buildCourseModules, enrichCourseCohesion
+ */
 import {
   CEFRLevel,
   FillBlankStep,

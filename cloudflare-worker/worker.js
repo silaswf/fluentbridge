@@ -1,4 +1,8 @@
 /**
+ * @file cloudflare-worker/worker.js
+ * @description Ponto de entrada do Cloudflare Worker (Edge API): roteia /api/health, /api/tts, /api/stt, /api/gemini-tutor, /api/translate, /api/youtube-study, /api/media/*, /api/telemetry e /api/admin/quotas com rate limit e verificação JWT.
+ */
+/**
  * FluentBridge Cloud API Worker
  * - /api/tts: Neural TTS via Cloudflare Workers AI (Deepgram Aura-2) + Google TTS fallback
  * - /api/stt: Cloud Whisper STT via Cloudflare Workers AI (@cf/openai/whisper-large-v3-turbo)

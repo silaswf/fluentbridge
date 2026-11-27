@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/adaptiveDifficulty.ts
+ * @description Motor de dificuldade adaptativa intra-lição: ajusta ritmo/dicas com base em acertos consecutivos.
+ * @exports AdaptiveDifficultyMode, AdaptiveProfile, computeAdaptiveProfile, AdaptiveHistoryState, loadAdaptiveHistory, recordAdaptiveAttempt, saveAdaptiveOverride
+ */
 export type AdaptiveDifficultyMode = 'guided' | 'balanced' | 'immersive';
 
 export interface AdaptiveProfile {

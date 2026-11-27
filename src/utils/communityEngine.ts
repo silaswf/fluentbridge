@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/communityEngine.ts
+ * @description Motor da Comunidade 2.0: geração de ligas semanais por idioma, desafio mensal, filtro de moderação e cálculo de diff.
+ * @exports LeagueTier, LEAGUES, getCurrentWeekKey, getLeagueForWeeklyXp, LeaderboardEntry, computeLanguageLeaderboard, getStarterPostsForLanguage, ModerationResult (+3)
+ */
 import type { CommunityPost, LanguageCode, UserProfile } from '../types/learning';
 
 export interface LeagueTier {

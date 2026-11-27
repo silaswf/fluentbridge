@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/offlineOutbox.ts
+ * @description Fila offline persistente (outbox) para lições, revisões SM-2 e checkpoints, com drenagem automática ao reconectar.
+ * @exports OutboxKind, OutboxItem, listOutboxItems, getPendingOutboxCount, enqueueOfflineMutation, clearOfflineOutbox, flushOfflineOutbox, flushProgressOutbox
+ */
 export type OutboxKind =
   | 'lesson_complete'
   | 'srs_review'

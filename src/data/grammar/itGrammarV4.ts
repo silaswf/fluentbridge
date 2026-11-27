@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/itGrammarV4.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de itGrammarV4.
+ * @exports IT_GRAMMAR_V4
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const IT_GRAMMAR_V4: GrammarReferenceEntry[] = [

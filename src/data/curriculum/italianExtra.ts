@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/italianExtra.ts
+ * @description Conteúdo curricular (italianExtra) do curso de idiomas.
+ * @exports ITALIAN_ALL_TOPICS, ITALIAN_ALL_VOCAB, ITALIAN_ALL_GRAMMAR_GUIDE
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

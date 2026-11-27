@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/frGrammarV4.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de frGrammarV4.
+ * @exports FR_GRAMMAR_V4
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const FR_GRAMMAR_V4: GrammarReferenceEntry[] = [

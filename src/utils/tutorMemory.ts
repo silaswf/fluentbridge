@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/tutorMemory.ts
+ * @description Utilitário tutorMemory da camada de lógica do FluentBridge.
+ * @exports PedagogicalMemorySummary, buildPedagogicalMemoryContext
+ */
 import type { LanguageCode, MistakeEntry, VocabCard } from '../types/learning';
 
 export interface PedagogicalMemorySummary {

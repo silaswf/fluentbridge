@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examCatalog.ts
+ * @description Catálogo oficial dos 25 formatos de exames cronometrados (IELTS, CELPIP, DET, CELPE-Bras, TÖMER, YAEL etc.).
+ * @exports EXAM_TYPES, getExamTypesByLanguage, getExamTypeById
+ */
 import type { ExamTypeMeta } from '../../types/exams';
 import type { LanguageCode } from '../../types/learning';
 

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsCelpip.ts
+ * @description Banco de simulados oficiais cronometrados (Celpip).
+ * @exports CELPIP_MOCK_EXAMS
+ */
 import type { MockExam } from '../../types/exams';
 
 export const CELPIP_MOCK_EXAMS: MockExam[] = [

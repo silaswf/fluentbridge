@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/deGrammarExtra.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de deGrammarExtra.
+ * @exports DE_GRAMMAR_EXTRA, DE_ALL_GRAMMAR_100
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import { GERMAN_ALL_GRAMMAR_GUIDE } from '../curriculum/germanExtra';
 

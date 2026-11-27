@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/voiceAndGrader.test.ts
+ * @description Suíte de testes unitários Vitest validando voiceAndGrader.
+ */
 import { describe, expect, it, vi } from 'vitest';
 import { getExamTypeById } from '../../data/exams/examCatalog';
 import { ALL_MOCK_EXAMS } from '../../data/exams';

@@ -1,3 +1,8 @@
+/**
+ * @file src/components/LessonPlayer.tsx
+ * @description Player interativo de lições multi-etapas (vocab, fonética, dicas, listening, reading, cloze, speaking, writing, ditado, pares mínimos e histórias) com XP e vidas.
+ * @exports LessonPlayer
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FillBlankStepView } from './lesson/FillBlankStepView';
 import { SpeakingStepView } from './lesson/SpeakingStepView';

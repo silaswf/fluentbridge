@@ -1,3 +1,8 @@
+/**
+ * @file src/components/GradedReadersView.tsx
+ * @description Leitores Graduados por nível CEFR e idioma com glossário clicável, áudio integrado e acompanhamento de leitura.
+ * @exports GradedReadersView
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Check, Play, Plus, Square, Volume2 } from 'lucide-react';
 import type { LanguageCode } from '../types/learning';

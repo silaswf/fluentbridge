@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/examScoring.test.ts
+ * @description Suíte de testes unitários Vitest validando examScoring.
+ */
 import { describe, expect, it } from 'vitest';
 import { getExamTypeById } from '../../data/exams/examCatalog';
 import { gradeMockExam } from '../examScoring';

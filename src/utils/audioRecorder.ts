@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/audioRecorder.ts
+ * @description Gravador de áudio via MediaRecorder API com compactação para envio ao professor e Whisper STT.
+ * @exports AudioRecorderHandle, isAudioRecordingSupported, startAudioRecording
+ */
 export interface AudioRecorderHandle {
   stop: () => void;
   cancel: () => void;

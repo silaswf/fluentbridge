@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammarGuide.ts
+ * @description Agregador central dos 3.400 guias de referência gramatical (200 por idioma nos 17 idiomas).
+ * @exports GrammarReferenceEntry, SWJ_GRAMMAR_GUIDE, ALL_GRAMMAR_GUIDE, getGrammarGuideByLanguage
+ */
 import type { LanguageCode } from '../types/learning';
 import { FRENCH_GRAMMAR_GUIDE } from './curriculum/frenchCourse';
 import { GERMAN_ALL_GRAMMAR_GUIDE } from './curriculum/germanExtra';

@@ -1,3 +1,7 @@
+/**
+ * @file e2e/human-journey.spec.ts
+ * @description Jornadas humanas E2E (Desktop, Polyglot/LGPD, Mobile 390x844 + Admin Health/Quotas, WCAG AA Contrast e Jornada 5 v9.x).
+ */
 import { expect, test } from '@playwright/test';
 
 async function attachErrorGuards(page: import('@playwright/test').Page) {

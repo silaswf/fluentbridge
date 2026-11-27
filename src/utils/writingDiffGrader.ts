@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/writingDiffGrader.ts
+ * @description Utilitário writingDiffGrader da camada de lógica do FluentBridge.
+ * @exports WritingDiffToken, WritingLineFeedback, HybridWritingLineFeedback, analyzeWritingLineByLine, analyzeWritingHybrid
+ */
 import {
   CLOUD_GEMINI_PROXY_TOKEN,
   DEFAULT_BACKEND_API_URL,

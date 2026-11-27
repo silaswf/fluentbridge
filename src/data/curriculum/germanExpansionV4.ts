@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/germanExpansionV4.ts
+ * @description Conteúdo curricular (germanExpansionV4) do curso de idiomas.
+ * @exports GERMAN_V4_TOPICS, GERMAN_V4_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

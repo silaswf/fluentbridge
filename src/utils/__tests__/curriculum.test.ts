@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/curriculum.test.ts
+ * @description Suíte de testes unitários Vitest validando curriculum.
+ */
 import { describe, expect, it } from 'vitest';
 import { EXAM_TYPES } from '../../data/exams/examCatalog';
 import { ALL_MOCK_EXAMS } from '../../data/exams';

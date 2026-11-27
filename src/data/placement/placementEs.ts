@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementEs.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Espanhol.
+ * @exports PLACEMENT_QUESTIONS_ES
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_ES: PlacementQuestion[] = [

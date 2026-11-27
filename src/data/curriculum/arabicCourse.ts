@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/arabicCourse.ts
+ * @description Conteúdo curricular (arabicCourse) do curso de idiomas.
+ * @exports ARABIC_META, ARABIC_BASE_TOPICS, ARABIC_BASE_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

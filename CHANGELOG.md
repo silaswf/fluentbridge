@@ -1,3 +1,5 @@
+<!-- @file CHANGELOG.md — Registro histórico cronológico de todas as versões, correções e entregas do FluentBridge Academy. -->
+
 # Changelog — FluentBridge
 
 Registro histórico completo de versões, funcionalidades, correções de bugs, melhorias de autenticação/nuvem e builds multiplataforma do **FluentBridge Academy**.

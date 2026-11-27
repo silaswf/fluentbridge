@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/hebrewNiqqud.ts
+ * @description Utilitário para remover ou alternar diacríticos vocálicos (Niqqud) em textos em Hebraico.
+ * @exports HebrewScriptMode, stripHebrewNiqqud, loadHebrewScriptMode, saveHebrewScriptMode
+ */
 export type HebrewScriptMode = 'niqqud' | 'modern';
 
 const HEBREW_MODE_KEY = 'fb_he_script_mode_v1';

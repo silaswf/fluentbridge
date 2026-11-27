@@ -1,3 +1,7 @@
+/**
+ * @file scripts/sync-version-manifest.mjs
+ * @description Sincroniza o número de versão entre package.json, appConfig.ts e public/version.json.
+ */
 import fs from 'node:fs';
 import path from 'node:path';
 

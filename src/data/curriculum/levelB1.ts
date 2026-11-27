@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/levelB1.ts
+ * @description Unidades e vocabulário base do nível B1 de Inglês.
+ * @exports TOPICS_B1, VOCAB_B1
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 
 export const TOPICS_B1: Topic[] = [

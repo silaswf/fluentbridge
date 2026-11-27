@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/notifications.ts
+ * @description Utilitário notifications da camada de lógica do FluentBridge.
+ * @exports scheduleDailyStudyReminder
+ */
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 

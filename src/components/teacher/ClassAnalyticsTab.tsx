@@ -1,3 +1,8 @@
+/**
+ * @file src/components/teacher/ClassAnalyticsTab.tsx
+ * @description Subcomponente docente ClassAnalyticsTab.
+ * @exports ClassAnalyticsTab
+ */
 import { BarChart3, Clock, FileText, Trophy, Users } from 'lucide-react';
 import type { StudentSubmission, UserProfile } from '../../types/learning';
 

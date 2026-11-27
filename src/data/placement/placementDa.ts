@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementDa.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Dinamarquês.
+ * @exports PLACEMENT_DA
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_DA: PlacementQuestion[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/lessons.ts
+ * @description Agregador de todas as 2.550 unidades integradas e vocabulário inicial nos 17 idiomas.
+ * @exports BUILTIN_TOPICS, ALL_BUILTIN_TOPICS, INITIAL_VOCABULARY, ALL_INITIAL_VOCABULARY, cloneInitialVocab, INITIAL_CLASSES, INITIAL_USERS, INITIAL_SUBMISSIONS (+1)
+ */
 import type {
   ClassGroup,
   PlatformState,

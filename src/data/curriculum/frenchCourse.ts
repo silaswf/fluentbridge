@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/frenchCourse.ts
+ * @description Conteúdo curricular (frenchCourse) do curso de idiomas.
+ * @exports FRENCH_ALL_TOPICS, FRENCH_ALL_VOCAB, FRENCH_GRAMMAR_GUIDE
+ */
 import type { CEFRLevel, Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

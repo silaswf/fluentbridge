@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/VocabIntroStep.tsx
+ * @description Renderiza etapa inicial de vocabulário da unidade com IPA, exemplos, áudio e marcação de estudo.
+ * @exports VocabIntroStep
+ */
 import { Check, RefreshCw, Sparkles } from 'lucide-react';
 import type { LanguageCode, VocabCard } from '../../types/learning';
 import { extractScriptCharsFromWord } from '../../data/scriptTrainerData';

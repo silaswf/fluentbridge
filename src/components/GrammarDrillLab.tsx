@@ -1,3 +1,8 @@
+/**
+ * @file src/components/GrammarDrillLab.tsx
+ * @description Laboratório de Drills Gramaticais interativos com feedback imediato e prática intensiva por idioma.
+ * @exports GrammarDrillLab
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Flame, RotateCcw, Timer, XCircle, Zap } from 'lucide-react';
 import type { LanguageCode, SkillType } from '../types/learning';

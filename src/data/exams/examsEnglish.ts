@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsEnglish.ts
+ * @description Banco de simulados oficiais cronometrados (English).
+ * @exports ENGLISH_MOCK_EXAMS
+ */
 import type { MockExam } from '../../types/exams';
 
 export const ENGLISH_MOCK_EXAMS: MockExam[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/certificatePdf.ts
+ * @description Utilitário certificatePdf da camada de lógica do FluentBridge.
+ * @exports downloadCertificatePdf
+ */
 import type { CEFRLevel, CertificateRecord } from '../types/learning';
 
 const LEVEL_NAMES: Record<CEFRLevel, string> = {

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/courseBuilder.ts
+ * @description Construtor de currículos (buildRichLanguageTopic, buildLanguageVocab) e geração padronizada de unidades multi-etapas.
+ * @exports RichLanguageBlueprint, CourseDialectMeta, buildRichLanguageTopic, buildLanguageVocab
+ */
 import type {
   CEFRLevel,
   GlossWord,

@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/cloudSync.test.ts
+ * @description Suíte de testes unitários Vitest validando cloudSync.
+ */
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PLATFORM_STATE } from '../../data/lessons';
 import type { PlatformState, StudentSubmission, UserProfile } from '../../types/learning';

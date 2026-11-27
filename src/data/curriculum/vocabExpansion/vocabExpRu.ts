@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpRu.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Russo.
+ * @exports VOCAB_EXP_RU, VOCAB_FIXES_RU
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_RU: VocabExpansionTuple[] = [

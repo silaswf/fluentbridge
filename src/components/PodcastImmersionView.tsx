@@ -1,3 +1,8 @@
+/**
+ * @file src/components/PodcastImmersionView.tsx
+ * @description Player de Podcasts de Imersão por idioma com transcrição bilíngue, áudio neural e checkpoints de compreensão.
+ * @exports PodcastImmersionView
+ */
 import { useEffect, useRef, useState } from 'react';
 import {
   CheckCircle2,

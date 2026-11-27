@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/studyPlanEngine.ts
+ * @description Gerador de plano de estudos semanal personalizado conforme meta, nível CEFR e exames por idioma.
+ * @exports WeeklyStudyPlan, LEARNING_GOAL_OPTIONS, generateWeeklyStudyPlan
+ */
 import type { CEFRLevel, LanguageCode, LearningGoalType, Topic } from '../types/learning';
 
 export interface WeeklyStudyPlan {

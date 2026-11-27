@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/frenchExpansion.ts
+ * @description Conteúdo curricular (frenchExpansion) do curso de idiomas.
+ * @exports FRENCH_EXPANSION_BLUEPRINTS, FRENCH_EXPANSION_TOPICS, FRENCH_EXPANSION_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

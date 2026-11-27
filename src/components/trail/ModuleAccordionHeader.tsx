@@ -1,3 +1,8 @@
+/**
+ * @file src/components/trail/ModuleAccordionHeader.tsx
+ * @description Cartão resumido de prévia e ações de tópico exibido na trilha de aprendizado.
+ * @exports ModuleAccordionHeader
+ */
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CEFRLevel } from '../../types/learning';
 

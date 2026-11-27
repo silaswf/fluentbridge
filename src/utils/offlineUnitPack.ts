@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/offlineUnitPack.ts
+ * @description Download e cache local das próximas unidades da trilha para estudo offline.
+ * @exports getCachedOfflineUnits, markUnitsOffline, downloadNextUnitsOffline
+ */
 import type { Topic, VocabCard } from '../types/learning';
 import { fetchNeuralTtsBlob } from './speech';
 

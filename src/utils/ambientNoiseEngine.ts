@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/ambientNoiseEngine.ts
+ * @description Utilitário ambientNoiseEngine da camada de lógica do FluentBridge.
+ * @exports AmbientNoisePreset, AmbientNoiseIntensity, AmbientNoiseOption, AMBIENT_INTENSITY_OPTIONS, AMBIENT_NOISE_OPTIONS, stopAmbientNoise, setAmbientNoiseIntensity, startAmbientNoise
+ */
 export type AmbientNoisePreset = 'clean' | 'cafe' | 'station' | 'phone';
 export type AmbientNoiseIntensity = 'soft' | 'real' | 'challenge';
 

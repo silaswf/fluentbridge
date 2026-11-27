@@ -1,3 +1,8 @@
+/**
+ * @file src/types/exams.ts
+ * @description Arquivo estrutural src/types/exams.ts do FluentBridge Academy.
+ * @exports ExamPracticeCategory, ExamBandReference, ExamTypeMeta, ExamQuestion, ExamWritingTask, ExamSpeakingPart, ExamSpeakingTask, WritingCriterionScore (+3)
+ */
 import type { CEFRLevel, LanguageCode } from './learning';
 
 export type ExamPracticeCategory =

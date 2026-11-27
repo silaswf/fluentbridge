@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/speech.ts
+ * @description Motor unificado de TTS neural (Cloudflare Worker /api/tts + cache IndexedDB + Web Speech fallback), STT Whisper e diagnóstico de 17 vozes.
+ * @exports pickBestNaturalVoice, fetchNeuralTtsBlob, getSelectedVoiceLabels, getAllVoiceProviderLabels, VoiceDiagnosticItem, getAllVoiceDiagnostics, stopSpeaking, speakText (+9)
+ */
 import { Capacitor } from '@capacitor/core';
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import { REGIONAL_ACCENTS_BY_LANGUAGE } from '../data/regionalAccents';

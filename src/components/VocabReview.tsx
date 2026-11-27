@@ -1,3 +1,8 @@
+/**
+ * @file src/components/VocabReview.tsx
+ * @description Sistema de Revisão Espaçada (SM-2) com flashcards, modo Cloze contextual, estatísticas de memória e integração Hands-Free.
+ * @exports VocabReview
+ */
 import { useEffect, useMemo, useState } from 'react';
 import {
   BrainCircuit,

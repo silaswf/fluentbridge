@@ -1,4 +1,6 @@
 @echo off
+:: @file publicar-versao.bat
+:: Script batch Windows para automatizar build, commit, tag de versão e publicação.
 setlocal
 cd /d "%~dp0"
 

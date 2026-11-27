@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpAf.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Africâner.
+ * @exports VOCAB_EXP_AF, VOCAB_FIXES_AF
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_AF: VocabExpansionTuple[] = [

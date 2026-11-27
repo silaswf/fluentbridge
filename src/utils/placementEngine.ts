@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/placementEngine.ts
+ * @description Motor adaptativo CAT (Computerized Adaptive Testing) de nivelamento em 15 questões nos 17 idiomas.
+ * @exports PlacementQuestion, PlacementAnswerRecord, LevelBreakdown, AdaptivePlacementSummary, ADAPTIVE_LEVELS, TOTAL_PLACEMENT_QUESTIONS, INITIAL_PLACEMENT_LEVEL, getNextAdaptiveLevel (+2)
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 
 export interface PlacementQuestion {

@@ -1,3 +1,7 @@
+/**
+ * @file vite.config.ts
+ * @description Configuração do bundler Vite, plugin PWA (Workbox) e fatiamento manualChunks por idioma para manter todos os chunks abaixo de 500 kB.
+ */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';

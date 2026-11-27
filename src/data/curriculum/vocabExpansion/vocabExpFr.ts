@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpFr.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Francês.
+ * @exports VOCAB_EXP_FR, VOCAB_FIXES_FR
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_FR: VocabExpansionTuple[] = [

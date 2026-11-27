@@ -1,3 +1,8 @@
+/**
+ * @file src/components/lesson/FillBlankStepView.tsx
+ * @description Subcomponente do LessonPlayer que renderiza exercícios de preenchimento de lacunas (fill_blank) com suporte a dicas e validação.
+ * @exports FillBlankStepView
+ */
 import type { FillBlankStep } from '../../types/learning';
 
 interface FillBlankStepViewProps {

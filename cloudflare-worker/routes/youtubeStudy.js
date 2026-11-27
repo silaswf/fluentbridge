@@ -1,3 +1,8 @@
+/**
+ * @file cloudflare-worker/routes/youtubeStudy.js
+ * @description Rota POST /api/youtube-study: extrai metadados/legendas do YouTube (ou SRT manual) e gera estudo tokenizado, notas gramaticais e quiz via Gemini.
+ * @exports extractYouTubeIdServer, handleYouTubeStudyRequest
+ */
 import { GEMINI_FALLBACK_MODELS, jsonResponse } from '../lib/http.js';
 
 export function extractYouTubeIdServer(rawUrl) {

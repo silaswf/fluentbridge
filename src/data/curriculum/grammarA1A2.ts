@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/grammarA1A2.ts
+ * @description Unidades focadas em gramática (A1A2) de Inglês.
+ * @exports GRAMMAR_TOPICS_A1_A2, GRAMMAR_VOCAB_A1_A2
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 
 export const GRAMMAR_TOPICS_A1_A2: Topic[] = [

@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/vocabUnlock.test.ts
+ * @description Suíte de testes unitários Vitest validando vocabUnlock.
+ */
 import { describe, expect, it } from 'vitest';
 import type { VocabCard } from '../../types/learning';
 import { getUnlockedVocabCards } from '../vocabUnlock';

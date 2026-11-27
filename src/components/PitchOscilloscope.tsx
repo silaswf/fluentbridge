@@ -1,3 +1,8 @@
+/**
+ * @file src/components/PitchOscilloscope.tsx
+ * @description Osciloscópio visual de contorno tonal para prática de tons em Mandarim e entonação/pitch-accent em Japonês.
+ * @exports PitchOscilloscope
+ */
 import { useEffect, useRef, useState } from 'react';
 import { Activity, Mic, Square } from 'lucide-react';
 import type { LanguageCode } from '../types/learning';

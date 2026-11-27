@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosHe.ts
+ * @description Banco de cenários de conversação do Tutor IA para Hebraico (RTL).
+ * @exports HE_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const HE_TUTOR_SCENARIOS: AITutorScenario[] = [

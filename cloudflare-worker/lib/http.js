@@ -1,3 +1,8 @@
+/**
+ * @file cloudflare-worker/lib/http.js
+ * @description Helpers HTTP compartilhados do Worker: cabeçalhos CORS padrão, lista de modelos Gemini fallback e builder jsonResponse().
+ * @exports CORS_HEADERS, GEMINI_FALLBACK_MODELS, jsonResponse
+ */
 export const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

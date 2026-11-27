@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/norwegianExpansion.ts
+ * @description Conteúdo curricular (norwegianExpansion) do curso de idiomas.
+ * @exports NORWEGIAN_EXP_TOPICS, NORWEGIAN_EXP_VOCAB, NORWEGIAN_150_TOPICS, NORWEGIAN_150_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

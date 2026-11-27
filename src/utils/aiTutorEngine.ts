@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/aiTutorEngine.ts
+ * @description Utilitário aiTutorEngine da camada de lógica do FluentBridge.
+ * @exports TutorReplyResult, generateDynamicUnitScenario, generateCustomAIScenario, generateDynamicOpeningVariation, generateTutorReply
+ */
 import {
   CLOUD_GEMINI_PROXY_TOKEN,
   DEFAULT_BACKEND_API_URL,

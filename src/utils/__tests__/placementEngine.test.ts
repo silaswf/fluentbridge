@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/placementEngine.test.ts
+ * @description Suíte de testes unitários Vitest validando placementEngine.
+ */
 import { describe, expect, it } from 'vitest';
 import {
   ALL_PLACEMENT_QUESTIONS,

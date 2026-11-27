@@ -1,3 +1,7 @@
+/**
+ * @file electron/main.cjs
+ * @description Processo principal Electron (Desktop Windows): cria a BrowserWindow segura, configura permissões de microfone e integra o auto-updater.
+ */
 const { app, BrowserWindow, ipcMain, session, shell } = require('electron');
 const fs = require('fs');
 const https = require('https');

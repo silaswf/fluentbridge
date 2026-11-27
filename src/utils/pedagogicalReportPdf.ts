@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/pedagogicalReportPdf.ts
+ * @description Gerador de Boletim Pedagógico mensal imprimível/PDF para alunos e turmas.
+ * @exports downloadPedagogicalReportPdf
+ */
 import type { LanguageCourse, UserProfile } from '../types/learning';
 
 function escapeHtml(raw: string): string {

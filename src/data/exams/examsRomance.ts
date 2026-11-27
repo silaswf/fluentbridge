@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsRomance.ts
+ * @description Banco de simulados oficiais cronometrados (Romance).
+ * @exports ROMANCE_MOCK_EXAMS
+ */
 import type { MockExam } from '../../types/exams';
 
 export const ROMANCE_MOCK_EXAMS: MockExam[] = [

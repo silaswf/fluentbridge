@@ -1,3 +1,8 @@
+/**
+ * @file src/components/TipsLibrary.tsx
+ * @description Componente de interface TipsLibrary do FluentBridge.
+ * @exports TipsLibrary
+ */
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,

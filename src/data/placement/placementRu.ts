@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementRu.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Russo.
+ * @exports PLACEMENT_QUESTIONS_RU
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_RU: PlacementQuestion[] = [

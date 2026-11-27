@@ -1,3 +1,8 @@
+/**
+ * @file src/data/podcastEpisodes.ts
+ * @description Catálogo dos 85 episódios de podcast de imersão (5 por idioma) com transcrição e checkpoints.
+ * @exports PodcastLine, PodcastEpisode, PODCAST_EPISODES
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 import {
   expandPodcastLinesAndCheckpoints,

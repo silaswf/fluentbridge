@@ -1,3 +1,8 @@
+/**
+ * @file src/data/inLessonLexicon.ts
+ * @description Léxico de referência rápida dentro das lições e glossário offline para os 17 idiomas.
+ * @exports InLessonLexiconEntry, IN_LESSON_LEXICON
+ */
 import { LanguageCode } from '../types/learning';
 
 export interface InLessonLexiconEntry {

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementDe.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Alemão.
+ * @exports PLACEMENT_QUESTIONS_DE
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_DE: PlacementQuestion[] = [

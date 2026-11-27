@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/ShadowingPanel.tsx
+ * @description Painel de prática de Shadowing: reproduz frase modelo e grava a repetição simultânea do aluno para comparação.
+ * @exports ShadowingPanel
+ */
 import { useEffect, useRef, useState } from 'react';
 import { Mic, Play, Radio, Square, Volume2 } from 'lucide-react';
 import type { LanguageCode } from '../../types/learning';

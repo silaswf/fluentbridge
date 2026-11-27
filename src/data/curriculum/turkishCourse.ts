@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/turkishCourse.ts
+ * @description Conteúdo curricular (turkishCourse) do curso de idiomas.
+ * @exports TURKISH_META, TURKISH_BASE_TOPICS, TURKISH_BASE_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

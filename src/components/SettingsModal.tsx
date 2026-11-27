@@ -1,3 +1,8 @@
+/**
+ * @file src/components/SettingsModal.tsx
+ * @description Modal unificado de Configurações: sotaque regional, tema (Claro/Escuro/Sistema), idioma da interface, fonte, fila offline e logout.
+ * @exports SettingsModal
+ */
 import { useState } from 'react';
 import {
   Download,

@@ -1,3 +1,5 @@
+<!-- @file docs/02-ARQUITETURA-NUVEM-E-PLATAFORMAS.md — Documentação de arquitetura técnica: cliente React/PWA, Electron, Capacitor, iOS Safari PWA, Cloudflare Worker + R2, Supabase RLS e diretrizes. -->
+
 # 02 — Arquitetura, Nuvem & Plataformas (`v9.3.0`)
 
 Este documento consolida toda a arquitetura técnica do **FluentBridge Academy**: cliente Web/PWA, aplicativos nativos Windows (Electron) e Android (Capacitor), estratégia iOS gratuita (Safari PWA), Edge API no Cloudflare Workers (`v9.3.0`, 10 endpoints incl. `/api/translate` e `/api/admin/quotas`) + R2, banco/autenticação Supabase e pipeline CI/CD no GitHub Actions.
@@ -94,3 +96,15 @@ Hospedado em `https://fluentbridge-api.silaswf.workers.dev` com bindings `env.AI
 ### CI/CD (`.github/workflows/build-android-apk.yml`)
 - **Job `secret-scan`:** bloqueia o pipeline caso padrões de chaves privadas/tokens existam no repositório antes de qualquer build.
 - **Jobs de Build & Release:** executam `tsc`, `vitest`, `vite build`, compilam Windows `.exe` (NSIS) e Android `.apk`/`.aab` assinados e publicam automaticamente em `silaswf/fluentbridge-releases` a cada tag `v*`.
+
+---
+
+## 6. Diretriz de Manutenibilidade & Comentários Obrigatórios
+
+Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem a diretriz permanente definida em [`AGENTS.md`](../AGENTS.md) e [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md): todo arquivo relevante mantém um cabeçalho `@file` descrevendo sua finalidade e principais funções/exportações, garantindo leitura rápida e manutenção segura.
+
+---
+
+## 6. Diretriz de Manutenibilidade & Comentários Obrigatórios
+
+Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem a diretriz permanente definida em [`AGENTS.md`](../AGENTS.md) e [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md): todo arquivo relevante mantém um cabeçalho `@file` descrevendo sua finalidade e principais funções/exportações, garantindo leitura rápida e manutenção segura.

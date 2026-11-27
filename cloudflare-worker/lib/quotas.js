@@ -1,3 +1,8 @@
+/**
+ * @file cloudflare-worker/lib/quotas.js
+ * @description Gerenciamento de cotas diárias persistentes no R2 (checkPersistentDailyQuota) e agregação de consumo multi-dia (getDailyQuotasSnapshot).
+ * @exports DAILY_QUOTA_LIMITS, checkPersistentDailyQuota, getDailyQuotasSnapshot
+ */
 export const DAILY_QUOTA_LIMITS = {
   stt: { limit: 200, label: 'Transcrição Whisper STT', endpoint: '/api/stt' },
   gemini: { limit: 250, label: 'Tutor IA & Corretor Gemini', endpoint: '/api/gemini-tutor' },

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/gradedReaders.ts
+ * @description Catálogo de Leitores Graduados (contos e artigos CEFR) para todos os 17 idiomas.
+ * @exports ReaderSentence, ReaderGlossaryWord, GradedChapter, GradedReaderBook, GRADED_READERS, getGradedReaderByLanguage
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 
 export interface ReaderSentence {

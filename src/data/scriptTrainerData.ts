@@ -1,3 +1,8 @@
+/**
+ * @file src/data/scriptTrainerData.ts
+ * @description Dados de alfabetos, traços e caracteres especiais (Hiragana, Katakana, Cirílico, Árabe, Hebraico Alefbet, Turco e Nórdico).
+ * @exports ScriptCharacterItem, MandarinToneGuide, JAPANESE_HIRAGANA, JAPANESE_KATAKANA, JAPANESE_KANJI, CHINESE_HANZI, MANDARIN_TONES, RUSSIAN_CYRILLIC (+6)
+ */
 export interface ScriptCharacterItem {
   char: string;
   reading: string;

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/examAiGrader.ts
+ * @description Utilitário examAiGrader da camada de lógica do FluentBridge.
+ * @exports gradeWritingWithRubric, gradeSpeakingWithRubric
+ */
 import {
   CLOUD_GEMINI_PROXY_TOKEN,
   DEFAULT_BACKEND_API_URL,

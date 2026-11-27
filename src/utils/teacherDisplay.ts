@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/teacherDisplay.ts
+ * @description Resolve o nome público exibido para professores (priorizando nome configurado no estúdio com fallback para cadastro).
+ * @exports getTeacherDisplayName
+ */
 import type { UserProfile } from '../types/learning';
 
 /**

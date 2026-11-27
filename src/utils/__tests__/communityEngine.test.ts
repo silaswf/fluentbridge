@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/communityEngine.test.ts
+ * @description Suíte de testes unitários Vitest validando communityEngine.
+ */
 import { describe, expect, it } from 'vitest';
 import {
   computeLanguageLeaderboard,

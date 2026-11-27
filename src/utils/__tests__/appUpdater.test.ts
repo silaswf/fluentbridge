@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/appUpdater.test.ts
+ * @description Suíte de testes unitários Vitest validando appUpdater.
+ */
 import { describe, expect, it, vi } from 'vitest';
 import { checkForAppUpdate, compareVersions } from '../appUpdater';
 

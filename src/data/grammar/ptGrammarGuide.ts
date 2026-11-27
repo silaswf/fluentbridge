@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/ptGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de ptGrammarGuide.
+ * @exports PT_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const PT_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

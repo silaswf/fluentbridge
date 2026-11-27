@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpSv.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Sueco.
+ * @exports VOCAB_EXP_SV, VOCAB_FIXES_SV
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_SV: VocabExpansionTuple[] = [

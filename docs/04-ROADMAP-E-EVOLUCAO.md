@@ -1,3 +1,5 @@
+<!-- @file docs/04-ROADMAP-E-EVOLUCAO.md — Histórico consolidado de versões (v1.0 a v9.3.0) e roadmap estratégico das próximas ondas. -->
+
 # 04 — Roadmap & Evolução (`v1.0.0 → v10.0.0`)
 
 Histórico consolidado de todas as fases entregues até a **`v9.3.0`** e plano de evolução técnica e comercial para as próximas versões.

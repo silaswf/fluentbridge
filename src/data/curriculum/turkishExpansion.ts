@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/turkishExpansion.ts
+ * @description Conteúdo curricular (turkishExpansion) do curso de idiomas.
+ * @exports TURKISH_EXP_TOPICS, TURKISH_EXP_VOCAB, TURKISH_150_TOPICS, TURKISH_150_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

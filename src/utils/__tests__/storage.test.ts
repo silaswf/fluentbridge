@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/storage.test.ts
+ * @description Suíte de testes unitários Vitest validando storage.
+ */
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PLATFORM_STATE } from '../../data/lessons';
 import {

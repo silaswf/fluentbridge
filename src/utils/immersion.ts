@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/immersion.ts
+ * @description Strings localizadas de instrução e imersão progressiva (B2/C1 em idioma-alvo; invertida EN->PT no curso de Português).
+ * @exports isImmersionLevel, ImmersionStrings, getImmersionStrings
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 
 export function isImmersionLevel(level?: CEFRLevel): boolean {

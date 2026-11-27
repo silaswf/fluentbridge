@@ -1,3 +1,8 @@
+/**
+ * @file src/components/AITutor.tsx
+ * @description Tutor IA de Conversação (chat e chamada de voz com VAD): cenários contextualizados, correção gramatical, áudio neural e modo imersão.
+ * @exports AITutor
+ */
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,

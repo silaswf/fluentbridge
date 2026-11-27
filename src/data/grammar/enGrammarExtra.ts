@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/enGrammarExtra.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de enGrammarExtra.
+ * @exports EN_GRAMMAR_EXTRA
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const EN_GRAMMAR_EXTRA: GrammarReferenceEntry[] = [

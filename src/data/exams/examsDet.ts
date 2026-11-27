@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examsDet.ts
+ * @description Banco de simulados oficiais cronometrados (Det).
+ * @exports DET_MOCK_EXAMS
+ */
 import type { MockExam } from '../../types/exams';
 
 export const DET_MOCK_EXAMS: MockExam[] = [

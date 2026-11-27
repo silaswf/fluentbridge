@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/russianExtra.ts
+ * @description Conteúdo curricular (russianExtra) do curso de idiomas.
+ * @exports RUSSIAN_ALL_TOPICS, RUSSIAN_ALL_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

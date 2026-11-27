@@ -1,3 +1,8 @@
+/**
+ * @file src/data/languages.ts
+ * @description Registro completo de cursos, tópicos integrados e funções de lookup por LanguageCode.
+ * @exports LANGUAGE_COURSES, SPANISH_STARTER_TOPICS, SPANISH_VOCAB, ENGLISH_ALL_TOPICS, ENGLISH_ALL_VOCAB, SPANISH_100_TOPICS, SPANISH_100_VOCAB, FRENCH_100_TOPICS (+14)
+ */
 import type { LanguageCode, LanguageCourse, Topic, VocabCard } from '../types/learning';
 import { GRAMMAR_TOPICS_A1_A2, GRAMMAR_VOCAB_A1_A2 } from './curriculum/grammarA1A2';
 import { GRAMMAR_TOPICS_B1_B2, GRAMMAR_VOCAB_B1_B2 } from './curriculum/grammarB1B2';

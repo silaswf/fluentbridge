@@ -1,3 +1,8 @@
+/**
+ * @file src/hooks/useCloudSyncController.ts
+ * @description Arquivo estrutural src/hooks/useCloudSyncController.ts do FluentBridge Academy.
+ * @exports useCloudSyncController
+ */
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import {
   fetchCurrentSupabaseUser,

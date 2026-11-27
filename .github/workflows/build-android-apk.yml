@@ -1,3 +1,5 @@
+# @file .github/workflows/build-android-apk.yml
+# Pipeline CI/CD GitHub Actions: varredura de segredos (secret-scan), testes, build multiplataforma (Windows .exe + Android .apk/.aab) e publicação em Releases.
 name: Build Multiplatform Release (Android & Windows)
 
 on:

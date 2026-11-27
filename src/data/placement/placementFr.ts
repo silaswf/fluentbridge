@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementFr.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Francês.
+ * @exports PLACEMENT_QUESTIONS_FR
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_FR: PlacementQuestion[] = [

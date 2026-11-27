@@ -1,3 +1,8 @@
+/**
+ * @file src/components/PlacementTestModal.tsx
+ * @description Modal do Teste de Nivelamento Adaptativo (CAT) de 15 perguntas nos 17 idiomas, diagnosticando o nível CEFR A1–C1.
+ * @exports PlacementTestModal
+ */
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,

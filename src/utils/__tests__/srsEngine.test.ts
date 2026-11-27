@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/srsEngine.test.ts
+ * @description Suíte de testes unitários Vitest validando srsEngine.
+ */
 import { describe, expect, it } from 'vitest';
 import type { VocabCard } from '../../types/learning';
 import {

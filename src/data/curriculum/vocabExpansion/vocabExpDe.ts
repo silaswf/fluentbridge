@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpDe.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Alemão.
+ * @exports VOCAB_EXP_DE, VOCAB_FIXES_DE
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_DE: VocabExpansionTuple[] = [

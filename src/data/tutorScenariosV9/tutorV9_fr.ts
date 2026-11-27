@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosV9/tutorV9_fr.ts
+ * @description Expansão v9.0 de +10 cenários de conversação para o Tutor IA em Francês.
+ * @exports FR_TUTOR_SCENARIOS_V9
+ */
 import type { AITutorScenario } from '../../types/learning';
 
 export const FR_TUTOR_SCENARIOS_V9: AITutorScenario[] = [

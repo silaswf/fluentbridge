@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosZhV4.ts
+ * @description Banco de cenários de conversação do Tutor IA para Chinês (Mandarim).
+ * @exports ZH_TUTOR_SCENARIOS_V4
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const ZH_TUTOR_SCENARIOS_V4: AITutorScenario[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosEsV4.ts
+ * @description Banco de cenários de conversação do Tutor IA para Espanhol.
+ * @exports ES_TUTOR_SCENARIOS_V4
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const ES_TUTOR_SCENARIOS_V4: AITutorScenario[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/dutchExpansion.ts
+ * @description Conteúdo curricular (dutchExpansion) do curso de idiomas.
+ * @exports DUTCH_EXP_TOPICS, DUTCH_EXP_VOCAB, DUTCH_100_TOPICS, DUTCH_100_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

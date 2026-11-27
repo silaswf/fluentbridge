@@ -1,3 +1,8 @@
+/**
+ * @file src/components/CommunityHub.tsx
+ * @description Comunidade 2.0: ligas semanais por idioma, fórum interativo, desafio mensal (+80 XP), reações, áudios e correção entre pares com diff.
+ * @exports CommunityHub
+ */
 import { useMemo, useState } from 'react';
 import {
   CheckCircle2,

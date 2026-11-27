@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementNl.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Holandês.
+ * @exports PLACEMENT_QUESTIONS_NL
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_NL: PlacementQuestion[] = [

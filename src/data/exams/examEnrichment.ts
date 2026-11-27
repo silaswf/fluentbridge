@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/examEnrichment.ts
+ * @description Enriquecimento automático de questões, passagens e tarefas de Speaking/Writing nos simulados.
+ * @exports enrichMockExams
+ */
 import type {
   ExamQuestion,
   ExamSpeakingTask,

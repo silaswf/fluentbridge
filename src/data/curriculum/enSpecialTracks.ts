@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/enSpecialTracks.ts
+ * @description Trilhas especiais temáticas de Inglês (Business, Viagens, Tecnologia e Exames).
+ * @exports TOPICS_EN_SPECIAL, VOCAB_EN_SPECIAL
+ */
 import type { CEFRLevel, Topic, VocabCard } from '../../types/learning';
 
 interface EnSpecialBlueprint {

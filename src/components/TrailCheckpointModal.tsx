@@ -1,3 +1,8 @@
+/**
+ * @file src/components/TrailCheckpointModal.tsx
+ * @description Modal de avaliação de Checkpoint entre blocos da trilha de estudos para consolidar o módulo.
+ * @exports TrailCheckpointTarget, TrailCheckpointModal
+ */
 import { CheckCircle2, Clapperboard, Headphones, X } from 'lucide-react';
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 import { InteractiveVideoView } from './InteractiveVideoView';

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/communityActions.ts
+ * @description Utilitário communityActions da camada de lógica do FluentBridge.
+ * @exports togglePostReaction, acceptCorrectionReply
+ */
 import type { CommunityPost } from '../types/learning';
 
 export function togglePostReaction(

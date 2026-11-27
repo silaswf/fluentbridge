@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v8Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v8Features.
+ */
 import { describe, expect, it } from 'vitest';
 import { loadLanguageCourseData } from '../../data/courseLoader';
 import { EXAM_TYPES } from '../../data/exams/examCatalog';

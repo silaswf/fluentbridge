@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/immersionExpander.ts
+ * @description Expansor de etapas de imersão e diálogos adicionais em unidades intermediárias e avançadas.
+ * @exports ImmersionCheckpoint, ExpandableLine, expandPodcastLinesAndCheckpoints, buildVideoCheckpoints
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 
 export interface ImmersionCheckpoint {

@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * @file scripts/prewarm-r2-tts.mjs
+ * @description Script de pré-aquecimento de cache neural TTS no bucket Cloudflare R2 para frases frequentes dos 17 idiomas.
+ */
+/**
  * Pré-aquecimento do cache TTS no Cloudflare R2 (fluentbridge-media)
  * Uso:
  *   node scripts/prewarm-r2-tts.mjs

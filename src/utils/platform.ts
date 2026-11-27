@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/platform.ts
+ * @description Helpers de detecção de plataforma (Web, Electron, Capacitor Android) e idiomas RTL (Árabe/Hebraico).
+ * @exports isNativeAndroid, isElectronDesktop, isWebPlatform, isRtlLanguage
+ */
 import { Capacitor } from '@capacitor/core';
 import type { LanguageCode } from '../types/learning';
 

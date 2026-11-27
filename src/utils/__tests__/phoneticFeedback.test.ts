@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/phoneticFeedback.test.ts
+ * @description Suíte de testes unitários Vitest validando phoneticFeedback.
+ */
 import { describe, expect, it } from 'vitest';
 import { analyzePhoneticFeedback, splitSyllables } from '../phoneticFeedback';
 

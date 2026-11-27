@@ -1,3 +1,8 @@
+/**
+ * @file src/data/interactiveVideos.ts
+ * @description Catálogo dos 51 vídeos curtos interativos (3 por idioma) com falas e checkpoints.
+ * @exports VideoWordToken, InteractiveSubtitleLine, InteractiveVideoClip, INTERACTIVE_VIDEO_CLIPS, getInteractiveVideosByLanguage, lookupSubtitleWord
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 import {
   buildVideoCheckpoints,

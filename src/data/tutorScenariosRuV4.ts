@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosRuV4.ts
+ * @description Banco de cenários de conversação do Tutor IA para Russo.
+ * @exports RU_TUTOR_SCENARIOS_V4
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const RU_TUTOR_SCENARIOS_V4: AITutorScenario[] = [

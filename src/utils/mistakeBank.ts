@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/mistakeBank.ts
+ * @description Gerenciador do Caderno de Erros: registra, deduplica e marca como superados os erros do aluno.
+ * @exports MAX_MISTAKE_BANK_ITEMS, addMistakeEntry, markMistakeResolved, getActiveMistakesByLanguage
+ */
 import type { LanguageCode, MistakeEntry, SkillType } from '../types/learning';
 
 export const MAX_MISTAKE_BANK_ITEMS = 150;

@@ -1,3 +1,8 @@
+/**
+ * @file src/components/LearningPath.tsx
+ * @description Trilha Modular CEFR A1–C1: hero compacto, filtros de nível, módulos colapsáveis, missões diárias, alertas de retenção SM-2, radar e checkpoints.
+ * @exports LearningPath
+ */
 import { useEffect, useState } from 'react';
 import {
   Activity,

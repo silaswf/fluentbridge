@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/spanishExpansion.ts
+ * @description Conteúdo curricular (spanishExpansion) do curso de idiomas.
+ * @exports SPANISH_EXPANSION_BLUEPRINTS, SPANISH_EXPANSION_TOPICS, SPANISH_EXPANSION_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

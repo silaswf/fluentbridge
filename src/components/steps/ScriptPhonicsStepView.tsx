@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/ScriptPhonicsStepView.tsx
+ * @description Renderiza etapa introdutória de alfabeto/escrita (script_phonics) nas unidades A1 de idiomas não-latinos.
+ * @exports ScriptPhonicsStepView
+ */
 import { useState } from 'react';
 import { CheckCircle2, PenTool, Sparkles, Volume2, XCircle } from 'lucide-react';
 import type { ScriptCharacterItem } from '../../data/scriptTrainerData';

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/accessibility.ts
+ * @description Preferências de acessibilidade: escala de fonte e helpers de contraste/navegação por teclado.
+ * @exports FontScale, FONT_SCALE_LABELS, loadStoredFontScale, saveFontScale, applyFontScale
+ */
 export type FontScale = 'sm' | 'md' | 'lg' | 'xl';
 
 const FONT_SCALE_KEY = 'fb_font_scale_v1';

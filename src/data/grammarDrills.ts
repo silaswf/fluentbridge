@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammarDrills.ts
+ * @description Banco de exercícios intensivos (drills) gramaticais para os 17 idiomas.
+ * @exports GrammarDrillItem, GRAMMAR_DRILLS, getGrammarDrillsByLanguage
+ */
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 
 export interface GrammarDrillItem {

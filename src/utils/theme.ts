@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/theme.ts
+ * @description Utilitário theme da camada de lógica do FluentBridge.
+ * @exports ThemeMode, loadStoredThemeMode, saveThemeMode, resolveEffectiveDark, applyThemeMode, nextThemeMode
+ */
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 const THEME_STORAGE_KEY = 'fluentbridge_theme_mode';

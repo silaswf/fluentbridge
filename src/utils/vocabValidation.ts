@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/vocabValidation.ts
+ * @description Valida integridade lexical de unidades e flashcards (correspondência palavra-exemplo e detecção de fallbacks).
+ * @exports isMetaFallbackExample, exampleMatchesWord
+ */
 import type { LanguageCode } from '../types/learning';
 
 const LEADING_DICTIONARY_MARKER_RE =

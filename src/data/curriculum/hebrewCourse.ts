@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/hebrewCourse.ts
+ * @description Conteúdo curricular (hebrewCourse) do curso de idiomas.
+ * @exports HEBREW_META, HEBREW_BASE_TOPICS, HEBREW_BASE_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

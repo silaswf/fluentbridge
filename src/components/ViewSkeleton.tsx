@@ -1,3 +1,8 @@
+/**
+ * @file src/components/ViewSkeleton.tsx
+ * @description Skeleton loader exibido durante o carregamento lazy (Suspense) das visões secundárias.
+ * @exports ViewSkeleton
+ */
 export function ViewSkeleton() {
   return (
     <div

@@ -1,3 +1,8 @@
+/**
+ * @file src/components/teacher/VipStudentsPanel.tsx
+ * @description Painel de gerenciamento de alunos VIP vinculados diretamente ao professor, com tarefas e código de convite.
+ * @exports VipStudentsPanel
+ */
 import { useState } from 'react';
 import {
   Check,

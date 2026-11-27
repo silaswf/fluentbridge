@@ -1,3 +1,8 @@
+/**
+ * @file src/data/regionalAccents.ts
+ * @description Catálogo completo dos 65 sotaques regionais distribuídos pelos 17 idiomas e resolvedor de preferência.
+ * @exports RegionalAccentOption, REGIONAL_ACCENTS_BY_LANGUAGE, getRegionalAccents
+ */
 import type { LanguageCode } from '../types/learning';
 
 export interface RegionalAccentOption {

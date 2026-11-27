@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/telemetry.ts
+ * @description Captura global de erros de cliente, envio para /api/telemetry, health checks sintéticos e consulta de cotas R2 (/api/admin/quotas).
+ * @exports TelemetryErrorLog, SyntheticHealthResult, reportClientError, installGlobalErrorListeners, fetchTelemetryLogs, runSyntheticHealthChecks, AdminQuotaRouteStat, AdminQuotaSnapshot (+1)
+ */
 import { APP_VERSION, DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import { getActivePlatformLabel } from './appUpdater';
 import { enqueueOfflineMutation } from './offlineOutbox';

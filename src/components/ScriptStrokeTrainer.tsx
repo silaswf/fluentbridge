@@ -1,3 +1,8 @@
+/**
+ * @file src/components/ScriptStrokeTrainer.tsx
+ * @description Treinador de Alfabetos e Traços (Hiragana, Katakana, Cirílico, Árabe RTL, Hebraico Alefbet RTL, Hanzi e caracteres especiais).
+ * @exports ScriptStrokeTrainer
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff, PenTool, RotateCcw, Sparkles } from 'lucide-react';
 import {

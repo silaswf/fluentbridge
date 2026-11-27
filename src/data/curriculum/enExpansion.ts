@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/enExpansion.ts
+ * @description Expansão intermediária do currículo de Inglês.
+ * @exports EN_EXPANSION_BLUEPRINTS, TOPICS_EN_EXPANSION, VOCAB_EN_EXPANSION
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

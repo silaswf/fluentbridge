@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/chineseExpansionV4.ts
+ * @description Conteúdo curricular (chineseExpansionV4) do curso de idiomas.
+ * @exports CHINESE_V4_TOPICS, CHINESE_V4_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

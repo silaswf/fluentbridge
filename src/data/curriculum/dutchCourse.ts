@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/dutchCourse.ts
+ * @description Conteúdo curricular (dutchCourse) do curso de idiomas.
+ * @exports DUTCH_META, DUTCH_BASE_TOPICS, DUTCH_BASE_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

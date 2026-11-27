@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/frGrammarExtra.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de frGrammarExtra.
+ * @exports FR_GRAMMAR_EXTRA, FR_ALL_GRAMMAR_100
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import { FRENCH_GRAMMAR_GUIDE } from '../curriculum/frenchCourse';
 

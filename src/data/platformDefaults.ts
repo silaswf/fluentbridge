@@ -1,3 +1,8 @@
+/**
+ * @file src/data/platformDefaults.ts
+ * @description Metadados dos 17 cursos (LANGUAGE_COURSES_META) e estado inicial padrão da plataforma (DEFAULT_PLATFORM_STATE).
+ * @exports LANGUAGE_COURSES_META, getLanguageCourseMeta, getActiveDialectMeta, INITIAL_CLASSES, INITIAL_USERS, INITIAL_SUBMISSIONS, DEFAULT_PLATFORM_STATE
+ */
 import type {
   ClassGroup,
   LanguageCode,

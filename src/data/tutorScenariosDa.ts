@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosDa.ts
+ * @description Banco de cenários de conversação do Tutor IA para Dinamarquês.
+ * @exports DA_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const DA_TUTOR_SCENARIOS: AITutorScenario[] = [

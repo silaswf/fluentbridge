@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/esGrammarExtra.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de esGrammarExtra.
+ * @exports ES_GRAMMAR_EXTRA, ES_ALL_GRAMMAR_100
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import { SPANISH_GRAMMAR_GUIDE } from '../curriculum/spanishCourse';
 

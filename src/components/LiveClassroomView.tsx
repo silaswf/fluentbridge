@@ -1,3 +1,8 @@
+/**
+ * @file src/components/LiveClassroomView.tsx
+ * @description Sala de Aulas ao Vivo: agenda de sessões síncronas entre professor e aluno/turma com sala de vídeo e criação de tarefas.
+ * @exports LiveClassroomView
+ */
 import { useState } from 'react';
 import { Calendar, ExternalLink, Plus, Sparkles, Video } from 'lucide-react';
 import { EmptyStateCard } from './EmptyStateCard';

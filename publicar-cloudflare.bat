@@ -1,4 +1,6 @@
 @echo off
+:: @file publicar-cloudflare.bat
+:: Script batch Windows para deploy do frontend no Cloudflare Pages e API Edge no Cloudflare Worker.
 setlocal
 cd /d "%~dp0"
 

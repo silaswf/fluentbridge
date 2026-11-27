@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementHe.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Hebraico (RTL).
+ * @exports PLACEMENT_HE
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_HE: PlacementQuestion[] = [

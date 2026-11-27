@@ -1,3 +1,8 @@
+/**
+ * @file cloudflare-worker/routes/translate.js
+ * @description Rota POST /api/translate: tradutor bidirecional por curso com Gemini, retorno de IPA, nota literal, alternativas de registro e vocabulário extraível.
+ * @exports handleTranslateRequest
+ */
 import { GEMINI_FALLBACK_MODELS, jsonResponse } from '../lib/http.js';
 
 export async function handleTranslateRequest(request, env) {

@@ -1,3 +1,7 @@
+/**
+ * @file e2e/fluentbridge.spec.ts
+ * @description Suíte E2E principal Playwright cobrindo Gateway, Login, 17 idiomas, Dark Mode, Script Trainer, LessonPlayer, Simulados, Comunidade, Cloze/Readers e DET.
+ */
 import { expect, test } from '@playwright/test';
 
 async function loginAsMasterAdmin(page: import('@playwright/test').Page) {

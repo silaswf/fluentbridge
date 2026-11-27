@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosPt.ts
+ * @description Banco de cenários de conversação do Tutor IA para Português PLE (para falantes de Inglês).
+ * @exports PT_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const PT_TUTOR_SCENARIOS: AITutorScenario[] = [

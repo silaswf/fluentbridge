@@ -1,3 +1,7 @@
+/**
+ * @file playwright.config.ts
+ * @description Configuração da suíte E2E Playwright (browser Chromium, webServer local e timeouts das jornadas humanas).
+ */
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

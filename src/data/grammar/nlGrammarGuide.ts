@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/nlGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de nlGrammarGuide.
+ * @exports NL_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const NL_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

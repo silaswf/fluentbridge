@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/audioRetention.test.ts
+ * @description Suíte de testes unitários Vitest validando audioRetention.
+ */
 import { describe, expect, it } from 'vitest';
 import type { StudentSubmission } from '../../types/learning';
 import {

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/svGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de svGrammarGuide.
+ * @exports SV_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const SV_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

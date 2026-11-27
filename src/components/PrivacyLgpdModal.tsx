@@ -1,3 +1,8 @@
+/**
+ * @file src/components/PrivacyLgpdModal.tsx
+ * @description Modal de Privacidade & LGPD: exportação completa dos dados em JSON e auto-exclusão definitiva da conta na nuvem.
+ * @exports PrivacyLgpdModal
+ */
 import { useState } from 'react';
 import { Download, ShieldCheck, Trash2, X } from 'lucide-react';
 import type { UserProfile } from '../types/learning';

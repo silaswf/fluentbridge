@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosSv.ts
+ * @description Banco de cenários de conversação do Tutor IA para Sueco.
+ * @exports SV_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const SV_TUTOR_SCENARIOS: AITutorScenario[] = [

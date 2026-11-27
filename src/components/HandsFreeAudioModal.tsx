@@ -1,3 +1,8 @@
+/**
+ * @file src/components/HandsFreeAudioModal.tsx
+ * @description Modo Hands-Free em áudio contínuo: reproduz flashcards em loop com pausas para repetição sem usar as mãos.
+ * @exports HandsFreeAudioModal
+ */
 import { useEffect, useRef, useState } from 'react';
 import {
   Headphones,

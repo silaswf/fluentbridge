@@ -1,3 +1,8 @@
+/**
+ * @file src/data/exams/index.ts
+ * @description Registro central agregando todos os 100 simulados oficiais enriquecidos nos 17 idiomas.
+ * @exports ALL_MOCK_EXAMS, getExamsByLanguage
+ */
 import type { MockExam } from '../../types/exams';
 import type { LanguageCode } from '../../types/learning';
 import { CELPIP_MOCK_EXAMS } from './examsCelpip';

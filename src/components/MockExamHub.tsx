@@ -1,3 +1,8 @@
+/**
+ * @file src/components/MockExamHub.tsx
+ * @description Central de Simulados Oficiais Cronometrados (100 exames em 25 formatos incl. IELTS, CELPIP, DET, TÖMER, YAEL, Norskprøve, PD3 e CELPE-Bras).
+ * @exports MockExamHub
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award,

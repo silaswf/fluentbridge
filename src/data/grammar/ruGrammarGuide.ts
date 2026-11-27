@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/ruGrammarGuide.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de ruGrammarGuide.
+ * @exports RU_GRAMMAR_GUIDE
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const RU_GRAMMAR_GUIDE: GrammarReferenceEntry[] = [

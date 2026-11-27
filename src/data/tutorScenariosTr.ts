@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosTr.ts
+ * @description Banco de cenários de conversação do Tutor IA para Turco.
+ * @exports TR_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const TR_TUTOR_SCENARIOS: AITutorScenario[] = [

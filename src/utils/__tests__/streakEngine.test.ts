@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/streakEngine.test.ts
+ * @description Suíte de testes unitários Vitest validando streakEngine.
+ */
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PLATFORM_STATE } from '../../data/lessons';
 import { recordStudyActivity } from '../streakEngine';

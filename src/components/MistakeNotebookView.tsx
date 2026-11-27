@@ -1,3 +1,8 @@
+/**
+ * @file src/components/MistakeNotebookView.tsx
+ * @description Caderno de Erros automático: agrupa falhas recentes em lições/revisões para prática direcionada e superação.
+ * @exports MistakeNotebookView
+ */
 import { useMemo, useState } from 'react';
 import { BookMarked, CheckCircle2, RotateCcw, Sparkles } from 'lucide-react';
 import type { LanguageCode, MistakeEntry } from '../types/learning';

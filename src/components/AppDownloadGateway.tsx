@@ -1,3 +1,8 @@
+/**
+ * @file src/components/AppDownloadGateway.tsx
+ * @description Gateway multiplataforma Dark Sober: links para Windows (.exe), Android (.apk), instruções iOS Safari PWA ($0/ano), seletor PT/EN/ES e entrada na versão Web.
+ * @exports AppDownloadGateway
+ */
 import { useState } from 'react';
 import {
   ArrowRight,

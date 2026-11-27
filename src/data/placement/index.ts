@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/index.ts
+ * @description Registro central das 680 questões do Teste de Nivelamento Adaptativo (CAT) nos 17 idiomas e UI localizadas.
+ * @exports ALL_PLACEMENT_QUESTIONS, getPlacementBankByLanguage, PlacementUiStrings, getPlacementUiStrings
+ */
 import type { CEFRLevel, LanguageCode } from '../../types/learning';
 import type { PlacementQuestion } from '../../utils/placementEngine';
 import { PLACEMENT_QUESTIONS_DE } from './placementDe';

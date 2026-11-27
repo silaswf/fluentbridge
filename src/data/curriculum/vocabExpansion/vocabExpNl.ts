@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpNl.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Holandês.
+ * @exports VOCAB_EXP_NL, VOCAB_FIXES_NL
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_NL: VocabExpansionTuple[] = [

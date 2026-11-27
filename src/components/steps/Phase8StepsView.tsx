@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/Phase8StepsView.tsx
+ * @description Renderiza etapas avançadas de ditado (dictation), pares mínimos (minimal_pairs) e histórias interativas (story).
+ * @exports Phase8StepsView
+ */
 import { Eye, EyeOff, Volume2 } from 'lucide-react';
 import type {
   DictationStep,

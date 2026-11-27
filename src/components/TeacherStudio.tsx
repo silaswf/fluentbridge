@@ -1,3 +1,8 @@
+/**
+ * @file src/components/TeacherStudio.tsx
+ * @description Estúdio do Professor: orquestra correções, gestão de turmas/boletins PDF, painel VIP, criador de tópicos, tarefas e configurações da escola.
+ * @exports TeacherTab, TeacherStudio
+ */
 import { useEffect, useState } from 'react';
 import {
   Award,

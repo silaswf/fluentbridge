@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/ListeningStepView.tsx
+ * @description Renderiza etapa de compreensão auditiva (listening) com áudio neural 1.0x/0.75x e alternativas.
+ * @exports ListeningStepView
+ */
 import { useEffect, useState } from 'react';
 import {
   CheckCircle2,

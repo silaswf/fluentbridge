@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/portugueseCourse.ts
+ * @description Curso base de Português como Língua Estrangeira (PLE) — 50 unidades para falantes de Inglês (A1–B1 em Inglês, B2–C1 em Português).
+ * @exports PORTUGUESE_META, PORTUGUESE_TOPICS, PORTUGUESE_VOCAB
+ */
 import type { LanguageCode, Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

@@ -1,3 +1,8 @@
+/**
+ * @file src/components/DualAudioButtons.tsx
+ * @description Botões duplos reutilizáveis de áudio neural (velocidade normal 1.0x e lenta 0.75x) com fallback Web Speech.
+ * @exports DualAudioButtons
+ */
 import { useEffect, useState } from 'react';
 import { ChevronDown, Globe2, Loader2, Turtle, Volume2 } from 'lucide-react';
 import { getLanguageCourseMeta as getLanguageCourse } from '../data/platformDefaults';

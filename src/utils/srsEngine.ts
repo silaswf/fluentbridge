@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/srsEngine.ts
+ * @description Algoritmo SM-2 de repetição espaçada: calcula intervalo, fator de facilidade e próxima revisão de flashcards.
+ * @exports SrsRating, isCardDue, previewNextIntervalLabel, reviewVocabCardSM2, sortCardsForReview, buildClozePrompt
+ */
 import type { VocabCard } from '../types/learning';
 
 export type SrsRating = 'again' | 'hard' | 'good' | 'easy';

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/appUpdater.ts
+ * @description Verificação de atualizações do app (Web/Electron/Android) comparando versão local com /version.json.
+ * @exports AppUpdateInfo, DesktopUpdaterBridge, compareVersions, getDesktopBridge, checkForAppUpdate, triggerAndroidApkUpdate, applyWebOtaRefresh, getActivePlatformLabel
+ */
 import { Browser } from '@capacitor/browser';
 import {
   ANDROID_APK_DOWNLOAD_URL,

@@ -1,3 +1,5 @@
+<!-- @file SETUP_MOBILE_DESKTOP_SUPABASE.md — Guia prático de configuração inicial de ambientes Windows (Electron), Android (Capacitor) e projeto Supabase. -->
+
 # Guia Completo: Empacotamento Windows, Android, iOS & Supabase
 
 Este projeto já foi configurado com:

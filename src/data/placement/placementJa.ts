@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementJa.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Japonês.
+ * @exports PLACEMENT_QUESTIONS_JA
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_JA: PlacementQuestion[] = [

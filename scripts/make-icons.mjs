@@ -1,3 +1,7 @@
+/**
+ * @file scripts/make-icons.mjs
+ * @description Utilitário Node para gerar os ícones PNG/ICO multiplataforma do aplicativo a partir do asset vetorial base.
+ */
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';

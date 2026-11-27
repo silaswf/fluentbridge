@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpEs.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Espanhol.
+ * @exports VOCAB_EXP_ES, VOCAB_FIXES_ES
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_ES: VocabExpansionTuple[] = [

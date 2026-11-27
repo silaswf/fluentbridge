@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v9Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v9Features.
+ */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';

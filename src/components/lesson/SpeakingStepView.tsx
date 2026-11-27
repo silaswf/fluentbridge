@@ -1,3 +1,8 @@
+/**
+ * @file src/components/lesson/SpeakingStepView.tsx
+ * @description Subcomponente do LessonPlayer para prática de Speaking: checagem fonética instantânea, feedback de fonemas, oscilador tonal, shadowing e gravação para o professor.
+ * @exports SpeakingStepView
+ */
 import { Check, Mic, MicOff, Radio, Send, Square } from 'lucide-react';
 import type { LanguageCode, LessonStep } from '../../types/learning';
 import { isAudioRecordingSupported } from '../../utils/audioRecorder';

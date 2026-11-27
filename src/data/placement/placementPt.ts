@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementPt.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Português PLE (para falantes de Inglês).
+ * @exports PLACEMENT_PT
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_PT: PlacementQuestion[] = [

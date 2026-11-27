@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v83Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v83Features.
+ */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';

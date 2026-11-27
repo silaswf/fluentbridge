@@ -1,3 +1,8 @@
+/**
+ * @file src/components/AppUpdateModal.tsx
+ * @description Modal de verificação e aviso de novas versões do aplicativo Desktop/Web com link direto para atualização.
+ * @exports AppUpdateModal
+ */
 import { useEffect, useState } from 'react';
 import {
   CheckCircle2,

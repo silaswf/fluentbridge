@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/enExpansionV4.ts
+ * @description Conteúdo curricular (enExpansionV4) do curso de idiomas.
+ * @exports EN_V4_BLUEPRINTS, EN_V4_TOPICS, EN_V4_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

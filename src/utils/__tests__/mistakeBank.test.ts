@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/mistakeBank.test.ts
+ * @description Suíte de testes unitários Vitest validando mistakeBank.
+ */
 import { describe, expect, it } from 'vitest';
 import {
   addMistakeEntry,

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/portugueseExpansionB2C1.ts
+ * @description Expansão B2–C1 (40 unidades) do curso de Português PLE em 100% imersão em Português.
+ * @exports PORTUGUESE_EXP_B2C1_BLUEPRINTS, PORTUGUESE_EXP_B2C1_TOPICS, PORTUGUESE_EXP_B2C1_VOCAB
+ */
 import type { LanguageCode, Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

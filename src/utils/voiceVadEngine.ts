@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/voiceVadEngine.ts
+ * @description Utilitário voiceVadEngine da camada de lógica do FluentBridge.
+ * @exports VadSessionState, VadUtterancePayload, ContinuousVadOptions, analyzeProsody, startContinuousVadSession
+ */
 import type { ProsodyAnalysis } from '../types/learning';
 
 export type VadSessionState = 'idle' | 'listening' | 'speaking' | 'processing';

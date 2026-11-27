@@ -1,4 +1,9 @@
 /**
+ * @file src/utils/pitchDetector.ts
+ * @description Utilitário pitchDetector da camada de lógica do FluentBridge.
+ * @exports detectPitchHz, normalizePitchToContour, getMandarinToneContour, getJapanesePitchContour
+ */
+/**
  * Autocorrelation-based F0 (fundamental frequency) pitch detector for real-time
  * Mandarin tone (1–4) and Japanese pitch accent visual feedback.
  */

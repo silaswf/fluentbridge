@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenarios.ts
+ * @description Agregador central dos 850 cenários de Tutor IA (50 por idioma) e ângulos dinâmicos de roleplay.
+ * @exports UnitRoleplayAngle, UNIT_ROLEPLAY_ANGLES, AI_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario, LanguageCode } from '../types/learning';
 import { RU_TUTOR_SCENARIOS } from './tutorScenariosRu';
 import { JA_TUTOR_SCENARIOS } from './tutorScenariosJa';

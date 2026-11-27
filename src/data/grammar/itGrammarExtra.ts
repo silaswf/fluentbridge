@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/itGrammarExtra.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de itGrammarExtra.
+ * @exports IT_GRAMMAR_EXTRA, IT_ALL_GRAMMAR_100
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import { ITALIAN_ALL_GRAMMAR_GUIDE } from '../curriculum/italianExtra';
 

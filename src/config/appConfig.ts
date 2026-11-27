@@ -1,3 +1,8 @@
+/**
+ * @file src/config/appConfig.ts
+ * @description Configurações centrais do app: versão atual, URLs de release, e-mail Admin Mestre, código docente padrão, endpoints de API e chaves efetivas Supabase/Gemini.
+ * @exports APP_VERSION, GITHUB_RELEASES_URL, WINDOWS_DOWNLOAD_URL, ANDROID_APK_DOWNLOAD_URL, MASTER_ADMIN_EMAIL, DEFAULT_TEACHER_ACCESS_CODE, DEFAULT_BACKEND_API_URL, CLOUD_GEMINI_PROXY_TOKEN (+7)
+ */
 import type { CloudConfig } from '../types/learning';
 
 export const APP_VERSION = '9.3.0';

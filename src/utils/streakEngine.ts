@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/streakEngine.ts
+ * @description Motor de ofensiva diária (streak), proteções (streak freeze) e histórico de dias estudados.
+ * @exports getLocalDateKey, StreakUpdateResult, recordStudyActivity
+ */
 import type { UserProfile } from '../types/learning';
 
 const MAX_STREAK_FREEZES = 3;

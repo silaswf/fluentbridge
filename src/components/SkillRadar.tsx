@@ -1,3 +1,8 @@
+/**
+ * @file src/components/SkillRadar.tsx
+ * @description Componente de interface SkillRadar do FluentBridge.
+ * @exports SkillRadar
+ */
 import { Sparkles, TrendingUp } from 'lucide-react';
 import type { SkillType } from '../types/learning';
 import { SKILL_META } from './SkillBadge';

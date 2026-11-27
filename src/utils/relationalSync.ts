@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/relationalSync.ts
+ * @description Sincronização relacional híbrida no Supabase (profiles, student_progress, submissions, certificates) com verificação RLS.
+ * @exports SecurityAuditStatus, syncRelationalFullState, getSecurityAuditStatus, syncCommunityPostToCloud, syncCommunityReplyToCloud, syncLiveSessionToCloud, subscribeCommunityRealtime
+ */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getEffectiveSupabaseConfig } from '../config/appConfig';
 import type {

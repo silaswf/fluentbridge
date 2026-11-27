@@ -1,3 +1,5 @@
+<!-- @file README.md — Visão geral oficial do FluentBridge Academy, métricas atuais, links de plataformas/releases e comandos de desenvolvimento. -->
+
 # FluentBridge Academy (`v9.3.0`)
 
 Plataforma completa de ensino em **17 idiomas (Inglês, Espanhol, Francês, Italiano, Alemão, Russo, Japonês, Chinês Mandarim, Árabe, Holandês, Africâner, Sueco, Turco, Hebraico, Norueguês, Dinamarquês e Português PLE para falantes de Inglês)** de **A1 a C1** (**`2.550` unidades**, **`65` sotaques regionais com vozes neurais**, **`100` Simulados Cronometrados Oficiais**, **`850` cenários de Tutor IA**, **Tradutor Bidirecional por Curso com IPA e SM-2**, **YouTube Study Lab com análise gramatical por IA**, **Comunidade 2.0**, **Modo Hands-Free**, **RTL nativo em Árabe e Hebraico com toggle de Niqqud**, **Gateway Web / Windows / Android / iOS Safari PWA ($0/ano)**, **Suíte Vitest + E2E Playwright com Auditoria WCAG AA** e **Estúdio do Professor + Admin Mestre**), desenvolvida para o **Prof. Silas Wagner**.

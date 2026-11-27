@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpJa.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Japonês.
+ * @exports VOCAB_EXP_JA, VOCAB_FIXES_JA
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_JA: VocabExpansionTuple[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementSv.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Sueco.
+ * @exports PLACEMENT_QUESTIONS_SV
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_SV: PlacementQuestion[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/portugueseExpansion.ts
+ * @description Consolidador da expansão de Português PLE (97 unidades balanceadas para fechar 150 unidades exatas com 30 por nível CEFR).
+ * @exports PORTUGUESE_EXPANSION_TOPICS, PORTUGUESE_EXPANSION_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   PORTUGUESE_EXP_A1B1_TOPICS,

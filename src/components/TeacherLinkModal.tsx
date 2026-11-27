@@ -1,3 +1,8 @@
+/**
+ * @file src/components/TeacherLinkModal.tsx
+ * @description Modal para o aluno vincular-se a um professor/turma ou confirmar estudo no modo autônomo.
+ * @exports TeacherLinkModal
+ */
 import { useState } from 'react';
 import {
   AlertTriangle,

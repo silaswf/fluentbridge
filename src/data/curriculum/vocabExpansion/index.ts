@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/index.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de index.
+ * @exports mergeCourseVocab
+ */
 import type { LanguageCode, VocabCard } from '../../../types/learning';
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 

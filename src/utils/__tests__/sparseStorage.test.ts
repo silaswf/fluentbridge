@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/sparseStorage.test.ts
+ * @description Suíte de testes unitários Vitest validando sparseStorage.
+ */
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PLATFORM_STATE, ALL_INITIAL_VOCABULARY } from '../../data/lessons';
 import {

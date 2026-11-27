@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpZh.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Chinês (Mandarim).
+ * @exports VOCAB_EXP_ZH, VOCAB_FIXES_ZH
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_ZH: VocabExpansionTuple[] = [

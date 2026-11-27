@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v84Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v84Features.
+ */
 import { describe, expect, it } from 'vitest';
 import { getTeacherDisplayName } from '../teacherDisplay';
 import { analyzePhoneticFeedback } from '../phoneticFeedback';

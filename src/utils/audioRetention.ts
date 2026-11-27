@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/audioRetention.ts
+ * @description Política de retenção automática de áudios Speaking (60 dias): resumo e limpeza preservando feedbacks escritos.
+ * @exports AUDIO_RETENTION_DAYS, AUDIO_RETENTION_MS, AudioRetentionSummary, getSubmissionTimestampMs, hasStoredAudioPayload, isSubmissionAudioExpired, getAudioRetentionSummary, AudioPurgeResult (+1)
+ */
 import type { CloudConfig, StudentSubmission } from '../types/learning';
 import { deleteAudioClip } from './audioDb';
 import { deleteSpeakingAudiosFromCloud } from './cloudSync';

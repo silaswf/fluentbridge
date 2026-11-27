@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/accentPreference.ts
+ * @description Utilitário accentPreference da camada de lógica do FluentBridge.
+ * @exports resolvePreferredAccent, getAccentDisplayMeta
+ */
 import { REGIONAL_ACCENTS_BY_LANGUAGE, type RegionalAccentOption } from '../data/regionalAccents';
 import type { Accent, LanguageCode } from '../types/learning';
 

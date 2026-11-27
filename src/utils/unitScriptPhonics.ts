@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/unitScriptPhonics.ts
+ * @description Injeta automaticamente etapa de fonética/alfabeto (script_phonics) nas unidades iniciais A1 de RU, JA, ZH, AR e HE.
+ * @exports ScriptPhonicsContext, createScriptPhonicsContext, buildUnitScriptPhonicsStep
+ */
 import {
   ARABIC_ALPHABET,
   CHINESE_HANZI,

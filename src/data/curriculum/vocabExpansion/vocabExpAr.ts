@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpAr.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Árabe (RTL).
+ * @exports VOCAB_EXP_AR, VOCAB_FIXES_AR
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_AR: VocabExpansionTuple[] = [

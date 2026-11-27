@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/MatchingStepView.tsx
+ * @description Renderiza etapa de associação de pares (matching) entre idioma-alvo e tradução.
+ * @exports MatchingStepView
+ */
 import { CheckCircle2 } from 'lucide-react';
 import type { LanguageCode, MatchingPair, MatchingStep } from '../../types/learning';
 import { DualAudioButtons } from '../DualAudioButtons';

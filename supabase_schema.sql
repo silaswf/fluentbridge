@@ -1,3 +1,5 @@
+-- @file supabase_schema.sql
+-- Schema SQL completo e idempotente do Supabase (tabelas relacionais, snapshot, RLS, buckets speaking-audios/fb-audio, triggers, Realtime e migrações até v9.2+ para 17 idiomas).
 -- ============================================================================
 -- FluentBridge Production Database & Storage Schema (Supabase / PostgreSQL)
 -- Execute este script completo no SQL Editor do seu projeto Supabase.

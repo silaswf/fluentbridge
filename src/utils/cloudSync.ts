@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/cloudSync.ts
+ * @description Cliente singleton Supabase, autenticação (OAuth/e-mail), mesclagem não-destrutiva de estado, upload de áudio e telemetria.
+ * @exports NATIVE_OAUTH_REDIRECT_URL, SUPABASE_SQL_SCHEMA, getSupabaseClient, getSupabaseAccessToken, testSupabaseConnection, mergePlatformStates, uploadSpeakingAudioToCloud, resolveSubmissionAudioUrl (+14)
+ */
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';

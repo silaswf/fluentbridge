@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/grammarC1.ts
+ * @description Unidades focadas em gramática (C1) de Inglês.
+ * @exports GRAMMAR_TOPICS_C1, GRAMMAR_VOCAB_C1
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 
 export const GRAMMAR_TOPICS_C1: Topic[] = [

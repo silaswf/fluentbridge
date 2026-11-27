@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/examScoring.ts
+ * @description Motor de correção e conversão de notas oficiais de todos os 25 formatos de simulados (IELTS, TOEFL, CELPIP, DET, CELPE-Bras etc.).
+ * @exports GradedExamResult, gradeMockExam
+ */
 import type {
   ExamBandReference,
   ExamPracticeCategory,

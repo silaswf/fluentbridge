@@ -1,3 +1,8 @@
+/**
+ * @file src/components/CertificatesView.tsx
+ * @description Visualização, emissão e verificação de certificados CEFR A1–C1 com código de autenticidade e download de boletim PDF.
+ * @exports CertificatesView
+ */
 import {
   Award,
   CheckCircle2,

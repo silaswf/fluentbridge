@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/expansionV9/expV9_af.ts
+ * @description Expansão curricular v9.0 (+47 unidades coesas A1–C1 para completar 150 unidades) em Africâner.
+ * @exports AF_V9_TOPICS, AF_V9_VOCAB
+ */
 import type { Topic, VocabCard } from '../../../types/learning';
 import {
   buildLanguageVocab,

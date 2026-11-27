@@ -1,3 +1,8 @@
+/**
+ * @file src/components/teacher/TopicCreatorTab.tsx
+ * @description Aba de criação de tópicos personalizados nos 17 idiomas com gerador de rascunho por IA (Gemini) e exemplo pronto.
+ * @exports TopicCreatorTab
+ */
 import { useState } from 'react';
 import { Plus, Sparkles, Trash2 } from 'lucide-react';
 import { DEFAULT_BACKEND_API_URL } from '../../config/appConfig';

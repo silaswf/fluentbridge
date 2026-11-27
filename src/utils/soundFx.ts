@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/soundFx.ts
+ * @description Síntese leve de efeitos sonoros (Web Audio API) para acertos, erros e conclusões de lição.
+ * @exports isSoundMuted, setSoundMuted, playSound
+ */
 type SoundEffectKind = 'correct' | 'wrong' | 'match' | 'complete' | 'levelup';
 
 let muted = false;

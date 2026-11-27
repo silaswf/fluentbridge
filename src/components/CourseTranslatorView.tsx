@@ -1,3 +1,8 @@
+/**
+ * @file src/components/CourseTranslatorView.tsx
+ * @description Tradutor Bidirecional por Curso: adapta par de idiomas automaticamente (PT <-> Idioma ou EN <-> PT), gera IPA, alternativas de registro, TTS e salva no SM-2.
+ * @exports CourseTranslatorView
+ */
 import { useEffect, useState } from 'react';
 import {
   ArrowLeftRight,

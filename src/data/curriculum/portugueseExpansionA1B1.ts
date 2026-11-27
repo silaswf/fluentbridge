@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/portugueseExpansionA1B1.ts
+ * @description Expansão A1–B1 (60 unidades) do curso de Português PLE com andaime pedagógico em Inglês.
+ * @exports PORTUGUESE_EXP_A1B1_TOPICS, PORTUGUESE_EXP_A1B1_VOCAB
+ */
 import type { LanguageCode, Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

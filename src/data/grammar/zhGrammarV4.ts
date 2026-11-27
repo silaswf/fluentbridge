@@ -1,3 +1,8 @@
+/**
+ * @file src/data/grammar/zhGrammarV4.ts
+ * @description Guias de referência gramatical (A1–C1) para o curso de zhGrammarV4.
+ * @exports ZH_GRAMMAR_V4
+ */
 import type { GrammarReferenceEntry } from '../grammarGuide';
 
 export const ZH_GRAMMAR_V4: GrammarReferenceEntry[] = [

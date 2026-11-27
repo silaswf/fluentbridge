@@ -1,3 +1,7 @@
+/**
+ * @file src/utils/__tests__/v82Features.test.ts
+ * @description Suíte de testes unitários Vitest validando v82Features.
+ */
 import { describe, expect, it } from 'vitest';
 import { REGIONAL_ACCENTS_BY_LANGUAGE, getRegionalAccents } from '../../data/regionalAccents';
 import { DEFAULT_PLATFORM_STATE } from '../../data/platformDefaults';

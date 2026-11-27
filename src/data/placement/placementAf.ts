@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementAf.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Africâner.
+ * @exports PLACEMENT_QUESTIONS_AF
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_AF: PlacementQuestion[] = [

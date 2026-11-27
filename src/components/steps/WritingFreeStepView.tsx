@@ -1,3 +1,8 @@
+/**
+ * @file src/components/steps/WritingFreeStepView.tsx
+ * @description Renderiza etapa de escrita livre (writing_free) com checklist, contador de palavras, corretor IA e envio ao professor.
+ * @exports WritingFreeStepView
+ */
 import { useEffect, useState } from 'react';
 import { CheckCircle2, HelpCircle, Loader2, Send, Sparkles } from 'lucide-react';
 import type { LanguageCode, WritingFreeStep } from '../../types/learning';

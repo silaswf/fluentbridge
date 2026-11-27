@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/germanExtra.ts
+ * @description Conteúdo curricular (germanExtra) do curso de idiomas.
+ * @exports GERMAN_ALL_TOPICS, GERMAN_ALL_VOCAB, GERMAN_ALL_GRAMMAR_GUIDE
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

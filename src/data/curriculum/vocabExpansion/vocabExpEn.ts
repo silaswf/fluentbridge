@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/vocabExpansion/vocabExpEn.ts
+ * @description Expansão e correções lexicais de vocabulário para o curso de Inglês.
+ * @exports VOCAB_EXP_EN, VOCAB_FIXES_EN
+ */
 import type { VocabExampleFixMap, VocabExpansionTuple } from './types';
 
 export const VOCAB_EXP_EN: VocabExpansionTuple[] = [

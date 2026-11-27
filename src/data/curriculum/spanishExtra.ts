@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/spanishExtra.ts
+ * @description Conteúdo curricular (spanishExtra) do curso de idiomas.
+ * @exports SPANISH_META, SPANISH_EXTRA_TOPICS, SPANISH_EXTRA_VOCAB, SPANISH_EXTRA_GRAMMAR_GUIDE
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import type { GrammarReferenceEntry } from '../grammarGuide';
 import {

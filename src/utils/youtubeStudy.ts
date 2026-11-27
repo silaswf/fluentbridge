@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/youtubeStudy.ts
+ * @description Cliente do YouTube Study Lab: extrai IDs de URLs, parseia SRT/VTT, chama /api/youtube-study e gera pacote offline.
+ * @exports YouTubeSubtitleItem, YouTubeGrammarInsight, YouTubeCheckpointItem, YouTubeStudyPack, extractYouTubeVideoId, parseManualTranscript, buildOfflineYouTubeStudyPack, fetchYouTubeStudyPack
+ */
 import { DEFAULT_BACKEND_API_URL } from '../config/appConfig';
 import type { CEFRLevel, LanguageCode } from '../types/learning';
 import { getLanguageCourseMeta } from '../data/platformDefaults';

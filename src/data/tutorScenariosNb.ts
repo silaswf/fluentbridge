@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosNb.ts
+ * @description Banco de cenários de conversação do Tutor IA para Norueguês Bokmål.
+ * @exports NB_TUTOR_SCENARIOS
+ */
 import type { AITutorScenario } from '../types/learning';
 
 export const NB_TUTOR_SCENARIOS: AITutorScenario[] = [

@@ -1,3 +1,8 @@
+/**
+ * @file src/utils/phoneticFeedback.ts
+ * @description Analisador fonético multi-idioma: compara transcrição falada com a frase-alvo e gera breakdown de fonemas e drills.
+ * @exports PhoneticTipItem, PhoneticDrillItem, PhoneticWordDetail, PhonemeItem, PhoneticFeedbackResult, splitSyllables, analyzePhoneticFeedback
+ */
 import type { LanguageCode } from '../types/learning';
 import { evaluatePronunciation } from './speech';
 

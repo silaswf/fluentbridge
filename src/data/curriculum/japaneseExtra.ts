@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/japaneseExtra.ts
+ * @description Conteúdo curricular (japaneseExtra) do curso de idiomas.
+ * @exports JAPANESE_ALL_TOPICS, JAPANESE_ALL_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

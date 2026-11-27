@@ -1,3 +1,8 @@
+/**
+ * @file src/data/placement/placementZh.ts
+ * @description Banco de 40 questões adaptativas CAT (A1–C1) para nivelamento em Chinês (Mandarim).
+ * @exports PLACEMENT_QUESTIONS_ZH
+ */
 import type { PlacementQuestion } from '../../utils/placementEngine';
 
 export const PLACEMENT_QUESTIONS_ZH: PlacementQuestion[] = [

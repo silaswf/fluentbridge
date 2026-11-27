@@ -1,3 +1,7 @@
+/**
+ * @file src/main.tsx
+ * @description Ponto de entrada React 19: monta <App /> no DOM, registra listeners globais de erro e importa estilos base.
+ */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';

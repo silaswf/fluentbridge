@@ -1,3 +1,7 @@
+/**
+ * @file electron/preload.cjs
+ * @description Script preload Electron (contextBridge): expõe APIs seguras de plataforma e versão para o renderer sem expor Node.js direto.
+ */
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('fluentBridgeDesktop', {

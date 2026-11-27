@@ -1,3 +1,8 @@
+/**
+ * @file src/data/curriculum/danishExpansion.ts
+ * @description Conteúdo curricular (danishExpansion) do curso de idiomas.
+ * @exports DANISH_EXP_TOPICS, DANISH_EXP_VOCAB, DANISH_150_TOPICS, DANISH_150_VOCAB
+ */
 import type { Topic, VocabCard } from '../../types/learning';
 import {
   buildLanguageVocab,

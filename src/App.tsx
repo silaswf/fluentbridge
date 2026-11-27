@@ -1,3 +1,8 @@
+/**
+ * @file src/App.tsx
+ * @description Orquestrador raiz do FluentBridge: gerencia autenticação, estado global, troca de idioma/curso, tema, i18n, banner PT PLE, sync Supabase e renderização lazy de todas as views.
+ * @exports App
+ */
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import {

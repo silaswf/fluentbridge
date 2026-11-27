@@ -1,3 +1,8 @@
+/**
+ * @file src/components/YouTubeStudyLab.tsx
+ * @description YouTube Study Lab: importa URL ou SRT do YouTube, gera legendas bilíngues clicáveis para SM-2, analisa gramática real e cria quiz IA.
+ * @exports YouTubeStudyLab
+ */
 import { useState } from 'react';
 import {
   BookmarkPlus,

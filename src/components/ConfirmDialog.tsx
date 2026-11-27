@@ -1,3 +1,8 @@
+/**
+ * @file src/components/ConfirmDialog.tsx
+ * @description Diálogo modal acessível reutilizável para confirmações destrutivas ou sensíveis no app.
+ * @exports ConfirmDialog
+ */
 import { useEffect } from 'react';
 import { AlertTriangle, HelpCircle, ShieldAlert, X } from 'lucide-react';
 

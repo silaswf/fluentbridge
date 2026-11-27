@@ -1,3 +1,8 @@
+/**
+ * @file src/data/tutorScenariosV9/tutorV9_ja.ts
+ * @description Expansão v9.0 de +10 cenários de conversação para o Tutor IA em Japonês.
+ * @exports JA_TUTOR_SCENARIOS_V9
+ */
 import type { AITutorScenario } from '../../types/learning';
 
 export const JA_TUTOR_SCENARIOS_V9: AITutorScenario[] = [
