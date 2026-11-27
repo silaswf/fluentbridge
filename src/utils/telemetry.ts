@@ -171,3 +171,36 @@ export async function runSyntheticHealthChecks(): Promise<SyntheticHealthResult[
   }
   return results;
 }
+
+export interface AdminQuotaRouteStat {
+  key: string;
+  label: string;
+  endpoint: string;
+  usedToday: number;
+  limitPerActor: number;
+  activeActorsToday: number;
+  sevenDayTotal: number;
+}
+
+export interface AdminQuotaSnapshot {
+  ok: boolean;
+  date: string;
+  days: number;
+  r2Connected: boolean;
+  routes: AdminQuotaRouteStat[];
+  generatedAt: string;
+}
+
+export async function fetchAdminQuotas(days = 7): Promise<AdminQuotaSnapshot | null> {
+  if (typeof fetch === 'undefined') return null;
+  const apiBase = DEFAULT_BACKEND_API_URL.replace(/\/+$/, '');
+  if (!apiBase) return null;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/quotas?days=${days}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as AdminQuotaSnapshot;
+    return data?.ok && Array.isArray(data.routes) ? data : null;
+  } catch {
+    return null;
+  }
+}

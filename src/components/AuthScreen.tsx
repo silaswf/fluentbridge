@@ -16,6 +16,12 @@ import {
   MASTER_ADMIN_EMAIL,
 } from '../config/appConfig';
 import { verifyPassword } from '../utils/storage';
+import {
+  detectPreferredBrowserLocale,
+  hasExplicitUiLocale,
+  tUi,
+  type UiLocale,
+} from '../utils/i18n';
 import type {
   ClassGroup,
   StudentEnrollmentType,
@@ -30,6 +36,8 @@ interface AuthScreenProps {
   users: UserProfile[];
   classes: ClassGroup[];
   cloudConfigured: boolean;
+  uiLocale?: UiLocale;
+  onChangeUiLocale?: (locale: UiLocale) => void;
   onOpenDownloadModal?: () => void;
   onLogin: (userId: string) => void;
   onEmailAuthLogin?: (
@@ -55,6 +63,8 @@ export function AuthScreen({
   users,
   classes,
   cloudConfigured,
+  uiLocale = 'pt',
+  onChangeUiLocale,
   onOpenDownloadModal,
   onLogin,
   onEmailAuthLogin,
@@ -310,6 +320,38 @@ export function AuthScreen({
 
         {/* Right Auth Form (Dark Sober Card) */}
         <div className="flex flex-col justify-center rounded-3xl border border-slate-800 bg-slate-900/95 p-6 shadow-2xl sm:p-8 lg:col-span-7">
+          {onChangeUiLocale && (
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              {uiLocale === 'pt' && !hasExplicitUiLocale() && detectPreferredBrowserLocale() === 'en' ? (
+                <button
+                  type="button"
+                  data-testid="auth-switch-en-btn"
+                  onClick={() => onChangeUiLocale('en')}
+                  className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 text-[11px] font-bold text-blue-300 hover:bg-blue-500/20 cursor-pointer"
+                >
+                  {tUi(uiLocale, 'auth.switchEnPrompt')}
+                </button>
+              ) : (
+                <span />
+              )}
+              <div data-testid="auth-locale-switcher" className="flex items-center gap-1">
+                {(['pt', 'en', 'es'] as UiLocale[]).map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => onChangeUiLocale(loc)}
+                    className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold uppercase transition cursor-pointer ${
+                      uiLocale === loc
+                        ? 'bg-blue-600 text-white'
+                        : 'border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {/* Tabs */}
           <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-slate-800 bg-slate-950/90 p-1">
             <button
@@ -325,7 +367,7 @@ export function AuthScreen({
               }`}
             >
               <LogIn className="h-4 w-4" />
-              <span>Entrar</span>
+              <span>{tUi(uiLocale, 'auth.loginTab')}</span>
             </button>
             <button
               type="button"
@@ -340,7 +382,7 @@ export function AuthScreen({
               }`}
             >
               <UserPlus className="h-4 w-4" />
-              <span>Criar conta</span>
+              <span>{tUi(uiLocale, 'auth.registerTab')}</span>
             </button>
           </div>
 

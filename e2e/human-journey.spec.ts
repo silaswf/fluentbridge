@@ -349,9 +349,10 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
     expect(darkSurfaceCheck.modRgb[2]).toBeLessThan(80);
     await page.evaluate(() => document.documentElement.classList.remove('dark'));
 
-    // Open Admin Panel via desktop/wide nav and run live Health Check
+    // Open Admin Panel via desktop/wide nav and run live Health Check + verify Quotas Panel
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.getByRole('button', { name: /Admin Mestre|Painel Admin/i }).click();
+    await expect(page.getByTestId('admin-quotas-panel')).toBeVisible();
     await page.getByTestId('admin-run-healthcheck-btn').click();
     await expect(page.getByTestId('admin-healthcheck-results')).toBeVisible({ timeout: 15000 });
 
@@ -450,6 +451,7 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
       await expect(page.locator('main')).toHaveAttribute('dir', expectRtl ? 'rtl' : 'ltr');
       await expect(page.getByText(/\(150 unidades\)/i)).toBeVisible({ timeout: 10000 });
     }
+    await expect(page.getByTestId('pt-course-en-ui-banner')).toBeVisible();
 
     // 1b. Verify Bidirectional Course Translator (with Portuguese selected -> EN <-> PT)
     await page.getByRole('button', { name: /Tradutor/i }).click();

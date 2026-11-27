@@ -137,6 +137,7 @@ import {
 import {
   loadStoredUiLocale,
   saveUiLocale,
+  tUi,
   type UiLocale,
 } from './utils/i18n';
 import {
@@ -218,6 +219,7 @@ export function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadStoredThemeMode());
   const [uiLocale, setUiLocale] = useState<UiLocale>(() => loadStoredUiLocale());
+  const [ptUiBannerDismissed, setPtUiBannerDismissed] = useState(false);
   const [fontScale, setFontScale] = useState<FontScale>(() => loadStoredFontScale());
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
@@ -1525,6 +1527,8 @@ export function App() {
         <AppDownloadGateway
           mode="landing"
           schoolName={state.schoolName}
+          uiLocale={uiLocale}
+          onChangeUiLocale={setUiLocale}
           onContinueWeb={(remember) => {
             if (remember && typeof window !== 'undefined') {
               window.localStorage.setItem('fluentbridge_prefer_web', '1');
@@ -1543,6 +1547,8 @@ export function App() {
           users={state.users}
           classes={state.classes}
           cloudConfigured={isCloudConfigured}
+          uiLocale={uiLocale}
+          onChangeUiLocale={setUiLocale}
           onOpenDownloadModal={() => setShowDownloadModal(true)}
           onLogin={handleLogin}
           onEmailAuthLogin={handleEmailAuthLogin}
@@ -1553,6 +1559,8 @@ export function App() {
           <AppDownloadGateway
             mode="modal"
             schoolName={state.schoolName}
+            uiLocale={uiLocale}
+            onChangeUiLocale={setUiLocale}
             onContinueWeb={() => setShowDownloadModal(false)}
             onClose={() => setShowDownloadModal(false)}
           />
@@ -1976,6 +1984,33 @@ export function App() {
         dir={isRtlLanguage(activeLanguage) ? 'rtl' : 'ltr'}
         className="safe-main-pb flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 lg:pb-10"
       >
+        {activeCourse.code === 'pt' && uiLocale !== 'en' && !ptUiBannerDismissed && (
+          <div
+            data-testid="pt-course-en-ui-banner"
+            className="mx-auto mb-4 flex max-w-6xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs text-blue-950"
+          >
+            <span className="font-semibold">
+              {tUi(uiLocale, 'ptBanner.title')}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-testid="pt-course-switch-en-btn"
+                onClick={() => setUiLocale('en')}
+                className="rounded-xl bg-blue-600 px-3 py-1.5 font-bold text-white hover:bg-blue-700 cursor-pointer"
+              >
+                {tUi(uiLocale, 'ptBanner.cta')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPtUiBannerDismissed(true)}
+                className="rounded-xl border border-blue-200 bg-white px-3 py-1.5 font-semibold text-blue-800 hover:bg-blue-100 cursor-pointer"
+              >
+                {tUi(uiLocale, 'ptBanner.dismiss')}
+              </button>
+            </div>
+          </div>
+        )}
         {activeView === 'learn' && (
           <LearningPath
             currentUser={currentUser}
@@ -2355,6 +2390,8 @@ export function App() {
         <AppDownloadGateway
           mode="modal"
           schoolName={state.schoolName}
+          uiLocale={uiLocale}
+          onChangeUiLocale={setUiLocale}
           onContinueWeb={() => setShowDownloadModal(false)}
           onClose={() => setShowDownloadModal(false)}
         />

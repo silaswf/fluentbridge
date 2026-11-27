@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import {
   Award,
+  Check,
   CheckCircle2,
-  Clock,
   Cloud,
+  Copy,
   GraduationCap,
-  Mic,
-  PenTool,
   Plus,
-  Save,
-  Sparkles,
+  Search,
   Trash2,
   Users,
   Crown,
@@ -25,20 +23,20 @@ import type {
   PronunciationRubric,
   StudentSubmission,
   TeacherAssignment,
-  TipCategory,
   Topic,
 } from '../types/learning';
 import { getAudioClip } from '../utils/audioDb';
 import { resolveSubmissionAudioUrl } from '../utils/cloudSync';
 import { getSelectedVoiceLabels } from '../utils/speech';
+import { getTeacherDisplayName } from '../utils/teacherDisplay';
 import { ConfirmDialog } from './ConfirmDialog';
-import { DualAudioButtons } from './DualAudioButtons';
 import { SchoolSettingsTab } from './teacher/SchoolSettingsTab';
+import { SubmissionsGradingTab } from './teacher/SubmissionsGradingTab';
+import { TopicCreatorTab } from './teacher/TopicCreatorTab';
 import { VipStudentsPanel } from './teacher/VipStudentsPanel';
 import { downloadPedagogicalReportPdf } from '../utils/pedagogicalReportPdf';
-import { getLanguageCourseMeta } from '../data/platformDefaults';
+import { getLanguageCourseMeta, LANGUAGE_COURSES_META } from '../data/platformDefaults';
 import {
-  DEFAULT_BACKEND_API_URL,
   DEFAULT_TEACHER_ACCESS_CODE,
   isMasterAdminEmail,
   MASTER_ADMIN_EMAIL,
@@ -274,7 +272,6 @@ export function TeacherStudio({
   const [newClassDesc, setNewClassDesc] = useState('');
   const [certTargetLevel, setCertTargetLevel] = useState<Record<string, CEFRLevel>>({});
 
-  // Phase 8 Assignments & AI Topic Generator state
   const [assignTitle, setAssignTitle] = useState('');
   const [assignDesc, setAssignDesc] = useState('');
   const [assignClassId, setAssignClassId] = useState('');
@@ -282,193 +279,8 @@ export function TeacherStudio({
   const [assignDueDate, setAssignDueDate] = useState(() =>
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
   );
-  const [aiTopicIdea, setAiTopicIdea] = useState('');
-  const [isGeneratingAiTopic, setIsGeneratingAiTopic] = useState(false);
-
-  // Create Topic Form State
-  const [topicLanguage, setTopicLanguage] = useState<LanguageCode>('en');
-  const [titlePt, setTitlePt] = useState('');
-  const [titleEn, setTitleEn] = useState('');
-  const [subtitle, setSubtitle] = useState('');
-  const [level, setLevel] = useState<CEFRLevel>('A2');
-  const [tipCategory, setTipCategory] = useState<TipCategory>('grammar');
-  const [tipTitle, setTipTitle] = useState('');
-  const [tipSummary, setTipSummary] = useState('');
-  const [tipDetails, setTipDetails] = useState('');
-  const [tipExampleEn, setTipExampleEn] = useState('');
-  const [tipExamplePt, setTipExamplePt] = useState('');
-
-  const [listenAudio, setListenAudio] = useState('');
-  const [listenQuestion, setListenQuestion] = useState('');
-  const [listenRight, setListenRight] = useState('');
-  const [listenWrong, setListenWrong] = useState('');
-
-  const [readText, setReadText] = useState('');
-  const [readQuestion, setReadQuestion] = useState('');
-  const [readRight, setReadRight] = useState('');
-  const [readWrong, setReadWrong] = useState('');
-
-  const [speakSentence, setSpeakSentence] = useState('');
-  const [speakTranslation, setSpeakTranslation] = useState('');
-  const [speakHint, setSpeakHint] = useState('');
-
-  const [writePrompt, setWritePrompt] = useState('');
-  const [writeModel, setWriteModel] = useState('');
-
-  // Teacher link modal / actions state
-
-  const handlePrefillSampleTopic = () => {
-    setTitlePt('Negócios & Networking Internacional');
-    setTitleEn('International Networking');
-    setSubtitle('Apresente sua empresa, faça perguntas inteligentes e troque contatos.');
-    setLevel('B1');
-    setTipCategory('culture');
-    setTipTitle('Small talk que gera conexão real');
-    setTipSummary('Evite perguntas fechadas (sim/não). Pergunte "What brought you to..."');
-    setTipDetails(
-      'Em conferências ou cafés corporativos, perguntas abertas convidam o outro a contar histórias e destravam a conversa naturalmente.',
-    );
-    setTipExampleEn('What brought you to this year’s conference?');
-    setTipExamplePt('O que trouxe você para a conferência deste ano?');
-    setListenAudio(
-      "Hi! I'm Laura from Lisbon. Currently I lead customer partnerships at a clean-tech startup. What kind of projects is your team focusing on?",
-    );
-    setListenQuestion('Qual é o cargo atual da Laura?');
-    setListenRight('Ela lidera parcerias com clientes em uma startup de tecnologia limpa.');
-    setListenWrong('Ela é estudante de medicina em Londres.');
-    setReadText(
-      'Hi David! Great meeting you at the panel earlier. As promised, here is the link to our case study. Let us touch base next Tuesday for a quick 15-minute call.',
-    );
-    setReadQuestion('O que a mensagem propõe para a próxima terça-feira?');
-    setReadRight('Uma ligação rápida de 15 minutos para manter contato.');
-    setReadWrong('Cancelar a parceria atual.');
-    setSpeakSentence("It was great connecting—let's touch base next week!");
-    setSpeakTranslation('Foi ótimo conectar com você — vamos conversar na semana que vem!');
-    setSpeakHint('Pronuncie "touch base" com clareza ("tâtch bêis").');
-    setWritePrompt('Escreva uma mensagem curta de follow-up após conhecer alguém em um evento.');
-    setWriteModel(
-      'Hi Alex! It was great meeting you at the workshop today. Let us stay in touch on LinkedIn!',
-    );
-  };
-
-  const handleCreateTopic = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!titlePt.trim() || !speakSentence.trim() || !listenAudio.trim() || !readText.trim()) {
-      return;
-    }
-
-    const id = `custom-${Date.now()}`;
-    const newTopic: Topic = {
-      id,
-      languageCode: topicLanguage,
-      titlePt: titlePt.trim(),
-      titleEn: titleEn.trim() || titlePt.trim(),
-      subtitle:
-        subtitle.trim() ||
-        'Lição personalizada criada pelo professor com as 4 habilidades.',
-      level,
-      estimatedMinutes: 8,
-      icon: 'Sparkles',
-      color: '#7C3AED',
-      isCustom: true,
-      topicTipsSummary: [tipTitle.trim() || 'Dica exclusiva do professor'],
-      steps: [
-        {
-          id: `${id}-tip`,
-          type: 'tip',
-          tip: {
-            id: `${id}-tip-content`,
-            category: tipCategory,
-            title: tipTitle.trim() || 'Dica do Professor',
-            summary: tipSummary.trim() || 'Ponto de atenção para este tópico.',
-            details:
-              tipDetails.trim() ||
-              'Revise o exemplo abaixo em voz alta para memorizar a estrutura.',
-            examples: [
-              {
-                en: tipExampleEn.trim() || speakSentence.trim(),
-                pt: tipExamplePt.trim() || speakTranslation.trim() || 'Exemplo prático.',
-              },
-            ],
-          },
-        },
-        {
-          id: `${id}-listen`,
-          type: 'listening',
-          speakerLabel: `Áudio do Professor · ${state.teacherName}`,
-          contextPt: 'Ouça o áudio com atenção e escolha a resposta correta.',
-          audioText: listenAudio.trim(),
-          question: listenQuestion.trim() || 'O que foi informado no áudio?',
-          options: [
-            listenRight.trim() || 'A informação principal dita no áudio.',
-            listenWrong.trim() || 'Uma informação diferente do áudio.',
-          ],
-          correctIndex: 0,
-          explanation: `No áudio ouvimos: "${listenAudio.trim()}".`,
-          hintTip: 'Use a velocidade 0.75x se precisar captar cada palavra.',
-        },
-        {
-          id: `${id}-read`,
-          type: 'reading',
-          title: 'Leitura Guiada',
-          format: 'article',
-          text: readText.trim(),
-          glossary: [],
-          question: readQuestion.trim() || 'Qual é a ideia principal do texto?',
-          options: [
-            readRight.trim() || 'Ideia principal confirmada pelo texto.',
-            readWrong.trim() || 'Afirmação incorreta sobre o texto.',
-          ],
-          correctIndex: 0,
-          explanation: 'Confira o trecho principal do texto acima.',
-          hintTip: 'Você pode clicar em "Ouvir texto" para treinar leitura + áudio juntos.',
-        },
-        {
-          id: `${id}-speak`,
-          type: 'speaking',
-          promptPt: 'Pratique esta frase-chave em voz alta:',
-          targetSentence: speakSentence.trim(),
-          translationPt: speakTranslation.trim() || 'Pratique a pronúncia natural.',
-          ipa: '/prática guiada/',
-          brPhoneticHint: speakHint.trim() || 'Fale pausadamente mantendo o ritmo.',
-          focusTip: speakHint.trim() || 'Foque na clareza das palavras principais.',
-        },
-        {
-          id: `${id}-write`,
-          type: 'writing_free',
-          promptPt: writePrompt.trim() || 'Escreva 1 ou 2 frases sobre este tema.',
-          scenarioPt: 'Sua resposta poderá ser enviada diretamente para correção do professor.',
-          minWords: 6,
-          checklist: [{ label: 'Pelo menos 6 palavras em inglês', keywords: [' '] }],
-          modelAnswer: writeModel.trim() || speakSentence.trim(),
-          hintTip: 'Use a estrutura da dica inicial para montar sua frase.',
-        },
-      ],
-    };
-
-    onAddCustomTopic(newTopic);
-    setTitlePt('');
-    setTitleEn('');
-    setSubtitle('');
-    setTipTitle('');
-    setTipSummary('');
-    setTipDetails('');
-    setTipExampleEn('');
-    setTipExamplePt('');
-    setListenAudio('');
-    setListenQuestion('');
-    setListenRight('');
-    setListenWrong('');
-    setReadText('');
-    setReadQuestion('');
-    setReadRight('');
-    setReadWrong('');
-    setSpeakSentence('');
-    setSpeakTranslation('');
-    setSpeakHint('');
-    setWritePrompt('');
-    setWriteModel('');
-  };
+  const [copiedClassId, setCopiedClassId] = useState<string | null>(null);
+  const [userSearch, setUserSearch] = useState('');
 
   const handleCreateClassSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -485,7 +297,20 @@ export function TeacherStudio({
     setNewClassDesc('');
   };
 
-  const pendingCount = state.submissions.filter((s) => s.status === 'pending').length;
+  const pendingCount = state.submissions.filter((sub) => {
+    if (sub.status !== 'pending') return false;
+    if (isMaster) return true;
+    const subStu = state.users.find((u) => u.id === sub.studentId);
+    const subCls = state.classes.find((c) => c.id === sub.classId);
+    const hasExplicitOwner = Boolean(
+      sub.teacherId || subStu?.assignedTeacherId || subCls?.teacherId,
+    );
+    const belongsToMe =
+      sub.teacherId === currentUser.id ||
+      subStu?.assignedTeacherId === currentUser.id ||
+      subCls?.teacherId === currentUser.id;
+    return !hasExplicitOwner || belongsToMe;
+  }).length;
   const students = state.users.filter((u) => u.role === 'student');
 
   const getClassName = (classId?: string) =>
@@ -562,341 +387,26 @@ export function TeacherStudio({
 
       {/* TAB 1: CORRECTIONS (WRITING + SPEAKING AUDIO) */}
       {tab === 'corrections' && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-            <div className="flex flex-wrap gap-1.5">
-              {(
-                [
-                  { id: 'all', label: 'Todos os envios' },
-                  { id: 'writing', label: 'Escrita (Writing)' },
-                  { id: 'speaking', label: 'Áudio (Speaking)' },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setFilterType(f.id)}
-                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
-                    filterType === f.id
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            <select
-              value={filterClassId}
-              onChange={(e) => setFilterClassId(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700"
-            >
-              <option value="ALL">Todas as turmas</option>
-              {state.classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="space-y-3 lg:col-span-5">
-              {filteredSubs.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500">
-                  Nenhum envio encontrado neste filtro.
-                </div>
-              ) : (
-                filteredSubs.map((sub) => {
-                  const active = selectedSub?.id === sub.id;
-                  return (
-                    <button
-                      key={sub.id}
-                      type="button"
-                      onClick={() => handleSelectSubmission(sub)}
-                      className={`w-full rounded-2xl border p-4 text-left transition cursor-pointer ${
-                        active
-                          ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-100'
-                          : 'border-slate-200 bg-white hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1.5 font-display text-sm font-bold text-slate-900">
-                          {sub.type === 'speaking' ? (
-                            <Mic className="h-3.5 w-3.5 text-rose-500" />
-                          ) : (
-                            <PenTool className="h-3.5 w-3.5 text-amber-600" />
-                          )}
-                          {sub.studentName}
-                        </span>
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                            sub.status === 'pending'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-emerald-100 text-emerald-800'
-                          }`}
-                        >
-                          {sub.status === 'pending' ? (
-                            <>
-                              <Clock className="h-3 w-3" />
-                              Aguardando
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className="h-3 w-3" />
-                              Corrigido
-                            </>
-                          )}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs font-semibold text-blue-700">
-                        {sub.topicTitle} · {getClassName(sub.classId)}
-                      </p>
-                      <p className="mt-1.5 line-clamp-2 text-xs text-slate-600">
-                        “{sub.responseText}”
-                      </p>
-                      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>{sub.createdAt}</span>
-                        {sub.type === 'speaking' && sub.audioDurationSec && (
-                          <span className="font-mono font-bold text-rose-600">
-                            Áudio {sub.audioDurationSec}s
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-
-            <div className="lg:col-span-7">
-              {selectedSub ? (
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                            selectedSub.type === 'speaking'
-                              ? 'bg-rose-50 text-rose-700'
-                              : 'bg-amber-50 text-amber-800'
-                          }`}
-                        >
-                          {selectedSub.type === 'speaking'
-                            ? 'Áudio de Speaking'
-                            : 'Produção de Writing'}
-                        </span>
-                        <h3 className="font-display text-lg font-bold text-slate-900">
-                          {selectedSub.studentName}
-                        </h3>
-                      </div>
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        {selectedSub.topicTitle} · {getClassName(selectedSub.classId)} ·{' '}
-                        {selectedSub.createdAt}
-                      </p>
-                    </div>
-                    {selectedSub.teacherBadge && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                        <Award className="h-3.5 w-3.5" />
-                        {selectedSub.teacherBadge}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mt-4 space-y-4">
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <p className="text-[11px] font-bold text-slate-400 uppercase">
-                        Proposta do exercício
-                      </p>
-                      <p className="mt-0.5 text-xs font-medium text-slate-700">
-                        {selectedSub.promptPt}
-                      </p>
-
-                      {selectedSub.type === 'speaking' ? (
-                        <div className="mt-3 space-y-2.5">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-[11px] font-bold text-rose-700 uppercase">
-                              Frase-alvo & Gravação do Aluno
-                            </span>
-                            {selectedSub.autoPronunciationScore !== undefined && (
-                              <span className="rounded-full bg-blue-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-blue-800">
-                                Auto-precisão: {selectedSub.autoPronunciationScore}%
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm font-bold text-slate-900">
-                            “{selectedSub.targetSentence ?? selectedSub.responseText}”
-                          </p>
-
-                          {loadedAudioUrl ? (
-                            <audio controls src={loadedAudioUrl} className="h-10 w-full" />
-                          ) : (
-                            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-rose-200 bg-white p-3">
-                              <span className="text-xs text-slate-600">
-                                {selectedSub.audioArchived
-                                  ? 'Áudio removido automaticamente após 60 dias (transcrição, nota e feedback escritos preservados).'
-                                  : selectedSub.audioId
-                                    ? 'Áudio gravado em outro dispositivo (use o player modelo abaixo).'
-                                    : 'Áudio demonstrativo · Clique para ouvir a frase:'}
-                              </span>
-                              <DualAudioButtons
-                                text={
-                                  selectedSub.targetSentence ??
-                                  selectedSub.responseText
-                                }
-                                languageCode={selectedSub.languageCode ?? 'en'}
-                                showSlow
-                                size="xs"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <>
-                          <p className="mt-3 text-[11px] font-bold text-slate-400 uppercase">
-                            Texto enviado pelo aluno
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-900">
-                            “{selectedSub.responseText}”
-                          </p>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Pronunciation Rubric for Speaking */}
-                    {selectedSub.type === 'speaking' && (
-                      <div className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-4">
-                        <p className="text-xs font-extrabold text-rose-900 uppercase">
-                          Avaliação de Pronúncia (1 a 5)
-                        </p>
-                        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                          {(
-                            [
-                              { key: 'clarity', label: 'Clareza' },
-                              { key: 'intonation', label: 'Entonação' },
-                              { key: 'rhythm', label: 'Ritmo' },
-                            ] as const
-                          ).map(({ key, label }) => (
-                            <div key={key} className="rounded-xl bg-white p-2.5 ring-1 ring-rose-100">
-                              <div className="flex justify-between text-xs font-bold text-slate-700">
-                                <span>{label}</span>
-                                <span className="font-mono text-rose-600">
-                                  {rubricDraft[key]}/5
-                                </span>
-                              </div>
-                              <div className="mt-1.5 flex gap-1">
-                                {[1, 2, 3, 4, 5].map((score) => (
-                                  <button
-                                    key={score}
-                                    type="button"
-                                    onClick={() =>
-                                      setRubricDraft((prev) => ({
-                                        ...prev,
-                                        [key]: score,
-                                      }))
-                                    }
-                                    className={`flex-1 rounded-md py-1 font-mono text-[11px] font-bold transition cursor-pointer ${
-                                      rubricDraft[key] >= score
-                                        ? 'bg-rose-500 text-white'
-                                        : 'bg-slate-100 text-slate-500'
-                                    }`}
-                                  >
-                                    {score}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700">
-                        Feedback e Dica do Professor (em português)
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={feedbackDraft}
-                        onChange={(e) => setFeedbackDraft(e.target.value)}
-                        placeholder="Escreva elogios, pontos de melhoria e dicas de pronúncia ou gramática..."
-                        className="mt-1.5 w-full rounded-2xl border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                      />
-                    </div>
-
-                    {selectedSub.type === 'writing' && (
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700">
-                          Versão sugerida / corrigida (em inglês)
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={correctedDraft}
-                          onChange={(e) => setCorrectedDraft(e.target.value)}
-                          className="mt-1.5 w-full rounded-2xl border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700">
-                        Selo de reconhecimento
-                      </label>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {(selectedSub.type === 'speaking'
-                          ? SPEAKING_BADGES
-                          : WRITING_BADGES
-                        ).map((b) => (
-                          <button
-                            key={b}
-                            type="button"
-                            onClick={() => setBadgeDraft(b)}
-                            className={`rounded-full border px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
-                              badgeDraft === b
-                                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            {b}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onGradeSubmission(selectedSub.id, {
-                          teacherFeedback:
-                            feedbackDraft.trim() ||
-                            (selectedSub.type === 'speaking'
-                              ? 'Boa articulação! Continue praticando em voz alta todos os dias.'
-                              : 'Excelente esforço! Continue praticando diariamente.'),
-                          correctedText:
-                            selectedSub.type === 'writing'
-                              ? correctedDraft.trim() || selectedSub.responseText
-                              : '',
-                          teacherBadge: badgeDraft,
-                          pronunciationRubric:
-                            selectedSub.type === 'speaking' ? rubricDraft : undefined,
-                        })
-                      }
-                      className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 cursor-pointer"
-                    >
-                      <Save className="h-4 w-4" />
-                      <span>Salvar correção e publicar para o aluno</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-                  Selecione um envio à esquerda para corrigir.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <SubmissionsGradingTab
+          submissions={filteredSubs}
+          classes={state.classes}
+          selectedSub={selectedSub}
+          loadedAudioUrl={loadedAudioUrl}
+          feedbackDraft={feedbackDraft}
+          correctedDraft={correctedDraft}
+          badgeDraft={badgeDraft}
+          rubricDraft={rubricDraft}
+          filterType={filterType}
+          filterClassId={filterClassId}
+          onChangeFilterType={setFilterType}
+          onChangeFilterClassId={setFilterClassId}
+          onSelectSubmission={handleSelectSubmission}
+          onChangeFeedback={setFeedbackDraft}
+          onChangeCorrected={setCorrectedDraft}
+          onChangeBadge={setBadgeDraft}
+          onChangeRubric={setRubricDraft}
+          onGradeSubmission={onGradeSubmission}
+        />
       )}
 
       {/* TAB 2: CLASSES, STUDENTS & CERTIFICATES */}
@@ -1038,11 +548,11 @@ export function TeacherStudio({
                   onChange={(e) => setAssignLang(e.target.value as LanguageCode)}
                   className="rounded-xl border border-slate-300 px-2.5 py-2 text-xs"
                 >
-                  <option value="en">Inglês</option>
-                  <option value="es">Espanhol</option>
-                  <option value="fr">Francês</option>
-                  <option value="it">Italiano</option>
-                  <option value="de">Alemão</option>
+                  {LANGUAGE_COURSES_META.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.namePt}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="date"
@@ -1147,9 +657,23 @@ export function TeacherStudio({
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1 font-mono text-xs font-bold text-slate-800">
-                        Código: {cls.code}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void navigator.clipboard?.writeText(cls.code);
+                          setCopiedClassId(cls.id);
+                          window.setTimeout(() => setCopiedClassId(null), 1800);
+                        }}
+                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1 font-mono text-xs font-bold text-slate-800 hover:bg-slate-100 cursor-pointer"
+                        title="Copiar código da turma"
+                      >
+                        {copiedClassId === cls.id ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5 text-slate-500" />
+                        )}
+                        <span>Código: {cls.code}</span>
+                      </button>
                       {state.classes.length > 1 && (
                         <button
                           type="button"
@@ -1260,7 +784,7 @@ export function TeacherStudio({
                                     student: stu,
                                     course: getLanguageCourseMeta(stu.activeLanguage ?? 'en'),
                                     schoolName: state.schoolName,
-                                    teacherName: currentUser.name,
+                                    teacherName: getTeacherDisplayName(currentUser, state.teacherName),
                                   })
                                 }
                                 className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
@@ -1303,25 +827,51 @@ export function TeacherStudio({
                   </h2>
                 </div>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Admin Mestre autorizado: <span className="font-mono font-bold text-slate-700">{MASTER_ADMIN_EMAIL}</span> · Código de convite docente: <span className="rounded bg-purple-100 px-1.5 py-0.5 font-mono font-bold text-purple-900">{DEFAULT_TEACHER_ACCESS_CODE}</span>
+                  Admin Mestre autorizado: <span className="font-mono font-bold text-slate-700">{MASTER_ADMIN_EMAIL}</span>
+                  {isMaster && (
+                    <>
+                      {' '}· Código de convite docente:{' '}
+                      <span className="rounded bg-purple-100 px-1.5 py-0.5 font-mono font-bold text-purple-900">
+                        {state.teacherAccessCode?.trim() || DEFAULT_TEACHER_ACCESS_CODE}
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-                  currentUser.isMasterAdmin || isMasterAdminEmail(currentUser.email)
-                    ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-300'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
-              >
-                <ShieldCheck className="h-3.5 w-3.5" />
-                {currentUser.isMasterAdmin || isMasterAdminEmail(currentUser.email)
-                  ? 'Modo Admin Mestre Desbloqueado'
-                  : 'Modo Professor (Somente leitura para cargos)'}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder="Buscar usuário..."
+                    className="w-40 rounded-xl border border-slate-200 bg-slate-50 py-1 pr-3 pl-8 text-xs"
+                  />
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                    currentUser.isMasterAdmin || isMasterAdminEmail(currentUser.email)
+                      ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-300'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {currentUser.isMasterAdmin || isMasterAdminEmail(currentUser.email)
+                    ? 'Modo Admin Mestre Desbloqueado'
+                    : 'Modo Professor (Somente leitura para cargos)'}
+                </span>
+              </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {state.users.map((u) => {
+              {state.users
+                .filter((u) => {
+                  if (!userSearch.trim()) return true;
+                  const q = userSearch.toLowerCase();
+                  return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+                })
+                .map((u) => {
                 const isTargetMaster = Boolean(
                   u.isMasterAdmin || isMasterAdminEmail(u.email),
                 );
@@ -1369,7 +919,15 @@ export function TeacherStudio({
                       {canManage && !isTargetMaster && u.id !== currentUser.id && (
                         <button
                           type="button"
-                          onClick={() => onDeleteUser(u.id)}
+                          onClick={() =>
+                            setPendingConfirm({
+                              title: `Excluir conta de ${u.name}?`,
+                              description: `Remove ${u.email} da lista local.`,
+                              confirmLabel: 'Excluir usuário',
+                              tone: 'danger',
+                              action: () => onDeleteUser(u.id),
+                            })
+                          }
                           className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
                           aria-label={`Remover usuário ${u.name}`}
                           title="Excluir conta"
@@ -1420,385 +978,13 @@ export function TeacherStudio({
 
       {/* TAB 3: CREATE CUSTOM TOPIC */}
       {tab === 'create' && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <form
-            onSubmit={handleCreateTopic}
-            className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs lg:col-span-8"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
-              <div>
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  Criar Tópico com as 4 Habilidades + Dica
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Ao publicar, a lição fica disponível para toda a escola na Trilha de Estudos.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={handlePrefillSampleTopic}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Exemplo pronto</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Phase 9: AI Unit Generator */}
-            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3.5">
-              <input
-                type="text"
-                value={aiTopicIdea}
-                onChange={(e) => setAiTopicIdea(e.target.value)}
-                placeholder="Tema p/ IA gerar lição (ex: Negociar aumento, Pedir comida em Paris)..."
-                className="min-w-[200px] flex-1 rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs"
-              />
-              <button
-                type="button"
-                disabled={isGeneratingAiTopic || !aiTopicIdea.trim()}
-                onClick={async () => {
-                  setIsGeneratingAiTopic(true);
-                  try {
-                    const res = await fetch(
-                      `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/gemini-tutor`,
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          contents: [
-                            {
-                              role: 'user',
-                              parts: [
-                                {
-                                  text: `Create a language lesson draft in ${topicLanguage} (CEFR ${level}) for Brazilian Portuguese students on topic "${aiTopicIdea.trim()}". Reply ONLY with JSON: {"titlePt":"","titleEn":"","subtitle":"","tipTitle":"","tipSummary":"","tipDetails":"","tipExampleEn":"","tipExamplePt":"","listenAudio":"","listenQuestion":"","listenRight":"","listenWrong":"","readText":"","readQuestion":"","readRight":"","readWrong":"","speakSentence":"","speakTranslation":"","speakHint":"","writePrompt":"","writeModel":""}`,
-                                },
-                              ],
-                            },
-                          ],
-                          generationConfig: { responseMimeType: 'application/json' },
-                        }),
-                      },
-                    );
-                    if (res.ok) {
-                      const json = (await res.json()) as {
-                        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-                      };
-                      const raw = json.candidates?.[0]?.content?.parts?.[0]?.text;
-                      if (raw) {
-                        const d = JSON.parse(raw) as Record<string, string>;
-                        if (d.titlePt) setTitlePt(d.titlePt);
-                        if (d.titleEn) setTitleEn(d.titleEn);
-                        if (d.subtitle) setSubtitle(d.subtitle);
-                        if (d.tipTitle) setTipTitle(d.tipTitle);
-                        if (d.tipSummary) setTipSummary(d.tipSummary);
-                        if (d.tipDetails) setTipDetails(d.tipDetails);
-                        if (d.tipExampleEn) setTipExampleEn(d.tipExampleEn);
-                        if (d.tipExamplePt) setTipExamplePt(d.tipExamplePt);
-                        if (d.listenAudio) setListenAudio(d.listenAudio);
-                        if (d.listenQuestion) setListenQuestion(d.listenQuestion);
-                        if (d.listenRight) setListenRight(d.listenRight);
-                        if (d.listenWrong) setListenWrong(d.listenWrong);
-                        if (d.readText) setReadText(d.readText);
-                        if (d.readQuestion) setReadQuestion(d.readQuestion);
-                        if (d.readRight) setReadRight(d.readRight);
-                        if (d.readWrong) setReadWrong(d.readWrong);
-                      }
-                    }
-                  } catch {
-                    // Ignore generation errors cleanly
-                  } finally {
-                    setIsGeneratingAiTopic(false);
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>{isGeneratingAiTopic ? 'Gerando...' : 'Gerar rascunho com IA'}</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-              <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-700">
-                  Título em Português *
-                </label>
-                <input
-                  required
-                  value={titlePt}
-                  onChange={(e) => setTitlePt(e.target.value)}
-                  placeholder="Ex: Check-in no Hotel"
-                  className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">Idioma</label>
-                <select
-                  value={topicLanguage}
-                  onChange={(e) => setTopicLanguage(e.target.value as LanguageCode)}
-                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="en">🇬🇧 Inglês</option>
-                  <option value="es">🇪🇸 Espanhol</option>
-                  <option value="fr">🇫🇷 Francês</option>
-                  <option value="de">🇩🇪 Alemão</option>
-                  <option value="it">🇮🇹 Italiano</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700">Nível CEFR</label>
-                <select
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value as CEFRLevel)}
-                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="A1">A1 · Iniciante</option>
-                  <option value="A2">A2 · Básico</option>
-                  <option value="B1">B1 · Intermediário</option>
-                  <option value="B2">B2 · Avançado</option>
-                  <option value="C1">C1 · Proficiência</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <input
-                value={titleEn}
-                onChange={(e) => setTitleEn(e.target.value)}
-                placeholder="Título em Inglês (opcional)"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-              />
-              <input
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                placeholder="Subtítulo curto"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
-
-            <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
-              <p className="text-xs font-extrabold text-amber-900 uppercase">
-                1. Dica do Professor durante o tópico
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <input
-                  value={tipTitle}
-                  onChange={(e) => setTipTitle(e.target.value)}
-                  placeholder="Título da dica"
-                  className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2"
-                />
-                <select
-                  value={tipCategory}
-                  onChange={(e) => setTipCategory(e.target.value as TipCategory)}
-                  className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="grammar">Gramática</option>
-                  <option value="pronunciation">Pronúncia</option>
-                  <option value="false_friend">Falso Cognato</option>
-                  <option value="culture">Cultura</option>
-                </select>
-              </div>
-              <input
-                value={tipSummary}
-                onChange={(e) => setTipSummary(e.target.value)}
-                placeholder="Resumo em 1 linha"
-                className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
-              />
-              <textarea
-                rows={2}
-                value={tipDetails}
-                onChange={(e) => setTipDetails(e.target.value)}
-                placeholder="Explicação completa da dica..."
-                className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
-              />
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <input
-                  value={tipExampleEn}
-                  onChange={(e) => setTipExampleEn(e.target.value)}
-                  placeholder="Exemplo em inglês"
-                  className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
-                />
-                <input
-                  value={tipExamplePt}
-                  onChange={(e) => setTipExamplePt(e.target.value)}
-                  placeholder="Tradução do exemplo"
-                  className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2.5 rounded-2xl border border-indigo-200 bg-indigo-50/40 p-4">
-                <p className="text-xs font-extrabold text-indigo-900 uppercase">
-                  2. Listening (Áudio em Inglês) *
-                </p>
-                <textarea
-                  required
-                  rows={2}
-                  value={listenAudio}
-                  onChange={(e) => setListenAudio(e.target.value)}
-                  placeholder="Texto em inglês que o app falará..."
-                  className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={listenQuestion}
-                  onChange={(e) => setListenQuestion(e.target.value)}
-                  placeholder="Pergunta de compreensão (PT)"
-                  className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={listenRight}
-                  onChange={(e) => setListenRight(e.target.value)}
-                  placeholder="Alternativa correta"
-                  className="w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={listenWrong}
-                  onChange={(e) => setListenWrong(e.target.value)}
-                  placeholder="Alternativa distratora"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs"
-                />
-              </div>
-
-              <div className="space-y-2.5 rounded-2xl border border-teal-200 bg-teal-50/40 p-4">
-                <p className="text-xs font-extrabold text-teal-900 uppercase">
-                  3. Reading (Texto em Inglês) *
-                </p>
-                <textarea
-                  required
-                  rows={2}
-                  value={readText}
-                  onChange={(e) => setReadText(e.target.value)}
-                  placeholder="Texto ou e-mail curto em inglês..."
-                  className="w-full rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={readQuestion}
-                  onChange={(e) => setReadQuestion(e.target.value)}
-                  placeholder="Pergunta sobre o texto (PT)"
-                  className="w-full rounded-xl border border-teal-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={readRight}
-                  onChange={(e) => setReadRight(e.target.value)}
-                  placeholder="Alternativa correta"
-                  className="w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={readWrong}
-                  onChange={(e) => setReadWrong(e.target.value)}
-                  placeholder="Alternativa distratora"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2.5 rounded-2xl border border-rose-200 bg-rose-50/40 p-4">
-                <p className="text-xs font-extrabold text-rose-900 uppercase">
-                  4. Speaking (Fala) *
-                </p>
-                <input
-                  required
-                  value={speakSentence}
-                  onChange={(e) => setSpeakSentence(e.target.value)}
-                  placeholder="Frase alvo em inglês..."
-                  className="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={speakTranslation}
-                  onChange={(e) => setSpeakTranslation(e.target.value)}
-                  placeholder="Tradução da frase"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs"
-                />
-                <input
-                  value={speakHint}
-                  onChange={(e) => setSpeakHint(e.target.value)}
-                  placeholder="Dica de pronúncia"
-                  className="w-full rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs"
-                />
-              </div>
-
-              <div className="space-y-2.5 rounded-2xl border border-amber-200 bg-amber-50/40 p-4">
-                <p className="text-xs font-extrabold text-amber-900 uppercase">
-                  5. Writing (Escrita)
-                </p>
-                <input
-                  value={writePrompt}
-                  onChange={(e) => setWritePrompt(e.target.value)}
-                  placeholder="Instrução da escrita (PT)"
-                  className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs"
-                />
-                <textarea
-                  rows={2}
-                  value={writeModel}
-                  onChange={(e) => setWriteModel(e.target.value)}
-                  placeholder="Resposta modelo do professor (EN)"
-                  className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-xs transition hover:bg-blue-700 cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Publicar tópico na Trilha de Estudos</span>
-            </button>
-          </form>
-
-          <div className="space-y-3 lg:col-span-4">
-            <h3 className="font-display text-sm font-bold tracking-wide text-slate-500 uppercase">
-              Seus tópicos publicados ({state.customTopics.length})
-            </h3>
-            {state.customTopics.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-center text-xs text-slate-500">
-                Você ainda não criou tópicos próprios. Use “Preencher exemplo pronto” ao lado para testar em 1 clique!
-              </div>
-            ) : (
-              state.customTopics.map((topic) => (
-                <div
-                  key={topic.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-slate-600">
-                          {topic.languageCode ?? 'en'}
-                        </span>
-                        <span className="rounded-full bg-purple-50 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-700">
-                          {topic.level}
-                        </span>
-                      </div>
-                      <h4 className="mt-1 font-display text-sm font-bold text-slate-900">
-                        {topic.titlePt}
-                      </h4>
-                      <p className="text-xs text-slate-500">{topic.steps.length} etapas</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => onDeleteCustomTopic(topic.id)}
-                      className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
-                      aria-label={`Remover ${topic.titlePt}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onPlayTopic(topic)}
-                    className="mt-3 w-full rounded-xl border border-blue-200 bg-blue-50 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
-                  >
-                    Testar tópico agora →
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <TopicCreatorTab
+          teacherName={getTeacherDisplayName(currentUser, state.teacherName)}
+          customTopics={state.customTopics}
+          onAddCustomTopic={onAddCustomTopic}
+          onDeleteCustomTopic={onDeleteCustomTopic}
+          onPlayTopic={onPlayTopic}
+        />
       )}
 
       {/* TAB 4: CLOUD SYNC (SUPABASE), GEMINI AI & SCHOOL SETTINGS */}

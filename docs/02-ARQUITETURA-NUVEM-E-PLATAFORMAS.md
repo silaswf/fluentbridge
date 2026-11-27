@@ -1,6 +1,6 @@
-# 02 — Arquitetura, Nuvem & Plataformas (`v9.2.0`)
+# 02 — Arquitetura, Nuvem & Plataformas (`v9.3.0`)
 
-Este documento consolida toda a arquitetura técnica do **FluentBridge Academy**: cliente Web/PWA, aplicativos nativos Windows (Electron) e Android (Capacitor), estratégia iOS gratuita (Safari PWA), Edge API no Cloudflare Workers (`v9.2.0`, 9 endpoints incl. `/api/translate`) + R2, banco/autenticação Supabase e pipeline CI/CD no GitHub Actions.
+Este documento consolida toda a arquitetura técnica do **FluentBridge Academy**: cliente Web/PWA, aplicativos nativos Windows (Electron) e Android (Capacitor), estratégia iOS gratuita (Safari PWA), Edge API no Cloudflare Workers (`v9.3.0`, 10 endpoints incl. `/api/translate` e `/api/admin/quotas`) + R2, banco/autenticação Supabase e pipeline CI/CD no GitHub Actions.
 
 ---
 

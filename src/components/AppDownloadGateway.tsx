@@ -15,10 +15,13 @@ import {
   GITHUB_RELEASES_URL,
   WINDOWS_DOWNLOAD_URL,
 } from '../config/appConfig';
+import { tUi, type UiLocale } from '../utils/i18n';
 
 interface AppDownloadGatewayProps {
   mode: 'landing' | 'modal';
   schoolName: string;
+  uiLocale?: UiLocale;
+  onChangeUiLocale?: (locale: UiLocale) => void;
   onContinueWeb: (rememberChoice?: boolean) => void;
   onClose?: () => void;
 }
@@ -26,6 +29,8 @@ interface AppDownloadGatewayProps {
 export function AppDownloadGateway({
   mode,
   schoolName,
+  uiLocale = 'pt',
+  onChangeUiLocale,
   onContinueWeb,
   onClose,
 }: AppDownloadGatewayProps) {
@@ -33,6 +38,27 @@ export function AppDownloadGateway({
 
   const innerCard = (
     <div className="relative mx-auto w-full max-w-4xl rounded-3xl border border-slate-800 bg-slate-900/95 p-6 text-slate-100 shadow-2xl sm:p-8">
+      {onChangeUiLocale && (
+        <div
+          data-testid="gateway-locale-switcher"
+          className="mb-3 flex justify-end gap-1"
+        >
+          {(['pt', 'en', 'es'] as UiLocale[]).map((loc) => (
+            <button
+              key={loc}
+              type="button"
+              onClick={() => onChangeUiLocale(loc)}
+              className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-bold uppercase transition cursor-pointer ${
+                uiLocale === loc
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              {loc}
+            </button>
+          ))}
+        </div>
+      )}
       {mode === 'modal' && onClose && (
         <button
           type="button"
@@ -50,10 +76,10 @@ export function AppDownloadGateway({
           {schoolName} · Versão {APP_VERSION}
         </span>
         <h1 className="mt-3 font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-          Escolha como deseja estudar hoje
+          {tUi(uiLocale, 'gateway.chooseStudy')}
         </h1>
         <p className="mx-auto mt-1.5 max-w-2xl text-sm text-slate-400">
-          Baixe o aplicativo oficial para Windows ou Android com experiência nativa, ou continue imediatamente pela versão Web.
+          {tUi(uiLocale, 'gateway.subtitle')}
         </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-slate-300">
@@ -226,7 +252,7 @@ export function AppDownloadGateway({
             onClick={() => onContinueWeb(rememberWeb)}
             className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-blue-500 cursor-pointer"
           >
-            <span>{mode === 'landing' ? 'Continuar na Versão Web' : 'Voltar para o App'}</span>
+            <span>{mode === 'landing' ? tUi(uiLocale, 'gateway.continueWeb') : 'Voltar para o App'}</span>
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

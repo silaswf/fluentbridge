@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
+  Activity,
   Check,
   Copy,
   Crown,
+  Download,
   KeyRound,
   Lock,
   RefreshCw,
@@ -32,8 +34,10 @@ import {
 } from '../utils/relationalSync';
 import { getAllVoiceDiagnostics, speakText } from '../utils/speech';
 import {
+  fetchAdminQuotas,
   fetchTelemetryLogs,
   runSyntheticHealthChecks,
+  type AdminQuotaSnapshot,
   type SyntheticHealthResult,
   type TelemetryErrorLog,
 } from '../utils/telemetry';
@@ -98,12 +102,16 @@ export function AdminPanel({
   const [workerHealth, setWorkerHealth] = useState<{
     version?: string;
     languagesCount?: number;
+    accentCount?: number;
     hasAi?: boolean;
     hasGemini?: boolean;
     hasR2?: boolean;
   } | null>(null);
+  const [quotasSnapshot, setQuotasSnapshot] = useState<AdminQuotaSnapshot | null>(null);
+  const [loadingQuotas, setLoadingQuotas] = useState(false);
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryErrorLog[]>([]);
   const [search, setSearch] = useState('');
+  const [pwFeedback, setPwFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     void getSecurityAuditStatus(state.cloudConfig).then(setSecStatus);
@@ -114,11 +122,12 @@ export function AdminPanel({
     if (!base || typeof fetch === 'undefined') return;
     fetch(`${base}/api/health`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { version?: string; supportedLanguages?: string[]; hasAiBinding?: boolean; hasGeminiSecret?: boolean; hasR2Bucket?: boolean } | null) => {
+      .then((data: { version?: string; accentCount?: number; supportedLanguages?: string[]; hasAiBinding?: boolean; hasGeminiSecret?: boolean; hasR2Bucket?: boolean } | null) => {
         if (data) {
           setWorkerHealth({
             version: data.version,
             languagesCount: data.supportedLanguages?.length ?? 17,
+            accentCount: data.accentCount ?? 65,
             hasAi: Boolean(data.hasAiBinding),
             hasGemini: Boolean(data.hasGeminiSecret),
             hasR2: Boolean(data.hasR2Bucket),
@@ -127,8 +136,9 @@ export function AdminPanel({
       })
       .catch(() => undefined);
     void fetchTelemetryLogs().then(setTelemetryLogs);
+    void fetchAdminQuotas(7).then(setQuotasSnapshot);
   }, []);
-  const [filter, setFilter] = useState<'all' | 'students' | 'teachers' | 'blocked'>(
+  const [filter, setFilter] = useState<'all' | 'students' | 'teachers' | 'unlinked' | 'blocked'>(
     'all',
   );
   const [pwDraftByUser, setPwDraftByUser] = useState<Record<string, string>>({});
@@ -158,6 +168,9 @@ export function AdminPanel({
 
   const teachersCount = state.users.filter((u) => u.role === 'teacher').length;
   const studentsCount = state.users.filter((u) => u.role === 'student').length;
+  const unlinkedCount = state.users.filter(
+    (u) => u.role === 'student' && !u.assignedTeacherId && !u.classId,
+  ).length;
   const blockedCount = state.users.filter((u) => Boolean(u.blocked)).length;
   const supaCfg = getEffectiveSupabaseConfig(state.cloudConfig);
   const voiceDiagnostics = getAllVoiceDiagnostics();
@@ -165,6 +178,9 @@ export function AdminPanel({
   const filteredUsers = state.users.filter((u) => {
     if (filter === 'students' && u.role !== 'student') return false;
     if (filter === 'teachers' && u.role !== 'teacher') return false;
+    if (filter === 'unlinked' && !(u.role === 'student' && !u.assignedTeacherId && !u.classId)) {
+      return false;
+    }
     if (filter === 'blocked' && !u.blocked) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
@@ -352,8 +368,22 @@ export function AdminPanel({
               <span className="truncate font-mono text-[11px] font-bold text-blue-700">
                 {DEFAULT_BACKEND_API_URL}
                 {workerHealth?.version ? ` · v${workerHealth.version}` : ''}
+                {workerHealth?.accentCount ? ` · ${workerHealth.accentCount} sotaques` : ''}
               </span>
             </div>
+            {workerHealth && (
+              <div className="flex flex-wrap gap-1.5">
+                <span className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold ${workerHealth.hasAi ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-rose-50 text-rose-700'}`}>
+                  Workers AI: {workerHealth.hasAi ? 'OK' : 'OFF'}
+                </span>
+                <span className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold ${workerHealth.hasGemini ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-rose-50 text-rose-700'}`}>
+                  Gemini Key: {workerHealth.hasGemini ? 'OK' : 'OFF'}
+                </span>
+                <span className={`rounded-lg px-2 py-0.5 font-mono text-[10px] font-bold ${workerHealth.hasR2 ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-rose-50 text-rose-700'}`}>
+                  R2 Bucket: {workerHealth.hasR2 ? 'OK' : 'OFF'}
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 pt-1">
               {voiceDiagnostics.map((item) => (
                 <div
@@ -407,13 +437,14 @@ export function AdminPanel({
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {(
               [
-                { id: 'all', label: 'Todos' },
-                { id: 'students', label: 'Alunos' },
-                { id: 'teachers', label: 'Professores' },
-                { id: 'blocked', label: 'Bloqueados' },
+                { id: 'all', label: `Todos (${state.users.length})` },
+                { id: 'students', label: `Alunos (${studentsCount})` },
+                { id: 'teachers', label: `Professores (${teachersCount})` },
+                { id: 'unlinked', label: `Sem Professor (${unlinkedCount})` },
+                { id: 'blocked', label: `Bloqueados (${blockedCount})` },
               ] as const
             ).map((opt) => (
               <button
@@ -429,6 +460,29 @@ export function AdminPanel({
                 {opt.label}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                const header = 'Nome,Email,Papel,XP,Unidades,Turma,Bloqueado';
+                const rows = filteredUsers.map((u) => {
+                  const clsName = state.classes.find((c) => c.id === u.classId)?.name ?? '';
+                  return [u.name, u.email, u.role, u.xp, u.completedTopicIds.length, clsName, u.blocked ? 'Sim' : 'Nao']
+                    .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+                    .join(',');
+                });
+                const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `fluentbridge-usuarios-${new Date().toISOString().slice(0, 10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100 cursor-pointer"
+            >
+              <Download className="h-3 w-3" />
+              <span>Exportar CSV</span>
+            </button>
           </div>
         </div>
 
@@ -665,10 +719,14 @@ export function AdminPanel({
                         type="button"
                         onClick={() => {
                           const nextPw = (pwDraftByUser[u.id] ?? '').trim();
-                          if (nextPw.length >= 6) {
-                            onResetUserLocalPassword(u.id, nextPw);
-                            setPwDraftByUser((prev) => ({ ...prev, [u.id]: '' }));
+                          if (nextPw.length < 6) {
+                            setPwFeedback(`A nova senha de ${u.name} deve ter no mínimo 6 caracteres.`);
+                            return;
                           }
+                          onResetUserLocalPassword(u.id, nextPw);
+                          setPwDraftByUser((prev) => ({ ...prev, [u.id]: '' }));
+                          setPwFeedback(`Senha local de ${u.name} redefinida com sucesso.`);
+                          window.setTimeout(() => setPwFeedback(null), 3500);
                         }}
                         className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
                       >
@@ -702,6 +760,83 @@ export function AdminPanel({
                     Conta protegida (Admin Mestre)
                   </span>
                 )}
+              </div>
+            );
+          })}
+        </div>
+        {pwFeedback && (
+          <p className="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-xs font-semibold text-blue-900">
+            {pwFeedback}
+          </p>
+        )}
+      </section>
+
+      {/* Consumo Diário de Cotas IA (Cloudflare R2) */}
+      <section
+        data-testid="admin-quotas-panel"
+        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
+              <Activity className="h-4.5 w-4.5 text-indigo-600" />
+              <span>Consumo Diário de Cotas IA (Cloudflare R2)</span>
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Monitoramento em tempo real das cotas persistentes no R2 ({quotasSnapshot?.date ?? 'hoje'}) e acumulado de {quotasSnapshot?.days ?? 7} dias.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={loadingQuotas}
+            onClick={() => {
+              setLoadingQuotas(true);
+              void fetchAdminQuotas(7)
+                .then(setQuotasSnapshot)
+                .finally(() => setLoadingQuotas(false));
+            }}
+            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingQuotas ? 'animate-spin' : ''}`} />
+            <span>Atualizar cotas</span>
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            quotasSnapshot?.routes ?? [
+              { key: 'stt', label: 'Transcrição Whisper STT', endpoint: '/api/stt', usedToday: 0, limitPerActor: 200, activeActorsToday: 0, sevenDayTotal: 0 },
+              { key: 'gemini', label: 'Tutor IA & Corretor', endpoint: '/api/gemini-tutor', usedToday: 0, limitPerActor: 250, activeActorsToday: 0, sevenDayTotal: 0 },
+              { key: 'translate', label: 'Tradutor Bidirecional', endpoint: '/api/translate', usedToday: 0, limitPerActor: 300, activeActorsToday: 0, sevenDayTotal: 0 },
+              { key: 'youtube', label: 'YouTube Study Lab', endpoint: '/api/youtube-study', usedToday: 0, limitPerActor: 100, activeActorsToday: 0, sevenDayTotal: 0 },
+            ]
+          ).map((r) => {
+            const pct = Math.min(100, Math.round((r.usedToday / Math.max(1, r.limitPerActor)) * 100));
+            const barColor =
+              pct >= 85 ? 'bg-rose-500' : pct >= 60 ? 'bg-amber-500' : 'bg-emerald-500';
+            return (
+              <div
+                key={r.key}
+                className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs"
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-bold text-slate-900">{r.label}</span>
+                  <span className="font-mono text-[10px] text-slate-500">{r.endpoint}</span>
+                </div>
+                <div className="mt-2 flex items-baseline justify-between font-mono">
+                  <span className="text-base font-extrabold text-slate-900">
+                    {r.usedToday}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    / {r.limitPerActor} por usuário/dia
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                  <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
+                </div>
+                <p className="mt-2 text-[10px] text-slate-500">
+                  {r.activeActorsToday} ativo(s) hoje · {r.sevenDayTotal} reqs em {quotasSnapshot?.days ?? 7}d
+                </p>
               </div>
             );
           })}
@@ -793,16 +928,16 @@ export function AdminPanel({
           <div>
             <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
               <ShieldCheck className="h-4.5 w-4.5 text-emerald-600" />
-              <span>Segurança &amp; Migração Definitiva RLS (v4.0)</span>
+              <span>Segurança &amp; Migração SQL Supabase (v9.2+)</span>
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
-              Armazenamento esparso de vocabulário ativo (economia ~95% no JSONB/localStorage) + sincronização relacional autenticada com políticas RLS por aluno/professor/admin (<code className="font-mono">supabase_schema.sql</code> Seção 9).
+              Armazenamento esparso + sincronização relacional autenticada com políticas RLS para os 17 idiomas, bucket <code className="font-mono">fb-audio</code> e RPC LGPD (<code className="font-mono">supabase_schema.sql</code> Seção 11).
             </p>
           </div>
           <button
             type="button"
             onClick={() => {
-              const sqlSnippet = `-- Cole no SQL Editor do Supabase (Seção 9 do supabase_schema.sql)\nalter table public.student_progress add column if not exists recommended_level_by_language jsonb not null default '{}'::jsonb;\nalter table public.student_progress add column if not exists topic_step_progress jsonb not null default '{}'::jsonb;\nalter table public.student_progress add column if not exists learned_vocab_ids text[] not null default '{}';\nalter table public.student_progress add column if not exists mistake_bank jsonb not null default '[]'::jsonb;`;
+              const sqlSnippet = `-- Cole no SQL Editor do Supabase (Seção 11 do supabase_schema.sql - v9.2+)\nalter table public.profiles drop constraint if exists profiles_active_language_check;\nalter table public.profiles add constraint profiles_active_language_check check (active_language in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));\nalter table public.assignments drop constraint if exists assignments_language_code_check;\nalter table public.assignments add constraint assignments_language_code_check check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));\nalter table public.exam_attempts drop constraint if exists exam_attempts_language_code_check;\nalter table public.exam_attempts add constraint exam_attempts_language_code_check check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));\nalter table public.community_posts drop constraint if exists community_posts_language_code_check;\nalter table public.community_posts add constraint community_posts_language_code_check check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));\nalter table public.live_sessions drop constraint if exists live_sessions_language_code_check;\nalter table public.live_sessions add constraint live_sessions_language_code_check check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));\nalter table public.vocab_progress drop constraint if exists vocab_progress_language_code_check;\nalter table public.vocab_progress add constraint vocab_progress_language_code_check check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));`;
               void navigator.clipboard?.writeText(sqlSnippet);
               setRlsCopied(true);
               window.setTimeout(() => setRlsCopied(false), 2500);
@@ -810,7 +945,7 @@ export function AdminPanel({
             className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer"
           >
             {rlsCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            <span>{rlsCopied ? 'SQL RLS copiado!' : 'Copiar SQL Migração v4.0'}</span>
+            <span>{rlsCopied ? 'SQL v9.2+ copiado!' : 'Copiar SQL Migração v9.2+'}</span>
           </button>
         </div>
 

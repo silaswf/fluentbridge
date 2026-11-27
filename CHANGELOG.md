@@ -4,6 +4,21 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v9.3.0`] — 2026-11-26
+### i18n no Login/Gateway + Banner PT PLE, Observabilidade de Cotas R2 (`/api/admin/quotas`), Modularização & Melhorias Admin/Professor
+- **i18n Completo na Entrada & Curso de Português PLE (`i18n.ts`, `AppDownloadGateway.tsx`, `AuthScreen.tsx`, `App.tsx`):**
+  - Adicionado seletor `PT | EN | ES` no **Gateway de Download** e na **Tela de Login/Cadastro** + sugestão automática de 1 clique para mudar para Inglês quando o navegador está em `en-*` e não há idioma salvo.
+  - Novo banner inteligente (`pt-course-en-ui-banner`) exibido ao selecionar **Português (`pt`)** com a interface em outro idioma, oferecendo troca imediata para Inglês.
+- **Painel de Cotas IA em Tempo Real (`cloudflare-worker/lib/quotas.js`, `routes/adminQuotas.js`, `telemetry.ts`, `AdminPanel.tsx`):**
+  - Novo endpoint `GET /api/admin/quotas` agregando consumo diário e acumulado de 7 dias no R2 para `/api/stt`, `/api/gemini-tutor`, `/api/translate` e `/api/youtube-study`.
+  - Novo painel **Consumo Diário de Cotas IA (Cloudflare R2)** no `AdminPanel` com barras de progresso por rota, usuários ativos, badges de bindings (`AI`, `Gemini`, `R2`), filtro `Sem Professor`, **Exportar CSV** de usuários, feedback inline ao redefinir senha e SQL de migração atualizado para `v9.2+` (`17` idiomas).
+- **Modularização & Otimizações no Estúdio do Professor (`SpeakingStepView.tsx`, `SubmissionsGradingTab.tsx`, `TopicCreatorTab.tsx`, `TeacherStudio.tsx`, `routes/media.js`):**
+  - Extraídos `SpeakingStepView.tsx` de `LessonPlayer.tsx`, `SubmissionsGradingTab.tsx` + `TopicCreatorTab.tsx` de `TeacherStudio.tsx` e `routes/media.js` + `lib/quotas.js` de `worker.js`.
+  - Fila de correções ganhou filtros de **Status**, **Idioma (17)** e **Busca**, além de corrigir o rótulo de idioma na caixa de texto corrigido; o criador de tópicos e as tarefas agora exibem todos os **17 idiomas**, preenchem também *Speaking/Writing* no gerador por IA, protegem exclusão de usuários com confirmação, ocultam o código docente de não-admins e adicionam botão **Copiar código da turma**.
+- **Verificação:** `node --check` em todos os 7 arquivos do Worker, `tsc --noEmit` (`0` erros), `vitest run src` (`23/23` suítes / `87/87` testes), `npm run build` (`7.22s`, `0` chunks > 500 kB), `playwright test` (`15/15` E2E) e smoke-test ao vivo em `/api/health` e `/api/admin/quotas`.
+
+---
+
 ## [`v9.2.0`] — 2026-11-26
 ### Tradutor Bidirecional por Curso (`/api/translate`) & Português como Língua Estrangeira (`pt`) com Imersão Invertida
 - **Tradutor Bidirecional Adaptativo (`CourseTranslatorView.tsx`, `courseTranslator.ts`, `cloudflare-worker/routes/translate.js`):**

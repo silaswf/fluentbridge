@@ -56,6 +56,24 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
     'lesson.accentLabel': 'Sotaque',
     'common.close': 'Fechar',
     'common.cancel': 'Cancelar',
+    'gateway.chooseStudy': 'Escolha como deseja estudar hoje',
+    'gateway.subtitle': 'Baixe o aplicativo oficial para Windows ou Android com experiência nativa, ou continue imediatamente pela versão Web.',
+    'gateway.continueWeb': 'Continuar na Versão Web',
+    'gateway.rememberWeb': 'Ir direto para o login web nas próximas visitas neste navegador',
+    'gateway.winTitle': 'Aplicativo Windows',
+    'gateway.androidTitle': 'Aplicativo Android',
+    'gateway.webTitle': 'Versão Web / iOS',
+    'auth.loginTab': 'Entrar',
+    'auth.registerTab': 'Criar Conta',
+    'auth.googleBtn': 'Entrar com Google',
+    'auth.emailLabel': 'E-mail',
+    'auth.passwordLabel': 'Senha',
+    'auth.loginSubmit': 'Entrar na plataforma',
+    'auth.registerSubmit': 'Criar minha conta',
+    'auth.switchEnPrompt': 'Estudando em inglês? Mudar interface para EN',
+    'ptBanner.title': 'Curso de Português para falantes de Inglês ativo — prefere a interface em inglês?',
+    'ptBanner.cta': 'Mudar interface para Inglês',
+    'ptBanner.dismiss': 'Manter em Português',
   },
   en: {
     'nav.learn': 'Learning Path',
@@ -110,6 +128,24 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
     'lesson.accentLabel': 'Accent',
     'common.close': 'Close',
     'common.cancel': 'Cancel',
+    'gateway.chooseStudy': 'Choose how you want to study today',
+    'gateway.subtitle': 'Download the official Windows or Android app for a native experience, or continue right away in the Web app.',
+    'gateway.continueWeb': 'Continue in Web Version',
+    'gateway.rememberWeb': 'Go straight to web login on future visits in this browser',
+    'gateway.winTitle': 'Windows App',
+    'gateway.androidTitle': 'Android App',
+    'gateway.webTitle': 'Web / iOS Version',
+    'auth.loginTab': 'Sign In',
+    'auth.registerTab': 'Create Account',
+    'auth.googleBtn': 'Continue with Google',
+    'auth.emailLabel': 'Email',
+    'auth.passwordLabel': 'Password',
+    'auth.loginSubmit': 'Sign in to platform',
+    'auth.registerSubmit': 'Create my account',
+    'auth.switchEnPrompt': 'Studying in English? Switch UI to EN',
+    'ptBanner.title': 'Portuguese for English Speakers course is active — want the interface in English?',
+    'ptBanner.cta': 'Switch UI to English',
+    'ptBanner.dismiss': 'Keep Portuguese UI',
   },
   es: {
     'nav.learn': 'Ruta de Clases',
@@ -164,6 +200,24 @@ const DICTIONARY: Record<UiLocale, Record<string, string>> = {
     'lesson.accentLabel': 'Acento',
     'common.close': 'Cerrar',
     'common.cancel': 'Cancelar',
+    'gateway.chooseStudy': 'Elige cómo quieres estudiar hoy',
+    'gateway.subtitle': 'Descarga la app oficial para Windows o Android con experiencia nativa, o continúa ahora mismo en la versión Web.',
+    'gateway.continueWeb': 'Continuar en la Versión Web',
+    'gateway.rememberWeb': 'Ir directo al login web en futuras visitas en este navegador',
+    'gateway.winTitle': 'App de Windows',
+    'gateway.androidTitle': 'App de Android',
+    'gateway.webTitle': 'Versión Web / iOS',
+    'auth.loginTab': 'Iniciar sesión',
+    'auth.registerTab': 'Crear Cuenta',
+    'auth.googleBtn': 'Continuar con Google',
+    'auth.emailLabel': 'Correo electrónico',
+    'auth.passwordLabel': 'Contraseña',
+    'auth.loginSubmit': 'Entrar a la plataforma',
+    'auth.registerSubmit': 'Crear mi cuenta',
+    'auth.switchEnPrompt': '¿Estudias en inglés? Cambiar interfaz a EN',
+    'ptBanner.title': 'Curso de Portugués para angloparlantes activo — ¿prefieres la interfaz en inglés?',
+    'ptBanner.cta': 'Cambiar a Inglés',
+    'ptBanner.dismiss': 'Mantener Español',
   },
 };
 
@@ -173,6 +227,20 @@ export function tUi(locale: UiLocale, key: string): string {
 
 export function getAllUiTranslationKeys(): string[] {
   return Object.keys(DICTIONARY.pt);
+}
+
+export function hasExplicitUiLocale(): boolean {
+  if (typeof window === 'undefined') return false;
+  const raw = window.localStorage.getItem(UI_LOCALE_KEY);
+  return raw === 'pt' || raw === 'en' || raw === 'es';
+}
+
+export function detectPreferredBrowserLocale(): UiLocale {
+  if (typeof navigator === 'undefined') return 'pt';
+  const lang = (navigator.language || '').toLowerCase();
+  if (lang.startsWith('en')) return 'en';
+  if (lang.startsWith('es')) return 'es';
+  return 'pt';
 }
 
 export function loadStoredUiLocale(): UiLocale {

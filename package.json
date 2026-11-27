@@ -1,7 +1,7 @@
 {
   "name": "fluentbridge",
   "private": true,
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "FluentBridge Academy - Plataforma de Ensino em 17 Idiomas (A1-C1)",
   "author": "Prof. Silas - FluentBridge Academy",
   "type": "module",

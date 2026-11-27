@@ -15,6 +15,8 @@ import { HEBREW_ALEFBET, NORDIC_SPECIAL_LETTERS, TURKISH_SPECIAL_LETTERS } from 
 import { getImmersionStrings } from '../immersion';
 import { buildOfflineTranslation, getTranslatorLanguagePair, translateCourseText } from '../courseTranslator';
 import { PORTUGUESE_TOPICS } from '../../data/curriculum/portugueseCourse';
+import { detectPreferredBrowserLocale, tUi } from '../i18n';
+import { fetchAdminQuotas } from '../telemetry';
 import type { LanguageCode } from '../../types/learning';
 
 describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () => {
@@ -129,7 +131,7 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
     expect(offline.subtitles[0].textTarget).toBe('Merhaba dünya');
   });
 
-  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.2.0 contract (P1)', () => {
+  it('modular Cloudflare Worker exports valid routes, HTTP 206 Range & v9.3.0 contract (P1)', () => {
     const workerSrc = fs.readFileSync(
       path.resolve(process.cwd(), 'cloudflare-worker/worker.js'),
       'utf8',
@@ -142,15 +144,56 @@ describe('v9.0.0 Features — 16 Languages, 150 Units & YouTube Study Lab', () =
       path.resolve(process.cwd(), 'cloudflare-worker/routes/translate.js'),
       'utf8',
     );
-    expect(workerSrc).toContain("version: '9.2.0'");
+    const adminQuotasSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/routes/adminQuotas.js'),
+      'utf8',
+    );
+    const mediaRouteSrc = fs.readFileSync(
+      path.resolve(process.cwd(), 'cloudflare-worker/routes/media.js'),
+      'utf8',
+    );
+    expect(workerSrc).toContain("version: '9.3.0'");
     expect(workerSrc).toContain("from './routes/youtubeStudy.js'");
     expect(workerSrc).toContain("from './routes/translate.js'");
+    expect(workerSrc).toContain("from './routes/adminQuotas.js'");
+    expect(workerSrc).toContain("from './routes/media.js'");
     expect(workerSrc).toContain('/api/youtube-study');
     expect(workerSrc).toContain('/api/translate');
-    expect(workerSrc).toContain('/api/media/list');
-    expect(workerSrc).toContain('206');
+    expect(workerSrc).toContain('/api/admin/quotas');
+    expect(workerSrc).toContain('/api/media/');
+    expect(mediaRouteSrc).toContain('206');
     expect(ytRouteSrc).toContain('handleYouTubeStudyRequest');
     expect(translateRouteSrc).toContain('handleTranslateRequest');
+    expect(adminQuotasSrc).toContain('handleAdminQuotasRequest');
+  });
+
+  it('supports i18n parity across pt/en/es for Auth/Gateway & fetches admin quotas cleanly', async () => {
+    expect(tUi('en', 'auth.loginTab')).toBe('Sign In');
+    expect(tUi('es', 'gateway.continueWeb')).toBe('Continuar en la Versión Web');
+    expect(tUi('en', 'ptBanner.cta')).toBe('Switch UI to English');
+    expect(['pt', 'en', 'es']).toContain(detectPreferredBrowserLocale());
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            ok: true,
+            date: '2026-11-26',
+            days: 7,
+            r2Connected: true,
+            routes: [
+              { key: 'stt', label: 'STT', endpoint: '/api/stt', usedToday: 4, limitPerActor: 200, activeActorsToday: 2, sevenDayTotal: 15 },
+            ],
+            generatedAt: new Date().toISOString(),
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    );
+    const snap = await fetchAdminQuotas(7);
+    expect(snap?.ok).toBe(true);
+    expect(snap?.routes[0].usedToday).toBe(4);
   });
 
   it('adapts bidirectional translator pair to active course (PT<->Target, EN<->PT for Portuguese)', async () => {
