@@ -31,11 +31,11 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
     await page.goto('/');
     await expect(page.getByTestId('download-windows-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v10\.0\.0\/FluentBridge-Setup-10\.0\.0\.exe/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.0\.0\/FluentBridge-Setup-11\.0\.0\.exe/,
     );
     await expect(page.getByTestId('download-android-link')).toHaveAttribute(
       'href',
-      /silaswf\/fluentbridge-releases\/releases\/download\/v10\.0\.0\/FluentBridge-v10\.0\.0\.apk/,
+      /silaswf\/fluentbridge-releases\/releases\/download\/v11\.0\.0\/FluentBridge-v11\.0\.0\.apk/,
     );
     await page.getByTestId('continue-web-btn').click();
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -239,6 +239,12 @@ test.describe('FluentBridge v8.2.0 E2E Suite', () => {
       const gotItBtn = page.getByRole('button', { name: /Entendi|Got it/i }).first();
       if (await gotItBtn.isVisible().catch(() => false)) {
         await gotItBtn.click();
+        continue;
+      }
+      const picStep = page.getByTestId('picture-choice-step');
+      if (await picStep.isVisible().catch(() => false)) {
+        await picStep.locator('.grid button').first().click();
+        await page.locator('.fixed.inset-0.z-50 footer button').last().click();
         continue;
       }
       const verifyBtn = page.getByRole('button', { name: /Verificar resposta|Check/i });

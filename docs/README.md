@@ -1,6 +1,6 @@
 <!-- @file docs/README.md — Índice mestre e resumo executivo da documentação consolidada do FluentBridge Academy. -->
 
-# Documentação Oficial — FluentBridge Academy (`v10.0.0`)
+# Documentação Oficial — FluentBridge Academy (`v11.0.0`)
 
 Documentação técnica, funcional, arquitetural e estratégica consolidada do **FluentBridge Academy** — plataforma poliglota em **17 idiomas** (`en`, `es`, `fr`, `it`, `de`, `ru`, `ja`, `zh`, `ar`, `nl`, `af`, `sv`, `tr`, `he`, `nb`, `da`, `pt`) de **A1 a C1**, com **`2.550` unidades (`150` por idioma)**, **Tradutor Bidirecional por Curso (`POST /api/translate`)**, **Português PLE para falantes de Inglês (imersão invertida `EN → PT`)**, **`65` sotaques regionais com vozes neurais**, **`100` simulados oficiais (`25` formatos incl. CELPE-Bras)**, **`850` cenários de Tutor IA**, **`3.400` guias gramaticais**, **`680` questões CAT**, **YouTube Study Lab** e **Estúdio do Professor + Admin Mestre**.
 
@@ -18,7 +18,7 @@ Documentação técnica, funcional, arquitetural e estratégica consolidada do *
 
 ---
 
-## Resumo Executivo (`v10.0.0`)
+## Resumo Executivo (`v11.0.0`)
 
 | Dimensão | Estado Verificado |
 | --- | --- |
@@ -26,4 +26,4 @@ Documentação técnica, funcional, arquitetural e estratégica consolidada do *
 | **Voz, Áudio, Tradutor & Imersão** | **`65` sotaques neurais** (Gemini 2.5 Native TTS + Deepgram Aura-2 + cache R2 `tts/v6/`), **Tradutor Bidirecional por Curso** (`/api/translate` `PT ⇄ Idioma` e `EN ⇄ PT`), Whisper STT (`/api/stt`), ruído ambiente (3 níveis), **Modo Hands-Free**, **`85` podcasts**, **`51` vídeos** (HTTP `206 Range`) e **YouTube Study Lab** |
 | **Simulados & Comunidade** | **`100` simulados cronometrados** (`25` formatos oficiais incl. **CELPE-Bras**, speaking em 3 partes, rubrica Writing + envio docente) e **Comunidade 2.0** (Ligas, Desafio do Mês `+80 XP`, moderação, áudio, *diff* de correção `+10 XP`) |
 | **Interfaces & Plataformas** | Web/PWA (`https://fluentbridge.pages.dev`), Edge API (`https://fluentbridge-api.silaswf.workers.dev`), Windows `.exe`, Android `.apk`/`.aab`, iPhone/iPad Safari PWA (`$0/ano`); Login/Gateway Dark Sober e Hero compacto |
-| **Qualidade & Testes** | `tsc --noEmit` (`0` erros) · `vitest` (`24` suítes / `93` testes verdes) · `playwright` (`15/15` fluxos E2E Desktop + Mobile `390x844` + WCAG AA Light/Dark) · `0` chunks > 500 kB · Worker `v10.0.0` + Pages live |
+| **Qualidade & Testes** | `tsc --noEmit` (`0` erros) · `vitest` (`29` suítes / `115` testes verdes) · `playwright` (`18/18` fluxos E2E Desktop + Mobile `390x844` + WCAG AA + Multi-Tenant/Visual) · `0` chunks > 500 kB · Worker `v11.0.0` (`293` LOC + `364` SVGs R2) + Pages live |

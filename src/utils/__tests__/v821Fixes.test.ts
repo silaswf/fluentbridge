@@ -42,10 +42,16 @@ describe('v8.2.1 — módulos da trilha sem repetição', () => {
 });
 
 describe('v8.2.1 — áudio: sotaques regionais e timeout', () => {
-  const workerSrc = readFileSync(
-    resolve(__dirname, '../../../cloudflare-worker/worker.js'),
-    'utf8',
-  );
+  const workerSrc =
+    readFileSync(
+      resolve(__dirname, '../../../cloudflare-worker/worker.js'),
+      'utf8',
+    ) +
+    '\n' +
+    readFileSync(
+      resolve(__dirname, '../../../cloudflare-worker/routes/tts.js'),
+      'utf8',
+    );
   const BASE_DEFAULTS = new Set([
     'en-US', 'es-MX', 'fr-FR', 'it-IT', 'de-DE', 'ru-RU', 'ja-JP', 'zh-CN',
     'ar-SA', 'nl-NL', 'af-ZA', 'sv-SE', 'tr-TR', 'he-IL', 'nb-NO', 'da-DK', 'pt-BR',

@@ -29,10 +29,16 @@ import {
 import { analyzeWritingHybrid } from '../writingDiffGrader';
 
 describe('v8.3.0 — Vozes Neurais Naturais (Worker + Cliente)', () => {
-  const workerSrc = readFileSync(
-    resolve(__dirname, '../../../cloudflare-worker/worker.js'),
-    'utf8',
-  );
+  const workerSrc =
+    readFileSync(
+      resolve(__dirname, '../../../cloudflare-worker/worker.js'),
+      'utf8',
+    ) +
+    '\n' +
+    readFileSync(
+      resolve(__dirname, '../../../cloudflare-worker/routes/tts.js'),
+      'utf8',
+    );
 
   it('Worker usa tts/v6/, nunca grava google-tts-fallback no cache e eleva EN/ES para gemini-tts com fallback Deepgram', () => {
     expect(workerSrc).toContain('tts/v6/${locale}');

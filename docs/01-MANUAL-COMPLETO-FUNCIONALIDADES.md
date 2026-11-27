@@ -1,8 +1,8 @@
 <!-- @file docs/01-MANUAL-COMPLETO-FUNCIONALIDADES.md — Manual funcional detalhado passo a passo de todas as 14 áreas do aplicativo (aluno, professor e admin). -->
 
-# 01 — Manual Completo de Funcionalidades (`v10.0.0`)
+# 01 — Manual Completo de Funcionalidades (`v11.0.0`)
 
-Este manual descreve **detalhe por detalhe** como funciona cada tela, botão, algoritmo, atalho de teclado, fluxo offline e permissão de perfil dentro do **FluentBridge Academy (`v10.0.0`)** — incluindo o **Multi-Tenancy Escolar (isolamento por `schoolId`, alocação de alunos e troca de professor na mesma escola)**, o **Tradutor Bidirecional por Curso (`POST /api/translate`)** e o curso de **Português como Língua Estrangeira (`pt`)** com imersão invertida (`A1–B1` em Inglês, `B2–C1` 100% em Português).
+Este manual descreve **detalhe por detalhe** como funciona cada tela, botão, algoritmo, atalho de teclado, fluxo offline e permissão de perfil dentro do **FluentBridge Academy (`v11.0.0`)** — incluindo as **`364` ilustrações visuais estilo Duolingo** (`picture_choice` 2×2 + SM-2 visual), **Replay Comparativo & Mapa de Calor Fonético**, **Revisão Express 5 min**, **Operação B2B Multi-Escola** (QR Code, CSV, Coordenador `isSchoolAdmin`, Diário de Presença), **Tradutor Bidirecional (`POST /api/translate`)** e **Português PLE (`pt`)** com imersão invertida.
 
 ---
 

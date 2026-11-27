@@ -10,6 +10,7 @@ import {
   LessonStep,
   ListeningStep,
   MatchingStep,
+  PictureChoiceStep,
   ReadingStep,
   StoryStep,
   Topic,
@@ -17,6 +18,10 @@ import {
   WritingFreeStep,
 } from '../types/learning';
 import { IN_LESSON_LEXICON, InLessonLexiconEntry } from '../data/inLessonLexicon';
+import {
+  inferTrackTagsFromTopic,
+  resolveVisualConceptId,
+} from '../data/visualConcepts';
 import {
   buildUnitScriptPhonicsStep,
   createScriptPhonicsContext,
@@ -696,13 +701,77 @@ export function enrichCourseCohesion(
         `${modThemes[modThemes.length - 1]} ${modGroupIdx - modThemes.length + 2}`
       }`;
 
-    enrichedVocab.push(...unitVocab);
+    // Wave 2: Enrich every vocab card with visualConceptId
+    const visualEnrichedVocab: VocabCard[] = unitVocab.map((card) => ({
+      ...card,
+      visualConceptId:
+        card.visualConceptId ||
+        resolveVisualConceptId(card.word, card.translation, card.category),
+    }));
+
+    // Wave 3: Inject 1 PictureChoiceStep for A1/A2 topics with >= 4 distinct visualConceptIds
+    const stepsWithPictureChoice = [...finalSteps];
+    const hasPictureChoice = stepsWithPictureChoice.some(
+      (s) => s.type === 'picture_choice',
+    );
+    if ((topic.level === 'A1' || topic.level === 'A2') && !hasPictureChoice) {
+      const distinctCards: Array<VocabCard & { visualConceptId: string }> = [];
+      const seenConcepts = new Set<string>();
+      for (const card of visualEnrichedVocab) {
+        if (!card.visualConceptId || seenConcepts.has(card.visualConceptId)) continue;
+        seenConcepts.add(card.visualConceptId);
+        distinctCards.push(card as VocabCard & { visualConceptId: string });
+        if (distinctCards.length >= 4) break;
+      }
+      if (distinctCards.length === 4) {
+        const target = distinctCards[0];
+        const pictureStep: PictureChoiceStep = {
+          id: `${topic.id}-picture-choice`,
+          type: 'picture_choice',
+          stageLabelPt: 'Associação Visual · Escolha a Imagem',
+          promptPt: `Qual imagem representa "${target.word}"?`,
+          audioText: target.word,
+          targetWord: target.word,
+          options: distinctCards.map((c) => ({
+            conceptId: c.visualConceptId,
+            label: c.word,
+            translationPt: c.translation,
+            imageUrl: c.imageUrl,
+          })),
+          correctIndex: 0,
+          explanationPt: `"${target.word}" significa "${target.translation}".`,
+        };
+        const vocabIntroIdx = stepsWithPictureChoice.findIndex(
+          (s) => s.type === 'vocab_intro',
+        );
+        if (vocabIntroIdx >= 0) {
+          stepsWithPictureChoice.splice(vocabIntroIdx + 1, 0, pictureStep);
+        } else {
+          const phonicsIdx = stepsWithPictureChoice.findIndex(
+            (s) => s.type === 'script_phonics',
+          );
+          stepsWithPictureChoice.splice(phonicsIdx >= 0 ? phonicsIdx + 1 : 0, 0, pictureStep);
+        }
+      }
+    }
+
+    const coverConceptId =
+      topic.coverConceptId ||
+      resolveVisualConceptId(topic.titleEn, topic.titlePt) ||
+      visualEnrichedVocab.find((c) => c.visualConceptId)?.visualConceptId;
+    const trackTags =
+      topic.trackTags ??
+      inferTrackTagsFromTopic(topic.titlePt, topic.titleEn, topic.level);
+
+    enrichedVocab.push(...visualEnrichedVocab);
     enrichedTopics.push({
       ...topic,
+      coverConceptId,
+      trackTags,
       moduleIndex,
       moduleTitlePt,
       recycledLinks: Array.from(recycledLinksMap.values()).slice(0, 3),
-      steps: finalSteps,
+      steps: stepsWithPictureChoice,
     });
   });
 

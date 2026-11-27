@@ -5,10 +5,8 @@
  */
 import { useEffect, useState } from 'react';
 import {
-  Activity,
   Check,
   Copy,
-  CreditCard,
   Crown,
   Download,
   KeyRound,
@@ -38,14 +36,12 @@ import type {
   UserProfile,
 } from '../types/learning';
 import {
-  DEFAULT_SCHOOL_ID,
   getEffectiveSchool,
   getSchoolClasses,
   getSchoolTeachers,
   resolveUserSchoolId,
 } from '../utils/tenantEngine';
 import {
-  DEFAULT_BILLING_CONFIG,
   fetchBillingPlansStatus,
   SUBSCRIPTION_PLANS,
   type BillingPlansApiResponse,
@@ -69,6 +65,10 @@ import {
 } from '../utils/telemetry';
 import { getTeacherDisplayName } from '../utils/teacherDisplay';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SchoolsManagementPanel } from './admin/SchoolsManagementPanel';
+import { QuotasAndBillingPanel } from './admin/QuotasAndBillingPanel';
+import { AuditAndLatencyPanel } from './admin/AuditAndLatencyPanel';
+import type { ParsedStudentCsvRow } from '../utils/qrCodeSvg';
 
 interface AdminPanelProps {
   state: PlatformState;
@@ -85,6 +85,15 @@ interface AdminPanelProps {
     primaryColor?: string;
   }) => void;
   onToggleSchoolStatus?: (schoolId: string) => void;
+  onUpdateSchoolBranding?: (
+    schoolId: string,
+    branding: { primaryColor?: string; logoUrl?: string },
+  ) => void;
+  onImportSchoolStudents?: (
+    schoolId: string,
+    rows: ParsedStudentCsvRow[],
+  ) => void;
+  onToggleSchoolAdminRole?: (userId: string) => void;
   onAllocateUserSchool?: (userId: string, targetSchoolId: string) => void;
   currentUser: UserProfile;
   totalBuiltinTopicsCount: number;
@@ -120,6 +129,9 @@ export function AdminPanel({
   onChangeAdminSchoolFilter,
   onCreateSchool,
   onToggleSchoolStatus,
+  onUpdateSchoolBranding,
+  onImportSchoolStudents,
+  onToggleSchoolAdminRole,
   onAllocateUserSchool,
   currentUser,
   totalBuiltinTopicsCount,
@@ -197,9 +209,6 @@ export function AdminPanel({
   );
   const [pwDraftByUser, setPwDraftByUser] = useState<Record<string, string>>({});
   const [inviteDraftByTeacher, setInviteDraftByTeacher] = useState<Record<string, string>>({});
-  const [newSchoolName, setNewSchoolName] = useState('');
-  const [newSchoolOwnerEmail, setNewSchoolOwnerEmail] = useState('');
-  const [copiedSchoolId, setCopiedSchoolId] = useState<string | null>(null);
   const [pendingConfirm, setPendingConfirm] = useState<{
     title: string;
     description: string;
@@ -324,175 +333,17 @@ export function AdminPanel({
       </div>
 
       {/* Escolas & Multi-Tenancy (Isolamento por Tenant) */}
-      <section
-        data-testid="admin-schools-panel"
-        className="rounded-3xl border border-blue-200 bg-white p-6 shadow-xs space-y-4"
-      >
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <span>Escolas &amp; Multi-Tenancy (Isolamento por Tenant)</span>
-            </h2>
-            <p className="text-xs text-slate-500">
-              Cada escola possui dados 100% isolados (usuários, turmas, professores, comunidade e RLS Supabase). Filtre ou aloque alunos e professores em 1 clique.
-            </p>
-          </div>
-          {onChangeAdminSchoolFilter && (
-            <select
-              value={adminSchoolFilter}
-              onChange={(e) => onChangeAdminSchoolFilter(e.target.value)}
-              aria-label="Filtrar painel por escola"
-              className="rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs font-bold text-blue-950"
-            >
-              <option value="ALL">Todas as escolas ({schools.length})</option>
-              {schools.map((sc) => (
-                <option key={sc.id} value={sc.id}>
-                  {sc.name} ({sc.status === 'active' ? 'Ativa' : 'Suspensa'})
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {schools.map((sc) => {
-            const allUsers = usersAll ?? state.users;
-            const allClasses = classesAll ?? state.classes;
-            const scStudents = allUsers.filter(
-              (u) => u.role === 'student' && resolveUserSchoolId(u) === sc.id,
-            ).length;
-            const scTeachers = allUsers.filter(
-              (u) => u.role === 'teacher' && resolveUserSchoolId(u) === sc.id,
-            ).length;
-            const scClasses = allClasses.filter(
-              (c) => (c.schoolId || DEFAULT_SCHOOL_ID) === sc.id,
-            ).length;
-            const isMain = sc.id === DEFAULT_SCHOOL_ID;
-            return (
-              <div
-                key={sc.id}
-                className={`rounded-2xl border p-4 text-xs ${
-                  sc.status === 'suspended'
-                    ? 'border-rose-200 bg-rose-50/60'
-                    : 'border-slate-200 bg-slate-50/70'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-display text-sm font-bold text-slate-900">
-                      {sc.name}
-                    </p>
-                    <p className="font-mono text-[11px] text-slate-500">
-                      ?escola={sc.slug} · {sc.inviteCode}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      sc.status === 'active'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-rose-100 text-rose-800'
-                    }`}
-                  >
-                    {sc.status === 'active' ? 'Ativa' : 'Suspensa'}
-                  </span>
-                </div>
-                <p className="mt-2 font-mono text-[11px] text-slate-600">
-                  {scStudents} aluno(s) · {scTeachers} prof(s) · {scClasses} turma(s)
-                </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const portalUrl =
-                        typeof window !== 'undefined'
-                          ? `${window.location.origin}/?escola=${sc.slug}`
-                          : `/?escola=${sc.slug}`;
-                      void navigator.clipboard?.writeText(portalUrl);
-                      setCopiedSchoolId(sc.id);
-                      window.setTimeout(() => setCopiedSchoolId(null), 2000);
-                    }}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
-                  >
-                    {copiedSchoolId === sc.id ? (
-                      <Check className="h-3 w-3 text-emerald-600" />
-                    ) : (
-                      <Copy className="h-3 w-3" />
-                    )}
-                    <span>{copiedSchoolId === sc.id ? 'Link copiado' : 'Copiar link'}</span>
-                  </button>
-                  {!isMain && onToggleSchoolStatus && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPendingConfirm({
-                          tone: sc.status === 'active' ? 'danger' : 'primary',
-                          title:
-                            sc.status === 'active'
-                              ? `Suspender escola "${sc.name}"?`
-                              : `Reativar escola "${sc.name}"?`,
-                          description:
-                            sc.status === 'active'
-                              ? 'Alunos e professores desta escola não conseguirão fazer login até a reativação.'
-                              : 'Todos os alunos e professores da escola poderão acessar normalmente.',
-                          confirmLabel:
-                            sc.status === 'active' ? 'Suspender escola' : 'Reativar escola',
-                          action: () => onToggleSchoolStatus(sc.id),
-                        })
-                      }
-                      className={`rounded-lg px-2.5 py-1 text-[11px] font-bold cursor-pointer ${
-                        sc.status === 'active'
-                          ? 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
-                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      }`}
-                    >
-                      {sc.status === 'active' ? 'Suspender' : 'Reativar'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {onCreateSchool && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!newSchoolName.trim()) return;
-              onCreateSchool({
-                name: newSchoolName.trim(),
-                ownerEmail: newSchoolOwnerEmail.trim() || undefined,
-              });
-              setNewSchoolName('');
-              setNewSchoolOwnerEmail('');
-            }}
-            className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 sm:flex-row sm:items-center"
-          >
-            <input
-              type="text"
-              required
-              value={newSchoolName}
-              onChange={(e) => setNewSchoolName(e.target.value)}
-              placeholder="Nome da nova escola (ex: Idiomas Alpha)..."
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
-            />
-            <input
-              type="email"
-              value={newSchoolOwnerEmail}
-              onChange={(e) => setNewSchoolOwnerEmail(e.target.value)}
-              placeholder="E-mail do coordenador (opcional)"
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
-            />
-            <button
-              type="submit"
-              className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
-            >
-              + Nova Escola
-            </button>
-          </form>
-        )}
-      </section>
+      <SchoolsManagementPanel
+        schools={schools}
+        users={usersAll ?? state.users}
+        classes={classesAll ?? state.classes}
+        adminSchoolFilter={adminSchoolFilter}
+        onChangeAdminSchoolFilter={onChangeAdminSchoolFilter}
+        onCreateSchool={onCreateSchool}
+        onToggleSchoolStatus={onToggleSchoolStatus}
+        onUpdateSchoolBranding={onUpdateSchoolBranding}
+        onImportSchoolStudents={onImportSchoolStudents}
+      />
 
       {/* Exclusive Teacher Authorization Code + Cloud/Voice Diagnostics */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -925,6 +776,20 @@ export function AdminPanel({
                       {u.role === 'teacher' ? 'Tornar Aluno' : 'Promover Professor'}
                     </button>
 
+                    {u.role === 'teacher' && onToggleSchoolAdminRole && (
+                      <button
+                        type="button"
+                        onClick={() => onToggleSchoolAdminRole(u.id)}
+                        className={`rounded-xl border px-3 py-1.5 text-xs font-bold cursor-pointer ${
+                          u.isSchoolAdmin
+                            ? 'border-indigo-300 bg-indigo-100 text-indigo-900'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {u.isSchoolAdmin ? 'Coordenador ✓' : 'Tornar Coordenador'}
+                      </button>
+                    )}
+
                     {onUpdateUserSubscription && (
                       <select
                         value={u.subscription?.planId ?? (u.assignedTeacherId || u.classId ? 'school_grant' : 'free')}
@@ -1049,175 +914,32 @@ export function AdminPanel({
         )}
       </section>
 
-      {/* Consumo Diário de Cotas IA (Cloudflare R2) */}
-      <section
-        data-testid="admin-quotas-panel"
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
-              <Activity className="h-4.5 w-4.5 text-indigo-600" />
-              <span>Consumo Diário de Cotas IA (Cloudflare R2)</span>
-            </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Monitoramento em tempo real das cotas persistentes no R2 ({quotasSnapshot?.date ?? 'hoje'}) e acumulado de {quotasSnapshot?.days ?? 7} dias.
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={loadingQuotas}
-            onClick={() => {
-              setLoadingQuotas(true);
-              void fetchAdminQuotas(7)
-                .then(setQuotasSnapshot)
-                .finally(() => setLoadingQuotas(false));
-            }}
-            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50 cursor-pointer"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loadingQuotas ? 'animate-spin' : ''}`} />
-            <span>Atualizar cotas</span>
-          </button>
-        </div>
+      {/* Consumo Diário de Cotas IA (Cloudflare R2) & Motor de Planos */}
+      <QuotasAndBillingPanel
+        quotasSnapshot={quotasSnapshot}
+        loadingQuotas={loadingQuotas}
+        onRefreshQuotas={() => {
+          setLoadingQuotas(true);
+          void fetchAdminQuotas(7)
+            .then(setQuotasSnapshot)
+            .finally(() => setLoadingQuotas(false));
+        }}
+        billingConfig={state.billingConfig}
+        billingStatus={billingStatus}
+        onUpdateBillingConfig={onUpdateBillingConfig}
+        onRequestConfirm={(pending) =>
+          setPendingConfirm({
+            ...pending,
+            tone: pending.tone ?? 'warning',
+          })
+        }
+      />
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {(
-            quotasSnapshot?.routes ?? [
-              { key: 'stt', label: 'Transcrição Whisper STT', endpoint: '/api/stt', usedToday: 0, limitPerActor: 200, activeActorsToday: 0, sevenDayTotal: 0 },
-              { key: 'gemini', label: 'Tutor IA & Corretor', endpoint: '/api/gemini-tutor', usedToday: 0, limitPerActor: 250, activeActorsToday: 0, sevenDayTotal: 0 },
-              { key: 'translate', label: 'Tradutor Bidirecional', endpoint: '/api/translate', usedToday: 0, limitPerActor: 300, activeActorsToday: 0, sevenDayTotal: 0 },
-              { key: 'youtube', label: 'YouTube Study Lab', endpoint: '/api/youtube-study', usedToday: 0, limitPerActor: 100, activeActorsToday: 0, sevenDayTotal: 0 },
-            ]
-          ).map((r) => {
-            const pct = Math.min(100, Math.round((r.usedToday / Math.max(1, r.limitPerActor)) * 100));
-            const barColor =
-              pct >= 85 ? 'bg-rose-500' : pct >= 60 ? 'bg-amber-500' : 'bg-emerald-500';
-            return (
-              <div
-                key={r.key}
-                className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs"
-              >
-                <div className="flex items-center justify-between gap-1">
-                  <span className="font-bold text-slate-900">{r.label}</span>
-                  <span className="font-mono text-[10px] text-slate-500">{r.endpoint}</span>
-                </div>
-                <div className="mt-2 flex items-baseline justify-between font-mono">
-                  <span className="text-base font-extrabold text-slate-900">
-                    {r.usedToday}
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    / {r.limitPerActor} por usuário/dia
-                  </span>
-                </div>
-                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                  <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-                </div>
-                <p className="mt-2 text-[10px] text-slate-500">
-                  {r.activeActorsToday} ativo(s) hoje · {r.sevenDayTotal} reqs em {quotasSnapshot?.days ?? 7}d
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Motor de Planos & Assinaturas (Pronto para ativação futura) */}
-      {(() => {
-        const billingCfg = state.billingConfig ?? DEFAULT_BILLING_CONFIG;
-        const isBillingOn = Boolean(billingCfg.billingEnabled);
-        return (
-          <section
-            data-testid="admin-billing-panel"
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="flex items-center gap-2 font-display text-base font-bold text-slate-900">
-                    <CreditCard className="h-4.5 w-4.5 text-emerald-600" />
-                    <span>Motor de Planos &amp; Assinaturas</span>
-                  </h2>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                      isBillingOn
-                        ? 'bg-amber-100 text-amber-900'
-                        : 'bg-emerald-100 text-emerald-800'
-                    }`}
-                  >
-                    {isBillingOn
-                      ? 'Cobrança Ativa'
-                      : '100% Gratuito (Cobrança Desativada)'}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-600">
-                  Estrutura pronta (Stripe / Mercado Pago + tabelas Supabase + rotas <code className="font-mono">/api/billing/*</code>). Enquanto estiver desativada, <strong>nenhum aluno vê paywall</strong> e todos têm acesso irrestrito. Alunos vinculados a professores mantêm <code className="font-mono">school_grant</code> gratuito.
-                </p>
-              </div>
-              {onUpdateBillingConfig && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPendingConfirm({
-                      tone: isBillingOn ? 'primary' : 'warning',
-                      title: isBillingOn
-                        ? 'Voltar para modo 100% gratuito?'
-                        : 'Ativar motor de cobrança?',
-                      description: isBillingOn
-                        ? 'Todos os usuários voltarão imediatamente para acesso gratuito irrestrito.'
-                        : 'Exigirá chaves STRIPE_SECRET_KEY ou MERCADOPAGO_ACCESS_TOKEN no Worker para checkout real. Alunos da escola/VIP continuam gratuitos.',
-                      confirmLabel: isBillingOn ? 'Ativar modo gratuito' : 'Confirmar ativação',
-                      action: () =>
-                        onUpdateBillingConfig({
-                          ...billingCfg,
-                          billingEnabled: !isBillingOn,
-                          updatedAt: new Date().toISOString(),
-                        }),
-                    })
-                  }
-                  className={`rounded-xl px-3.5 py-2 text-xs font-bold cursor-pointer ${
-                    isBillingOn
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  {isBillingOn ? 'Voltar p/ 100% Gratuito' : 'Ativar cobrança (futuro)'}
-                </button>
-              )}
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-700">
-                Worker Mode: {billingStatus?.mode ?? 'free'}
-              </span>
-              <span className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-bold ${billingStatus?.providers.stripe ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                Stripe Secret: {billingStatus?.providers.stripe ? 'Configurado' : 'Pendente'}
-              </span>
-              <span className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-bold ${billingStatus?.providers.mercadopago ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                Mercado Pago: {billingStatus?.providers.mercadopago ? 'Configurado' : 'Pendente'}
-              </span>
-            </div>
-
-            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
-              {SUBSCRIPTION_PLANS.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-xs"
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-slate-900">{plan.badgePt}</span>
-                    <span className="font-mono text-[10px] text-slate-500">
-                      {plan.referencePricePt}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[11px] leading-snug text-slate-600">
-                    {plan.summaryPt}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        );
-      })()}
+      {/* Auditoria Administrativa & Latência p95 */}
+      <AuditAndLatencyPanel
+        auditLogs={state.auditLogs}
+        quotasSnapshot={quotasSnapshot}
+      />
 
       {/* Retenção Automática de Áudios (60 dias) */}
       {(() => {

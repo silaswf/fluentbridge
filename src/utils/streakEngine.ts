@@ -1,7 +1,7 @@
 /**
  * @file src/utils/streakEngine.ts
  * @description Motor de ofensiva diária (streak), proteções (streak freeze) e histórico de dias estudados.
- * @exports getLocalDateKey, StreakUpdateResult, recordStudyActivity
+ * @exports getLocalDateKey, StreakUpdateResult, recordStudyActivity, awardMeritStreakFreeze
  */
 import type { UserProfile } from '../types/learning';
 
@@ -104,5 +104,30 @@ export function recordStudyActivity(
     freezeUsed,
     earnedFreeze,
     incremented: true,
+  };
+}
+
+export function awardMeritStreakFreeze(
+  user: UserProfile,
+  reason: 'streak_7d' | 'checkpoint',
+): { user: UserProfile; awarded: boolean } {
+  void reason;
+  const currentFreezes = user.streakFreezes ?? 1;
+  if (currentFreezes >= MAX_STREAK_FREEZES) {
+    return {
+      user: {
+        ...user,
+        streakFreezes: MAX_STREAK_FREEZES,
+      },
+      awarded: false,
+    };
+  }
+
+  return {
+    user: {
+      ...user,
+      streakFreezes: Math.min(MAX_STREAK_FREEZES, currentFreezes + 1),
+    },
+    awarded: true,
   };
 }

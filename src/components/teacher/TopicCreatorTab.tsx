@@ -4,10 +4,12 @@
  * @exports TopicCreatorTab
  */
 import { useState } from 'react';
-import { Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Plus, Sparkles, Trash2, Upload } from 'lucide-react';
 import { DEFAULT_BACKEND_API_URL } from '../../config/appConfig';
 import { getLanguageCourseMeta, LANGUAGE_COURSES_META } from '../../data/platformDefaults';
+import { VISUAL_CONCEPTS } from '../../data/visualConcepts';
 import type { CEFRLevel, LanguageCode, TipCategory, Topic } from '../../types/learning';
+import { ConceptIllustration } from '../ConceptIllustration';
 
 interface TopicCreatorTabProps {
   teacherName: string;
@@ -56,6 +58,43 @@ export function TopicCreatorTab({
 
   const [writePrompt, setWritePrompt] = useState('');
   const [writeModel, setWriteModel] = useState('');
+  const [coverConceptId, setCoverConceptId] = useState<string>(
+    VISUAL_CONCEPTS[0]?.id ?? 'apple',
+  );
+  const [coverImageUrl, setCoverImageUrl] = useState<string>('');
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverUploadStatus, setCoverUploadStatus] = useState<string | null>(null);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingCover(true);
+    setCoverUploadStatus(null);
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const key = `images/topics/${Date.now()}-${safeName}`;
+      const endpoint = `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/media/upload?key=${encodeURIComponent(key)}`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        body: file,
+      });
+      if (res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { url?: string; key?: string };
+        const resolvedUrl =
+          data.url ||
+          `${DEFAULT_BACKEND_API_URL.replace(/\/+$/, '')}/api/media/${data.key || key}`;
+        setCoverImageUrl(resolvedUrl);
+        setCoverUploadStatus('Capa enviada com sucesso!');
+      } else {
+        setCoverUploadStatus('Falha ao enviar capa. Usando ilustração do conceito selecionado.');
+      }
+    } catch {
+      setCoverUploadStatus('Sem conexão para upload. Usando ilustração do conceito selecionado.');
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
 
   const selectedCourseName = getLanguageCourseMeta(topicLanguage).namePt;
 
@@ -182,6 +221,8 @@ export function TopicCreatorTab({
       icon: 'Sparkles',
       color: '#7C3AED',
       isCustom: true,
+      coverConceptId: coverConceptId || undefined,
+      coverImageUrl: coverImageUrl.trim() || undefined,
       topicTipsSummary: [tipTitle.trim() || 'Dica exclusiva do professor'],
       steps: [
         {
@@ -279,6 +320,8 @@ export function TopicCreatorTab({
     setSpeakHint('');
     setWritePrompt('');
     setWriteModel('');
+    setCoverImageUrl('');
+    setCoverUploadStatus(null);
     setAiStatusMsg(null);
   };
 
@@ -386,6 +429,49 @@ export function TopicCreatorTab({
             placeholder="Subtítulo curto"
             className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5">
+          <ConceptIllustration
+            conceptId={coverConceptId}
+            imageUrl={coverImageUrl || undefined}
+            alt="Capa do tópico"
+            size="sm"
+          />
+          <div className="min-w-[180px] flex-1">
+            <label className="text-xs font-bold text-slate-700">
+              Conceito Visual de Capa
+            </label>
+            <select
+              value={coverConceptId}
+              onChange={(e) => setCoverConceptId(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold"
+            >
+              {VISUAL_CONCEPTS.slice(0, 30).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.emoji} {c.labelPt} ({c.category})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100">
+              <Upload className="h-3.5 w-3.5" />
+              <span>{isUploadingCover ? 'Enviando...' : 'Upload Capa (opcional)'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleCoverUpload(e)}
+                disabled={isUploadingCover}
+                className="hidden"
+              />
+            </label>
+            {coverUploadStatus && (
+              <span className="text-[10px] font-semibold text-slate-600">
+                {coverUploadStatus}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4">

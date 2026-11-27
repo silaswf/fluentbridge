@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   Headphones,
+  Image as ImageIcon,
   List,
   RotateCw,
   Search,
@@ -42,8 +43,10 @@ import {
   type HebrewScriptMode,
 } from '../utils/hebrewNiqqud';
 import { HandsFreeAudioModal } from './HandsFreeAudioModal';
+import { ConceptIllustration } from './ConceptIllustration';
 import { DualAudioButtons } from './DualAudioButtons';
 import { MistakeNotebookView } from './MistakeNotebookView';
+import { resolveVisualConceptId } from '../data/visualConcepts';
 
 interface VocabReviewProps {
   vocab: VocabCard[];
@@ -103,6 +106,26 @@ export function VocabReview({
     loadHebrewScriptMode(),
   );
   const [handsFreeOpen, setHandsFreeOpen] = useState(false);
+  const [visualMode, setVisualMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('fb_vocab_visual_mode');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleVisualMode = () => {
+    setVisualMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('fb_vocab_visual_mode', String(next));
+      } catch {
+        // ignore storage errors
+      }
+      return next;
+    });
+  };
 
   const unlockedIdSet = useMemo(() => new Set(vocab.map((c) => c.id)), [vocab]);
   const activeSourceVocab =
@@ -341,6 +364,18 @@ export function VocabReview({
             >
               <List className="h-4 w-4" />
               <span>Lista ({deck.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleVisualMode}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                visualMode
+                  ? 'border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <ImageIcon className="h-4 w-4" />
+              <span>{visualMode ? 'Modo Visual' : 'Modo Minimalista Texto'}</span>
             </button>
             <button
               type="button"
@@ -709,6 +744,22 @@ export function VocabReview({
                 ) : (
                   <>
                     <div className="my-6 text-center">
+                      {visualMode && (
+                        <ConceptIllustration
+                          conceptId={
+                            activeCard.visualConceptId ||
+                            resolveVisualConceptId(
+                              activeCard.word,
+                              activeCard.translation,
+                              activeCard.category,
+                            )
+                          }
+                          imageUrl={activeCard.imageUrl}
+                          alt={activeCard.word}
+                          size="md"
+                          className="mx-auto mb-3"
+                        />
+                      )}
                       <h2 className="font-display text-3xl font-extrabold text-slate-900">
                         {languageCode === 'ja' && jaScriptMode === 'kana'
                           ? toJapaneseKana(activeCard.word)

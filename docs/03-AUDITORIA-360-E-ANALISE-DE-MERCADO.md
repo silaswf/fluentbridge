@@ -1,42 +1,36 @@
 <!-- @file docs/03-AUDITORIA-360-E-ANALISE-DE-MERCADO.md — Auditoria Técnica 360° (Zero-Based) pós-v10.0.0, telemetria real do codebase, benchmark competitivo de mercado e catálogo exaustivo de oportunidades de evolução. -->
 
-# 03 — Auditoria 360° & Análise Competitiva de Mercado (`v10.0.0`)
+# 03 — Auditoria 360° & Análise Competitiva de Mercado (`v11.0.0`)
 
-**Data da Auditoria:** 26/11/2026 · **Versão Auditada:** `v10.0.0` · **Escopo:** Frontend React/PWA, Edge API Cloudflare Worker + R2, Banco Supabase + RLS Multi-Tenant, Cobertura de Testes, UX/Acessibilidade e Posicionamento Competitivo.
+**Data da Auditoria:** 27/11/2026 · **Versão Auditada:** `v11.0.0` · **Escopo:** Pós-execução integral dos **Eixos A–G (P0, P1 e P2)** + 3 Ondas de Imagens Estilo Duolingo.
 
 ---
 
-## 1. Resumo Executivo & Scorecard 360°
+## 1. Resumo Executivo & Scorecard 360° (`v11.0.0`)
 
-Com a entrega da **`v10.0.0`** (Multi-Tenancy Escolar com isolamento estrito por `schoolId`, troca segura de professor dentro da mesma escola, coordenação global do Master Admin, motor de planos pronto em modo 100% gratuito, observabilidade de cotas R2, Tradutor Bidirecional e 17 idiomas com 2.550 unidades), o ciclo original `v1.0 → v10.0` foi **100% concluído**.
+Na **`v11.0.0`**, todos os itens **P0, P1 e P2** dos **Eixos A–G** listados na auditoria `v10.0.0` foram implementados e validados em produção: `364` ilustrações conceituais servidas no Cloudflare R2, exercício `picture_choice` 2×2, Replay Comparativo de fala + Mapa de Calor fonético + velocidades `0.75x/1.0x/1.15x`, Revisão Express 5 min + Streak Freeze por mérito + Grupos de Estudo, QR Code SVG + logo/cor por escola + importação CSV + painel `isSchoolAdmin` + Diário de Presença, `worker.js` reduzido a `293` linhas + extração de módulos de `LessonPlayer`/`AdminPanel`/`App`/`cloudSync`, Pacotes Offline CEFR + `deltaSyncEngine.ts`, e `115/115` testes Vitest + `18/18` jornadas Playwright.
 
-Esta auditoria parte do **zero** sobre o estado real atual da plataforma para identificar o que já é nível mercado, onde estão as novas dívidas técnicas e quais oportunidades geram maior impacto no próximo ciclo (`v10.1 → v12.0`).
-
-| Dimensão Auditada | Nota (`v10.0.0`) | Evolução vs `v9.0` | Diagnóstico Objetivo |
+| Dimensão Auditada | Nota (`v11.0.0`) | Evolução vs `v10.0` | Diagnóstico Objetivo |
 | --- | :---: | :---: | --- |
-| **1. Pedagogia & Amplitude Curricular** | **9.4 / 10** | ▲ +0.4 | `17` idiomas (`2.550` unidades A1–C1), Português PLE com imersão invertida, `100` simulados (`25` formatos), `850` cenários IA, `3.400` guias gramaticais, SM-2 + CAT + Caderno de Erros. **Gap principal:** unidades ainda dependem quase 100% de texto/áudio (faltam imagens/ilustrações temáticas estilo Duolingo). |
-| **2. IA, Voz & Imersão** | **9.0 / 10** | ▲ +0.3 | `65` sotaques neurais (Gemini 2.5 + Aura-2 + cache R2 SHA-256), Whisper STT, YouTube Study Lab, Tradutor Bidirecional (`/api/translate`), Hands-Free e Phoneme Breakdown. **Gap principal:** falta replay comparativo lado a lado (nativo vs aluno), mapa de calor por palavra na pronúncia e memória persistente de erros no Tutor IA. |
-| **3. Multi-Tenancy, B2B & Gestão Docente** | **8.8 / 10** | ▲ +1.8 | Isolamento estrito por `schoolId` no frontend (`scopePlatformStateForUser`) e no Postgres RLS (`Seção 13`), criação/suspensão de escolas pelo Master Admin, alocação em 1 clique, troca de professor na mesma escola sem perda de XP/progresso, `?escola=<slug>`. **Gap principal:** falta papel dedicado `isSchoolAdmin` (painel do coordenador local sem acesso Master), logo/paleta por escola no R2 e diário de presença. |
-| **4. UX/UI, Acessibilidade & Mobile** | **8.7 / 10** | ▲ +0.3 | Light + Dark Mode validados WCAG AA em Playwright, i18n (`PT/EN/ES`) no Login/Gateway/Player, RTL nativo (`ar`, `he` + toggle *Niqqud*), viewport `390x844` sem overflow. **Gap principal:** faltam atalhos de revisão rápida "5 min", onboarding guiado por objetivo em vídeo/visual e auditoria automatizada `axe-core`. |
-| **5. Arquitetura & Modularização** | **7.6 / 10** | ▲ +0.4 | `worker.js` já foi fatiado (`routes/media.js`, `routes/translate.js`, `routes/adminQuotas.js`, `routes/billing.js`, `lib/quotas.js`) e `LessonPlayer`/`TeacherStudio` começaram a ser quebrados. **Gap crítico:** `src/App.tsx` (`2.536` linhas), `LessonPlayer.tsx` (`2.018` linhas), `AdminPanel.tsx` (`1.416` linhas), `LearningPath.tsx` (`1.323` linhas) e `cloudSync.ts` (`1.304` linhas) seguem grandes demais. |
-| **6. Segurança, Privacidade & LGPD** | **8.9 / 10** | ▲ +0.5 | RLS estrito por `school_id` + `teaches_student()` anti-vazamento entre escolas, zero segredos no bundle cliente, `hidden` sourcemaps, exclusão/exportação LGPD, `ConfirmDialog` em ações sensíveis. **Gap principal:** rate limit e log de auditoria imutável para ações administrativas multi-escola no backend. |
-| **7. Qualidade, Testes & Observabilidade** | **8.6 / 10** | ▲ +0.4 | `24/24` suítes Vitest (`93` testes), `15/15` E2E Playwright (Desktop + Mobile), `0` erros TS, painel R2 `/api/admin/quotas` + telemetria de erros. **Gap principal:** ausência de testes unitários de componentes React (Testing Library), cobertura E2E específica para isolamento entre duas escolas simultâneas e métricas de latência p95 por endpoint. |
-| **8. Performance & Offline-First** | **8.3 / 10** | ▬ 0.0 | Build Vite em `8.32s`, `0` chunks > 500 kB (`tutor-scenarios-core` 472.73 kB, `index` 459.99 kB), PWA precache `1.82 MiB` + `offlineOutbox`. **Gap principal:** sincronização ainda envia snapshot JSONB inteiro (falta Delta Sync) e não há pacote offline baixável por nível CEFR com áudios cacheados. |
+| **1. Pedagogia & Conteúdo Visual** | **9.7 / 10** | ▲ +0.3 | `17` idiomas (`2.550` unid.), **`364` ilustrações conceituais no R2** (`VocabIntroStep`, `VocabReview`, `picture_choice` 2×2, `TopicCreatorTab`), `100` simulados, `850` cenários IA. |
+| **2. IA, Voz & Imersão** | **9.5 / 10** | ▲ +0.5 | **`65` sotaques**, **Replay Comparativo Lado a Lado**, **Mapa de Calor palavra-por-palavra**, velocidade `0.75x/1.0x/1.15x`, `DictationStepView` com diff e painel **Memória da IA** no `AITutor`. |
+| **3. Multi-Tenancy, B2B & Gestão Docente** | **9.4 / 10** | ▲ +0.6 | RLS `school_id`, **QR Code SVG**, upload de logo/cor, importação **CSV em lote**, painel exclusivo **`isSchoolAdmin`**, **Diário de Presença** e trilha de auditoria (`Seção 14`). |
+| **4. UX/UI, Acessibilidade & Mobile** | **9.2 / 10** | ▲ +0.5 | **Revisão Express 5 min**, filtros por foco (`Viagem/Negócios/Exames/Carreira`), **Streak Freeze por mérito**, Modo Minimalista Texto no SM-2, WCAG AA e `390x844` zero overflow. |
+| **5. Arquitetura & Modularização** | **8.6 / 10** | ▲ +1.0 | `worker.js` reduzido para **`293` linhas**; extraídos `ReadingStepView`, `WritingStepView`, `DictationStepView`, `SchoolsManagementPanel`, `QuotasAndBillingPanel`, `AuditAndLatencyPanel`, `useTenantSchoolActions`, `stateMerge.ts`, `japanese-kana` (`42.41 kB`) e `visual-concepts` (`42.47 kB`). |
+| **6. Segurança, Privacidade & LGPD** | **9.2 / 10** | ▲ +0.3 | RLS multi-tenant + `admin_audit_logs` (`Seção 14`), validação de prefixos R2 em `media.js`, exclusão/exportação LGPD, `ConfirmDialog`. |
+| **7. Qualidade, Testes & Observabilidade** | **9.3 / 10** | ▲ +0.7 | **`29/29` suítes Vitest (`115/115` testes)** + **`18/18` E2E Playwright** + telemetria de latência `avgMs`/`p95Ms` em `/api/admin/quotas` e `AuditAndLatencyPanel`. |
+| **8. Performance & Offline-First** | **9.0 / 10** | ▲ +0.7 | Build Vite com **`0` chunks > 500 kB**, **Pacote Offline por Nível CEFR** (`fb-offline-packs-v1` com áudios + SVGs) e **`deltaSyncEngine.ts`**. |
 
-**Nota Geral Consolidada (`v10.0.0`):** **8.66 / 10** *(pronta para operação real gratuita com múltiplas escolas e professores; próximo salto exige multimídia visual, fala avançada e refatoração modular).*
+**Nota Geral Consolidada (`v11.0.0`):** **9.24 / 10** *(salto completo nos 8 eixos; resta apenas o Eixo H opcional de monetização/lojas futuras e refatoração gradual contínua de `App.tsx`/`LessonPlayer.tsx`).*
 
 ---
 
-## 2. Telemetria Real do Codebase (Medida em `v10.0.0`)
+## 2. Telemetria Real Atualizada (`v11.0.0`)
 
-- **Total geral (`src/` + `cloudflare-worker/`):** **`327` arquivos** · **`313.814` linhas** (inclui bancos curriculares dos 17 idiomas em `src/data/`).
-- **Código de aplicação (`src/` sem `src/data/` + `cloudflare-worker/`):** **`143` arquivos** · **`44.208` linhas**.
-- **Build de Produção (`vite build`):** `8.32s` · `1.930` módulos transformados · **`0` chunks > 500 kB** · **`0` warnings Rollup**.
-  - Maiores chunks JS gerados: `tutor-scenarios-core` (`472.73 kB`), `index` (`459.99 kB`), `curriculum-he-exp` (`446.76 kB`), `curriculum-v9-ar` (`423.52 kB`), `curriculum-nb-exp` (`416.91 kB`).
-  - PWA Workbox: `31` entradas em precache (`1.820,51 KiB`).
-- **Suíte de Testes:**
-  - **Vitest:** `24` suítes · **`93/93` testes passando** (`39.46s`, sendo ~37s em testes de coesão integral dos currículos).
-  - **Playwright E2E:** **`15/15` jornadas passando** (`1.6m` em Chromium Desktop + Mobile `390x844`).
+- **Total geral (`src/` + `cloudflare-worker/`):** **`353` arquivos** · **`321.576` linhas**
+- **Código de aplicação (`src/` sem `src/data/` + `cloudflare-worker/` sem `.css`):** **`168` arquivos** · **`51.309` linhas**
+- **Destaques de redução arquitetural:** `cloudflare-worker/worker.js` (`293` linhas), `AdminPanel.tsx` (`1.142` linhas vs `1.416`), chunk `japanese-kana` isolado em `42.41 kB`, chunk `visual-concepts` isolado em `42.47 kB`, **`0` chunks > 500 kB**.
+- **Testes:** `29/29` suítes Vitest (**`115/115` testes**) + **`18/18` jornadas E2E Playwright**.
 
 ### Top 12 Maiores Arquivos de Lógica/UI (Candidatos à Modularização)
 

@@ -1,10 +1,10 @@
 /**
  * @file src/components/DualAudioButtons.tsx
- * @description Botões duplos reutilizáveis de áudio neural (velocidade normal 1.0x e lenta 0.75x) com fallback Web Speech.
+ * @description Botões duplos reutilizáveis de áudio neural (velocidade normal 1.0x, lenta 0.75x e seletor 0.75x/1x/1.15x) com fallback Web Speech.
  * @exports DualAudioButtons
  */
 import { useEffect, useState } from 'react';
-import { ChevronDown, Globe2, Loader2, Turtle, Volume2 } from 'lucide-react';
+import { ChevronDown, Gauge, Globe2, Loader2, Turtle, Volume2 } from 'lucide-react';
 import { getLanguageCourseMeta as getLanguageCourse } from '../data/platformDefaults';
 import { getRegionalAccents } from '../data/regionalAccents';
 import type { LanguageCode } from '../types/learning';
@@ -16,6 +16,7 @@ interface DualAudioButtonsProps {
   preferredAccent?: string;
   onSelectAccent?: (accentCode: string) => void;
   showSlow?: boolean;
+  showSpeedToggle?: boolean;
   size?: 'xs' | 'sm' | 'md';
   stopPropagation?: boolean;
   className?: string;
@@ -30,6 +31,7 @@ export function DualAudioButtons({
   preferredAccent,
   onSelectAccent,
   showSlow = false,
+  showSpeedToggle = false,
   size = 'sm',
   stopPropagation = true,
   className = '',
@@ -49,6 +51,7 @@ export function DualAudioButtons({
   const [loadingCode, setLoadingCode] = useState<string | null>(null);
   const [playingCode, setPlayingCode] = useState<string | null>(null);
   const [accentsOpen, setAccentsOpen] = useState(false);
+  const [speedMultiplier, setSpeedMultiplier] = useState<0.75 | 1 | 1.15>(1);
 
   useEffect(() => {
     setActiveCode(resolvedPreferred);
@@ -69,7 +72,7 @@ export function DualAudioButtons({
     setActiveCode(langCode);
     speakText(text, {
       langCode,
-      rate: Math.max(0.65, Math.min(1.25, rate * rateMultiplier)),
+      rate: Math.max(0.65, Math.min(1.25, rate * rateMultiplier * speedMultiplier)),
       onLoading: (isLoading) => {
         setLoadingCode((cur) => (isLoading ? tag : cur === tag ? null : cur));
       },
@@ -84,6 +87,11 @@ export function DualAudioButtons({
         onPlayEnd?.();
       },
     });
+  };
+
+  const handleCycleSpeed = (e: React.MouseEvent) => {
+    if (stopPropagation) e.stopPropagation();
+    setSpeedMultiplier((cur) => (cur === 1 ? 1.15 : cur === 1.15 ? 0.75 : 1));
   };
 
   const btnSizing =
@@ -187,6 +195,24 @@ export function DualAudioButtons({
         >
           <Turtle className={size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
           <span>0.75x</span>
+        </button>
+      )}
+
+      {(showSlow || showSpeedToggle) && (
+        <button
+          type="button"
+          data-testid="audio-speed-cycle"
+          onClick={handleCycleSpeed}
+          title="Alternar velocidade de reprodução (1x → 1.15x → 0.75x)"
+          aria-label={`Velocidade de reprodução: ${speedMultiplier}x`}
+          className={`inline-flex items-center border font-mono font-bold transition cursor-pointer ${btnSizing} ${
+            speedMultiplier !== 1
+              ? 'border-indigo-300 bg-indigo-50 text-indigo-800'
+              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Gauge className={size === 'xs' ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+          <span>{speedMultiplier === 1 ? '1x' : `${speedMultiplier}x`}</span>
         </button>
       )}
 

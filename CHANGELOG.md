@@ -6,6 +6,24 @@ Registro histórico completo de versões, funcionalidades, correções de bugs, 
 
 ---
 
+## [`v11.0.0`] — 2026-11-27
+### Eixos A–G Completos (P0, P1 e P2): Imagens Estilo Duolingo (3 Ondas), Fala/IA 2.0, Revisão Express 5 min, B2B Avançado, Delta Sync & Modularização
+- **Eixo A — Imagens Estilo Duolingo nas 3 Ondas (`visualConcepts.ts`, `ConceptIllustration.tsx`, `PictureChoiceStepView.tsx`, `VocabIntroStep.tsx`, `VocabReview.tsx`, `courseCohesion.ts`, `TopicCreatorTab.tsx`, `scripts/generate-and-upload-concept-images.mjs`):**
+  - Catálogo conceitual compartilhado com **`364` conceitos visuais** em `18` categorias, resolução multilíngue automática nos `17` idiomas, `364` SVGs publicados no **Cloudflare R2 (`images/concepts/*.svg`)** e fallback vetorial offline determinístico (zero ícone quebrado).
+  - Exercício interativo **`picture_choice`** (grade `2×2` com atalhos `1–4` e áudio) injetado nas unidades `A1/A2`, toggle **"Modo Minimalista Texto"** no `VocabReview` e upload de capa personalizada no `TopicCreatorTab`.
+- **Eixo B — Fala, Pronúncia & IA Pedagógica 2.0 (`SpeakingStepView.tsx`, `DictationStepView.tsx`, `DualAudioButtons.tsx`, `AITutor.tsx`):**
+  - **Replay Comparativo Lado a Lado** (`1. Modelo Nativo` vs `2. Sua Gravação` + botão `Comparar em Sequência`), **Mapa de Calor Palavra-por-Palavra** clicável com áudio individual, seletor de velocidade **`0.75x | 1.0x | 1.15x`**, `DictationStepView` modular com diff visual e painel recolhível **"Memória Pedagógica da IA"** no `AITutor`.
+- **Eixo C — Engajamento, Hábito & Comunidade 2.0 (`ExpressReviewModal.tsx`, `TrailQuickActionsBar.tsx`, `streakEngine.ts`, `notifications.ts`, `CommunityHub.tsx`):**
+  - **Revisão Express 5 Minutos** (`5` cards SM-2 + `2` erros do caderno + `1` recap oral, `+35 XP`), filtros por foco (`Viagem`, `Negócios`, `Exames`, `Carreira`), **Streak Freeze por Mérito** (`awardMeritStreakFreeze`), teste de lembretes Web Push, **Grupos de Estudo** e **Desafio Semanal da Escola**.
+- **Eixo D — Operação B2B Multi-Escola Avançada (`SchoolsManagementPanel.tsx`, `SchoolCoordinatorPanel.tsx`, `AuditAndLatencyPanel.tsx`, `qrCodeSvg.ts`, `LiveClassroomView.tsx`):**
+  - QR Code SVG para `/?escola=<slug>`, upload de logo da escola no R2 + cor primária (`--school-primary`), importação em lote via CSV, painel exclusivo do **Coordenador Escolar (`isSchoolAdmin`)**, **Diário de Classe & Lista de Presença** com exportação CSV e trilha de auditoria administrativa (`Seção 14` SQL).
+- **Eixo E, F & G — Modularização, Qualidade E2E & Offline-First / Delta Sync (`deltaSyncEngine.ts`, `offlineUnitPack.ts`, `ReadingStepView.tsx`, `WritingStepView.tsx`, `QuotasAndBillingPanel.tsx`, `useTenantSchoolActions.ts`, `stateMerge.ts`, `cloudflare-worker/routes/*`, `e2e/v11-axes-ag.spec.ts`):**
+  - `worker.js` reduzido para **`293` linhas** (extraídos `tts.js`, `stt.js`, `gemini.js`, `youtube.js` + telemetria `avgMs`/`p95Ms` em `quotas.js`).
+  - `downloadCefrLevelOfflinePack()` com cache de imagens + áudios na Cache API (`fb-offline-packs-v1`) e `deltaSyncEngine.ts` para sincronização incremental.
+- **Verificação:** `node --check` em todos os `.js` do Worker, `tsc --noEmit` (`0` erros), `vitest run src` (**`29/29` suítes / `115/115` testes**), `npm run build` (`0` chunks > 500 kB, `japanese-kana` `42.41 kB`, `visual-concepts` `42.47 kB`), `playwright test` (**`18/18` jornadas E2E**).
+
+---
+
 ## [`v10.0.0`] — 2026-11-27
 ### Multi-Tenancy Escolar (Isolamento RLS), Troca de Professor na Mesma Escola & Nova Auditoria 360° + Roadmap v10.1–v12.0
 - **Motor de Multi-Tenancy Escolar (`src/utils/tenantEngine.ts`, `src/types/learning.ts`, `storage.ts`, `cloudSync.ts`):**

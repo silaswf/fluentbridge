@@ -5,6 +5,7 @@
  */
 import { useMemo, useState } from 'react';
 import {
+  Building2,
   CheckCircle2,
   Flame,
   Heart,
@@ -12,6 +13,7 @@ import {
   Pin,
   PlusCircle,
   Send,
+  ShieldCheck,
   Sparkles,
   Trash2,
   Trophy,
@@ -41,6 +43,7 @@ interface CommunityHubProps {
   users: UserProfile[];
   activeCourse: LanguageCourse;
   posts: CommunityPost[];
+  schoolName?: string;
   realtimeConnected?: boolean;
   onCreatePost: (payload: {
     languageCode: LanguageCourse['code'];
@@ -49,6 +52,7 @@ interface CommunityHubProps {
     title: string;
     body: string;
     targetSnippet?: string;
+    studyGroup?: string;
   }) => void;
   onReplyPost: (postId: string, content: string, correctionSuggestion?: string) => void;
   onToggleLikePost: (postId: string) => void;
@@ -57,6 +61,8 @@ interface CommunityHubProps {
   onClaimChallenge?: (challengeId: string, xpReward: number) => void;
   onDeletePost: (postId: string) => void;
 }
+
+const STUDY_GROUPS = ['Geral', 'Conversação', 'Simulados', 'Gramática', 'Pronúncia'] as const;
 
 const CATEGORY_LABELS: Record<CommunityPost['category'], string> = {
   question: 'Dúvida',
@@ -73,6 +79,7 @@ export function CommunityHub({
   users,
   activeCourse,
   posts,
+  schoolName,
   realtimeConnected = false,
   onCreatePost,
   onReplyPost,
@@ -84,9 +91,11 @@ export function CommunityHub({
 }: CommunityHubProps) {
   const [tab, setTab] = useState<'leagues' | 'forum'>('leagues');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | CommunityPost['category']>('ALL');
+  const [studyGroupFilter, setStudyGroupFilter] = useState<'ALL' | (typeof STUDY_GROUPS)[number]>('ALL');
   const [showComposer, setShowComposer] = useState(false);
 
   const [newCategory, setNewCategory] = useState<CommunityPost['category']>('question');
+  const [newStudyGroup, setNewStudyGroup] = useState<(typeof STUDY_GROUPS)[number]>('Geral');
   const [newLevel, setNewLevel] = useState<CEFRLevel>('A1');
   const [newTitle, setNewTitle] = useState('');
   const [newBody, setNewBody] = useState('');
@@ -122,8 +131,15 @@ export function CommunityHub({
     const merged = custom.length > 0 ? custom : getStarterPostsForLanguage(activeCourse.code);
     return merged
       .filter((p) => categoryFilter === 'ALL' || p.category === categoryFilter)
+      .filter((p) => studyGroupFilter === 'ALL' || (p.studyGroup ?? 'Geral') === studyGroupFilter)
       .sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
-  }, [posts, activeCourse.code, categoryFilter]);
+  }, [posts, activeCourse.code, categoryFilter, studyGroupFilter]);
+
+  const schoolWeeklyXp = useMemo(
+    () => leaderboard.filter((e) => e.isRealPeer).reduce((acc, e) => acc + e.weeklyXp, 0),
+    [leaderboard],
+  );
+  const schoolWeeklyGoal = Math.max(500, leaderboard.filter((e) => e.isRealPeer).length * 250);
 
   const isModerator =
     currentUser.role === 'teacher' ||
@@ -146,6 +162,7 @@ export function CommunityHub({
       title: newTitle.trim(),
       body: newBody.trim(),
       targetSnippet: newSnippet.trim() || undefined,
+      studyGroup: newStudyGroup,
     });
     setNewTitle('');
     setNewBody('');
@@ -173,10 +190,21 @@ export function CommunityHub({
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
-            <Users className="h-3.5 w-3.5" />
-            Comunidade · {activeCourse.flag} {activeCourse.namePt}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
+              <Users className="h-3.5 w-3.5" />
+              Comunidade · {activeCourse.flag} {activeCourse.namePt}
+            </span>
+            {schoolName && (
+              <span
+                data-testid="school-isolation-badge"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 ring-1 ring-emerald-200"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                Escola: {schoolName} · Ranking e fórum isolados
+              </span>
+            )}
+          </div>
           <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900">
             Ligas &amp; Fórum de {activeCourse.namePt}
           </h1>
@@ -282,51 +310,81 @@ export function CommunityHub({
             </div>
           </div>
 
-          {/* Desafio do Mês */}
-          <div
-            data-testid="monthly-challenge-card"
-            className="fb-card-primary rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-blue-50/80 p-5 shadow-2xs dark:border-indigo-900 dark:from-indigo-950/50 dark:to-slate-900"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-800 dark:bg-indigo-900/70 dark:text-indigo-200">
-                  <Trophy className="h-3 w-3" /> Desafio do Mês · {monthlyChallenge.badgeLabel}
-                </span>
-                <h3 className="mt-1.5 font-display text-base font-extrabold text-slate-900 dark:text-slate-100">
-                  {monthlyChallenge.title}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-300">
-                  {monthlyChallenge.description}
-                </p>
+          {/* Desafio do Mês & Desafio Semanal da Escola */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div
+              data-testid="monthly-challenge-card"
+              className="fb-card-primary rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 to-blue-50/80 p-5 shadow-2xs dark:border-indigo-900 dark:from-indigo-950/50 dark:to-slate-900"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-800 dark:bg-indigo-900/70 dark:text-indigo-200">
+                    <Trophy className="h-3 w-3" /> Desafio do Mês · {monthlyChallenge.badgeLabel}
+                  </span>
+                  <h3 className="mt-1.5 font-display text-base font-extrabold text-slate-900 dark:text-slate-100">
+                    {monthlyChallenge.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
+                    {monthlyChallenge.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">
+                    {Math.min(myWeeklyXp, monthlyChallenge.goalXp)} / {monthlyChallenge.goalXp} XP
+                  </span>
+                  {onClaimChallenge && (
+                    <button
+                      type="button"
+                      data-testid="claim-monthly-challenge-btn"
+                      disabled={challengeClaimed || myWeeklyXp < monthlyChallenge.goalXp}
+                      onClick={() => onClaimChallenge(monthlyChallenge.id, monthlyChallenge.xpReward)}
+                      className={`rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                        challengeClaimed
+                          ? 'bg-emerald-100 text-emerald-800 cursor-default'
+                          : myWeeklyXp >= monthlyChallenge.goalXp
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                            : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {challengeClaimed ? 'Resgatado ✓' : `Resgatar +${monthlyChallenge.xpReward} XP`}
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-extrabold text-indigo-700 dark:text-indigo-300">
-                  {Math.min(myWeeklyXp, monthlyChallenge.goalXp)} / {monthlyChallenge.goalXp} XP
-                </span>
-                {onClaimChallenge && (
-                  <button
-                    type="button"
-                    data-testid="claim-monthly-challenge-btn"
-                    disabled={challengeClaimed || myWeeklyXp < monthlyChallenge.goalXp}
-                    onClick={() => onClaimChallenge(monthlyChallenge.id, monthlyChallenge.xpReward)}
-                    className={`rounded-xl px-3.5 py-2 text-xs font-bold transition ${
-                      challengeClaimed
-                        ? 'bg-emerald-100 text-emerald-800 cursor-default'
-                        : myWeeklyXp >= monthlyChallenge.goalXp
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                          : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                    }`}
-                  >
-                    {challengeClaimed ? 'Resgatado ✓' : `Resgatar +${monthlyChallenge.xpReward} XP`}
-                  </button>
-                )}
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-indigo-600 transition-all"
+                  style={{ width: `${Math.min(100, Math.round((myWeeklyXp / monthlyChallenge.goalXp) * 100))}%` }}
+                />
               </div>
             </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
-              <div
-                className="h-full rounded-full bg-indigo-600 transition-all"
-                style={{ width: `${Math.min(100, Math.round((myWeeklyXp / monthlyChallenge.goalXp) * 100))}%` }}
-              />
+
+            <div
+              data-testid="school-weekly-challenge-card"
+              className="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50/90 to-orange-50/70 p-5 shadow-2xs"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900">
+                    <Building2 className="h-3 w-3" /> Desafio Semanal da Escola
+                  </span>
+                  <h3 className="mt-1.5 font-display text-base font-extrabold text-slate-900">
+                    Meta Coletiva {schoolName ? `· ${schoolName}` : 'da Turma'}
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Somem XP juntos nesta semana ({weekKey}) em {activeCourse.namePt} para desbloquear destaque no mural.
+                  </p>
+                </div>
+                <span className="font-mono text-xs font-extrabold text-amber-800">
+                  {Math.min(schoolWeeklyXp, schoolWeeklyGoal)} / {schoolWeeklyGoal} XP
+                </span>
+              </div>
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/80">
+                <div
+                  className="h-full rounded-full bg-amber-500 transition-all"
+                  style={{ width: `${Math.min(100, Math.round((schoolWeeklyXp / schoolWeeklyGoal) * 100))}%` }}
+                />
+              </div>
             </div>
           </div>
 
@@ -421,12 +479,31 @@ export function CommunityHub({
             </button>
           </div>
 
+          {/* Grupos de Estudo Filter */}
+          <div data-testid="study-group-filter-bar" className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[11px] font-bold text-slate-500">Grupos de Estudo:</span>
+            {(['ALL', ...STUDY_GROUPS] as const).map((group) => (
+              <button
+                key={group}
+                type="button"
+                onClick={() => setStudyGroupFilter(group)}
+                className={`rounded-full px-3 py-1 text-[11px] font-bold transition cursor-pointer ${
+                  studyGroupFilter === group
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {group === 'ALL' ? 'Todos os grupos' : group}
+              </button>
+            ))}
+          </div>
+
           {showComposer && (
             <form
               onSubmit={handlePublish}
               className="space-y-3 rounded-3xl border border-blue-200 bg-white p-5 shadow-sm"
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value as CommunityPost['category'])}
@@ -437,6 +514,18 @@ export function CommunityHub({
                   <option value="culture">Cultura &amp; Dica</option>
                   <option value="milestone">Conquista</option>
                   <option value="study_partner">Parceiro de Estudo</option>
+                </select>
+                <select
+                  value={newStudyGroup}
+                  onChange={(e) => setNewStudyGroup(e.target.value as (typeof STUDY_GROUPS)[number])}
+                  aria-label="Grupo de Estudo"
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800"
+                >
+                  {STUDY_GROUPS.map((group) => (
+                    <option key={group} value={group}>
+                      Grupo: {group}
+                    </option>
+                  ))}
                 </select>
                 <select
                   value={newLevel}
@@ -550,7 +639,10 @@ export function CommunityHub({
                           )}
                         </p>
                         <p className="text-[11px] text-slate-500">
-                          {post.createdAt} · Nível {post.level} · {CATEGORY_LABELS[post.category]}
+                          {post.createdAt} · Nível {post.level} · {CATEGORY_LABELS[post.category]} ·{' '}
+                          <span className="font-semibold text-indigo-700">
+                            {post.studyGroup ?? 'Geral'}
+                          </span>
                         </p>
                       </div>
                     </div>

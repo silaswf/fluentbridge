@@ -1,6 +1,6 @@
 /**
  * @file cloudflare-worker/routes/adminQuotas.js
- * @description Rota GET /api/admin/quotas do Worker: retorna consumo diário e acumulado de 7 dias das cotas de IA no R2 para o painel Admin.
+ * @description Rota GET /api/admin/quotas do Worker: retorna consumo diário, acumulado de 7 dias e latência média/p95 por rota para o painel Admin.
  * @exports handleAdminQuotasRequest
  */
 import { jsonResponse } from '../lib/http.js';

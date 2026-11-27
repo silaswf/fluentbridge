@@ -1,0 +1,385 @@
+/**
+ * @file src/components/lesson/WritingStepView.tsx
+ * @description Subcomponente do LessonPlayer para etapas de escrita guiada (writing_builder) e escrita livre com corretor IA/diff (writing_free).
+ * @exports WritingStepView, WritingBuilderStepView, WritingFreeStepView
+ */
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import {
+  CheckCircle2,
+  HelpCircle,
+  Loader2,
+  RotateCcw,
+  Send,
+  Sparkles,
+} from 'lucide-react';
+import type {
+  LanguageCode,
+  WritingBuilderStep,
+  WritingFreeStep,
+} from '../../types/learning';
+import {
+  analyzeWritingHybrid,
+  type HybridWritingLineFeedback,
+} from '../../utils/writingDiffGrader';
+import { DualAudioButtons } from '../DualAudioButtons';
+
+export interface WritingBuilderStepViewProps {
+  step: WritingBuilderStep;
+  builderBank: string[];
+  pickedIndices: number[];
+  setPickedIndices: Dispatch<SetStateAction<number[]>>;
+  checkedStatus: 'idle' | 'correct' | 'incorrect';
+}
+
+export function WritingBuilderStepView({
+  step,
+  builderBank,
+  pickedIndices,
+  setPickedIndices,
+  checkedStatus,
+}: WritingBuilderStepViewProps) {
+  return (
+    <div className="animate-fade-up rounded-3xl border border-amber-200/80 bg-white p-6 shadow-xs sm:p-7">
+      <h2 className="font-display text-lg font-bold text-slate-900">
+        {step.promptPt}
+      </h2>
+
+      <div className="mt-4 min-h-[76px] rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-3.5">
+        {pickedIndices.length === 0 ? (
+          <p className="py-2 text-center text-xs font-medium text-slate-400">
+            Clique nas palavras abaixo na ordem correta para montar a frase
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {pickedIndices.map((bankIdx, orderPos) => (
+              <button
+                key={`${bankIdx}-${orderPos}`}
+                type="button"
+                disabled={checkedStatus !== 'idle'}
+                onClick={() =>
+                  setPickedIndices((prev) =>
+                    prev.filter((_, idx) => idx !== orderPos),
+                  )
+                }
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-700 shadow-2xs transition hover:bg-rose-50 hover:text-rose-700 cursor-pointer disabled:cursor-default"
+              >
+                {builderBank[bankIdx]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        {builderBank.map((word, bankIdx) => {
+          const used = pickedIndices.includes(bankIdx);
+          return (
+            <button
+              key={bankIdx}
+              type="button"
+              disabled={used || checkedStatus !== 'idle'}
+              onClick={() => setPickedIndices((prev) => [...prev, bankIdx])}
+              className={`rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
+                used
+                  ? 'border-slate-200 bg-slate-100 text-transparent select-none'
+                  : 'border-slate-200 bg-white text-slate-800 shadow-2xs hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
+              }`}
+            >
+              {word}
+            </button>
+          );
+        })}
+      </div>
+
+      {checkedStatus === 'idle' && pickedIndices.length > 0 && (
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setPickedIndices([])}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Limpar ordem</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export interface WritingFreeStepViewProps {
+  step: WritingFreeStep;
+  languageCode?: LanguageCode;
+  preferredAccent?: string;
+  onSelectAccent?: (accentCode: string) => void;
+  freeText: string;
+  setFreeText: (val: string) => void;
+  freeWordCount: number;
+  hasLinkedTeacher: boolean;
+  submittedToTeacher: boolean;
+  onSendToTeacher: () => void;
+  onRequestTeacherLink?: () => void;
+  showModelAnswer: boolean;
+  onToggleModelAnswer: () => void;
+  onSaveMistakesToBank?: (
+    items: Array<{
+      prompt: string;
+      studentAnswer: string;
+      expectedAnswer: string;
+      explanation: string;
+    }>,
+  ) => void;
+}
+
+export function WritingFreeStepView({
+  step,
+  languageCode = 'en',
+  preferredAccent,
+  onSelectAccent,
+  freeText,
+  setFreeText,
+  freeWordCount,
+  hasLinkedTeacher,
+  submittedToTeacher,
+  onSendToTeacher,
+  onRequestTeacherLink,
+  showModelAnswer,
+  onToggleModelAnswer,
+  onSaveMistakesToBank,
+}: WritingFreeStepViewProps) {
+  const [diffFeedback, setDiffFeedback] = useState<HybridWritingLineFeedback | null>(null);
+  const [isAnalyzingDiff, setIsAnalyzingDiff] = useState(false);
+  const [savedMistakes, setSavedMistakes] = useState(false);
+
+  useEffect(() => {
+    setDiffFeedback(null);
+    setIsAnalyzingDiff(false);
+    setSavedMistakes(false);
+  }, [step.id]);
+
+  return (
+    <div className="animate-fade-up space-y-4 rounded-3xl border border-amber-200/80 bg-white p-6 shadow-xs sm:p-7">
+      <div>
+        <h2 className="font-display text-lg font-bold text-slate-900">
+          {step.promptPt}
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">{step.scenarioPt}</p>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+          <span>Checklist automático em tempo real</span>
+          <span
+            className={`font-mono ${
+              freeWordCount >= step.minWords ? 'text-emerald-600' : 'text-slate-500'
+            }`}
+          >
+            {freeWordCount} / {step.minWords} palavras mín.
+          </span>
+        </div>
+        <ul className="mt-2.5 space-y-1.5">
+          {step.checklist.map((item, idx) => {
+            const lower = freeText.toLowerCase();
+            const passed = item.keywords.some((kw) =>
+              lower.includes(kw.toLowerCase()),
+            );
+            return (
+              <li
+                key={idx}
+                className={`flex items-center gap-2 text-xs font-medium transition ${
+                  passed ? 'text-emerald-700' : 'text-slate-500'
+                }`}
+              >
+                <CheckCircle2
+                  className={`h-4 w-4 shrink-0 ${
+                    passed ? 'text-emerald-500' : 'text-slate-300'
+                  }`}
+                />
+                <span>{item.label}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <textarea
+        rows={4}
+        value={freeText}
+        onChange={(e) => setFreeText(e.target.value)}
+        placeholder="Escreva sua resposta no idioma da lição..."
+        className="w-full rounded-2xl border border-slate-300 bg-white p-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {hasLinkedTeacher ? (
+            <button
+              type="button"
+              disabled={freeWordCount < 3}
+              onClick={onSendToTeacher}
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+            >
+              <Send className="h-3.5 w-3.5" />
+              <span>
+                {submittedToTeacher
+                  ? 'Enviado para o Professor!'
+                  : 'Enviar resposta para o Professor corrigir'}
+              </span>
+            </button>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] text-amber-950">
+              <span className="font-semibold">
+                Correção docente restrita sem professor vinculado.
+              </span>
+              {onRequestTeacherLink && (
+                <button
+                  type="button"
+                  onClick={onRequestTeacherLink}
+                  className="rounded-lg bg-amber-600 px-2.5 py-1 font-bold text-white hover:bg-amber-700 cursor-pointer"
+                >
+                  Vincular professor
+                </button>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            data-testid="analyze-writing-diff-btn"
+            disabled={freeText.trim().length < 3 || isAnalyzingDiff}
+            onClick={() => {
+              setIsAnalyzingDiff(true);
+              setSavedMistakes(false);
+              void analyzeWritingHybrid(
+                freeText,
+                step.modelAnswer,
+                step.checklist,
+                languageCode,
+                step.promptPt,
+                step.scenarioPt,
+              )
+                .then((feedback) => {
+                  setDiffFeedback(feedback);
+                })
+                .finally(() => {
+                  setIsAnalyzingDiff(false);
+                });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-xs font-bold text-indigo-800 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+          >
+            {isAnalyzingDiff ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            <span>
+              {isAnalyzingDiff ? 'Analisando com IA...' : 'Analisar Gramática & Diff'}
+            </span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={onToggleModelAnswer}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
+        >
+          <HelpCircle className="h-3.5 w-3.5" />
+          <span>{showModelAnswer ? 'Ocultar exemplo' : 'Ver resposta modelo'}</span>
+        </button>
+      </div>
+
+      {diffFeedback && (
+        <div
+          data-testid="writing-diff-panel"
+          className="animate-fade-up space-y-3 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 text-xs"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-indigo-950">
+                Análise Linha a Linha (Score estimado: {diffFeedback.score}%)
+              </span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200">
+                {diffFeedback.source === 'ai' ? 'IA Semântica' : 'Análise Local'}
+              </span>
+            </div>
+            {onSaveMistakesToBank && diffFeedback.mistakeItems.length > 0 && (
+              <button
+                type="button"
+                disabled={savedMistakes}
+                onClick={() => {
+                  onSaveMistakesToBank(diffFeedback.mistakeItems);
+                  setSavedMistakes(true);
+                }}
+                className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 disabled:bg-emerald-600 cursor-pointer"
+              >
+                {savedMistakes
+                  ? 'Salvo no Caderno de Erros!'
+                  : `Salvar ${diffFeedback.mistakeItems.length} ajuste(s) no Caderno`}
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-1 rounded-xl border border-indigo-100 bg-white p-3 leading-relaxed">
+            {diffFeedback.diffTokens.map((tok, i) => (
+              <span
+                key={i}
+                className={
+                  tok.type === 'keep'
+                    ? 'text-slate-800'
+                    : tok.type === 'remove'
+                      ? 'rounded bg-rose-100 px-1 text-rose-800 line-through'
+                      : 'rounded bg-emerald-100 px-1 font-bold text-emerald-800'
+                }
+              >
+                {tok.text}
+              </span>
+            ))}
+          </div>
+
+          {diffFeedback.cefrFeedbackPt && (
+            <p className="rounded-xl bg-white/80 px-3 py-2 text-[11px] font-medium text-indigo-900">
+              {diffFeedback.cefrFeedbackPt}
+            </p>
+          )}
+
+          <ul className="space-y-1 text-indigo-950">
+            {diffFeedback.suggestionsPt.map((sug, i) => (
+              <li key={i}>• {sug}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {showModelAnswer && (
+        <div className="animate-fade-up flex flex-col justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-3.5 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[11px] font-bold text-blue-800 uppercase">
+              Resposta modelo do professor
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-slate-800">
+              “{step.modelAnswer}”
+            </p>
+          </div>
+          <DualAudioButtons
+            text={step.modelAnswer}
+            languageCode={languageCode}
+            preferredAccent={preferredAccent}
+            onSelectAccent={onSelectAccent}
+            size="xs"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export type WritingStepViewProps =
+  | ({ mode?: 'builder' } & WritingBuilderStepViewProps)
+  | ({ mode?: 'free' } & WritingFreeStepViewProps);
+
+export function WritingStepView(props: WritingStepViewProps) {
+  if (props.step.type === 'writing_builder') {
+    return <WritingBuilderStepView {...(props as WritingBuilderStepViewProps)} />;
+  }
+  return <WritingFreeStepView {...(props as WritingFreeStepViewProps)} />;
+}

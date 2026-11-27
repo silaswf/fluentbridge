@@ -28,7 +28,8 @@ export type BadgeKind =
   | 'fill_blank'
   | 'dictation'
   | 'minimal_pairs'
-  | 'story';
+  | 'story'
+  | 'picture_choice';
 
 interface SkillMeta {
   label: string;
@@ -147,6 +148,15 @@ export const SKILL_META: Record<BadgeKind, SkillMeta> = {
     text: 'text-sky-700',
     border: 'border-sky-200',
     dot: 'bg-sky-500',
+    Icon: Sparkles,
+  },
+  picture_choice: {
+    label: 'Associação Visual',
+    shortLabel: 'Visual',
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    border: 'border-emerald-200',
+    dot: 'bg-emerald-500',
     Icon: Sparkles,
   },
 };

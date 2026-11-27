@@ -1,13 +1,15 @@
 /**
  * @file src/components/AITutor.tsx
- * @description Tutor IA de Conversação (chat e chamada de voz com VAD): cenários contextualizados, correção gramatical, áudio neural e modo imersão.
- * @exports AITutor
+ * @description Tutor IA de Conversação (chat e chamada de voz com VAD): cenários contextualizados, correção gramatical, áudio neural, painel de memória pedagógica e modo imersão.
+ * @exports AITutor, parsePedagogicalMemory, ParsedPedagogicalMemory
  */
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Bot,
+  Brain,
   CheckCircle2,
+  ChevronDown,
   Dices,
   Languages,
   Lightbulb,
@@ -54,6 +56,51 @@ import {
   type VadSessionState,
 } from '../utils/voiceVadEngine';
 import { DualAudioButtons } from './DualAudioButtons';
+
+export interface ParsedPedagogicalMemory {
+  weakWords: string[];
+  recentMistakes: string[];
+}
+
+/**
+ * Extrai palavras fracas do SRS e erros recentes do Caderno de Erros a partir da string de memória pedagógica.
+ */
+export function parsePedagogicalMemory(memory?: string): ParsedPedagogicalMemory {
+  const text = memory?.trim() ?? '';
+  if (!text) return { weakWords: [], recentMistakes: [] };
+
+  const weakWords: string[] = [];
+  const recentMistakes: string[] = [];
+
+  const vocabMatch = text.match(
+    /Vocabulário prioritário do aluno no SRS para reforçar naturalmente na conversa:\s*([^.]+)\.?/i,
+  );
+  if (vocabMatch?.[1]) {
+    for (const item of vocabMatch[1].split(',')) {
+      const clean = item.trim();
+      if (clean) weakWords.push(clean);
+    }
+  }
+
+  const mistakesMatch = text.match(
+    /Erros recentes do aluno no Caderno de Erros para corrigir com delicadeza se surgirem:\s*([^.]+(?:\.[^.]+)*?)\.?$/i,
+  );
+  if (mistakesMatch?.[1]) {
+    for (const item of mistakesMatch[1].split(';')) {
+      const clean = item.trim().replace(/\.$/, '');
+      if (clean) recentMistakes.push(clean);
+    }
+  }
+
+  if (weakWords.length === 0 && recentMistakes.length === 0) {
+    for (const item of text.split(/[;\n]/)) {
+      const clean = item.trim();
+      if (clean) recentMistakes.push(clean);
+    }
+  }
+
+  return { weakWords, recentMistakes };
+}
 
 interface AITutorProps {
   accent: Accent;
@@ -118,6 +165,13 @@ export function AITutor({
   const [voiceError, setVoiceError] = useState('');
   const [usedGeminiSession, setUsedGeminiSession] = useState(false);
   const [sessionAwarded, setSessionAwarded] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
+
+  const parsedMemory = parsePedagogicalMemory(pedagogicalMemory);
+  const hasMemoryItems =
+    parsedMemory.weakWords.length > 0 || parsedMemory.recentMistakes.length > 0;
+  const memoryCount =
+    parsedMemory.weakWords.length + parsedMemory.recentMistakes.length;
 
   const stopRecRef = useRef<(() => void) | null>(null);
   const vadSessionRef = useRef<{ stop: () => void } | null>(null);
@@ -378,6 +432,75 @@ export function AITutor({
     startScenario(scenario);
   };
 
+  const renderMemoryPanel = () => {
+    if (!hasMemoryItems) return null;
+    return (
+      <div
+        data-testid="ai-tutor-memory-panel"
+        className="rounded-2xl border border-violet-200 bg-violet-50/70 px-4 py-2.5 text-xs"
+      >
+        <button
+          type="button"
+          onClick={() => setMemoryOpen((v) => !v)}
+          aria-expanded={memoryOpen}
+          className="flex w-full items-center justify-between gap-2 text-left font-bold text-violet-950 cursor-pointer"
+        >
+          <span className="inline-flex items-center gap-2">
+            <Brain className="h-4 w-4 text-violet-600" />
+            <span>Memória Pedagógica da IA</span>
+            <span className="rounded-full bg-violet-200/80 px-2 py-0.5 font-mono text-[10px] font-bold text-violet-900">
+              {memoryCount} {memoryCount === 1 ? 'alvo' : 'alvos'}
+            </span>
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 text-violet-700 transition-transform ${
+              memoryOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
+        {memoryOpen && (
+          <div className="mt-2.5 space-y-2 border-t border-violet-200/80 pt-2.5 text-violet-950">
+            {parsedMemory.weakWords.length > 0 && (
+              <div>
+                <p className="text-[10px] font-extrabold tracking-wider text-violet-700 uppercase">
+                  Palavras fracas / SRS em foco
+                </p>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {parsedMemory.weakWords.map((word) => (
+                    <span
+                      key={word}
+                      className="rounded-lg bg-white px-2 py-0.5 font-semibold text-violet-900 ring-1 ring-violet-200"
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {parsedMemory.recentMistakes.length > 0 && (
+              <div>
+                <p className="text-[10px] font-extrabold tracking-wider text-violet-700 uppercase">
+                  Erros recentes monitorados
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {parsedMemory.recentMistakes.map((err, idx) => (
+                    <li
+                      key={idx}
+                      className="rounded-lg bg-white/80 px-2.5 py-1 text-[11px] text-violet-900 ring-1 ring-violet-200/70"
+                    >
+                      {err}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (!selectedScenario) {
     const filteredScenarios = visibleScenarios.filter((sc) => {
       if (scenarioLevelFilter !== 'ALL' && sc.level !== scenarioLevelFilter) {
@@ -425,6 +548,8 @@ export function AITutor({
               : 'Tutor Inteligente Local Ativo'}
           </span>
         </div>
+
+        {renderMemoryPanel()}
 
         {/* 3 Mode Tabs */}
         <div className="flex flex-wrap gap-2">
@@ -779,6 +904,12 @@ export function AITutor({
           </button>
         </div>
       </header>
+
+      {hasMemoryItems && (
+        <div className="border-b border-slate-200/80 bg-slate-50/40 px-4 py-2 sm:px-6">
+          {renderMemoryPanel()}
+        </div>
+      )}
 
       {/* Full-Duplex VAD Live Call Bar */}
       {callMode && (

@@ -43,8 +43,19 @@ export async function handleMediaRequest(request, env, path, { verifySupabaseJwt
       return jsonResponse({ error: 'Media payload exceeds 15MB limit' }, 413);
     }
 
-    const safeName = rawKey.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^_+/, '');
-    const key = safeName.startsWith('videos/') ? safeName : `videos/${safeName}`;
+    const safeName = rawKey
+      .replace(/\.\.+/g, '')
+      .replace(/[^a-zA-Z0-9._/-]/g, '_')
+      .replace(/^\/+|_+$/g, '');
+    const allowedPrefixes = [
+      'videos/',
+      'images/concepts/',
+      'images/schools/',
+      'images/topics/',
+    ];
+    const key = allowedPrefixes.some((p) => safeName.startsWith(p))
+      ? safeName
+      : `videos/${safeName.replace(/^\/+/, '')}`;
     await env.MEDIA_BUCKET.put(key, bodyBytes, {
       httpMetadata: { contentType },
       customMetadata: { uploadedBy: auth.userId || 'local' },
@@ -58,7 +69,13 @@ export async function handleMediaRequest(request, env, path, { verifySupabaseJwt
       return jsonResponse({ error: 'Method not allowed' }, 405);
     }
     const url = new URL(request.url);
-    const listed = await env.MEDIA_BUCKET.list({ prefix: 'videos/', limit: 100 });
+    const reqPrefix = (url.searchParams.get('prefix') || 'videos/').replace(/^\/+/, '');
+    const prefix = ['videos/', 'images/concepts/', 'images/schools/', 'images/topics/'].some((p) =>
+      reqPrefix.startsWith(p),
+    )
+      ? reqPrefix
+      : 'videos/';
+    const listed = await env.MEDIA_BUCKET.list({ prefix, limit: 500 });
     const items = (listed.objects || []).map((obj) => ({
       key: obj.key,
       url: `${url.origin}/api/media/${obj.key}`,
@@ -113,7 +130,20 @@ export async function handleMediaRequest(request, env, path, { verifySupabaseJwt
   }
   const headers = new Headers();
   obj.writeHttpMetadata(headers);
-  if (!headers.get('Content-Type')) headers.set('Content-Type', 'application/octet-stream');
+  if (!headers.get('Content-Type')) {
+    const inferredType = key.endsWith('.webp')
+      ? 'image/webp'
+      : key.endsWith('.svg')
+        ? 'image/svg+xml'
+        : key.endsWith('.png')
+          ? 'image/png'
+          : key.endsWith('.jpg') || key.endsWith('.jpeg')
+            ? 'image/jpeg'
+            : key.endsWith('.mp4')
+              ? 'video/mp4'
+              : 'application/octet-stream';
+    headers.set('Content-Type', inferredType);
+  }
   headers.set('Accept-Ranges', 'bytes');
   if (typeof obj.size === 'number') {
     headers.set('Content-Length', String(obj.size));

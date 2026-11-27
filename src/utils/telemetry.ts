@@ -177,6 +177,12 @@ export async function runSyntheticHealthChecks(): Promise<SyntheticHealthResult[
   return results;
 }
 
+export interface AdminQuotaRouteLatency {
+  avgMs: number;
+  p95Ms: number;
+  samples: number;
+}
+
 export interface AdminQuotaRouteStat {
   key: string;
   label: string;
@@ -185,6 +191,7 @@ export interface AdminQuotaRouteStat {
   limitPerActor: number;
   activeActorsToday: number;
   sevenDayTotal: number;
+  latencyMs?: AdminQuotaRouteLatency;
 }
 
 export interface AdminQuotaSnapshot {

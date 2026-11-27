@@ -1,7 +1,7 @@
 /**
  * @file cloudflare-worker/lib/quotas.js
- * @description Gerenciamento de cotas diárias persistentes no R2 (checkPersistentDailyQuota) e agregação de consumo multi-dia (getDailyQuotasSnapshot).
- * @exports DAILY_QUOTA_LIMITS, checkPersistentDailyQuota, getDailyQuotasSnapshot
+ * @description Gerenciamento de cotas diárias persistentes no R2 (checkPersistentDailyQuota), agregação multi-dia (getDailyQuotasSnapshot) e telemetria leve de latência por rota.
+ * @exports DAILY_QUOTA_LIMITS, recordRouteLatency, getRouteLatencyStats, checkPersistentDailyQuota, getDailyQuotasSnapshot
  */
 export const DAILY_QUOTA_LIMITS = {
   stt: { limit: 200, label: 'Transcrição Whisper STT', endpoint: '/api/stt' },
@@ -9,6 +9,39 @@ export const DAILY_QUOTA_LIMITS = {
   translate: { limit: 300, label: 'Tradutor Bidirecional', endpoint: '/api/translate' },
   youtube: { limit: 100, label: 'YouTube Study Lab', endpoint: '/api/youtube-study' },
 };
+
+const MAX_LATENCY_SAMPLES = 200;
+const routeLatencySamples = new Map();
+
+export function recordRouteLatency(routeKey, durationMs) {
+  if (!routeKey || typeof durationMs !== 'number' || !Number.isFinite(durationMs)) return;
+  const safeMs = Math.max(0, Math.round(durationMs));
+  let samples = routeLatencySamples.get(routeKey);
+  if (!samples) {
+    samples = [];
+    routeLatencySamples.set(routeKey, samples);
+  }
+  samples.push(safeMs);
+  if (samples.length > MAX_LATENCY_SAMPLES) {
+    samples.shift();
+  }
+}
+
+export function getRouteLatencyStats(routeKey) {
+  const samples = routeLatencySamples.get(routeKey);
+  if (!samples || samples.length === 0) {
+    return { avgMs: 0, p95Ms: 0, samples: 0 };
+  }
+  const sum = samples.reduce((acc, v) => acc + v, 0);
+  const avgMs = Math.round(sum / samples.length);
+  const sorted = [...samples].sort((a, b) => a - b);
+  const p95Idx = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95));
+  return {
+    avgMs,
+    p95Ms: sorted[p95Idx],
+    samples: samples.length,
+  };
+}
 
 export async function checkPersistentDailyQuota(env, request, routeKey, dailyLimit, userId = null) {
   if (!env.MEDIA_BUCKET) return { allowed: true, remaining: dailyLimit };
@@ -88,6 +121,7 @@ export async function getDailyQuotasSnapshot(env, days = 7) {
         limitPerActor: meta.limit,
         activeActorsToday: 0,
         sevenDayTotal: 0,
+        latencyMs: getRouteLatencyStats(key),
       })),
       generatedAt: new Date().toISOString(),
     };
@@ -108,6 +142,7 @@ export async function getDailyQuotasSnapshot(env, days = 7) {
         limitPerActor: meta.limit,
         activeActorsToday: todayStat.actors,
         sevenDayTotal,
+        latencyMs: getRouteLatencyStats(key),
       };
     }),
   );

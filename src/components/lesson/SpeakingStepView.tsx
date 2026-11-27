@@ -1,16 +1,40 @@
 /**
  * @file src/components/lesson/SpeakingStepView.tsx
- * @description Subcomponente do LessonPlayer para prática de Speaking: checagem fonética instantânea, feedback de fonemas, oscilador tonal, shadowing e gravação para o professor.
- * @exports SpeakingStepView
+ * @description Subcomponente do LessonPlayer para prática de Speaking: checagem fonética instantânea, mapa de calor palavra-por-palavra, replay comparativo lado a lado, oscilador tonal, shadowing e gravação para o professor.
+ * @exports SpeakingStepView, classifyWordHeatmap, HeatmapTier
  */
-import { Check, Mic, MicOff, Radio, Send, Square } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Check, Mic, MicOff, Play, Radio, Send, Square, Volume2 } from 'lucide-react';
 import type { LanguageCode, LessonStep } from '../../types/learning';
 import { isAudioRecordingSupported } from '../../utils/audioRecorder';
-import { analyzePhoneticFeedback } from '../../utils/phoneticFeedback';
-import { isSpeechRecognitionSupported } from '../../utils/speech';
+import { analyzePhoneticFeedback, type PhoneticWordDetail } from '../../utils/phoneticFeedback';
+import { isSpeechRecognitionSupported, speakText, stopSpeaking } from '../../utils/speech';
 import { DualAudioButtons } from '../DualAudioButtons';
 import { PitchOscilloscope } from '../PitchOscilloscope';
 import { ShadowingPanel } from '../steps/ShadowingPanel';
+
+export type HeatmapTier = 'exact' | 'close' | 'missed';
+
+/**
+ * Classifica uma palavra avaliada no Speaking para o mapa de calor:
+ * - `exact` (emerald): acerto exato com alta confiança
+ * - `close` (amber): acerto parcial / confiança moderada / dica fonética
+ * - `missed` (rose): palavra ausente ou pronúncia fraca
+ */
+export function classifyWordHeatmap(
+  word: Pick<PhoneticWordDetail, 'matched' | 'confidence'>,
+): HeatmapTier {
+  if (word.matched) {
+    if (typeof word.confidence === 'number' && word.confidence < 0.75) {
+      return 'close';
+    }
+    return 'exact';
+  }
+  if (typeof word.confidence === 'number' && word.confidence >= 0.35) {
+    return 'close';
+  }
+  return 'missed';
+}
 
 type SpeakingStep = Extract<LessonStep, { type: 'speaking' }>;
 
@@ -65,6 +89,36 @@ export function SpeakingStepView({
   onManualSpeakingComplete,
   onRequestTeacherLink,
 }: SpeakingStepViewProps) {
+  const [shadowSpeed, setShadowSpeed] = useState<0.75 | 1 | 1.15>(1);
+  const [isComparingSequence, setIsComparingSequence] = useState(false);
+  const studentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleCompareSequence = () => {
+    if (!recordedAudioUrl) return;
+    if (isComparingSequence) {
+      stopSpeaking();
+      studentAudioRef.current?.pause();
+      setIsComparingSequence(false);
+      return;
+    }
+    setIsComparingSequence(true);
+    speakText(step.targetSentence, {
+      langCode: dialectCode,
+      rate: shadowSpeed,
+      onEnd: () => {
+        const audio = studentAudioRef.current;
+        if (!audio) {
+          setIsComparingSequence(false);
+          return;
+        }
+        audio.currentTime = 0;
+        audio.onended = () => setIsComparingSequence(false);
+        audio.onerror = () => setIsComparingSequence(false);
+        void audio.play().catch(() => setIsComparingSequence(false));
+      },
+    });
+  };
+
   return (
     <div className="animate-fade-up space-y-4 rounded-3xl border border-rose-200/80 bg-white p-6 shadow-xs sm:p-7">
       <p className="text-sm font-semibold text-slate-700">{step.promptPt}</p>
@@ -84,13 +138,34 @@ export function SpeakingStepView({
           </span>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
           <DualAudioButtons
             text={step.targetSentence}
             languageCode={languageCode}
+            rateMultiplier={shadowSpeed}
             showSlow
+            showSpeedToggle
             size="md"
           />
+          <div
+            data-testid="speaking-speed-selector"
+            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1"
+          >
+            {([0.75, 1, 1.15] as const).map((spd) => (
+              <button
+                key={spd}
+                type="button"
+                onClick={() => setShadowSpeed(spd)}
+                className={`rounded-lg px-2 py-1 font-mono text-[11px] font-bold transition cursor-pointer ${
+                  shadowSpeed === spd
+                    ? 'bg-rose-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {spd === 1 ? '1.0x' : `${spd}x`}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -173,20 +248,32 @@ export function SpeakingStepView({
             </span>
           </div>
           <p className="text-xs font-medium text-emerald-900">{speakingEval.summaryPt}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {speakingEval.words.map((w, idx) => (
-              <span
-                key={idx}
-                className={`rounded-lg px-2 py-0.5 text-xs font-semibold ${
-                  w.matched
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-rose-100 text-rose-800 ring-1 ring-rose-300'
-                }`}
-                title={`Sílabas: ${w.syllables.join(' · ')}`}
-              >
-                {w.syllables.join('·')}
-              </span>
-            ))}
+          <div className="flex flex-wrap gap-1.5" data-testid="phonetic-word-heatmap">
+            {speakingEval.words.map((w, idx) => {
+              const tier = classifyWordHeatmap(w);
+              const chipStyle =
+                tier === 'exact'
+                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                  : tier === 'close'
+                    ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-300 hover:bg-amber-200'
+                    : 'bg-rose-100 text-rose-800 ring-1 ring-rose-300 hover:bg-rose-200';
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  data-testid="heatmap-word-chip"
+                  data-heatmap={tier}
+                  onClick={() =>
+                    speakText(w.word, { langCode: dialectCode, rate: 0.85 })
+                  }
+                  className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold transition cursor-pointer ${chipStyle}`}
+                  title={`Sílabas: ${w.syllables.join(' · ')} — Clique para ouvir "${w.word}"`}
+                >
+                  <Volume2 className="h-3 w-3 opacity-70" />
+                  <span>{w.syllables.join('·')}</span>
+                </button>
+              );
+            })}
           </div>
           {speakingEval.phonemeBreakdown.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
@@ -255,18 +342,70 @@ export function SpeakingStepView({
       />
 
       {recordedAudioUrl && (
-        <div className="animate-fade-up space-y-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4">
-          <div className="flex items-center justify-between text-xs font-bold text-blue-950">
-            <span>Prévia da sua gravação ({recordedDuration}s)</span>
-            <button
-              type="button"
-              onClick={onStartOrStopVoiceClip}
-              className="text-blue-700 hover:underline cursor-pointer"
-            >
-              Regravar
-            </button>
+        <div
+          data-testid="comparative-replay-panel"
+          className="animate-fade-up space-y-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-blue-950">
+            <span>Replay Comparativo ({recordedDuration}s)</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCompareSequence}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-[11px] font-bold transition cursor-pointer ${
+                  isComparingSequence
+                    ? 'bg-rose-600 text-white'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
+              >
+                <Play className="h-3 w-3" />
+                <span>
+                  {isComparingSequence ? 'Parar Sequência' : 'Comparar em Sequência'}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={onStartOrStopVoiceClip}
+                className="text-blue-700 hover:underline cursor-pointer"
+              >
+                Regravar
+              </button>
+            </div>
           </div>
-          <audio controls src={recordedAudioUrl} className="h-10 w-full" />
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col justify-between gap-2 rounded-xl border border-indigo-200 bg-white p-3">
+              <p className="text-[11px] font-bold text-indigo-900">
+                1. Modelo Nativo ({shadowSpeed === 1 ? '1.0x' : `${shadowSpeed}x`})
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  speakText(step.targetSentence, {
+                    langCode: dialectCode,
+                    rate: shadowSpeed,
+                  })
+                }
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-800 hover:bg-indigo-100 cursor-pointer"
+              >
+                <Volume2 className="h-3.5 w-3.5" />
+                <span>Ouvir Modelo Nativo</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col justify-between gap-2 rounded-xl border border-blue-200 bg-white p-3">
+              <p className="text-[11px] font-bold text-blue-900">
+                2. Sua Gravação ({recordedDuration}s)
+              </p>
+              <audio
+                ref={studentAudioRef}
+                controls
+                src={recordedAudioUrl}
+                className="h-10 w-full"
+              />
+            </div>
+          </div>
+
           {hasLinkedTeacher ? (
             <button
               type="button"

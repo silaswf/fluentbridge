@@ -1,10 +1,10 @@
 /**
  * @file src/components/LiveClassroomView.tsx
- * @description Sala de Aulas ao Vivo: agenda de sessões síncronas entre professor e aluno/turma com sala de vídeo e criação de tarefas.
+ * @description Sala de Aulas ao Vivo: agenda de sessões síncronas entre professor e aluno/turma com sala de vídeo, diário de presença e criação de tarefas.
  * @exports LiveClassroomView
  */
 import { useState } from 'react';
-import { Calendar, ExternalLink, Plus, Sparkles, Video } from 'lucide-react';
+import { Calendar, ClipboardList, Download, ExternalLink, Plus, Sparkles, Video } from 'lucide-react';
 import { EmptyStateCard } from './EmptyStateCard';
 import type {
   ClassGroup,
@@ -12,6 +12,8 @@ import type {
   LiveSessionRecord,
   UserProfile,
 } from '../types/learning';
+
+type AttendanceStatus = 'present' | 'absent' | 'late';
 
 interface LiveClassroomViewProps {
   currentUser: UserProfile;
@@ -22,6 +24,11 @@ interface LiveClassroomViewProps {
   onCreateSession: (payload: Omit<LiveSessionRecord, 'id' | 'createdAt'>) => void;
   onUpdateSessionNotes: (sessionId: string, notes: string) => void;
   onGeneratePostClassTask: (session: LiveSessionRecord) => void;
+  onUpdateSessionAttendance?: (
+    sessionId: string,
+    attendance: Record<string, AttendanceStatus>,
+    participationScore?: Record<string, number>,
+  ) => void;
 }
 
 export function LiveClassroomView({
@@ -33,6 +40,7 @@ export function LiveClassroomView({
   onCreateSession,
   onUpdateSessionNotes,
   onGeneratePostClassTask,
+  onUpdateSessionAttendance,
 }: LiveClassroomViewProps) {
   const isTeacher = currentUser.role === 'teacher';
   const [title, setTitle] = useState('');
@@ -42,6 +50,12 @@ export function LiveClassroomView({
   const [targetId, setTargetId] = useState('');
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [notesDraftById, setNotesDraftById] = useState<Record<string, string>>({});
+  const [attendanceDraftById, setAttendanceDraftById] = useState<
+    Record<string, Record<string, AttendanceStatus>>
+  >({});
+  const [participationDraftById, setParticipationDraftById] = useState<
+    Record<string, Record<string, number>>
+  >({});
 
   const visibleSessions = sessions.filter((s) => {
     if (s.languageCode !== activeLanguage) return false;
@@ -234,6 +248,164 @@ export function LiveClassroomView({
               </div>
             )}
           </div>
+
+          {isTeacher && (() => {
+            const sessionStudents = activeSession.studentId
+              ? students.filter((st) => st.id === activeSession.studentId)
+              : activeSession.classId
+                ? students.filter((st) => st.classId === activeSession.classId)
+                : students;
+            const currentAttendance =
+              attendanceDraftById[activeSession.id] ?? activeSession.attendance ?? {};
+            const currentParticipation =
+              participationDraftById[activeSession.id] ??
+              activeSession.participationScore ??
+              {};
+
+            const updateAttendance = (
+              studentId: string,
+              status: AttendanceStatus,
+            ) => {
+              const nextAttendance = { ...currentAttendance, [studentId]: status };
+              setAttendanceDraftById((prev) => ({
+                ...prev,
+                [activeSession.id]: nextAttendance,
+              }));
+              onUpdateSessionAttendance?.(
+                activeSession.id,
+                nextAttendance,
+                currentParticipation,
+              );
+            };
+
+            const updateParticipation = (studentId: string, score: number) => {
+              const nextScore = { ...currentParticipation, [studentId]: score };
+              setParticipationDraftById((prev) => ({
+                ...prev,
+                [activeSession.id]: nextScore,
+              }));
+              onUpdateSessionAttendance?.(
+                activeSession.id,
+                currentAttendance,
+                nextScore,
+              );
+            };
+
+            const handleExportAttendanceCsv = () => {
+              const statusLabel = (s?: AttendanceStatus) =>
+                s === 'present' ? 'Presente' : s === 'late' ? 'Atraso' : s === 'absent' ? 'Falta' : 'Não marcado';
+              const header = 'Sessao,Data,Aluno,Email,Presenca,Participacao';
+              const rows = sessionStudents.map((st) =>
+                [
+                  `"${activeSession.title.replace(/"/g, '""')}"`,
+                  `"${activeSession.scheduledAt}"`,
+                  `"${st.name.replace(/"/g, '""')}"`,
+                  `"${st.email}"`,
+                  `"${statusLabel(currentAttendance[st.id])}"`,
+                  currentParticipation[st.id] ?? '',
+                ].join(','),
+              );
+              const blob = new Blob([[header, ...rows].join('\n')], {
+                type: 'text/csv;charset=utf-8',
+              });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `presenca-${activeSession.roomSlug}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+
+            return (
+              <div
+                data-testid="live-session-attendance-panel"
+                className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                    <ClipboardList className="h-4 w-4 text-blue-600" />
+                    <span>Diário de Classe &amp; Lista de Presença</span>
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleExportAttendanceCsv}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Exportar Presença CSV</span>
+                  </button>
+                </div>
+
+                {sessionStudents.length === 0 ? (
+                  <p className="text-xs text-slate-500">
+                    Nenhum aluno vinculado a esta sessão.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {sessionStudents.map((st) => {
+                      const stStatus = currentAttendance[st.id];
+                      const stScore = currentParticipation[st.id] ?? 0;
+                      return (
+                        <div
+                          key={st.id}
+                          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+                        >
+                          <div>
+                            <p className="font-bold text-slate-900">{st.name}</p>
+                            <p className="text-[11px] text-slate-500">{st.email}</p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
+                              {(
+                                [
+                                  ['present', 'Presente'],
+                                  ['late', 'Atraso'],
+                                  ['absent', 'Falta'],
+                                ] as const
+                              ).map(([val, label]) => (
+                                <button
+                                  key={val}
+                                  type="button"
+                                  onClick={() => updateAttendance(st.id, val)}
+                                  className={`px-2.5 py-1 text-[11px] font-bold cursor-pointer ${
+                                    stStatus === val
+                                      ? val === 'present'
+                                        ? 'bg-emerald-600 text-white'
+                                        : val === 'late'
+                                          ? 'bg-amber-500 text-white'
+                                          : 'bg-rose-600 text-white'
+                                      : 'bg-white text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-1" aria-label={`Participação de ${st.name}`}>
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <button
+                                  key={n}
+                                  type="button"
+                                  onClick={() => updateParticipation(st.id, n)}
+                                  className={`h-6 w-6 rounded-md font-mono text-[11px] font-bold cursor-pointer ${
+                                    stScore === n
+                                      ? 'bg-indigo-600 text-white'
+                                      : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {n}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 

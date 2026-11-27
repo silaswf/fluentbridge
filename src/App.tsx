@@ -51,8 +51,9 @@ import { addMistakeEntry, markMistakeResolved } from './utils/mistakeBank';
 import { scheduleDailyStudyReminder } from './utils/notifications';
 import { isRtlLanguage, isWebPlatform } from './utils/platform';
 import { isCardDue, reviewVocabCardSM2, type SrsRating } from './utils/srsEngine';
-import { recordStudyActivity } from './utils/streakEngine';
+import { awardMeritStreakFreeze, recordStudyActivity } from './utils/streakEngine';
 import { getUnlockedVocabCards } from './utils/vocabUnlock';
+import { useTenantSchoolActions } from './hooks/useTenantSchoolActions';
 import {
   applyThemeMode,
   loadStoredThemeMode,
@@ -104,6 +105,16 @@ const CommunityHub = lazy(() =>
 );
 const LiveClassroomView = lazy(() =>
   import('./components/LiveClassroomView').then((m) => ({ default: m.LiveClassroomView })),
+);
+const ExpressReviewModal = lazy(() =>
+  import('./components/ExpressReviewModal').then((m) => ({
+    default: m.ExpressReviewModal,
+  })),
+);
+const SchoolCoordinatorPanel = lazy(() =>
+  import('./components/admin/SchoolCoordinatorPanel').then((m) => ({
+    default: m.SchoolCoordinatorPanel,
+  })),
 );
 import {
   DEFAULT_PLATFORM_STATE,
@@ -164,18 +175,16 @@ import {
   verifyPassword,
 } from './utils/storage';
 import {
-  allocateUserToSchool,
   DEFAULT_SCHOOL_ID,
   detectSchoolFromUrl,
   ensureSchoolsList,
-  generateSchoolInviteCode,
   getEffectiveSchool,
   getSchoolTeachers,
   reassignStudentTeacherInSchool,
   resolveUserSchoolId,
   scopePlatformStateForUser,
-  slugifySchoolName,
 } from './utils/tenantEngine';
+import { ParsedStudentCsvRow } from './utils/qrCodeSvg';
 
 const AVATAR_COLORS = ['#116DFF', '#0D9488', '#D97706', '#7C3AED', '#E11D48'];
 
@@ -239,6 +248,7 @@ export function App() {
   const [uiLocale, setUiLocale] = useState<UiLocale>(() => loadStoredUiLocale());
   const [ptUiBannerDismissed, setPtUiBannerDismissed] = useState(false);
   const [adminSchoolFilter, setAdminSchoolFilter] = useState<string>('ALL');
+  const [showExpressReviewModal, setShowExpressReviewModal] = useState(false);
   const [fontScale, setFontScale] = useState<FontScale>(() => loadStoredFontScale());
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const lastSupabaseAuthEmailRef = useRef<string | null>(null);
@@ -1481,83 +1491,19 @@ export function App() {
     showToast(`Aluno vinculado ao(à) Prof. ${teacherDisplay}!`);
   };
 
-  const handleReassignStudentTeacher = (
-    studentId: string,
-    newTeacherId: string | undefined,
-  ) => {
-    const res = reassignStudentTeacherInSchool(state.users, studentId, newTeacherId);
-    if (!res.ok) {
-      showToast(res.error ?? 'Erro ao trocar professor.');
-      return;
-    }
-    setState((prev) => ({
-      ...prev,
-      users: reassignStudentTeacherInSchool(prev.users, studentId, newTeacherId).users,
-    }));
-    const newTeacher = newTeacherId
-      ? state.users.find((u) => u.id === newTeacherId)
-      : undefined;
-    showToast(
-      newTeacher
-        ? `Professor alterado para ${getTeacherDisplayName(newTeacher, state.teacherName)} (escola e XP preservados).`
-        : 'Professor desvinculado mantendo a escola do aluno.',
-    );
-  };
-
-  const handleCreateSchool = (payload: {
-    name: string;
-    inviteCode?: string;
-    ownerEmail?: string;
-    primaryColor?: string;
-  }) => {
-    const cleanName = payload.name.trim();
-    if (!cleanName) return;
-    const schools = ensureSchoolsList(state.schools, state.schoolName);
-    const baseSlug = slugifySchoolName(cleanName);
-    const uniqueSlug = schools.some((s) => s.slug === baseSlug)
-      ? `${baseSlug}-${Math.floor(10 + Math.random() * 89)}`
-      : baseSlug;
-    const inviteCode =
-      payload.inviteCode?.trim().toUpperCase() ||
-      generateSchoolInviteCode(cleanName, uniqueSlug);
-    const newSchool = {
-      id: `school-${Date.now()}`,
-      slug: uniqueSlug,
-      name: cleanName,
-      inviteCode,
-      ownerEmail: payload.ownerEmail?.trim() || undefined,
-      primaryColor: payload.primaryColor || '#116DFF',
-      status: 'active' as const,
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-    setState((prev) => ({
-      ...prev,
-      schools: [...ensureSchoolsList(prev.schools, prev.schoolName), newSchool],
-    }));
-    showToast(`Escola "${cleanName}" criada · Código: ${inviteCode}`);
-  };
-
-  const handleToggleSchoolStatus = (schoolId: string) => {
-    if (schoolId === DEFAULT_SCHOOL_ID) return;
-    setState((prev) => ({
-      ...prev,
-      schools: ensureSchoolsList(prev.schools, prev.schoolName).map((s) =>
-        s.id === schoolId
-          ? { ...s, status: s.status === 'active' ? 'suspended' : 'active' }
-          : s,
-      ),
-    }));
-    showToast('Status da escola atualizado.');
-  };
-
-  const handleAllocateUserSchool = (userId: string, targetSchoolId: string) => {
-    setState((prev) => ({
-      ...prev,
-      users: allocateUserToSchool(prev.users, prev.classes, userId, targetSchoolId),
-    }));
-    const targetSchool = getEffectiveSchool(state.schools, targetSchoolId, state.schoolName);
-    showToast(`Usuário alocado para "${targetSchool.name}".`);
-  };
+  const {
+    createSchool: handleCreateSchool,
+    toggleSchoolStatus: handleToggleSchoolStatus,
+    updateSchoolBranding: handleUpdateSchoolBranding,
+    importSchoolStudentsCsv: handleImportSchoolStudentsCsv,
+    allocateUserSchool: handleAllocateUserSchool,
+    reassignStudentTeacher: handleReassignStudentTeacher,
+    toggleSchoolAdminRole: handleToggleSchoolAdminRole,
+  } = useTenantSchoolActions({
+    setState,
+    showToast,
+    actorEmail: currentUser?.email,
+  });
 
   const handleUnlinkStudentFromTeacher = (studentId: string, bySelf = false) => {
     const target = state.users.find((u) => u.id === studentId);
@@ -2098,7 +2044,10 @@ export function App() {
   const classmates = scopedState.users.filter((u) => u.role === 'student');
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F9FC] lg:flex-row">
+    <div
+      className="flex min-h-screen flex-col bg-[#F7F9FC] lg:flex-row"
+      style={{ '--school-primary': effectiveSchool.primaryColor || '#116DFF' } as React.CSSProperties}
+    >
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-xl focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-xs focus:font-bold focus:text-white"
@@ -2201,11 +2150,15 @@ export function App() {
               updateCurrentUser((u) => {
                 const prev = u.completedCheckpoints ?? [];
                 if (prev.includes(checkpointId)) return u;
-                return {
-                  ...u,
-                  xp: u.xp + 60,
-                  completedCheckpoints: [...prev, checkpointId],
-                };
+                const merit = awardMeritStreakFreeze(
+                  {
+                    ...u,
+                    xp: u.xp + 60,
+                    completedCheckpoints: [...prev, checkpointId],
+                  },
+                  'checkpoint',
+                );
+                return merit.user;
               });
               if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                 void enqueueOfflineMutation('checkpoint', {
@@ -2215,6 +2168,9 @@ export function App() {
               }
               showToast(`Ponto de verificação concluído (${scorePercent}%)! +60 XP`);
             }}
+            dueVocabCount={dueVocabCount}
+            schoolName={effectiveSchool.name}
+            onOpenExpressReview={() => setShowExpressReviewModal(true)}
             onToggleReminder={() => void handleToggleReminder()}
             onStartTopic={(topic) => setActiveTopic(topic)}
             onGoToReview={() => setActiveView('review')}
@@ -2290,6 +2246,7 @@ export function App() {
               currentUser={currentUser}
               users={scopedState.users}
               activeCourse={activeCourse}
+              schoolName={effectiveSchool.name}
               posts={scopedState.communityPosts ?? []}
               realtimeConnected={realtimeConnected}
               onCreatePost={handleCreateCommunityPost}
@@ -2311,6 +2268,17 @@ export function App() {
               sessions={scopedState.liveSessions ?? []}
               onCreateSession={handleCreateLiveSession}
               onUpdateSessionNotes={handleUpdateLiveSessionNotes}
+              onUpdateSessionAttendance={(sessionId, attendance, participationScore) => {
+                setState((prev) => ({
+                  ...prev,
+                  liveSessions: (prev.liveSessions ?? []).map((s) =>
+                    s.id === sessionId
+                      ? { ...s, attendance, participationScore }
+                      : s,
+                  ),
+                }));
+                showToast('Lista de presença salva!');
+              }}
               onGeneratePostClassTask={handleGeneratePostClassTask}
             />
           )}
@@ -2364,8 +2332,23 @@ export function App() {
           )}
 
           {activeView === 'teacher' && currentUser.role === 'teacher' && (
-            <TeacherStudio
-              state={scopedState}
+            <div className="space-y-6">
+              {currentUser.isSchoolAdmin && !isCurrentUserMaster && (
+                <SchoolCoordinatorPanel
+                  state={scopedState}
+                  currentUser={currentUser}
+                  schools={[effectiveSchool]}
+                  onReassignStudentTeacher={handleReassignStudentTeacher}
+                  onImportSchoolStudents={(schoolId: string, rows: ParsedStudentCsvRow[]) => {
+                    const csvText = rows
+                      .map((r) => `${r.name},${r.email},${r.classCode ?? ''}`)
+                      .join('\n');
+                    handleImportSchoolStudentsCsv(schoolId, csvText);
+                  }}
+                />
+              )}
+              <TeacherStudio
+                state={scopedState}
               currentUser={currentUser}
               autoSyncStatus={autoSyncStatus}
               initialTab={teacherInitialTab}
@@ -2440,6 +2423,7 @@ export function App() {
               onCreateAssignment={handleCreateAssignment}
               onDeleteAssignment={handleDeleteAssignment}
             />
+            </div>
           )}
 
           {activeView === 'admin' &&
@@ -2455,6 +2439,14 @@ export function App() {
                 onChangeAdminSchoolFilter={setAdminSchoolFilter}
                 onCreateSchool={handleCreateSchool}
                 onToggleSchoolStatus={handleToggleSchoolStatus}
+                onUpdateSchoolBranding={handleUpdateSchoolBranding}
+                onImportSchoolStudents={(schoolId: string, rows: ParsedStudentCsvRow[]) => {
+                  const csvText = rows
+                    .map((r) => `${r.name},${r.email},${r.classCode ?? ''}`)
+                    .join('\n');
+                  handleImportSchoolStudentsCsv(schoolId, csvText);
+                }}
+                onToggleSchoolAdminRole={handleToggleSchoolAdminRole}
                 onAllocateUserSchool={handleAllocateUserSchool}
                 currentUser={currentUser}
                 totalBuiltinTopicsCount={2550}
@@ -2515,6 +2507,22 @@ export function App() {
             languageCode={activeLanguage}
             onClose={() => setShowPlacementModal(false)}
             onCompletePlacement={(lvl) => handleCompletePlacement(lvl)}
+          />
+        )}
+
+        {showExpressReviewModal && (
+          <ExpressReviewModal
+            languageCode={activeLanguage}
+            vocab={unlockedCourseVocab}
+            mistakes={currentUser.mistakeBank ?? []}
+            onRateCard={handleRateVocab}
+            onResolveMistake={handleResolveMistake}
+            onCompleteExpressReview={(xp) => {
+              updateCurrentUser((u) => ({ ...u, xp: u.xp + xp }));
+              setShowExpressReviewModal(false);
+              showToast(`Revisão Express concluída! +${xp} XP`);
+            }}
+            onClose={() => setShowExpressReviewModal(false)}
           />
         )}
 

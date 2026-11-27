@@ -1,8 +1,3 @@
-/**
- * @file src/components/LearningPath.tsx
- * @description Trilha Modular CEFR A1–C1: hero compacto, filtros de nível, módulos colapsáveis, missões diárias, alertas de retenção SM-2, radar e checkpoints.
- * @exports LearningPath
- */
 import { useEffect, useState } from 'react';
 import {
   Activity,
@@ -84,6 +79,11 @@ import {
 import { tUi, type UiLocale } from '../utils/i18n';
 import { ModuleAccordionHeader } from './trail/ModuleAccordionHeader';
 import {
+  TrailQuickActionsBar,
+  type TrailTrackFilter,
+} from './path/TrailQuickActionsBar';
+import {
+  downloadCefrLevelOfflinePack,
   downloadNextUnitsOffline,
   getCachedOfflineUnits,
 } from '../utils/offlineUnitPack';
@@ -114,6 +114,9 @@ interface LearningPathProps {
   onSaveLearningGoal?: (goal: LearningGoalType, targetDate?: string) => void;
   onCompleteCheckpoint?: (checkpointId: string, scorePercent: number) => void;
   activeDialect?: string;
+  dueVocabCount?: number;
+  schoolName?: string;
+  onOpenExpressReview?: () => void;
 }
 
 const TOPIC_ICONS = {
@@ -221,7 +224,11 @@ export function LearningPath({
   onSaveLearningGoal,
   onCompleteCheckpoint,
   activeDialect = 'en-US',
+  dueVocabCount = 0,
+  schoolName,
+  onOpenExpressReview,
 }: LearningPathProps) {
+  const [selectedTrack, setSelectedTrack] = useState<TrailTrackFilter>('ALL');
   const [confirmUnlinkOpen, setConfirmUnlinkOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [activeCheckpoint, setActiveCheckpoint] = useState<TrailCheckpointTarget | null>(
@@ -289,10 +296,13 @@ export function LearningPath({
   const nextTopic =
     topics.find((t) => !completedTopicIds.includes(t.id)) ?? topics[0];
 
-  const filteredTopics =
-    selectedLevel === 'ALL'
-      ? topics
-      : topics.filter((t) => t.level === selectedLevel);
+  const filteredTopics = topics.filter((t) => {
+    if (selectedLevel !== 'ALL' && t.level !== selectedLevel) return false;
+    if (selectedTrack !== 'ALL' && !(t.trackTags ?? []).includes(selectedTrack)) {
+      return false;
+    }
+    return true;
+  });
 
   const moduleGroups: Array<{
     key: string;
@@ -382,12 +392,12 @@ export function LearningPath({
                 (activeCourse.code === 'en'
                   ? currentUser.recommendedLevel
                   : undefined)) && (
-                <span className="rounded-full bg-amber-300 px-2 py-0.5 font-mono text-[10px] font-extrabold text-amber-950">
-                  Nível indicado ({activeCourse.namePt}):{' '}
-                  {currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
-                    currentUser.recommendedLevel}
-                </span>
-              )}
+                  <span className="rounded-full bg-amber-300 px-2 py-0.5 font-mono text-[10px] font-extrabold text-amber-950">
+                    Nível indicado ({activeCourse.namePt}):{' '}
+                    {currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
+                      currentUser.recommendedLevel}
+                  </span>
+                )}
             </div>
 
             <h1 className="font-display text-lg font-extrabold tracking-tight sm:text-xl">
@@ -428,6 +438,32 @@ export function LearningPath({
                 >
                   <Target className="h-3.5 w-3.5" />
                   <span>{tUi(uiLocale, 'trail.setGoal')}</span>
+                </button>
+              )}
+
+              {selectedLevel !== 'ALL' && (
+                <button
+                  type="button"
+                  disabled={downloadingOffline}
+                  onClick={() => {
+                    setDownloadingOffline(true);
+                    void downloadCefrLevelOfflinePack(
+                      topics,
+                      currentUser.vocab,
+                      selectedLevel,
+                      activeDialect,
+                    )
+                      .then((res) => {
+                        setOfflineIds(getCachedOfflineUnits());
+                        setOfflineStatus(
+                          `Nível ${selectedLevel} baixado offline (${res.cachedTopicIds.length} unid. · ${res.audioCount} áudios)!`,
+                        );
+                      })
+                      .finally(() => setDownloadingOffline(false));
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/12 px-3 py-2 text-xs font-bold text-white backdrop-blur-xs transition hover:bg-white/20 disabled:opacity-60 cursor-pointer"
+                >
+                  <span>Baixar Nível {selectedLevel} Offline</span>
                 </button>
               )}
             </div>
@@ -518,6 +554,16 @@ export function LearningPath({
         )}
 
       {/* Weekly Study Plan Card (Goal-Based Onboarding) */}
+      {onOpenExpressReview && (
+        <TrailQuickActionsBar
+          dueCount={dueVocabCount}
+          streakFreezes={currentUser.streakFreezes ?? 1}
+          selectedTrack={selectedTrack}
+          schoolName={schoolName}
+          onSelectTrack={setSelectedTrack}
+          onOpenExpressReview={onOpenExpressReview}
+        />
+      )}
       {currentUser.learningGoal && (() => {
         const plan = generateWeeklyStudyPlan(
           currentUser.learningGoal,
@@ -526,7 +572,7 @@ export function LearningPath({
           completedTopicIds,
           currentUser.dailyGoalMinutes,
           currentUser.recommendedLevelByLanguage?.[activeCourse.code] ??
-            currentUser.recommendedLevel,
+          currentUser.recommendedLevel,
         );
         return (
           <div
@@ -817,21 +863,21 @@ export function LearningPath({
                             : undefined;
                           const hasPartialProgress = Boolean(
                             savedProgress &&
-                              (savedProgress.stepIdx > 0 ||
-                                savedProgress.completedSteps.length > 0),
+                            (savedProgress.stepIdx > 0 ||
+                              savedProgress.completedSteps.length > 0),
                           );
                           const partialPct = savedProgress
                             ? Math.min(
-                                95,
-                                Math.max(
-                                  10,
-                                  Math.round(
-                                    ((savedProgress.stepIdx + 1) /
-                                      Math.max(1, savedProgress.totalSteps)) *
-                                      100,
-                                  ),
+                              95,
+                              Math.max(
+                                10,
+                                Math.round(
+                                  ((savedProgress.stepIdx + 1) /
+                                    Math.max(1, savedProgress.totalSteps)) *
+                                  100,
                                 ),
-                              )
+                              ),
+                            )
                             : 0;
 
                           return (
@@ -843,192 +889,190 @@ export function LearningPath({
                                 />
                               )}
 
-                    <div className="relative z-10 mt-5 hidden sm:block">
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 shadow-xs transition ${isCompleted
-                          ? 'border-emerald-500 bg-emerald-500 text-white'
-                          : isNext
-                            ? 'border-blue-600 bg-blue-600 text-white ring-4 ring-blue-100'
-                            : 'border-slate-200 bg-white text-slate-700'
-                          }`}
-                      >
-                        {isCompleted ? (
-                          <CheckCircle2 className="h-6 w-6" />
-                        ) : (
-                          <Icon className="h-5 w-5" />
-                        )}
-                      </div>
-                    </div>
+                              <div className="relative z-10 mt-5 hidden sm:block">
+                                <div
+                                  className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 shadow-xs transition ${isCompleted
+                                    ? 'border-emerald-500 bg-emerald-500 text-white'
+                                    : isNext
+                                      ? 'border-blue-600 bg-blue-600 text-white ring-4 ring-blue-100'
+                                      : 'border-slate-200 bg-white text-slate-700'
+                                    }`}
+                                >
+                                  {isCompleted ? (
+                                    <CheckCircle2 className="h-6 w-6" />
+                                  ) : (
+                                    <Icon className="h-5 w-5" />
+                                  )}
+                                </div>
+                              </div>
 
-                    <article
-                      className={`flex-1 rounded-2xl border bg-white p-5 transition ${isNext
-                        ? 'border-blue-300 shadow-sm ring-1 ring-blue-100'
-                        : 'border-slate-200/90 shadow-2xs hover:border-slate-300'
-                        }`}
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-bold ${LEVEL_COLORS[topic.level]}`}
-                            >
-                              {topic.level}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
-                              <Clock className="h-3.5 w-3.5" />
-                              {topic.estimatedMinutes} min
-                            </span>
-                            {offlineIds.includes(topic.id) && (
-                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                                Offline
-                              </span>
-                            )}
-                            {isImmersionLevel(topic.level) && (
-                              <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200">
-                                🌐 {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).badgeLabel}
-                              </span>
-                            )}
-                            {topic.isCustom && (
-                              <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
-                                Criado pelo Professor
-                              </span>
-                            )}
-                            {isCompleted && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Concluído
-                              </span>
-                            )}
-                          </div>
-
-                          <h3 className="font-display text-lg font-bold text-slate-900">
-                            {isImmersionLevel(topic.level) ? topic.titleEn : topic.titlePt}
-                          </h3>
-                          <p className="text-xs font-medium text-slate-400">
-                            {isImmersionLevel(topic.level) ? topic.titlePt : topic.titleEn}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2">
-                          {onPracticeTopicWithAI && (
-                            <button
-                              type="button"
-                              onClick={() => onPracticeTopicWithAI(topic)}
-                              className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 cursor-pointer"
-                            >
-                              <Sparkles className="h-3.5 w-3.5" />
-                              <span>{getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).practiceWithAiBtn}</span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => onStartTopic(topic)}
-                            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${isCompleted
-                              ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                              : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
-                              }`}
-                          >
-                            {isCompleted ? (
-                              <>
-                                <RotateCcw className="h-3.5 w-3.5" />
-                                <span>Refazer</span>
-                              </>
-                            ) : hasPartialProgress && savedProgress ? (
-                              <>
-                                <Play className="h-3.5 w-3.5 fill-white" />
-                                <span>
-                                  Continuar ({savedProgress.stepIdx + 1}/
-                                  {savedProgress.totalSteps})
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <Play className="h-3.5 w-3.5 fill-white" />
-                                <span>Começar</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      <p className="mt-2 text-sm text-slate-600">{topic.subtitle}</p>
-
-                      {hasPartialProgress && savedProgress && (
-                        <div className="mt-3 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-blue-800">
-                            <span>
-                              Em andamento · Etapa {savedProgress.stepIdx + 1} de{' '}
-                              {savedProgress.totalSteps}
-                            </span>
-                            <span className="font-mono">{partialPct}%</span>
-                          </div>
-                          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
-                            <div
-                              className="h-full rounded-full bg-blue-600 transition-all duration-300"
-                              style={{ width: `${partialPct}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {topic.topicTipsSummary.length > 0 && (
-                        <div className="topic-tips-box mt-3.5 rounded-xl border p-3">
-                          <p className="topic-tips-title flex items-center gap-1.5 text-xs font-bold">
-                            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-                            <span>
-                              {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).tipsInTopicHeading}:
-                            </span>
-                          </p>
-                          <ul className="mt-1.5 space-y-1">
-                            {topic.topicTipsSummary.map((tipItem, tipIdx) => (
-                              <li
-                                key={tipIdx}
-                                className="topic-tips-item flex items-start gap-2 text-xs leading-relaxed"
+                              <article
+                                className={`flex-1 rounded-2xl border bg-white p-5 transition ${isNext
+                                  ? 'border-blue-300 shadow-sm ring-1 ring-blue-100'
+                                  : 'border-slate-200/90 shadow-2xs hover:border-slate-300'
+                                  }`}
                               >
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                                <span>{tipItem}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div className="space-y-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span
+                                        className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-bold ${LEVEL_COLORS[topic.level]}`}
+                                      >
+                                        {topic.level}
+                                      </span>
+                                      <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
+                                        <Clock className="h-3.5 w-3.5" />
+                                        {topic.estimatedMinutes} min
+                                      </span>
+                                      {offlineIds.includes(topic.id) && (
+                                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                                          Offline
+                                        </span>
+                                      )}
+                                      {isImmersionLevel(topic.level) && (
+                                        <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200">
+                                          🌐 {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).badgeLabel}
+                                        </span>
+                                      )}
+                                      {topic.isCustom && (
+                                        <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
+                                          Criado pelo Professor
+                                        </span>
+                                      )}
+                                      {isCompleted && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                                          <CheckCircle2 className="h-3 w-3" />
+                                          Concluído
+                                        </span>
+                                      )}
+                                    </div>
 
-                      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-                        <SkillBadge kind="vocab_intro" compact />
-                        <SkillBadge kind="listening" compact />
-                        <SkillBadge kind="reading" compact />
-                        <SkillBadge kind="speaking" compact />
-                        <SkillBadge kind="writing" compact />
-                        {topic.recycledLinks && topic.recycledLinks.length > 0 && (
-                          <span
-                            className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200"
-                            title={`Revisão espiral de: ${topic.recycledLinks.map((l) => l.titlePt).join(', ')}`}
-                          >
-                            <RefreshCw className="h-2.5 w-2.5" />
-                            Revisão Espiral ({topic.recycledLinks.length})
-                          </span>
-                        )}
-                      </div>
-                    </article>
+                                    <h3 className="font-display text-lg font-bold text-slate-900">
+                                      {isImmersionLevel(topic.level) ? topic.titleEn : topic.titlePt}
+                                    </h3>
+                                    <p className="text-xs font-medium text-slate-400">
+                                      {isImmersionLevel(topic.level) ? topic.titlePt : topic.titleEn}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {onPracticeTopicWithAI && (
+                                      <button
+                                        type="button"
+                                        onClick={() => onPracticeTopicWithAI(topic)}
+                                        className="inline-flex items-center gap-1 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 cursor-pointer"
+                                      >
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        <span>{getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).practiceWithAiBtn}</span>
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => onStartTopic(topic)}
+                                      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${isCompleted
+                                        ? 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                        : 'bg-blue-600 text-white shadow-xs hover:bg-blue-700'
+                                        }`}
+                                    >
+                                      {isCompleted ? (
+                                        <>
+                                          <RotateCcw className="h-3.5 w-3.5" />
+                                          <span>Refazer</span>
+                                        </>
+                                      ) : hasPartialProgress && savedProgress ? (
+                                        <>
+                                          <Play className="h-3.5 w-3.5 fill-white" />
+                                          <span>
+                                            Continuar ({savedProgress.stepIdx + 1}/
+                                            {savedProgress.totalSteps})
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Play className="h-3.5 w-3.5 fill-white" />
+                                          <span>Começar</span>
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <p className="mt-2 text-sm text-slate-600">{topic.subtitle}</p>
+
+                                {hasPartialProgress && savedProgress && (
+                                  <div className="mt-3 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2">
+                                    <div className="flex items-center justify-between text-[11px] font-bold text-blue-800">
+                                      <span>
+                                        Em andamento · Etapa {savedProgress.stepIdx + 1} de{' '}
+                                        {savedProgress.totalSteps}
+                                      </span>
+                                      <span className="font-mono">{partialPct}%</span>
+                                    </div>
+                                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
+                                      <div
+                                        className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                                        style={{ width: `${partialPct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {topic.topicTipsSummary.length > 0 && (
+                                  <div className="topic-tips-box mt-3.5 rounded-xl border p-3">
+                                    <p className="topic-tips-title flex items-center gap-1.5 text-xs font-bold">
+                                      <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                                      <span>
+                                        {getImmersionStrings(topic.languageCode ?? activeCourse.code, topic.level).tipsInTopicHeading}:
+                                      </span>
+                                    </p>
+                                    <ul className="mt-1.5 space-y-1">
+                                      {topic.topicTipsSummary.map((tipItem, tipIdx) => (
+                                        <li
+                                          key={tipIdx}
+                                          className="topic-tips-item flex items-start gap-2 text-xs leading-relaxed"
+                                        >
+                                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                                          <span>{tipItem}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+                                  <SkillBadge kind="vocab_intro" compact />
+                                  <SkillBadge kind="listening" compact />
+                                  <SkillBadge kind="reading" compact />
+                                  <SkillBadge kind="speaking" compact />
+                                  <SkillBadge kind="writing" compact />
+                                  {topic.recycledLinks && topic.recycledLinks.length > 0 && (
+                                    <span
+                                      className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200"
+                                      title={`Revisão espiral de: ${topic.recycledLinks.map((l) => l.titlePt).join(', ')}`}
+                                    >
+                                      <RefreshCw className="h-2.5 w-2.5" />
+                                      Revisão Espiral ({topic.recycledLinks.length})
+                                    </span>
+                                  )}
+                                </div>
+                              </article>
                             </div>
                           );
                         })}
 
                         <div
                           data-testid="trail-checkpoint-card"
-                          className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 p-4 transition ${
-                            checkpointDone
-                              ? 'border-emerald-300 bg-emerald-50/70'
-                              : 'border-amber-300 bg-amber-50/70'
-                          }`}
+                          className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 p-4 transition ${checkpointDone
+                            ? 'border-emerald-300 bg-emerald-50/70'
+                            : 'border-amber-300 bg-amber-50/70'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             <span
-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-                                checkpointDone
-                                  ? 'bg-emerald-500 text-white'
-                                  : 'bg-amber-400 text-slate-950'
-                              }`}
+                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${checkpointDone
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-amber-400 text-slate-950'
+                                }`}
                             >
                               {checkpointDone ? (
                                 <CheckCircle2 className="h-5 w-5" />
@@ -1065,11 +1109,10 @@ export function LearningPath({
                                     : undefined,
                               })
                             }
-                            className={`rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${
-                              checkpointDone
-                                ? 'border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
-                                : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
-                            }`}
+                            className={`rounded-xl px-4 py-2 text-xs font-extrabold transition cursor-pointer ${checkpointDone
+                              ? 'border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
+                              : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                              }`}
                           >
                             {checkpointDone ? 'Revisar Checagem' : 'Abrir Checagem (+60 XP)'}
                           </button>

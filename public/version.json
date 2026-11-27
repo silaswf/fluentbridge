@@ -1,8 +1,8 @@
 {
-  "version": "10.0.0",
+  "version": "11.0.0",
   "publishedAt": "2026-11-27",
-  "releaseNotes": "FluentBridge Academy v10.0.0 — Multi-tenancy escolar com isolamento estrito (RLS school_id), coordenação global do Master Admin, troca fácil de professor dentro da mesma escola, nova Auditoria 360° e Roadmap v10.1–v12.0",
-  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v10.0.0/FluentBridge-Setup-10.0.0.exe",
-  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v10.0.0/FluentBridge-v10.0.0.apk",
-  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v10.0.0"
+  "releaseNotes": "FluentBridge Academy v11.0.0 — Eixos A-G completos: Imagens estilo Duolingo (3 ondas + R2), Replay comparativo & Mapa de calor fonético, Revisão Express 5 min, B2B QR/CSV/Coordenador/Presença e Delta Sync + Pacote Offline CEFR",
+  "windowsUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.0.0/FluentBridge-Setup-11.0.0.exe",
+  "androidUrl": "https://github.com/silaswf/fluentbridge-releases/releases/download/v11.0.0/FluentBridge-v11.0.0.apk",
+  "releasePageUrl": "https://github.com/silaswf/fluentbridge-releases/releases/tag/v11.0.0"
 }

@@ -6,6 +6,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FillBlankStepView } from './lesson/FillBlankStepView';
 import { SpeakingStepView } from './lesson/SpeakingStepView';
+import { DictationStepView } from './lesson/DictationStepView';
+import { ReadingStepView } from './lesson/ReadingStepView';
+import {
+  WritingBuilderStepView,
+  WritingFreeStepView,
+} from './lesson/WritingStepView';
+import { PictureChoiceStepView } from './steps/PictureChoiceStepView';
 import {
   AlertCircle,
   ArrowRight,
@@ -17,7 +24,6 @@ import {
   Heart,
   Infinity as InfinityIcon,
   Lightbulb,
-  RotateCcw,
   Settings,
   Sparkles,
   Volume2,
@@ -58,9 +64,7 @@ import { Phase8StepsView } from './steps/Phase8StepsView';
 import { ScriptPhonicsStepView } from './steps/ScriptPhonicsStepView';
 import { VocabIntroStep } from './steps/VocabIntroStep';
 import { ListeningStepView } from './steps/ListeningStepView';
-import { ReadingStepView } from './steps/ReadingStepView';
 import { MatchingStepView } from './steps/MatchingStepView';
-import { WritingFreeStepView } from './steps/WritingFreeStepView';
 import {
   computeAdaptiveProfile,
   loadAdaptiveHistory,
@@ -934,6 +938,7 @@ export function LessonPlayer({
     if (currentStep.type === 'script_phonics') return currentStep.introPt;
     if (currentStep.type === 'tip') return currentStep.tip.warning ?? currentStep.tip.summary;
     if (currentStep.type === 'speaking') return currentStep.focusTip;
+    if (currentStep.type === 'picture_choice') return currentStep.promptPt;
     return currentStep.hintTip;
   };
 
@@ -1801,6 +1806,22 @@ export function LessonPlayer({
             />
           )}
 
+          {/* NEW STEP: PICTURE CHOICE (Duolingo Visual) */}
+          {currentStep.type === 'picture_choice' && (
+            <PictureChoiceStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              onComplete={(ok) => {
+                setCheckedStatus(ok ? 'correct' : 'incorrect');
+                if (ok) {
+                  registerCorrect(20);
+                } else {
+                  registerMistake();
+                }
+              }}
+            />
+          )}
+
           {/* NEW STEP: FILL IN THE BLANK */}
           {currentStep.type === 'fill_blank' && (
             <FillBlankStepView
@@ -1842,70 +1863,13 @@ export function LessonPlayer({
 
           {/* WRITING BUILDER */}
           {currentStep.type === 'writing_builder' && (
-            <div className="animate-fade-up rounded-3xl border border-amber-200/80 bg-white p-6 shadow-xs sm:p-7">
-              <h2 className="font-display text-lg font-bold text-slate-900">
-                {currentStep.promptPt}
-              </h2>
-
-              <div className="mt-4 min-h-[76px] rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-3.5">
-                {pickedIndices.length === 0 ? (
-                  <p className="py-2 text-center text-xs font-medium text-slate-400">
-                    Clique nas palavras abaixo na ordem correta para montar a frase
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {pickedIndices.map((bankIdx, orderPos) => (
-                      <button
-                        key={`${bankIdx}-${orderPos}`}
-                        type="button"
-                        disabled={checkedStatus !== 'idle'}
-                        onClick={() =>
-                          setPickedIndices((prev) =>
-                            prev.filter((_, idx) => idx !== orderPos),
-                          )
-                        }
-                        className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-bold text-blue-700 shadow-2xs transition hover:bg-rose-50 hover:text-rose-700 cursor-pointer disabled:cursor-default"
-                      >
-                        {builderBank[bankIdx]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                {builderBank.map((word, bankIdx) => {
-                  const used = pickedIndices.includes(bankIdx);
-                  return (
-                    <button
-                      key={bankIdx}
-                      type="button"
-                      disabled={used || checkedStatus !== 'idle'}
-                      onClick={() => setPickedIndices((prev) => [...prev, bankIdx])}
-                      className={`rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${used
-                        ? 'border-slate-200 bg-slate-100 text-transparent select-none'
-                        : 'border-slate-200 bg-white text-slate-800 shadow-2xs hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
-                        }`}
-                    >
-                      {word}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {checkedStatus === 'idle' && pickedIndices.length > 0 && (
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setPickedIndices([])}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Limpar ordem</span>
-                  </button>
-                </div>
-              )}
-            </div>
+            <WritingBuilderStepView
+              step={currentStep}
+              builderBank={builderBank}
+              pickedIndices={pickedIndices}
+              setPickedIndices={setPickedIndices}
+              checkedStatus={checkedStatus}
+            />
           )}
 
           {/* WRITING FREE */}
@@ -1944,9 +1908,18 @@ export function LessonPlayer({
             />
           )}
 
-          {/* PHASE 8: DICTATION, MINIMAL PAIRS & MULTI-VOICE STORY */}
-          {(currentStep.type === 'dictation' ||
-            currentStep.type === 'minimal_pairs' ||
+          {/* PHASE 8 & MODULAR DICTATION */}
+          {currentStep.type === 'dictation' && (
+            <DictationStepView
+              step={currentStep}
+              languageCode={topic.languageCode}
+              level={topic.level}
+              checkedStatus={checkedStatus}
+              dictationText={dictationText}
+              onChangeDictationText={setDictationText}
+            />
+          )}
+          {(currentStep.type === 'minimal_pairs' ||
             currentStep.type === 'story') && (
               <>
                 <Phase8StepsView

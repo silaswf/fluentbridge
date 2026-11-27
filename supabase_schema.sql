@@ -919,3 +919,49 @@ drop policy if exists "live_sessions_school_read" on public.live_sessions;
 create policy "live_sessions_school_read" on public.live_sessions
   for select to authenticated
   using (public.is_master_admin() or school_id = public.current_user_school_id());
+
+-- ============================================================================
+-- SEÇÃO 14 (v11.0.0): WHITE-LABEL ESCOLAR, DIÁRIO DE CLASSE & AUDITORIA ADMIN
+-- ============================================================================
+
+alter table public.schools
+  add column if not exists logo_url text;
+
+alter table public.live_sessions
+  add column if not exists attendance jsonb not null default '{}'::jsonb;
+
+alter table public.live_sessions
+  add column if not exists participation_score jsonb not null default '{}'::jsonb;
+
+create table if not exists public.admin_audit_logs (
+  id text primary key,
+  actor_email text not null,
+  action text not null,
+  target_label text not null,
+  school_id text references public.schools(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_audit_logs enable row level security;
+
+drop policy if exists "admin_audit_logs_read" on public.admin_audit_logs;
+create policy "admin_audit_logs_read" on public.admin_audit_logs
+  for select to authenticated
+  using (
+    public.is_master_admin()
+    or (
+      exists (select 1 from public.profiles where id = auth.uid() and is_school_admin = true)
+      and school_id = public.current_user_school_id()
+    )
+  );
+
+drop policy if exists "admin_audit_logs_insert" on public.admin_audit_logs;
+create policy "admin_audit_logs_insert" on public.admin_audit_logs
+  for insert to authenticated
+  with check (
+    public.is_master_admin()
+    or (
+      exists (select 1 from public.profiles where id = auth.uid() and is_school_admin = true)
+      and school_id = public.current_user_school_id()
+    )
+  );

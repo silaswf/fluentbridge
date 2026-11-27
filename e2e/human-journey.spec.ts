@@ -182,6 +182,14 @@ test.describe('Human Simulation Journeys (v8.2.0)', () => {
         }
       }
 
+      // 6b) Picture Choice (Duolingo visual 2x2)
+      const picStep = page.getByTestId('picture-choice-step');
+      if (await picStep.isVisible().catch(() => false)) {
+        await picStep.locator('.grid button').first().click();
+        await page.locator('.fixed.inset-0.z-50 footer button').last().click();
+        continue;
+      }
+
       // 7) Writing Builder: pick word bank buttons & verify
       const builderHint = page.getByText(/Clique nas palavras abaixo na ordem correta/i);
       if (await builderHint.isVisible().catch(() => false)) {

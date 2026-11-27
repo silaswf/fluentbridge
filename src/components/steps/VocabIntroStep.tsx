@@ -6,7 +6,9 @@
 import { Check, RefreshCw, Sparkles } from 'lucide-react';
 import type { LanguageCode, VocabCard } from '../../types/learning';
 import { extractScriptCharsFromWord } from '../../data/scriptTrainerData';
+import { resolveVisualConceptId } from '../../data/visualConcepts';
 import { toJapaneseKana, type JapaneseScriptMode } from '../../utils/japaneseKana';
+import { ConceptIllustration } from '../ConceptIllustration';
 import { DualAudioButtons } from '../DualAudioButtons';
 import { ScriptStrokeTrainer } from '../ScriptStrokeTrainer';
 
@@ -59,6 +61,9 @@ export function VocabIntroStep({
         {cards.map((card) => {
           const isStudied = studiedVocabIds.includes(card.id);
           const lang = card.languageCode ?? topicLanguageCode ?? 'en';
+          const conceptId =
+            card.visualConceptId ||
+            resolveVisualConceptId(card.word, card.translation, card.category);
           return (
             <div
               key={card.id}
@@ -69,8 +74,15 @@ export function VocabIntroStep({
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-start gap-3">
+                  <ConceptIllustration
+                    conceptId={conceptId}
+                    imageUrl={card.imageUrl}
+                    alt={card.word}
+                    size="sm"
+                  />
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
                     <span className="font-display text-lg font-extrabold text-slate-900">
                       {lang === 'ja' && jaScriptMode === 'kana'
                         ? toJapaneseKana(card.word)
@@ -101,6 +113,7 @@ export function VocabIntroStep({
                   <p className="mt-1 text-sm font-bold text-emerald-700">
                     {card.translation}
                   </p>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">

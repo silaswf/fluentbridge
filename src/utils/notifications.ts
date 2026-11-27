@@ -1,7 +1,7 @@
 /**
  * @file src/utils/notifications.ts
  * @description Utilitário notifications da camada de lógica do FluentBridge.
- * @exports scheduleDailyStudyReminder
+ * @exports scheduleDailyStudyReminder, getWebNotificationStatus, sendTestStreakNotification
  */
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -85,4 +85,34 @@ export async function scheduleDailyStudyReminder(
     ok: true,
     message: `Preferência de lembrete salva (${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}).`,
   };
+}
+
+export type WebNotificationStatus = 'granted' | 'denied' | 'default' | 'unsupported';
+
+export function getWebNotificationStatus(): WebNotificationStatus {
+  if (typeof window === 'undefined' || !('Notification' in window) || !window.Notification) {
+    return 'unsupported';
+  }
+  const perm = window.Notification.permission;
+  if (perm === 'granted' || perm === 'denied' || perm === 'default') {
+    return perm;
+  }
+  return 'unsupported';
+}
+
+export function sendTestStreakNotification(schoolName?: string): boolean {
+  if (getWebNotificationStatus() !== 'granted') {
+    return false;
+  }
+  try {
+    const title = schoolName
+      ? `FluentBridge · ${schoolName} 🔥`
+      : 'FluentBridge · Lembrete de Ofensiva 🔥';
+    new window.Notification(title, {
+      body: 'Sua ofensiva diária está ativa! Faça uma Revisão Express de 5 minutos para manter o ritmo.',
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }

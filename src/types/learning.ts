@@ -272,6 +272,23 @@ export interface ScriptPhonicsStep {
   };
 }
 
+export interface PictureChoiceStep {
+  id: string;
+  type: 'picture_choice';
+  stageLabelPt?: string;
+  promptPt: string;
+  audioText: string;
+  targetWord: string;
+  options: Array<{
+    conceptId: string;
+    label: string;
+    translationPt: string;
+    imageUrl?: string;
+  }>;
+  correctIndex: number;
+  explanationPt: string;
+}
+
 export type LessonStep =
   | VocabIntroStep
   | ScriptPhonicsStep
@@ -285,7 +302,10 @@ export type LessonStep =
   | FillBlankStep
   | DictationStep
   | MinimalPairsStep
-  | StoryStep;
+  | StoryStep
+  | PictureChoiceStep;
+
+export type TrackTag = 'travel' | 'business' | 'exam' | 'career' | 'daily';
 
 export interface Topic {
   id: string;
@@ -299,6 +319,9 @@ export interface Topic {
   icon: string;
   color: string;
   isCustom?: boolean;
+  coverConceptId?: string;
+  coverImageUrl?: string;
+  trackTags?: TrackTag[];
   moduleIndex?: number;
   moduleTitlePt?: string;
   conceptKey?: string;
@@ -327,6 +350,8 @@ export interface VocabCard {
   lapses?: number;
   isRecycled?: boolean;
   recycledFromTitle?: string;
+  visualConceptId?: string;
+  imageUrl?: string;
 }
 
 export interface PronunciationRubric {
@@ -489,6 +514,7 @@ export interface CommunityPost {
   acceptedReplyId?: string;
   replies: CommunityReply[];
   pinned?: boolean;
+  studyGroup?: string;
   createdAt: string;
 }
 
@@ -509,6 +535,8 @@ export interface LiveSessionRecord {
   status: 'scheduled' | 'live' | 'completed' | 'cancelled';
   notes: string;
   generatedAssignmentId?: string;
+  attendance?: Record<string, 'present' | 'absent' | 'late'>;
+  participationScore?: Record<string, number>;
   createdAt: string;
 }
 
@@ -553,7 +581,17 @@ export interface SchoolTenant {
   inviteCode: string;
   ownerEmail?: string;
   primaryColor?: string;
+  logoUrl?: string;
   status: 'active' | 'suspended';
+  createdAt: string;
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  actorEmail: string;
+  action: string;
+  targetLabel: string;
+  schoolId?: string;
   createdAt: string;
 }
 
@@ -633,6 +671,7 @@ export interface PlatformState {
   liveSessions?: LiveSessionRecord[];
   cloudConfig: CloudConfig;
   billingConfig?: BillingConfig;
+  auditLogs?: AdminAuditLogEntry[];
   deletedUserIds?: string[];
   deletedClassIds?: string[];
   deletedTopicIds?: string[];

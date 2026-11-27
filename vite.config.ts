@@ -1,6 +1,7 @@
 /**
  * @file vite.config.ts
  * @description Configuração do bundler Vite, plugin PWA (Workbox) e fatiamento manualChunks por idioma para manter todos os chunks abaixo de 500 kB.
+ * @exports default
  */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -228,6 +229,8 @@ export default defineConfig(({ command }) => ({
           if (id.includes('/data/grammarGuide')) {
             return 'grammar-guide';
           }
+          if (id.includes('/utils/japaneseKana')) return 'japanese-kana';
+          if (id.includes('/data/visualConcepts')) return 'visual-concepts';
           return undefined;
         },
       },

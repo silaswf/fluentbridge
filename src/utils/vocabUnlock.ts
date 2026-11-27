@@ -63,5 +63,7 @@ export function getStepStageMeta(step: LessonStep): {
     case 'writing_builder':
     case 'writing_free':
       return { key: 'writing', label: 'Writing' };
+    case 'picture_choice':
+      return { key: 'practice', label: step.stageLabelPt ?? 'Visual' };
   }
 }
