@@ -28,7 +28,7 @@ create table if not exists public.profiles (
   full_name text not null,
   email text not null,
   role text not null check (role in ('teacher', 'student')) default 'student',
-  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de','ru','ja','zh')),
+  active_language text not null default 'en' check (active_language in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt')),
   dialect_by_language jsonb not null default '{"en":"en-US","es":"es-ES","fr":"fr-FR","it":"it-IT","de":"de-DE","ru":"ru-RU","ja":"ja-JP","zh":"zh-CN"}'::jsonb,
   assigned_teacher_id uuid references public.profiles(id) on delete set null,
   enrollment_type text not null default 'independent' check (enrollment_type in ('class','vip','independent')),
@@ -650,10 +650,70 @@ begin
   end if;
   delete from public.submissions where student_id = uid;
   delete from public.student_progress where user_id = uid;
-  delete from public.certificates where user_id = uid;
+  delete from public.certificates where student_id = uid;
   delete from public.user_quotas where user_id = uid;
   delete from public.profiles where id = uid;
 end;
 $$;
 revoke all on function public.delete_my_account_data() from public;
 grant execute on function public.delete_my_account_data() to authenticated;
+
+-- ============================================================================
+-- SEÇÃO 11 (v9.2.0): PARIDADE 17 IDIOMAS (TR, HE, NB, DA, PT PLE) & STORAGE
+-- ============================================================================
+-- Atualiza todas as constraints CHECK de idioma para os 17 cursos ativos:
+-- en, es, fr, it, de, ru, ja, zh, ar, nl, af, sv, tr, he, nb, da, pt
+
+alter table public.profiles drop constraint if exists profiles_active_language_check;
+alter table public.profiles
+  add constraint profiles_active_language_check
+  check (active_language in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+alter table public.assignments drop constraint if exists assignments_language_code_check;
+alter table public.assignments
+  add constraint assignments_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+alter table public.exam_attempts drop constraint if exists exam_attempts_language_code_check;
+alter table public.exam_attempts
+  add constraint exam_attempts_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+alter table public.community_posts drop constraint if exists community_posts_language_code_check;
+alter table public.community_posts
+  add constraint community_posts_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+alter table public.live_sessions drop constraint if exists live_sessions_language_code_check;
+alter table public.live_sessions
+  add constraint live_sessions_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+alter table public.vocab_progress drop constraint if exists vocab_progress_language_code_check;
+alter table public.vocab_progress
+  add constraint vocab_progress_language_code_check
+  check (language_code in ('en','es','fr','it','de','ru','ja','zh','ar','nl','af','sv','tr','he','nb','da','pt'));
+
+-- Garante bucket fb-audio (usado pelo Speaking cross-device com retenção de 60 dias)
+insert into storage.buckets (id, name, public)
+values ('fb-audio', 'fb-audio', false)
+on conflict (id) do nothing;
+
+drop policy if exists "fb_audio_upload_own" on storage.objects;
+create policy "fb_audio_upload_own" on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'fb-audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "fb_audio_read_own_or_teacher" on storage.objects;
+create policy "fb_audio_read_own_or_teacher" on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'fb-audio'
+    and (
+      (storage.foldername(name))[1] = auth.uid()::text
+      or public.is_teacher()
+    )
+  );
