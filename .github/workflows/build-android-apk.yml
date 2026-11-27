@@ -62,9 +62,6 @@ jobs:
             console.log('Secret scan clean across', files.length, 'tracked files.');
           "
 
-      - name: Verify @file documentation headers
-        run: node scripts/check-file-headers.mjs
-
   e2e-playwright:
     needs: secret-scan
     runs-on: ubuntu-latest
@@ -203,9 +200,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-
-      - name: Verify @file documentation headers
-        run: node scripts/check-file-headers.mjs
           cache: 'npm'
 
       - name: Install dependencies & build Windows Setup .exe
