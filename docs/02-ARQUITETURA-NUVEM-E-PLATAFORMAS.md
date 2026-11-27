@@ -99,12 +99,12 @@ Hospedado em `https://fluentbridge-api.silaswf.workers.dev` com bindings `env.AI
 
 ---
 
-## 6. Diretriz de Manutenibilidade & Comentários Obrigatórios
+## 6. Diretriz de Manutenibilidade, Comentários & Regras Anti-Regressão
 
-Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem a diretriz permanente definida em [`AGENTS.md`](../AGENTS.md) e [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md): todo arquivo relevante mantém um cabeçalho `@file` descrevendo sua finalidade e principais funções/exportações, garantindo leitura rápida e manutenção segura.
+Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem as diretrizes permanentes definidas em [`AGENTS.md`](../AGENTS.md), [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md) e [`.agents/rules/fluentbridge-core-guidelines.md`](../.agents/rules/fluentbridge-core-guidelines.md): cabeçalhos `@file` obrigatórios, paridade dinâmica dos 17 idiomas, teto de chunks `< 500 kB`, cotas R2, RLS + LGPD, `ConfirmDialog` e gate completo de testes antes de cada entrega.
 
 ---
 
-## 6. Diretriz de Manutenibilidade & Comentários Obrigatórios
+## 6. Diretriz de Manutenibilidade, Comentários & Regras Anti-Regressão
 
-Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem a diretriz permanente definida em [`AGENTS.md`](../AGENTS.md) e [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md): todo arquivo relevante mantém um cabeçalho `@file` descrevendo sua finalidade e principais funções/exportações, garantindo leitura rápida e manutenção segura.
+Todos os arquivos funcionais, estruturais, de dados, scripts, Worker Edge e documentação do repositório seguem as diretrizes permanentes definidas em [`AGENTS.md`](../AGENTS.md), [`.agents/rules/file-documentation-headers.md`](../.agents/rules/file-documentation-headers.md) e [`.agents/rules/fluentbridge-core-guidelines.md`](../.agents/rules/fluentbridge-core-guidelines.md): cabeçalhos `@file` obrigatórios, paridade dinâmica dos 17 idiomas, teto de chunks `< 500 kB`, cotas R2, RLS + LGPD, `ConfirmDialog` e gate completo de testes antes de cada entrega.
